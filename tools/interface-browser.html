@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta name="google" content="notranslate">
+<title>Interface tester</title>
+<link rel="stylesheet" type="text/css" href="interface-browser.css">
+<script src="lib/js/require.js"></script>
+<script src="lib/jc3/polyfill.js"></script>
+<script>
+require.config({
+map: {
+        "*": {
+			"jc3/jannesen.regional": "jc3/jannesen.regional.nl",
+			"jc3/jannesen.language": "jc3/jannesen.language.nl",
+			"jc3/jannesen.timezone": "jc3/jannesen.timezone.cet",
+			"css": "lib/js/css"
+		}
+    },
+    paths: {
+        "jc3":		"lib/jc3",
+    },
+    enforceDefine:	true,
+	waitSeconds:	5
+});
+
+requirejs.onError = function(err)
+{
+	throw err;
+};
+
+require(["interface-browser"]);
+</script>
+</head>
+<body>
+</body>
+</html>

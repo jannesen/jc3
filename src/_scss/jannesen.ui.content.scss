@@ -1,0 +1,335 @@
+﻿$font:                                      12px Lucida Grande, Lucida Sans,Arial,sans-serif !default;
+$jc-dialog-padding:                         0.75em !default;
+$jc-dialog-narrow-padding:                  5px !default;
+$jc-dialog-header-button-padding:           $jc-dialog-padding / 1.2 $jc-dialog-padding !default; // Padding around button for beter touch on phone on tablet.
+$jc-dialog-header-background-color:         #42455e !default;
+$jc-dialog-header-font-size:                1.2em !default;
+$jc-dialog-prev-content-background-color:   rgba(0, 0, 0, 0.2) !default;
+$jc-dialog-button-padding:                  0.4em 0.8em !default;
+$jc-dialog-footer-color:                    #f4f4f4 !default;
+$jc-dialog-footer-border-top:               1px solid #a0a0a0 !default;
+$jc-dialog-animation-time:                  .25s !default;
+$jc-dialog-border:                          1px solid $jc-dialog-header-background-color !default;
+$jc-dialog-border-radius:                   0 !default;
+$jc-dialog-box-shadow:                      4px 4px 4px rgba($jc-dialog-header-background-color, .5) !default;
+$jc-error-color:                            #d9534f !default;
+$jc-error-border:                           1px solid #d9534f !default;
+$jc-error-box-shadow:                       4px 4px 4px rgba($jc-error-color, .5) !default;
+$jc-error-details-color:                    #f0ad4e !default;
+$jc-error-details-border-color:             lighten($jc-error-details-color, 10%) !default;
+$jc-confirm-color:                          #D8781A !default;
+$jc-confirm-border:                         2px solid $jc-confirm-color !default;
+$jc-confirm-box-shadow:                     4px 4px 4px rgba($jc-confirm-color, .5) !default;
+
+
+@keyframes jannesen-ui-content-fadein-loading {
+      0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes jannesen-ui-content-fadein-dialog {
+    0% { opacity: 0.2; transform: scale(0.9); }
+  100% { opacity: 1;   transform: scale(1.0); }
+}
+@keyframes jannesen-ui-content-fadeout-dialog {
+    0% { opacity: 1;   transform: scale(1.0); }
+  100% { opacity: 0.2; transform: scale(0.9); }
+}
+@keyframes jannesen-ui-content-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(359deg); }
+}
+
+div.jannesen-ui-content {
+    display:            inline-block;
+    position:           relative;
+    box-sizing:         border-box;
+    font:               normal normal normal $font;
+    overflow:           hidden;
+
+    > div.-scrollbox {
+        box-sizing:         border-box;
+        > div.-content {
+            box-sizing:         border-box;
+            width:              100%;
+            display:            table;
+        }
+    }
+
+    > div.-overlay {
+        position:           absolute;
+        top:                0;
+        left:               0;
+        width:              100%;
+        height:             100%;
+        box-sizing:         border-box;
+        display:            none;
+    }
+
+    > div.-loading {
+        display:            none;
+    }
+
+    &.-loading,&.-execute {
+        user-select:    none;
+
+        > div.-scrollbox {
+            pointer-events: none;
+        }
+
+        > div.-overlay {
+            display:            inline-block;
+            background-color:   rgba(220,220,220,.25);
+            cursor:             wait;
+        }
+    }
+    &.-loading {
+        min-width:      6em * 0.8;
+        min-height:     1.95em * 0.8;
+        overflow:       visible;
+        > div.-overlay {
+            font-size:          48px;
+            color:              #0000a0;
+            animation:          jannesen-ui-content-fadein-loading 1s ease-in .1s 1 normal both;
+
+            &::after {
+                display:        inline-block;
+                position:       absolute;
+                left:           calc(50% - (1em / 2));
+                top:            calc(50% - (1em / 2));
+                width:          1em;
+                height:         1em;
+                line-height:    1em;
+                color:          #000000;
+                animation:      jannesen-ui-content-spin 1s infinite linear;
+                @include        fa-icon($fa-icon-spinner);
+            }
+        }
+    }
+    &.-unloading {
+        > div.-overlay {
+            display:            inline-block;
+            background-color:   rgba(220,220,220,0);
+        }
+    }
+}
+
+div.jannesen-ui-content.-form {
+    background-color:   #ffffff;
+    > div.-scrollbox {
+        height:     100%;
+        width:      100%;
+        overflow:   auto;
+        > div.-content {
+        }
+    }
+}
+
+div.jannesen-ui-content.-dialog {
+    > div.-scrollbox {
+        overflow:   hidden;
+
+        &.-scroll {
+            overflow:   auto;
+            > div.-content {
+                > div.-body {
+                    overflow:       hidden;
+                }
+            }
+        }
+        > div.-content {
+            > div.-body.-scroll {
+                overflow:           auto;
+            }
+        }
+    }
+
+    &.-fullscreen {
+        > div.-scrollbox {
+            height:   100%;
+            width:    100%;
+        }
+    }
+
+    &.-init {
+        visibility:         hidden;
+    }
+    &.-loaded {
+        @if $jc-dialog-animation-time  > 0 {
+            animation:          jannesen-ui-content-fadein-dialog $jc-dialog-animation-time linear 0s 1 normal both;
+        }
+    }
+    &.-unloading {
+        @if $jc-dialog-animation-time  > 0 {
+            animation:          jannesen-ui-content-fadeout-dialog $jc-dialog-animation-time linear 0s 1 normal both;
+        }
+    }
+}
+
+div.jannesen-ui-content-dialog {
+    box-sizing: content-box;
+    overflow:   hidden;
+
+    &.-window {
+        border:     $jc-dialog-border;
+
+        @if $jc-dialog-border-radius >= 2px {
+            border-radius:      $jc-dialog-border-radius;
+        }
+        @if $jc-dialog-box-shadow != "" {
+            box-shadow:         $jc-dialog-box-shadow;
+        }
+    }
+
+    > div.-header,div.-body,div.-footer{
+        display:    block;
+        box-sizing: border-box;
+        padding:    $jc-dialog-padding;
+    }
+    > div.-header {
+        position:           relative;
+        background-color:   $jc-dialog-header-background-color;
+        user-select:        none;
+
+        >span.-title {
+            color:          #fff;
+            font-weight:    bold;
+            font-size:      $jc-dialog-header-font-size;
+        }
+        >span.-buttons {
+            position:   absolute;
+            right:      0.5em;
+            >button {
+                display:            inline-block;
+                font-weight:        normal;
+                font-size:          1.2em;
+                margin-top:         (-$jc-dialog-padding / 1.2);
+                padding:            $jc-dialog-header-button-padding;
+                border:             0;
+                cursor:             pointer;
+                text-decoration:    none;
+                background-color:   transparent;
+                &:focus{
+                    border:     0;
+                    outline:    0;
+                }
+                &.-close:before { @include fa-icon($fa-icon-close); }
+            }
+        }
+    }
+    > div.-body {
+        overflow:           hidden;
+        background-color:   #ffffff;
+    }
+    > div.-footer {
+        background-color:   $jc-dialog-footer-color;
+        border-top:         $jc-dialog-footer-border-top;
+        user-select:        none;
+
+        @if $jc-dialog-footer-border-top == 0 {
+            padding-top: 0;
+        }
+
+        > div.-buttons {
+            width:          100%;
+            text-align:     right;
+            white-space:    nowrap;
+            > button {
+                margin:         0;
+                white-space:    nowrap;
+                vertical-align: middle;
+
+                &:not(:first-child) {
+                    margin-left: 1em;
+                }
+            }
+        }
+
+        &.-narrow-btn {
+            padding:    $jc-dialog-narrow-padding;
+
+            > div.-buttons {
+                > button {
+                    padding: 0.25em 1em;
+                }
+                > button, > .btn {
+                    &:before {
+                        display: block;
+                        margin: 0;
+                    }
+                }
+            }
+        }
+    }
+    > div.-dialog-move-target {
+        cursor:     move;
+    }
+}
+
+div.jannesen-ui-content-dialog.-confirm {
+    border: $jc-confirm-border;
+    @if $jc-confirm-box-shadow != "" {
+        box-shadow:         $jc-confirm-box-shadow;
+    }
+    > div.-header {
+        background-color: $jc-confirm-color;
+    }
+}
+
+div.jannesen-ui-content-dialog.-error {
+    border: $jc-error-border;
+    @if $jc-error-box-shadow != "" {
+        box-shadow:         $jc-error-box-shadow;
+    }
+    > div.-header {
+        background-color:   $jc-error-color;
+    }
+}
+
+div.jannesen-ui-content-error-message {
+    > div.-message {
+        color:          $jc-error-color;
+        font-size:      1.2em;
+        font-weight:    bold;
+        max-width:      40em;
+    }
+    > div.-details {
+        margin:         1em 0 0 0em;
+        font-size:      1em;
+        color:          $jc-error-details-color;
+        > span.-header {
+            border-bottom: 1px solid $jc-error-details-border-color;
+        }
+        div.-error {
+            margin:         0.5em 0 0 0.5em;
+        }
+    }
+}
+
+div.jannesen-ui-content-form div.jannesen-ui-content-error-message {
+    margin: .5em;
+}
+
+div.jannesen-ui-content-asynccontainer {
+    &.-loading {
+        position:           relative;
+        margin:             1em;
+        padding:            1em 1em 1em 4em;
+        background-color:   #eaeaea;
+        color:              #787878;
+        border:             1px solid #a8a8a8;
+        cursor:             wait;
+        animation:          jannesen-ui-content-fadein-loading 1s ease-in .2s 1 normal both;
+        &::before {
+            display:        inline-block;
+            position:       absolute;
+            left:           .5em;
+            top:            .25em;
+            font-size:      2em;
+            color:          #af1200;
+            animation:      jannesen-ui-content-spin 1s infinite linear;
+            z-index:        1000;
+            @include        fa-icon($fa-icon-refresh);
+        }
+    }
+}

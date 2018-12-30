@@ -1,0 +1,239 @@
+﻿$jc-main-color:                                 #2c2e3e !default
+$jc-main-sidebar-transition-time:               .35s !default;
+$jc-main-mouse-transition-time:                 .35s !default;
+
+div.jannesen-ui-main {
+    font:       normal normal normal $font;
+    position:   relative;
+
+    > div.-sidebar {
+        position:           absolute;
+        top:                0;
+        left:               0;
+        bottom:             0;
+        width:              0;
+        background-color:   lighten($jc-main-color, 10%);
+        z-index:            1;
+        overflow:           hidden;
+        user-select:        none;
+
+        > div.-buttonbar {
+            position:           absolute;
+            top:                0;
+            left:               0;
+            right:              6px;
+            height:             30px;
+            background-color:   $jc-main-color;
+
+            > button.-close {
+                color:          #af0000;
+                &::before {
+                    top:            0.0909em;
+                    left:           0.2791em;
+                    content:        $fa-icon-close;
+                }
+                &:hover {
+                    color:          #ff0000;
+                }
+            }
+            > button.-pin {
+                float:          right;
+                color:          #009000;
+                &::before {
+                    font-size:      80%;
+                    top:            0.25em;
+                    left:           0.5532em;
+                    transform:      rotate(90deg);
+                    transition:     transform linear $jc-main-sidebar-transition-time;
+                    content:        $fa-icon-thumb-tack;
+                }
+                &.-true {
+                    &::before {
+                        transform:      rotate(0deg);
+                    }
+                }
+                &:hover {
+                    color:          #00ff00;
+                }
+            }
+        }
+
+        > div.-menu-container {
+            position:           absolute;
+            box-sizing:         border-box;
+            top:                30px;
+            left:               0;
+            bottom:             0;
+            color:              #ffffff;
+            background-color:   lighten($jc-main-color, 10%);
+            padding:            2px;
+            overflow:           auto;
+
+            &::-webkit-scrollbar {
+                width:          8px;
+                height:         8px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background:     lighten($jc-main-color, 10%);
+            }
+
+            &::-webkit-scrollbar-track {
+                background:     lighten($jc-main-color, 30%);
+            }
+            &::-webkit-scrollbar-corner  {
+                background-color:   lighten($jc-main-color, 10%);
+            }
+        }
+
+        > div.-divider {
+            position:           absolute;
+            top:                0;
+            right:              0;
+            bottom:             0;
+            width:              6px;
+            background-color:   lighten($jc-main-color, 15%);
+            z-index:            2;
+            cursor:             col-resize;
+            transition:         background-color ease-in-out $jc-main-mouse-transition-time;
+
+            &:hover {
+                background-color:   lighten($jc-main-color, 50%);
+            }
+        }
+    }
+
+    > div.-content {
+        position:           absolute;
+        top:                0;
+        left:               0;
+        right:              0;
+        bottom:             0;
+        bottom:             0;
+        z-index:            0;
+
+        > div.-titlebar {
+            position:           absolute;
+            top:                0;
+            left:               0;
+            right:              0;
+            font-size:          20px;
+            height:             30px;
+            font-weight:        bold;
+            background-color:   $jc-main-color;
+            color:              #ffffff;
+            overflow:           hidden;
+            user-select:        none;
+
+            > div.-title {
+                display:        inline-block;
+                box-sizing:     border-box;
+                padding-left:   .2em;
+                padding-top:    .15em;
+                vertical-align: top;
+                white-space:    nowrap;
+            }
+
+            > div.-right {
+                display:        inline-block;
+                float:          right;
+            }
+
+            button.-sidebar {
+                &::before {
+                    font-size:      110%;
+                    top:            0.0455em;
+                    left:           0.2272em;
+                    content:        $fa-icon-navicon;
+                }
+            }
+            button.-nav-back {
+                &::before {
+                    font-size:      80%;
+                    top:            .25em;
+                    left:           .375em;
+                    content:        $fa-icon-long-arrow-left;
+                }
+            }
+            button.-nav-refresh {
+                &::before {
+                    font-size:      80%;
+                    top:            .25em;
+                    left:           .4462em;
+                    content:        $fa-icon-refresh;
+                }
+            }
+            button.-nav-prev {
+                &::before {
+                    font-size:      110%;
+                    top:            0;
+                    left:           0.4737em;
+                    content:        $fa-icon-angle-left;
+                }
+            }
+            button.-nav-next {
+                &::before {
+                    font-size:      110%;
+                    top:            0;
+                    left:           0.4737em;
+                    content:        $fa-icon-angle-right;
+                }
+            }
+            button.-moremenu {
+                &::before {
+                    font-size:      120%;
+                    top:            0.02em;
+                    left:           0.47592em;
+                    content:        $fa-ellipsis-v;
+                }
+            }
+        }
+        > div.-form {
+            position:           absolute;
+            top:                30px;
+            left:               0;
+            background-color:   #ffffff;
+        }
+    }
+
+    > div.-sidebar > div.-buttonbar,
+    > div.-content > div.-titlebar {
+        button {
+            display:            inline-block;
+            position:           relative;
+            box-sizing:         border-box;
+            padding:            0;
+            margin:             .1em 0;
+            width:              1.5em;
+            height:             1.3em;
+            border:             1px solid rgba(0,0,0,0);
+            color:              #afafaf;
+            font-size:          1em;
+            background-color:   rgba(0,0,0,0);
+            overflow:           hidden;
+            font:               normal normal normal 20px FontAwesome;
+
+            transition:         background-color ease-in-out $jc-main-mouse-transition-time,
+                                color            ease-in-out $jc-main-mouse-transition-time,
+                                border-color     ease-in-out $jc-main-mouse-transition-time,
+                                width            ease-in-out $jc-main-sidebar-transition-time,
+                                opacity          linear $jc-main-sidebar-transition-time;
+            &::before {
+                display:        inline-block;
+                position:       absolute;
+            }
+            &.-disabled {
+                opacity:        0;
+                pointer-events: none;
+            }
+            &:hover {
+                background-color:   lighten($jc-main-color, 15%);
+                border-color:       lighten($jc-main-color, 30%);
+                color:              #ffffff;
+            }
+            &:focus {
+                outline:            none;
+            }
+        }
+    }
+}

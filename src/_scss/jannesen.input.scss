@@ -1,0 +1,223 @@
+﻿$jc-input-forground-color:             #033c73 !default;
+$jc-input-background-color:            #ffffff !default;
+$jc-input-forground-disabled-color:    $jc-input-forground-color !default;
+$jc-input-background-disabled-color:   transparent !default;
+$jc-input-border-color:                #cccccc !default;
+$jc-input-border-error-color:          #dd5600 !default;
+$jc-input-border-focus-color:          #2fa4e7 !default;
+$jc-input-border-disabled-color:       transparent !default;
+$jc-input-border-radius:               0px !default;
+$jc-input-padding-top-bottom:          0.33em !default;
+$jc-input-padding-left-right:          0.5em !default;
+$jc-input-button-color:                $jc-input-forground-color !default;
+$jc-input-button-null-color:           #e0e0e0 !default;
+$jc-input-errormsg-border-color:       #000000 !default;
+$jc-input-errormsg-background-color:   #ffffa0 !default;
+$jc-input-errormsg-border-radius:      4px !default;
+
+@keyframes jannesen-ui-fade-waitbackground {
+    0% { background-color: #ffffff; color: #000000; }
+  100% { background-color: #d8d8d8; color: #808080; }
+}
+
+@mixin fa-input-button($content, $width, $size, $offset:0em) {
+    $fontsize: round(100 * (1em + $jc-input-padding-top-bottom * 2) / ($width / $size)) / 100;
+
+    margin-top:     ($jc-input-padding-top-bottom + $offset) / $fontsize;
+    margin-left:    ((1.125em + $jc-input-padding-top-bottom * 2) - ($width  * $fontsize)) / (2 * $fontsize);
+    font-size:      100% * $fontsize;
+    text-align:     center;
+    content:        $content;
+}
+
+input::-ms-clear {
+    display:    none;
+    width:      0;
+    height:     0;
+}
+
+.jannesen-input {
+    font-family:        inherit;
+    font-size:          100%;
+}
+
+input.jannesen-input, textarea.jannesen-input, select.jannesen-input, div.jannesen-input.-dropdown {
+    display:            inline-block;
+    position:           relative;
+    box-sizing:         border-box;
+    margin:             0;
+    outline:            none;
+    vertical-align:     top;
+    text-align:         left;
+    color:              $jc-input-forground-color;
+    background-color:   $jc-input-background-color;
+    border:             1px solid $jc-input-border-color;
+    border-radius:      $jc-input-border-radius;
+    transition:         border-color ease-in-out .2s;
+    width:              100%;
+
+    &.-error {
+        @include input-error();
+    }
+
+    &:focus {
+        @include input-focus();
+    }
+
+    &:not([disabled]):hover {
+        @include input-hover();
+    }
+
+    &[disabled]:hover, &.-disabled:hover {
+        border-color: $jc-input-border-disabled-color
+    }
+}
+
+input.jannesen-input, select.jannesen-input, div.jannesen-input.-dropdown {
+    height:             2em;
+}
+
+textarea.jannesen-input {
+    line-height:    1.25;
+    height:         5.833em;
+}
+
+input.jannesen-input, textarea.jannesen-input, select.jannesen-input {
+    padding:            $jc-input-padding-top-bottom $jc-input-padding-left-right;
+}
+
+input[disabled].jannesen-input, textarea[disabled].jannesen-input, select[disabled].jannesen-input, div.jannesen-input.-disabled, div.jannesen-input > input[disabled] {
+    background-color:   $jc-input-background-disabled-color;
+    color:              $jc-input-forground-disabled-color;
+    border-color:       $jc-input-border-disabled-color;
+    pointer-events:     none;
+}
+
+input.jannesen-input {
+    &.-integer,&.-number,&.-date,&.-datetime,&.-time {
+        text-align:     right;
+    }
+}
+
+div.jannesen-input {
+    display:        inline-block;
+    position:       relative;
+    vertical-align: top;
+    white-space:    nowrap;
+
+    > input {
+        display:            inline-block;
+        padding:            0;
+        margin:             $jc-input-padding-top-bottom $jc-input-padding-left-right;
+        outline:            none;
+        height:             1.1667em;
+        width:              calc(100% - 2em);
+        box-sizing:         border-box;
+        vertical-align:     top;
+        text-align:         left;
+        border:             0 none;
+        color:              $jc-input-forground-color;
+        background-color:   $jc-input-background-color;
+        font-family:        inherit;
+        font-size:          100%;
+    }
+
+    &.-focus  {
+        @include input-focus();
+    }
+
+    &.-integer,&.-number,&.-date,&.-datetime,&.-time {
+        > input {
+            text-align:     right;
+        }
+    }
+
+    &.-boolean,&.-radio {
+        @include            user-select(none);
+    }
+
+    > span.-button {
+        display:            inline-block;
+        position:           relative;
+        vertical-align:     top;
+        font-size:          100%;
+        box-sizing:         content-box;
+    }
+
+    &.-button, > span.-button {
+        margin:             0;
+        width:              1.1667em + ($jc-input-padding-top-bottom * 2);
+        height:             1.1667em + ($jc-input-padding-top-bottom * 2);
+        line-height:        1.125em;
+        color:              $jc-input-button-color;
+        background-color:   $jc-input-background-color;
+        border:             1px solid $jc-input-border-color;
+        border-radius:      $jc-input-border-radius;
+        text-align:         left;
+        transition:         border-color ease-in-out .2s;
+
+        @include            user-select(none);
+        @include            fa-icon();
+        &:before {
+            position:       absolute;
+        }
+
+        &:hover {
+            @include input-btn-hover();
+        }
+        &:focus {
+            @include input-focus();
+        }
+
+        &.-null {
+            color:              $jc-input-button-null-color;
+        }
+
+        &.-null:before,
+        &.-true:before    { @include fa-input-button($fa-icon-times, 0.786em, 1, -0.005em); }
+        &.-checked:before { @include fa-input-button($fa-icon-check, 1.000em, 1);          }
+    }
+    &:not([disabled]):hover {
+        &.-button, span.-button {
+           @include input-hover();
+        }
+    }
+
+    > span.-dropdown-button {
+        display:            inline-block;
+        margin:             0;
+        width:              1em;
+        height:             1em;
+        padding:            $jc-input-padding-top-bottom 0;
+        @include            user-select(none);
+        @include            fa-icon();
+        &:before {
+            font-size:      1.2em;
+            text-align:     center;
+            content:        $fa-icon-caret-down;
+        }
+    }
+
+    &.-disabled {
+        > span.-dropdown-button {
+            display: none;
+        }
+    }
+
+    > span:not(:first-child) {
+        border-left: 0;
+    }
+
+    &.-date > span.-button:before          { @include fa-input-button($fa-icon-calendar,   0.929em, 0.85, -0.05em);   }
+    &.-enum > span.-button:before          { @include fa-input-button($fa-icon-caret-down, 0.572em, 0.85);            }
+
+    > span.-label {
+        box-sizing:     content-box;
+        display:        inline-block;
+        white-space:    normal;
+        line-height:    1.125em;
+        padding:        $jc-input-padding-top-bottom 0 $jc-input-padding-top-bottom 0.5em;
+        margin-top:     1px;
+        vertical-align: top;
+    }
+}

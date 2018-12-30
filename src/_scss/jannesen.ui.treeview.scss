@@ -1,0 +1,66 @@
+﻿div.jannesen-ui-treeview {
+    user-select:    none;
+    padding:        .2em;
+
+    &:focus {
+        outline:        none;
+    }
+
+    .-icon {
+        width:                      1.2em;
+        text-align:                 center;
+        display:                    inline-block;
+        font:                       normal normal normal 1em FontAwesome;
+        font-size:                  inherit;
+        text-rendering:             auto;
+        -webkit-font-smoothing:     antialiased;
+        -moz-osx-font-smoothing:    grayscale;
+        transition:                 transform linear .25s;
+
+        &.-icon-arrow::before {
+            content:    "\f0da";
+        }
+
+        &.-icon-error::before {
+            color:      #ff0000;
+            content:    "\f071";
+        }
+
+        &.-icon-fw {
+            width:      1.2857em;
+            text-align: center;
+        }
+
+        &.-icon-spin {
+            animation: fa-spin 2s infinite linear;
+            &::before {
+                content: "\f110";
+            }
+        }
+    }
+
+    .-expanded > .-label > .-icon {
+        transform: rotate(45deg);
+    }
+
+    .-list {
+        padding-left:   1.2em;
+        height:         0;
+        overflow:       hidden;
+    }
+
+    .-item {
+        cursor:         pointer;
+        white-space:    nowrap;
+
+        &.-selected > .-label {
+            background: rgba(255, 255, 255, .1);
+        }
+    }
+
+    .-label {
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    }
+}

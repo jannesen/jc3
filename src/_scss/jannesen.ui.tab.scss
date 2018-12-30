@@ -1,0 +1,35 @@
+﻿.jannesen-ui-tabs {
+    outline: none;
+
+    >.-tab-header {
+        background-color:   #a8a8a8;
+        padding-left:       .25em;
+        padding-top:        (2em / 12);
+
+        > span {
+            display:                    inline-block;
+            color:                      white;
+            background-color:           lighten($jc-main-color, 40%);
+            padding:                    .5em 1em 0 1em;
+            box-sizing:                 border-box;
+            height:                     (26em / 12);
+            border:                     1px solid #e2e2e2;
+            border-bottom:              0 none;
+            transition:                 ease-in-out background-color .25s;
+            user-select:                none;
+
+            &.-active {
+                background-color:   lighten($jc-main-color, 10%);
+                border-color:       lighten($jc-main-color, 20%);
+            }
+            &.-disabled {
+                opacity:            .3;
+                text-decoration:    line-through;
+            }
+            &:not(.-active):hover {
+                cursor: pointer;
+                background-color:   lighten($jc-main-color, 25%);
+            }
+        }
+    }
+}

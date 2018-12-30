@@ -1,0 +1,46 @@
+﻿{
+  "data": [
+    {
+      "text": "Andere rapportages",
+      "children": [
+        {
+          "text": "Zoeken relatie",
+          "treelist": "api-sub-2.json"
+        },
+        {
+          "text": "Zoeken tasnet inlog",
+          "treelist": "api-sub-2.json"
+        },
+        {
+          "text": "Broken link",
+          "treelist": "api-sub-3.json"
+        }
+      ]
+    },
+    {
+      "text": "Tarief templates",
+      "url": "#"
+    },
+    {
+      "text": "Openstaande enquêtes",
+      "url": "#"
+    },
+    {
+      "text": "Andere rapportages",
+      "children": [
+        {
+          "text": "Zoeken relatie",
+          "treelist": "api-sub-2.json"
+        },
+        {
+          "text": "Zoeken tasnet inlog",
+          "treelist": "api-sub-2.json"
+        },
+        {
+          "text": "Broken link",
+          "treelist": "api-sub-3.json"
+        }
+      ]
+    }
+  ]
+}

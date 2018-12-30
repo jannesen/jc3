@@ -1,0 +1,33 @@
+﻿{
+  "data": [
+    { "text": "Welkom", "url": "main:Welkom" },
+    { "text": "TAS",    "treelist": "api-sub-1.json" },
+    { "text": "TCC",    "treelist": "api-sub-1.json" },
+    {
+      "text": "Rapportages",
+      "children": [
+        {
+          "text": "TAS",
+          "url": "http://www.manpowergroup.nl/"
+        },
+        {
+          "text": "TCC",
+          "url": "https://www.tvcn.nl/nl/blog/"
+        }
+      ]
+    },
+    {
+      "text": "Andere rapportages",
+      "children": [
+        {
+          "text": "TAS",
+          "treelist": "api-sub-1.json"
+        },
+        {
+          "text": "TCC",
+          "treelist": "api-sub-2.json"
+        }
+      ]
+    }
+  ]
+}

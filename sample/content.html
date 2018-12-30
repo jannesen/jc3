@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="google" content="notranslate">
+<title>Context sample</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="../lib/js/require.js"></script>
+<script src="../lib/js/polyfill.js"></script>
+<script>
+require.config({
+	paths: {
+        "jc3":		"../lib/js"
+	},
+	enforceDefine:	true,
+	waitSeconds:	5
+});
+
+requirejs.onError = function(err)
+{
+	throw err;
+};
+
+require(["content"], function($M) {
+            $M.main();
+       });
+</script>
+</head>
+<body>
+</body>
+</html>

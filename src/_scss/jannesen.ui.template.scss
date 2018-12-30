@@ -1,0 +1,102 @@
+﻿div.jannesen-ui-template-queryform {
+    > div.-query {
+        background-color:   #eaeaea;
+        border-bottom:      1px solid #808080;
+        display:            flex;
+        flex-direction:     row;
+        padding:            0.5em;
+        user-select:        none;
+        >div.-form {
+            order:      1;
+            align-self: center;
+
+            table.-search-grid {
+                border-spacing:     0;
+                border-collapse:    separate;
+                > tr {
+                    >td.-caption {
+                        padding:        (2em/12) 0.5em 0em 1em;
+                        white-space:    nowrap;
+                    }
+                    >td.-input {
+                        padding:        0;
+                    }
+                }
+            }
+        }
+        >div.-buttons {
+            order:      2;
+            align-self: flex-end;
+            padding:    0 1em;
+            width:      100%;
+            >button {
+                &:not(:first-child) {
+                    float:        right;
+                    margin-right: 1em;
+                }
+            }
+        }
+    }
+    > div.-result {
+        &.-querychanged {
+            opacity:        0;
+            transition:     opacity linear .15s .2s;
+        }
+    }
+}
+
+div.jannesen-ui-template-data-popup {
+    margin: auto;
+    display: block;
+    border: 1px solid black;
+    background-color: #ffffff;
+
+    > .-header {
+        background-color: $jc-dialog-header-background-color;
+        color: #ffffff;
+        padding: 0.25em;
+        font-size: 1.25em;
+        font-weight: bold;
+        cursor: move;
+
+        > .-close {
+            float: right;
+            cursor: pointer;
+
+            &::before {
+                top: 0.0909em;
+                left: 0.2791em;
+                @include fa-icon($fa-icon-close);
+            }
+
+            &:hover {
+                color: #ff0000;
+            }
+        }
+    }
+
+    > .-container {
+        display: inline-block;
+
+        > .-left {
+            padding-right: 0.2em;
+            float: left;
+        }
+
+        > .-right {
+            padding-left: 0.2em;
+            float: left;
+        }
+
+        &.-remark {
+            white-space: pre;
+            padding: .5em;
+        }
+    }
+}
+
+div.jannesen-ui-template-standard-dialog {
+    >div.-body {
+        background-color:   #f0f0f0;
+    }
+}

@@ -1,0 +1,155 @@
+﻿$jc-btn-border-color:                #cccccc !default;
+$jc-btn-border-radius:               0 !default;
+$jc-line-icon-btn-width:             1.5em !default;
+
+.btn {
+    display:            inline-block;
+    position:           relative;
+    padding:            0.4167em 0.8em;
+    height:             2.1667em;
+    margin:             0;
+    background-color:   #f4f4f4;
+    color:              #000000;
+    border:             1px solid $jc-btn-border-color;
+    border-radius:      $jc-btn-border-radius;
+    font-size:          1em;
+    font-weight:        400;
+    text-align:         center;
+    white-space:        nowrap;
+    min-width:          5em;
+    touch-action:       manipulation;
+    cursor:             pointer;
+    @include user-select(none);
+    transition:         background-color ease-in-out .2s,color ease-in-out .2s, border-color ease-in-out .2s;
+
+    &:hover {
+        @include            input-btn-hover();
+        background-color:   #d7faff;
+        color:              #0000a0;
+    }
+    &:focus {
+        @include            input-focus();
+        background-color:   #d7faff;
+        color:              #0000a0;
+    }
+
+    &.btn-cancel,&.btn-ok,&.btn-no,&.btn-yes,&.btn-save,&.btn-remove,&.btn-add,&.btn-search {
+        padding-left: 2.25em;
+
+        &:before {
+            display:            block;
+            position:           absolute;
+            top:                0.15em;
+            left:               0.25em;
+            font-family:        FontAwesome;
+            font-weight:        normal;
+            font-style:         normal;
+            text-decoration:    none;
+            font-size:          1.5em;
+            opacity:            0.6;
+            transition:         opacity ease-in-out .2s;
+        }
+        &:hover:before {
+            opacity: 1;
+        }
+    }
+
+    &.btn-cancel {
+        &:before {
+            content:    $fa-icon-close;
+            color:      #ff0000;
+        }
+    }
+    &.btn-ok {
+        &:before {
+            content:    $fa-icon-check;
+            color:      #00c000;
+        }
+    }
+    &.btn-no {
+        &:before {
+            content:    $fa-icon-close;
+            color:      #ff0000;
+        }
+    }
+    &.btn-yes {
+        &:before {
+            content:    $fa-icon-check;
+            color:      #00c000;
+        }
+    }
+    &.btn-save {
+        &:before {
+            content:    $fa-icon-save;
+            color:      #00c000;
+        }
+    }
+    &.btn-remove {
+        &:before {
+            content:    $fa-icon-trash;
+            color:      #e87800;
+        }
+    }
+    &.btn-add {
+        &:before {
+            content:    $fa-icon-plus;
+            color:      #3fc03f;
+        }
+    }
+    &.btn-search {
+        &:before {
+            content:    $fa-icon-search;
+            color:      #3f3fff;
+        }
+    }
+}
+
+@mixin line-icon-btn-helper($content, $color, $size, $width, $height) {
+    &:before {
+        font-size:  1em * $size;
+        top:        1em * ((12 - $height * $size) / 2) / (12 * $size);
+        left:       1em * ((12 * ($jc-line-icon-btn-width / 1em) - $width * $size) / 2) / (12 * $size);
+        color:      $color;
+        content:    $content;
+    }
+}
+
+.line-icon-btn {
+    display:            inline-block;
+    position:           relative;
+    padding:            0;
+    margin:             0;
+    border:             0;
+    width:              $jc-line-icon-btn-width;
+    height:             1em;
+    background-color:   transparent;
+    text-align:         center;
+    white-space:        nowrap;
+    cursor:             pointer;
+    user-select:        none;
+    overflow:           visible;
+    line-height:        1;
+    font-size:          inherit;
+    font-weight:        400;
+    vertical-align:     top;
+    &:before {
+        position:   absolute;
+        opacity:    0.3;
+        transition: opacity linear .35s;
+        font-size:  1.5em;
+        @include    fa-icon();
+    }
+    &:focus {
+        outline:        none;
+    }
+    &:hover {
+        border:         0;
+        &:before {
+            opacity:        1;
+        }
+    }
+    &.-edit     { @include line-icon-btn-helper($fa-icon-pencil, #0035ff, 1.5, 10.29, 12) }
+    &.-add      { @include line-icon-btn-helper($fa-icon-plus,   #00d000, 1.5,  9.43, 11) }
+    &.-delete   { @include line-icon-btn-helper($fa-icon-trash,  #c50000, 1.5,  9.43, 12) }
+    &.-ban      { @include line-icon-btn-helper($fa-icon-ban,    #c50000, 1.5, 10.29, 12) }
+}

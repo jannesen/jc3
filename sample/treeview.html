@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="google" content="notranslate">
+<title>Treeview sample</title>
+<link rel="stylesheet" type="text/css" href="style.css?v=@BUILDDATE@">
+<script src="../lib/js/require.js?v=@BUILDDATE@"></script>
+<script src="../lib/js/polyfill.js?v=@BUILDDATE@"></script>
+<script>
+require.config({
+	paths: {
+        "jc3":		"../lib/js"
+	},
+	enforceDefine:	true,
+	waitSeconds:	5
+});
+
+requirejs.onError = function(err)
+{
+	throw err;
+};
+
+require(["treeview"], function($M) {
+            $M.main();
+       });
+</script>
+</head>
+<body>
+</body>
+</html>

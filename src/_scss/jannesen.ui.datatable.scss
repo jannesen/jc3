@@ -1,0 +1,98 @@
+﻿div.jannesen-datatable {
+    display:            block;
+    position:           relative;
+    overflow:           hidden;
+    box-sizing:         border-box;
+    outline:            0;
+
+    >div.-table {
+        width:      calc(100% - 16px);
+        overflow:   hidden;
+
+        > table {
+            box-sizing:     border-box;
+            min-width:      100%;
+        }
+    }
+    >div.-scroll-vertical {
+        position:       absolute;
+        top:            0;
+        right:          0;
+    }
+}
+
+@keyframes jannesen-scrollbar-fade-btn {
+    0% { background-color: #f0f0f0; }
+  100% { background-color: #c8c8c8; }
+}
+
+@keyframes jannesen-scrollbar-fade-bar {
+    0% { background-color: #c8c8c8; }
+  100% { background-color: #909090; }
+}
+
+div.jannesen-scrollbar {
+    position:           relative;
+    display:            inline-block;
+    background-color:   #f0f0f0;
+    @include            user-select(none);
+//    width:              16px;
+    cursor:             default;
+
+    > div.-btn-up, > div.-btn-down {
+        display:            inline-block;
+        position:           absolute;
+//        width:              16px;
+//        height:             16px;
+        padding:            0;
+        &:before {
+            padding-left:       5px;
+            font-family:        FontAwesome;
+            font-size:          12px;
+            font-weight:        normal;
+            font-style:         normal;
+            text-decoration:    none;
+            color:              #c8c8c8;
+        }
+        &.-enabled {
+            &:before {
+                color:          #000000;
+            }
+            &:hover {
+                animation:          jannesen-scrollbar-fade-btn .2s ease-in-out 0s 1 both;
+            }
+        }
+    }
+    > div.-slider {
+        display:            inline-block;
+        position:           absolute;
+        > div.-bar {
+            height:             100%;
+            margin-left:        20%;
+            width:              60%;
+            background-color:   #c8c8c8;
+        }
+        &:hover {
+            > div.-bar {
+                animation:          jannesen-scrollbar-fade-bar .2s ease-in-out 0s 1 both;
+            }
+        }
+        &.-move {
+            > div.-bar {
+                background-color: #909090
+            }
+        }
+    }
+    > div.-btn-up {
+        top:        0;
+        &:before {
+            content:    $fa-icon-caret-up
+        }
+    }
+    > div.-btn-down {
+        bottom:         0;
+        &:before {
+            content:    $fa-icon-caret-down
+        }
+    }
+}

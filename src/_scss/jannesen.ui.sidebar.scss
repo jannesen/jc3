@@ -1,0 +1,25 @@
+﻿html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.app {
+    height: 100%;
+    width: 100%;
+
+    > .-sidebar {
+        height: 100%;
+        float: left;
+    }
+
+    > .-content {
+        height: 100%;
+        overflow: hidden;
+
+        iframe {
+            border: none;
+            height: 100%;
+            width: 100%;
+        }
+    }
+}
