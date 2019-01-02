@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 /// <reference path="../js/require.d.ts" />
 import * as $J    from "jc3/jannesen";
 
@@ -477,8 +477,7 @@ export class DOMHTMLElement implements $J.IEventSource
     {
         var p:HTMLElement = <HTMLElement>(this._element.offsetParent);
 
-        while (p && p !== this._element.ownerDocument.body)
-        {
+        while (p && p !== this._element.ownerDocument.body) {
             if (getElementComputedStylePropertyString(p, "position") !== "static")
                 return element(p);
 
@@ -591,12 +590,10 @@ export class DOMHTMLElement implements $J.IEventSource
                                 top:    rect.top  - <number>getElementComputedStyleProperty(this._element, "margin-top",  0)
                             };
 
-        if (getElementComputedStylePropertyString(this._element, "position") !== "fixed")
-        {
+        if (getElementComputedStylePropertyString(this._element, "position") !== "fixed") {
             var offsetParent = this.offsetParent;
 
-            if (offsetParent)
-            {
+            if (offsetParent) {
                 var parentRect   = offsetParent._element.getBoundingClientRect();
 
                 rtn.top  -= parentRect.top  + <number>getElementComputedStyleProperty(offsetParent._element, "border-top-width",  0);
@@ -661,8 +658,7 @@ export class DOMHTMLElement implements $J.IEventSource
 
         var c = this._element.childNodes;
 
-        for (var n = 0 ; n < c.length ; ++n)
-        {
+        for (var n = 0 ; n < c.length ; ++n) {
             if (c[n].nodeType === 1)
                 rtn.push(element(<HTMLElement>c[n]));
         }
@@ -792,8 +788,7 @@ export class DOMHTMLElement implements $J.IEventSource
         }
 
         if (propertyName instanceof Object) {
-            for (var key in propertyName)
-            {
+            for (var key in propertyName) {
                 if (propertyName.hasOwnProperty(key))
                     setElementStyleProperty(this._element, key, propertyName[key]);
             }
@@ -812,8 +807,7 @@ export class DOMHTMLElement implements $J.IEventSource
     public attr(attrName:any):any;
     public attr(attrName:string|any, value?:string|number|boolean): any
     {
-        if (typeof attrName === "string" && arguments.length === 1)
-        {
+        if (typeof attrName === "string" && arguments.length === 1) {
             let v = this._element.getAttribute(attrName);
 
             if (!(v === undefined || v === null || v === "") || this._element.hasAttribute(attrName))
@@ -822,16 +816,13 @@ export class DOMHTMLElement implements $J.IEventSource
             return undefined;
         }
 
-        if (arguments.length >= 2)
-        {
+        if (arguments.length >= 2) {
             setElementAttribute(this._element, attrName, value);
             return this;
         }
 
-        if (attrName instanceof Object)
-        {
-            for (var key in attrName)
-            {
+        if (attrName instanceof Object) {
+            for (var key in attrName) {
                 if (attrName.hasOwnProperty(key))
                     setElementAttribute(this._element, key, attrName[key]);
             }
@@ -850,21 +841,17 @@ export class DOMHTMLElement implements $J.IEventSource
     public prop(propName:any): any;
     public prop(propName:string|any, value?:any): any
     {
-        if (typeof propName === "string" && arguments.length === 1)
-        {
+        if (typeof propName === "string" && arguments.length === 1) {
             return (<any>this._element)[propName];
         }
 
-        if (typeof propName === "string" && arguments.length >= 2)
-        {
+        if (typeof propName === "string" && arguments.length >= 2) {
             (<any>this._element)[propName] = value;
             return this;
         }
 
-        if (propName instanceof Object)
-        {
-            for (var key in propName)
-            {
+        if (propName instanceof Object) {
+            for (var key in propName) {
                 if (propName.hasOwnProperty(key))
                     (<any>this._element)[key] = propName[key];
             }
@@ -902,8 +889,7 @@ export class DOMHTMLElement implements $J.IEventSource
     public html(value:string): DOMHTMLElement;
     public html(value?:string): any
     {
-        if (arguments.length >= 1)
-        {
+        if (arguments.length >= 1) {
             this._element.innerHTML = <string>value;
             return this;
         }
@@ -918,8 +904,7 @@ export class DOMHTMLElement implements $J.IEventSource
     public text(value:string): DOMHTMLElement;
     public text(value?:string): any
     {
-        if (arguments.length >= 1)
-        {
+        if (arguments.length >= 1) {
             this._element.textContent = <string>value;
             return this;
         }
@@ -970,8 +955,7 @@ export class DOMHTMLElement implements $J.IEventSource
                 domelement_addremove_node(newChild._element, true);
             }
         }
-        else
-        {
+        else {
             if (oldChild !== null && oldChild._element !== null) {
                 this._element.removeChild(oldChild._element);
                 if (this.isLive) {
@@ -994,20 +978,16 @@ export class DOMHTMLElement implements $J.IEventSource
      */
     public removeChild(...children:RemoveNode[]): DOMHTMLElement
     {
-        for (var a = 0 ; a < arguments.length ; ++a)
-        {
+        for (var a = 0 ; a < arguments.length ; ++a) {
             var child = arguments[a];
 
-            if (Array.isArray(child))
-            {
+            if (Array.isArray(child)) {
                 for (var n = 0 ; n < child.length ; ++n)
                     this.removeChild(child[n]);
             }
             else
-            if (child instanceof Object)
-            {
-                if (child instanceof DOMHTMLElement)
-                {
+            if (child instanceof Object) {
+                if (child instanceof DOMHTMLElement) {
                     if (child._element !== null) {
                         this._element.removeChild((<any>child)._element);
                         if (this.isLive) {
@@ -1016,25 +996,21 @@ export class DOMHTMLElement implements $J.IEventSource
                     }
                 }
                 else
-                if (child instanceof DOMText)
-                {
+                if (child instanceof DOMText) {
                     if ((<any>child)._element !== null) {
                         this._element.removeChild((<any>child)._element);
                     }
                 }
                 else
-                if (child instanceof DOMNodeList)
-                {
+                if (child instanceof DOMNodeList) {
                     this.removeChild((<DOMNodeList>child)._elements);
                 }
                 else
-                if (child.container instanceof Object)
-                {
+                if (child.container instanceof Object) {
                     this.removeChild(child.container);
                 }
                 else
-                if (child.nodeType === 1 || child.nodeType === 3)
-                {
+                if (child.nodeType === 1 || child.nodeType === 3) {
                     this._element.removeChild(child);
                     if (this.isLive) {
                         domelement_addremove_node(child, false);
@@ -1131,8 +1107,7 @@ export class DOMHTMLElement implements $J.IEventSource
     public data<T=any>(name:string, value:T): DOMHTMLElement;
     public data(name:string, value?:any): any|DOMHTMLElement
     {
-        if (arguments.length >= 2)
-        {
+        if (arguments.length >= 2) {
             this.pinElement();
 
             (<any>this)[name] = value;
@@ -1397,8 +1372,7 @@ export abstract class Container extends $J.EventHandling implements IDOMContaine
     }
 
     protected   _applyAttr(attrs:any, ...attrNames:string[]) {
-        for (let attrName of attrNames)
-        {
+        for (let attrName of attrNames) {
             if (attrs.hasOwnProperty(attrName)) {
                 let attrValue = (attrs as any)[attrName];
 
@@ -1425,34 +1399,26 @@ export function createElement(tagName:intrinsicNames, attrs?:HTMLAttributes, ...
 {
     var elm = new DOMHTMLElement($global.document.createElement(tagName));
 
-    if (attrs !== undefined && attrs !== null && typeof attrs === "object")
-    {
-        for (var attrName in attrs)
-        {
-            if (attrs.hasOwnProperty(attrName))
-            {
+    if (attrs !== undefined && attrs !== null && typeof attrs === "object") {
+        for (var attrName in attrs) {
+            if (attrs.hasOwnProperty(attrName)) {
                 var attrValue = (attrs as any)[attrName];
 
-                if (attrValue !== undefined && attrValue !== null)
-                {
-                    if (attrName.startsWith("on"))
-                    {
+                if (attrValue !== undefined && attrValue !== null) {
+                    if (attrName.startsWith("on")) {
                         if (typeof attrValue === "function")
                             elm.bind(attrName.substr(2) as any, attrValue);
                     }
                     else
-                    if (typeof attrValue === "string")
-                    {
+                    if (typeof attrValue === "string") {
                         elm.attr(attrName, <string>attrValue);
                     }
                     else
-                    if (typeof attrValue === "number")
-                    {
+                    if (typeof attrValue === "number") {
                         elm.attr(attrName, <number>attrValue);
                     }
                     else
-                    if (typeof attrValue === "boolean")
-                    {
+                    if (typeof attrValue === "boolean") {
                         elm.attr(attrName, <boolean>attrValue);
                     }
                 }
@@ -1549,8 +1515,7 @@ export function setLocationHash(hash:string, replace?:boolean)
     if (hash === null || hash === undefined)    hash = "";
     if (hash.length === 0 || hash[0] !== '#')   hash = '#' + hash;
 
-    if (location.hash !== hash)
-    {
+    if (location.hash !== hash) {
         const   url = location.pathname + location.search + hash;
         if (replace) {
 //            console.log('replace location: ' + url);
@@ -1649,8 +1614,7 @@ export function getTabForm(elm:HTMLElement|null) {
 export function nextTabStop(body:HTMLElement, cur:HTMLElement|null, back:boolean, ignorearea?:HTMLElement) {
     let nodelist = body.querySelectorAll("input,button,textarea,select,*[tabIndex]");
 
-    if (nodelist.length > 0)
-    {
+    if (nodelist.length > 0) {
         let targetTabIndex: number;
         let nextFocus:      HTMLElement|undefined;
         let nextTabIndex:   number|undefined;
@@ -1707,8 +1671,7 @@ function DOMContentLoaded()
 {
     $global.document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
 
-    if (ondomreadyHandlers)
-    {
+    if (ondomreadyHandlers) {
         body = new DOMHTMLElement($global.document.body);
         body.pinElement();
 
@@ -1722,8 +1685,7 @@ function DOMContentLoaded()
 function WINHashChange()
 {
     setTimeout(() => {
-        if (curlocationhash !== location.hash)
-        {
+        if (curlocationhash !== location.hash) {
             curlocationhash = location.hash;
 
             for (var i = 0 ; i < onlocationhashchangeHandlers.length ; ++i) {
@@ -1813,8 +1775,7 @@ function selectAll(elm:(Document|HTMLElement), selector:string): DOMNodeList
 //
 function insertHelperArray(children:any):NodeFragment|null
 {
-    if (children.length > 1)
-    {
+    if (children.length > 1) {
         var rtn:(Text|HTMLElement)[] = [];
 
         for (var n = 0 ; n < children.length ; ++n) {
@@ -1837,19 +1798,16 @@ function insertHelperArray(children:any):NodeFragment|null
 }
 function insertHelper(child:any):NodeFragment|null
 {
-    switch (typeof child)
-    {
+    switch (typeof child) {
     case "string":
         return $global.document.createTextNode(child);
 
     case "object":
-        if (child !== null)
-        {
+        if (child !== null) {
             if (Array.isArray(child))
                 return insertHelperArray(child);
 
-            if (child instanceof Object)
-            {
+            if (child instanceof Object) {
                 if (child.container instanceof Object)
                     return insertHelper(child.container);
 
@@ -1897,8 +1855,7 @@ function getElementComputedStyleProperty(element:HTMLElement, propertyName:strin
         return defaultValue;
 
     var ext = <string>styleNameDefaultExt[propertyName];
-    if (ext !== undefined)
-    {
+    if (ext !== undefined) {
         if (!v.endsWith(ext))
             throw new $J.InvalidStateError("css('" + propertyName + "') has a invalid property value '" + v + "'.");
 
@@ -1928,15 +1885,13 @@ function getElementComputedStyleProperties(element:HTMLElement, propertyNames:st
 }
 function setElementStyleProperty(element:HTMLElement, propertyName: string, value: string|number|undefined): void
 {
-    if (typeof value === "number")
-    {
+    if (typeof value === "number") {
         var e = styleNameDefaultExt[propertyName] || styleNameDefaultExtSet[propertyName];
         if (e) {
             value = "" + value + e;
         }
 
-        if (propertyName === "height" || propertyName === "width")
-        {
+        if (propertyName === "height" || propertyName === "width") {
             if (value < 0)
                 value = 0;
         }

@@ -1,4 +1,4 @@
-﻿/// <amd-dependency path="jc3/jannesen.input" />
+/// <amd-dependency path="jc3/jannesen.input" />
 /* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
 import * as $JA      from "jc3/jannesen.async";
@@ -101,8 +101,7 @@ class Content implements $JD.IDOMContainer
                                         (args.data as $JT.BaseType).validate(errList);
                                     }
 
-                                    if (errList.length === 0)
-                                    {
+                                    if (errList.length === 0) {
                                         let response = <div>loading</div>;
                                         responsecontainer.empty().appendChild(<h1>RESPONSE</h1>, response);
                                         $JA.Ajax(callDefinitions, args, new $JA.CancellationTokenDom(response))

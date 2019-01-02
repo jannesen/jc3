@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 /// <reference path="../js/require.d.ts" />
 
 var tick_per_day            = (24*60*60*1000);
@@ -400,8 +400,7 @@ export function datetimeNumberFromDate(d: number): number {
  */
 export function parseIntExact(s: string): number
 {
-    if (/^(\-|\+)?[0-9]+$/.test(s))
-    {
+    if (/^(\-|\+)?[0-9]+$/.test(s)) {
         var r = parseInt(s, 10);
 
         if (!isNaN(r))
@@ -462,12 +461,10 @@ export function parseDatetime(s: string): Date
  */
 export function parseDatetimeNumber(s: string): number
 {
-    try
-    {
+    try {
         var parts = /^([0-9]{4})\-([0-9]{1,2})\-([0-9]{1,2})T([0-9]{1,2}):([0-9]{1,2})(?::([0-9]{2})(?:\.([0-9]{1,3}))?)?$/.exec(s);
 
-        if (parts !== null && typeof parts[1] === "string" && typeof parts[2] === "string" && typeof parts[3] === "string" && typeof parts[4] === "string" && typeof parts[5] === "string")
-        {
+        if (parts !== null && typeof parts[1] === "string" && typeof parts[2] === "string" && typeof parts[3] === "string" && typeof parts[4] === "string" && typeof parts[5] === "string") {
             var y = parseIntExact(parts[1]!);
             var m = parseIntExact(parts[2]!);
             var d = parseIntExact(parts[3]!);
@@ -476,11 +473,9 @@ export function parseDatetimeNumber(s: string): number
             var S = 0;
             var F = 0;
 
-            if (typeof parts[6] === "string")
-            {
+            if (typeof parts[6] === "string") {
                 S = parseIntExact(parts[6]!) ;
-                if (typeof parts[7] === "string")
-                {
+                if (typeof parts[7] === "string") {
                     while (parts[7]!.length < 3)
                         parts[7] += "0";
 
@@ -504,8 +499,7 @@ export function parseDatetimeNumber(s: string): number
  */
 export function parseUrlArgs(urlargs: IUrlArgsInvariant|string): IUrlArgsInvariant
 {
-    if (typeof urlargs === 'string')
-    {
+    if (typeof urlargs === 'string') {
         var args = <IUrlArgsInvariant>{};
 
         if (urlargs.length > 0) {
@@ -575,8 +569,7 @@ export function datetimeToString(v: number|Date|null|undefined): string
             intToA((<Date>v).getUTCHours(),    2) + ":" +
             intToA((<Date>v).getUTCMinutes(),  2);
 
-    if ((<Date>v).getUTCSeconds() !== 0 || (<Date>v).getUTCMilliseconds() !== 0)
-    {
+    if ((<Date>v).getUTCSeconds() !== 0 || (<Date>v).getUTCMilliseconds() !== 0) {
         r += ":" + intToA((<Date>v).getUTCSeconds(),  2);
 
         if ((<Date>v).getUTCMilliseconds() !== 0)
@@ -651,8 +644,7 @@ export function round(v: number, p: number): number
 
     var pow: number;
 
-    switch(p)
-    {
+    switch(p) {
     case 0:     return Math.round(v);
     case 1:     pow = 10;           break;
     case 2:     pow = 100;          break;
@@ -749,8 +741,7 @@ export function globalError(msg:string, e:Object):void
     if (msg)
         m = m + "\n" + msg;
 
-    while (e instanceof Object)
-    {
+    while (e instanceof Object) {
         m += "\n" + e.toString();
         e = (<any>(firsterr = e)).innerError;
     }
@@ -910,8 +901,7 @@ export function eventTrigger(eventHandlers:IEventHandlerCollection|undefined, ev
     if (eventHandlers) {
         const events = eventHandlers[eventName];
         if (events) {
-            switch(events.length)
-            {
+            switch(events.length) {
             case 0:
                 break;
 

@@ -1,3 +1,4 @@
 .vs/*
 www/*
 *.csproj.user
+tsconfig.json

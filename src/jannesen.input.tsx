@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 /* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
 import * as $J         from "jc3/jannesen";
@@ -179,8 +179,7 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
             if (cur !== e) {
                 let input = this.getinputelm();
 
-                switch(input.prop("tagName"))
-                {
+                switch(input.prop("tagName")) {
                 case "INPUT":
                 case "TEXTAREA":
                 case "SELECT":
@@ -354,8 +353,7 @@ export abstract class InputTextControl<TNativeValue,
         }
     }
     protected       input_onkeypress(evt:KeyboardEvent): void {
-        if (evt.key.length === 1)
-        {
+        if (evt.key.length === 1) {
             const key = this.keyRemap(evt.key);
 
             if (key !== evt.key) {
@@ -598,8 +596,7 @@ export class Number extends InputTextControl<number, $JT.Number, INumberControlO
         if (key >= "0" && key <= "9")
             return key;
 
-        switch(key)
-        {
+        switch(key) {
             case ".":
             case $JR.decimalPoint:
                 return $JR.decimalPoint;
@@ -868,8 +865,7 @@ export class Date extends InputTextDropdownControl<number, $JT.Date, Date, IDate
             (key >= "a" && key <= "z"))
             return key;
 
-        switch(key)
-        {
+        switch(key) {
         case ".": // .
         case "-": // -
             return "/";
@@ -953,8 +949,7 @@ export class Time extends InputTextDropdownControl<number, $JT.Time, Time, ITime
             if (key >= "0" && key <= "9")
                 return key;
 
-            switch(key)
-            {
+            switch(key) {
             case "-":
                 return key;
 
@@ -1407,8 +1402,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
     }
     private         _inputTimerStop()
     {
-        if (this._inputTimer)
-        {
+        if (this._inputTimer) {
             clearTimeout(this._inputTimer);
             this._inputTimer = undefined;
         }

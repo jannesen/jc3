@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 
 export const Name = "UTC";
 

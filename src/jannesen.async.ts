@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 import * as $J   from "jc3/jannesen";
 import * as $JD  from "jc3/jannesen.dom";
 
@@ -1008,8 +1008,7 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
             }
             function xhr_onreadystatechange() {
                 try {
-                    if (xhr.readyState === 4 && !xhr_done)
-                    {
+                    if (xhr.readyState === 4 && !xhr_done) {
                         xhr_done = true;
                         if (xhr.status === 0)
                             on_timeout();
@@ -1022,8 +1021,7 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
             }
             function xhr_ontimeout() {
                 try {
-                    if (!xhr_done)
-                    {
+                    if (!xhr_done) {
                         xhr_done = true;
                         on_timeout();
                     }
@@ -1042,8 +1040,7 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
             function on_datareceived() {
                 let rtn:any;
 
-                try
-                {
+                try {
                     var contenttype = xhr.getResponseHeader("Content-Type");
                     if (contenttype) {
                         var i = contenttype.indexOf(";");
@@ -1051,8 +1048,7 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
                             contenttype = contenttype.substr(0, i);
                     }
 
-                    if (xhr.status === 200)
-                    {
+                    if (xhr.status === 200) {
                         if (contenttype === opts.response_contenttype) {
                             rtn = decodeData(xhr, contenttype);
                         } else {
@@ -1064,8 +1060,7 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
                             }
                         }
                     }
-                    else
-                    {
+                    else {
                         rtn = (contenttype === opts.response_contenttype) ? decodeData(xhr, contenttype) : undefined;
                         if (!(rtn instanceof Error)) {
                             rtn = new $J.AjaxError("HTTP-ERROR", "Receive error from server, status=" + xhr.status + ".", opts, xhr.status);

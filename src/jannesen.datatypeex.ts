@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 import * as $J   from "jc3/jannesen";
 import * as $JT  from "jc3/jannesen.datatype";
 import * as $JR  from "jc3/jannesen.regional";
@@ -57,8 +57,7 @@ export abstract class RangeValue extends $JT.SimpleType<IRangeValue> {
 
     protected _normalizeValue(v:IRangeValue|null):IRangeValue|null {
         if (v !== null) {
-            switch(typeof v.Begin)
-            {
+            switch(typeof v.Begin) {
             case "number":
                 break;
             case "undefined":
@@ -71,8 +70,7 @@ export abstract class RangeValue extends $JT.SimpleType<IRangeValue> {
             default:
                 throw new $J.InvalidStateError("Invalid IRangeValue.Begin.");
             }
-            switch(typeof v.End)
-            {
+            switch(typeof v.End) {
             case "number":
                 break;
             case "undefined":
@@ -437,8 +435,7 @@ function regexToString(r: RegExp): string {
     let s = r.source;
     let i = 0;
 
-    while ((i = s.indexOf('(', i)) >= 0)
-    {
+    while ((i = s.indexOf('(', i)) >= 0) {
         i = i + 1;
 
         if (s[i] !== '?')

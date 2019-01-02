@@ -1,4 +1,4 @@
-﻿/// <language code="en"/>
+/// <language code="en"/>
 import * as $J from "jc3/jannesen";
 
 export const btn_cancel                         = "Cancel";

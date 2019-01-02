@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 /* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
 import * as $J       from "jc3/jannesen";
@@ -358,8 +358,7 @@ export class Main extends $JD.Container
             let width:number;
             let left:number;
 
-            if (progess < 1)
-            {
+            if (progess < 1) {
                 width = this._sidebar_visible
                                     ? Math.max(this._sidebar_width * progess, curwidth)
                                     : Math.min(this._sidebar_width * (1 - progess), curwidth);

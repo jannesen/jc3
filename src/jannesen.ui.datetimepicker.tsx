@@ -1,4 +1,4 @@
-﻿/* @jsx-mode generic */
+/* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
 import * as $J       from "jc3/jannesen";
 import * as $JD      from "jc3/jannesen.dom";
@@ -177,10 +177,8 @@ export class DatePicker implements $JD.IDOMContainer,$J.EventHandling
     public          onKeyDown(ev:KeyboardEvent)
     {
         if (this._activeView) {
-            if (!(ev.altKey || ev.ctrlKey || ev.metaKey))
-            {
-                switch(ev.key)
-                {
+            if (!(ev.altKey || ev.ctrlKey || ev.metaKey)) {
+                switch(ev.key) {
                 case "PageUp":      this._navigateTo(this._hdrBtnPrev); return;
                 case "PageDown":    this._navigateTo(this._hdrBtnNext); return;
                 }
@@ -648,10 +646,8 @@ export abstract class ViewBase implements $JD.IDOMContainer
     }
     public                  onKeyDown(ev:KeyboardEvent)
     {
-        if (!(ev.altKey || ev.ctrlKey || ev.metaKey))
-        {
-            switch(ev.key)
-            {
+        if (!(ev.altKey || ev.ctrlKey || ev.metaKey)) {
+            switch(ev.key) {
             case "Enter":
                 if (this._viewState.selected !== null && this.validValue(this._viewState.selected)) {
                     this.onClick(this._viewState.selected, ev);

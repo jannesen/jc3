@@ -1,4 +1,4 @@
-﻿@mixin fa-fontface($fontawesome_path) {
+@mixin fa-fontface($fontawesome_path) {
     @font-face {
         font-family:    'FontAwesome';
         src:            url('#{$fontawesome_path}/fontawesome-webfont.eot#iefix') format("embedded-opentype"),

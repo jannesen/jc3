@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 import * as $J   from "jc3/jannesen";
 import * as $JA  from "jc3/jannesen.async";
 import * as $JD  from "jc3/jannesen.dom";
@@ -811,8 +811,7 @@ export abstract class SimpleType<TNative> extends BaseType
             return null;
         }
 
-        switch(typeof vjson)
-        {
+        switch(typeof vjson) {
         case "string":  v = this.cnvInvariantToValue(vjson as string);        break;
         case "number":  v = this.cnvJSONnumberToValue(vjson as number);       break;
         case "boolean": v = this.cnvJSONbooleanToValue(vjson as boolean);     break;
@@ -2018,8 +2017,7 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
      *!!DOC
      */
     public  assign(r:any):void {
-        if (r instanceof SelectType)
-        {
+        if (r instanceof SelectType) {
             const datasource = this.Datasource;
 
             if (datasource instanceof RemoteSelectDatasource && datasource === r.Datasource ) {
@@ -3030,8 +3028,7 @@ function time_parse_helper(s: string, f: number): number
 
     let maxValue: number|undefined;
 
-    switch(f)
-    {
+    switch(f) {
     case TimeFactor.Ms:     maxValue = 999;     break;
     case TimeFactor.Sec:    maxValue =  59;     break;
     case TimeFactor.Min:    maxValue =  59;     break;
@@ -3045,8 +3042,7 @@ function time_parse_helper(s: string, f: number): number
 }
 
 function encode_key(key: SelectValue): string {
-    switch(typeof key)
-    {
+    switch(typeof key) {
     case 'number':
         return '#' + (key as number).toString();
 

@@ -1,4 +1,4 @@
-﻿/// <export-interface path="jannesen.language.ts"/>
+/// <export-interface path="jannesen.language.ts"/>
 /// <language code="de"/>
 import * as  $J  from "jc3/jannesen";
 

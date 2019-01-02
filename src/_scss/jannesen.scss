@@ -1,5 +1,5 @@
-﻿@import "fontawesome.scss";
-@include fa-fontface('#{$libpath}/font-awesome-4.4.0');
+@import "fontawesome.scss";
+@include fa-fontface('#{$libpath}/font');
 
 @mixin user-select($arg) {
   -webkit-user-select: $arg;

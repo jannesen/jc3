@@ -1,4 +1,4 @@
-﻿/// <export-interface path="jannesen.timezone.ts"/>
+/// <export-interface path="jannesen.timezone.ts"/>
 
 export const Name = "CET";
 

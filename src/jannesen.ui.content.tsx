@@ -1,4 +1,4 @@
-﻿/* @jsx-mode generic */
+/* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
 import * as $J      from "jc3/jannesen";
 import * as $JA     from "jc3/jannesen.async";
@@ -1681,8 +1681,7 @@ function errorToMsg(err:Error): $JD.DOMHTMLElement {
     }
 
     if (serverErrorDetails && serverErrorDetails.detail) {
-        for (var i = 0 ; i < serverErrorDetails.detail.length ; ++i)
-        {
+        for (var i = 0 ; i < serverErrorDetails.detail.length ; ++i) {
             if (f)
                 msg.appendChild(<br/>);
             else

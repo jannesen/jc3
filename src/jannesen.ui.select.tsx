@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 /* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
 import * as $J       from "jc3/jannesen";
@@ -239,8 +239,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
             const input     = this.input;
 
             if (this._selectedRow !== undefined && this._tbodydata && container && input) {
-                switch(ev.key)
-                {
+                switch(ev.key) {
                 case "Backspace":
                     return true;
 

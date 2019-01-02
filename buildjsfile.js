@@ -1,4 +1,4 @@
-﻿/* eslint smart-tabs: "on" */
+/* eslint smart-tabs: "on" */
 var $build = require(process.env.BUILDJS);
 
 var references = {

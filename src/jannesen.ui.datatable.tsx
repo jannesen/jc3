@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 /// <reference path="../js/require.d.ts" />
 /* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
@@ -268,10 +268,8 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
 
     private     _onkeydown(ev:KeyboardEvent):boolean
     {
-        if (!(ev.altKey || ev.ctrlKey || ev.metaKey))
-        {
-            switch(ev.key)
-            {
+        if (!(ev.altKey || ev.ctrlKey || ev.metaKey)) {
+            switch(ev.key) {
             case "Enter":
                 if (typeof this._selectedRow === 'number' && typeof this._opts.rowClick === "function") {
                     this._opts.rowClick(this._recordset.item(this._selectedRow));
@@ -636,8 +634,7 @@ export class Scrollbar extends $JD.Container
                  this._setValue(this._maxValue, $JT.ChangeReason.Assign, false);
             }
 
-            if (this._sliderSize === 0 || recalc)
-            {
+            if (this._sliderSize === 0 || recalc) {
                 this._sliderSize = 12 + Math.round((this._scrollSize-12) * Math.pow(0.4, Math.log(this._maxValue - this._minValue+1) / Math.LN10));
                 this._slider.css("height", this._sliderSize);
                 recalc = true;
@@ -648,8 +645,7 @@ export class Scrollbar extends $JD.Container
             if (recalc)
                 this._slider.show(true);
         }
-        else
-        {
+        else {
             this._sliderSize = 0;
             this._slider.show(false);
         }
@@ -677,8 +673,7 @@ export class Scrollbar extends $JD.Container
 
 function helper_getrecordId(e:any): number|null
 {
-    while (e instanceof Element)
-    {
+    while (e instanceof Element) {
         if (e.tagName === "TR") {
             let id = e.getAttribute("_recordidx");
 
