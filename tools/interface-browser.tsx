@@ -1,4 +1,4 @@
-/// <amd-dependency path="jc3/jannesen.input" />
+﻿/// <amd-dependency path="jc3/jannesen.input" />
 /* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
 import * as $JA      from "jc3/jannesen.async";

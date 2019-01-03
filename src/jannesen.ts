@@ -1,4 +1,4 @@
-/// <reference path="lib-ext.d.ts"/>
+﻿/// <reference path="lib-ext.d.ts"/>
 /// <reference path="../js/require.d.ts" />
 
 var tick_per_day            = (24*60*60*1000);

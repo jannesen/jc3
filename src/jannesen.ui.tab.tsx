@@ -1,4 +1,4 @@
-/* @jsx-mode generic */
+﻿/* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
 import * as $J   from "jc3/jannesen";
 import * as $JA  from "jc3/jannesen.async";

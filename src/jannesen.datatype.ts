@@ -1,4 +1,4 @@
-/// <reference path="lib-ext.d.ts"/>
+﻿/// <reference path="lib-ext.d.ts"/>
 import * as $J   from "jc3/jannesen";
 import * as $JA  from "jc3/jannesen.async";
 import * as $JD  from "jc3/jannesen.dom";

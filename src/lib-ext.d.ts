@@ -1,4 +1,4 @@
-/* tslint:disable:interface-name */
+﻿/* tslint:disable:interface-name */
 
 interface Error
 {

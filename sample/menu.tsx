@@ -1,4 +1,4 @@
-/* @jsx-mode generic */
+﻿/* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
 import * as $JD      from "jc3/jannesen.dom";
 import * as $JUM     from "jc3/jannesen.ui.menu";

@@ -1,4 +1,4 @@
-@import "fontawesome.scss";
+﻿@import "fontawesome.scss";
 @include fa-fontface('#{$libpath}/font');
 
 @mixin user-select($arg) {

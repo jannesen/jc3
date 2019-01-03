@@ -1,4 +1,4 @@
-define(function() {
+﻿define(function() {
     var head = document.getElementsByTagName('head')[0];
 
     var cssAPI = {};
