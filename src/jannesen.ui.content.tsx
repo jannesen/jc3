@@ -1794,7 +1794,7 @@ function window_onfocusin(ev:FocusEvent) {
         }
     }
 }
-function getContentBody(n:HTMLElement|null) {
+export function getContentBody(n:HTMLElement|null) {
     while (n && n !== $global.document.body) {
         const contentBody = $JD.getElementData(n, "contentbody");
         if (contentBody instanceof ContentBody) {
