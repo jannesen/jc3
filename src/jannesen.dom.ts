@@ -340,10 +340,10 @@ export class DOMWindow implements $J.IEventSource
      * !!DOC
      */
 
-    public bind<K extends keyof DOMWindowEventMap>(eventName: K, handler:(ev:DOMWindowEventMap[K]) => void, thisArg?:any): void;
-    public bind(eventName:string,        handler:(ev:any)               => void, thisArg?:any): void
+    public bind<K extends keyof DOMWindowEventMap>(eventName: K, handler:(ev:DOMWindowEventMap[K]) => void, thisArg?:any, options?:AddEventListenerOptions): void;
+    public bind(eventName:string, handler:(ev:any) => void, thisArg?:any, options?:AddEventListenerOptions): void
     {
-        event_bind(this._window, this._events, eventName, handler, thisArg);
+        event_bind(this._window, this._events, eventName, handler, thisArg, options);
     }
 
     /**
@@ -378,10 +378,10 @@ export class DOMHTMLDocument implements $J.IEventSource
     /**
      * !!DOC
      */
-    public bind<K extends keyof DOMDocumentEventMap>(eventName: K, handler:(ev:DOMDocumentEventMap[K]) => void, thisArg?:any): void;
-    public bind(eventName: string,            handler:(ev:any)     => void, thisArg?:any): void
+    public bind<K extends keyof DOMDocumentEventMap>(eventName: K, handler:(ev:DOMDocumentEventMap[K]) => void, thisArg?:any, options?:AddEventListenerOptions): void;
+    public bind(eventName: string, handler:(ev:any) => void, thisArg?:any, options?:AddEventListenerOptions): void
     {
-        event_bind(this._document, this._events, eventName, handler, thisArg);
+        event_bind(this._document, this._events, eventName, handler, thisArg, options);
     }
 
     /**
@@ -1120,8 +1120,8 @@ export class DOMHTMLElement implements $J.IEventSource
     /**
      * !!DOC
      */
-    public bind<K extends keyof DOMElementEventMap>(eventName: K, handler:(ev:DOMElementEventMap[K]) => void, thisArg?:any): void;
-    public bind(eventName: string,                  handler:(ev:any)             => void, thisArg?:any): void
+    public bind<K extends keyof DOMElementEventMap>(eventName: K, handler:(ev:DOMElementEventMap[K]) => void, thisArg?:any, options?:AddEventListenerOptions): void;
+    public bind(eventName: string, handler:(ev:any) => void, thisArg?:any, options?:AddEventListenerOptions): void
     {
         switch(eventName) {
         case "AddedToDocument":
@@ -1138,7 +1138,7 @@ export class DOMHTMLElement implements $J.IEventSource
                 this.pinElement();
                 this._events = [];
             }
-            event_bind(this._element, this._events, eventName, handler, thisArg);
+            event_bind(this._element, this._events, eventName, handler, thisArg, options);
             break;
         }
     }
@@ -1698,11 +1698,11 @@ function WINHashChange()
 //-------------------------------------------------------------------------------------------------
 // Wrapper around a event handlers so that exception logged and display to the user.
 //
-function event_bind(node:Window|Document|HTMLElement, events:$J.IEventWrapper[], eventName:string, handler: (ev: any) => void, thisArg?:any): $J.IEventWrapper
+function event_bind(node:Window|Document|HTMLElement, events:$J.IEventWrapper[], eventName:string, handler: (ev: any) => void, thisArg:any, options?:AddEventListenerOptions): $J.IEventWrapper
 {
     let wrapper = $J.eventWrapper(eventName, handler, thisArg);
     events.push(wrapper);
-    node.addEventListener(eventName, wrapper);
+    node.addEventListener(eventName, wrapper, options);
     return wrapper;
 }
 function event_unbind(node:Window|Document|HTMLElement, events:$J.IEventWrapper[]|undefined, eventName:string, handler:(ev:any) => void, thisArg?:any): void
