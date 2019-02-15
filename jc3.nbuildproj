@@ -20,6 +20,12 @@
     <File Include="**\*" />
   </ItemGroup>
   <ItemGroup>
+    <File Remove=".git\**" />
+    <File Remove=".vs\**" />
+    <None Remove=".git\**" />
+    <None Remove=".vs\**" />
+  </ItemGroup>
+  <ItemGroup>
     <File Remove="jc3.nbuildproj" />
     <File Remove="jc3.sln" />
     <File Remove="JLib-Web.nbuildproj" />
