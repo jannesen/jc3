@@ -363,7 +363,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
                             this._resolve(y);
                         }
                      },
-                     (r: Error) => {
+                     (r:any) => {
                         if (!this._called) {
                             this._called = true;
                             this._reject(r);
@@ -648,6 +648,25 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
                                 });
             });
     }
+
+    /**
+     * !!DOC
+     */
+    public static       from<T>(o:PromiseLike<T>): Task<T>;
+    public static       from<T>(o:Error):Task<void>;
+    public static       from<T>(o:T):Task<T>;
+    public static       from(o:any):Task<any>
+    {
+        if (isPromiseLike(o)) {
+            return new Task<any>((r,e) => o.then(r,e));
+        }
+
+        if (o instanceof Error) {
+            return Task.reject(o);
+        }
+
+        return Task.resolve(o);
+    }
     /**
      * !!DOC
      */
@@ -720,11 +739,11 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
             this._flush();
         }
     }
-    private             _reject(reason: Error)
+    private             _reject(reason: any)
     {
-        if ( this._state === TaskState.Pending) {
+        if (this._state === TaskState.Pending) {
             this._state = TaskState.Rejected;
-            this._result = reason;
+            this._result = (reason instanceof Error) ? reason : new Error('' + reason);
             this._flush();
         }
     }
