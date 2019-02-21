@@ -17,12 +17,14 @@ export const enum MenuPosition
 
 export interface IMenuButtonAttr
 {
-    btnclass?:          string;
-    menuclass?:         string;
-    firstmenuclass?:    string;
+    class?:             string;
+    style?:             string;
+    tabIndex?:          number;
     title?:             string;
     content?:           $JD.AddNode;
     menupos?:           MenuPosition;
+    menuclass?:         string;
+    firstmenuclass?:    string;
     dataSource?:        (ct:$JA.ICancellationToken)=>IDataSourceResult;
     onclick?:           (data:any)=>void;
 }
@@ -49,9 +51,9 @@ export class MenuButton extends $JD.Container
         if (children && children.length > 0)    attr.dataSource = () => children;
         if (attr.menupos === undefined)         attr.menupos = MenuPosition.Left;
 
-        super(<button class={ $JD.classJoin("jannesen-ui-menu -button", attr.btnclass) } tabIndex="0" title={ attr.title }>{ attr.content }</button>);
+        super(<button class={attr.class} style={attr.style} title={attr.title} tabIndex={attr.tabIndex}>{ attr.content }</button>);
 
-        this._applyAttr(attr, "onclick");
+        this._applyAttr(attr, 'onclick');
         this._attr       = attr;
         this._activeMenu = null;
 

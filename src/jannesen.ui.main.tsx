@@ -161,13 +161,13 @@ export class Main extends $JD.Container
                                     { this._nav_refresh = <button class="-nav-refresh -disabled" tabIndex="-1" onclick={() => { this.refresh();                     } } title="Refresh" /> }
                                     { this._nav_prev    = <button class="-nav-prev -disabled"    tabIndex="-1" onclick={() => { this.gotoprev();                    } } title="Previous record"/> }
                                     { this._nav_next    = <button class="-nav-next -disabled"    tabIndex="-1" onclick={() => { this.gotonext();                    } } title="Next record"/> }
-                                    { this._moremenu    = <$JUM.MenuButton btnclass="-moremenu"
+                                    { this._moremenu    = <$JUM.MenuButton class="jannesen-ui-menu -button -moremenu"
+                                                                           title="Action menu"
+                                                                           menupos={$JUM.MenuPosition.Right}
                                                                            dataSource={(ct) => {
                                                                                let   form = !this._formloader.isBusy && this._formloader.contentBody;
                                                                                return (form && form.isIdle) ? form.moreMenuDatasource(ct) : [];
-                                                                           }}
-                                                                           menupos={$JUM.MenuPosition.Right}
-                                                                           title="Action menu"/> }
+                                                                           }} /> }
                                 </div>
                             </div>
                             { this._formloader = new $JUC.FormLoader({
