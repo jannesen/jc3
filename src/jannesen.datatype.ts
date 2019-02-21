@@ -666,6 +666,26 @@ export abstract class SimpleType<TNative> extends BaseType
     /**
      *!!DOC
      */
+    public getOutput(format?:string) {
+        const self = this;
+        const span = $JD.createElement('span', { "class":"jannesen-ui-output" });
+        changed();
+        self.bind('changed', changed);
+        span.bind('RemovedFromDocument', () => { self.unbind('changed', changed ); })
+        return span;
+
+        function changed() {
+            let c = self.toDom(format);
+            if (c === '') { c = '\xA0'; }
+            span.empty().appendChild(c);
+        }
+    }
+
+
+
+    /**
+     *!!DOC
+     */
     public setDefault():void {
         if (this._value === null) {
             this.setValue(this.Default, ChangeReason.Parse);

@@ -221,3 +221,13 @@ div.jannesen-input {
         vertical-align: top;
     }
 }
+
+span.jannesen-ui-output {
+    display:            inline-block;
+    box-sizing:         border-box;
+    padding:            $jc-input-padding-top-bottom $jc-input-padding-left-right;
+    background:         #eaeaea;
+    width:              100%;
+    border:             1px solid $jc-input-border-color;
+    border-radius:      $jc-input-border-radius;
+}

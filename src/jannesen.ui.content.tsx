@@ -227,9 +227,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                     throw e;
                                 }
 
-                                return ( this._contentBody
-                                            ? this._contentBody.displayError(e, context)
-                                            : DialogError.show(e, context) as $JA.Task<void>)
+                                return (DialogError.show(e, context) as $JA.Task<void>)
                                        .then(() => { throw e; });
                           })
                    .finally(() => {
@@ -529,9 +527,9 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
 
         return this._loader.execute(executor, ct);
     }
-    public              displayError(e: Error, context:AsyncContext): $JA.Task<void>
+    public              executeDisplayError(e: Error): $JA.Task<void>
     {
-        return DialogError.show(e, context) as $JA.Task<void>;
+        return this.execute((ct) => DialogError.show(e, ct));
     }
 
     public              body_onkeydown(ev: KeyboardEvent) {
