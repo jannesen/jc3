@@ -22,7 +22,7 @@ $jc-line-icon-btn-width:             1.5em !default;
     @include user-select(none);
     transition:         background-color ease-in-out .2s,color ease-in-out .2s, border-color ease-in-out .2s;
 
-    &:hover {
+    &:not(.-disabled):hover {
         @include            input-btn-hover();
         background-color:   #d7faff;
         color:              #0000a0;
@@ -49,7 +49,7 @@ $jc-line-icon-btn-width:             1.5em !default;
             opacity:            0.6;
             transition:         opacity ease-in-out .2s;
         }
-        &:hover:before {
+        &:not(.-disabled):hover:before {
             opacity: 1;
         }
     }
