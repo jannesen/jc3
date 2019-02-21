@@ -93,6 +93,17 @@ export interface ICallArgs //!!TODO
 /**
  *!!DOC
  */
+export class MessageError extends __Error
+{
+    constructor(message:string, innerError?:Error) {
+        super("MessageError", message);
+        this.innerError  = innerError;
+    }
+}
+
+/**
+ *!!DOC
+ */
 export class InvalidStateError extends __Error
 {
     constructor(message?:string, innerError?:Error) {

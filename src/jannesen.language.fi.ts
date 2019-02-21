@@ -5,45 +5,46 @@ import * as  $J from "jc3/jannesen";
 
 export function errorToText(err: Error): string {
     switch (err.name) {
-        case "InvalidStateError": return "Interne fout.";
-        case "NotImplentedError": return "Niet geïmplementeerd.";
-        case "LoadError": return "Fout tijdens laden.";
+    case "MessageError": return err.message;
+    case "InvalidStateError": return "Interne fout.";
+    case "NotImplentedError": return "Niet geïmplementeerd.";
+    case "LoadError": return "Fout tijdens laden.";
 
-        case "ServerError":
-            switch ((err as $J.ServerError).errCode) {
-                case "GENERAL-ERROR": return "Fout ontvangen van server.";
-                case "CONFIG-ERROR": return "Server configuratie fout.";
-                case "REQUEST-ERROR": return "Fout in de 'request' welke naar de server is gestuurd.";
-                case "INTERNAL-ERROR": return "Interne fout tijdens verwerking.";
-                case "SERVICE-DOWN": return "De applicatie is niet beschikbaar op het moment. Probeer het later nog eens.";
-                case "NO-ACCESS": return "Je hebt geen toegang tot de gevraagde data.";
-                case "ACCESS-BLOCK": return "De toegang tot de applicantie is geblokkeerd.";
-                case "NO-DATA": return "Gegevens niet beschikbaar / verwijder.";
-            }
+    case "ServerError":
+        switch ((err as $J.ServerError).errCode) {
+            case "GENERAL-ERROR": return "Fout ontvangen van server.";
+            case "CONFIG-ERROR": return "Server configuratie fout.";
+            case "REQUEST-ERROR": return "Fout in de 'request' welke naar de server is gestuurd.";
+            case "INTERNAL-ERROR": return "Interne fout tijdens verwerking.";
+            case "SERVICE-DOWN": return "De applicatie is niet beschikbaar op het moment. Probeer het later nog eens.";
+            case "NO-ACCESS": return "Je hebt geen toegang tot de gevraagde data.";
+            case "ACCESS-BLOCK": return "De toegang tot de applicantie is geblokkeerd.";
+            case "NO-DATA": return "Gegevens niet beschikbaar / verwijder.";
+        }
 
-            return "Fout " + (err as $J.ServerError).errCode + " ontvangen van server.";
+        return "Fout " + (err as $J.ServerError).errCode + " ontvangen van server.";
 
-        case "AjaxError":
-            switch ((err as $J.AjaxError).errCode) {
-                case "HTTP-ERROR": return "Error http-" + (err as $J.AjaxError).httpStatus + " ontvangen van server.";
+    case "AjaxError":
+        switch ((err as $J.AjaxError).errCode) {
+            case "HTTP-ERROR": return "Error http-" + (err as $J.AjaxError).httpStatus + " ontvangen van server.";
 
-                case "TIMEOUT":
-                    if ((err as $J.AjaxError).callDefinition.method === "GET") {
-                        return "Timeout tijdens ophalen data van server.";
-                    }
+            case "TIMEOUT":
+                if ((err as $J.AjaxError).callDefinition.method === "GET") {
+                    return "Timeout tijdens ophalen data van server.";
+                }
 
-                    return "Er heeft een netwerkstoring plaats gevonden tijdens het communiceren met de server." +
-                        "Het is mogelijk dat je opdracht goed is verwerkt, maar dat het resultaat verloren is gegaan.\n\n" +
-                        "We verzoeken je te controleren of de opdracht goed is verwerkt.";
+                return "Er heeft een netwerkstoring plaats gevonden tijdens het communiceren met de server." +
+                    "Het is mogelijk dat je opdracht goed is verwerkt, maar dat het resultaat verloren is gegaan.\n\n" +
+                    "We verzoeken je te controleren of de opdracht goed is verwerkt.";
 
-                default: return "Fout tijdens communicatie met server.";
-            }
+            default: return "Fout tijdens communicatie met server.";
+        }
 
-        case "ConversionError": return "Conversie fout.";
-        case "FormatError": return "Formaat fout.";
-        case "ValidateError": return "Validatie fout.";
-        case "FormError": return "Fout in form afhandeling";
-        default: return "Error: " + (err as Error).name;
+    case "ConversionError": return "Conversie fout.";
+    case "FormatError": return "Formaat fout.";
+    case "ValidateError": return "Validatie fout.";
+    case "FormError": return "Fout in form afhandeling";
+    default: return "Error: " + (err as Error).name;
     }
 }
 

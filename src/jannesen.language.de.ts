@@ -4,6 +4,7 @@ import * as  $J  from "jc3/jannesen";
 
 export function errorToText(err: Error): string {
     switch (err.name) {
+    case "MessageError": return err.message;
     case "InvalidStateError": return "Internal error.";
     case "NotImplentedError": return "Not implemented.";
     case "LoadError": return "Error while loading.";
