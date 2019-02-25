@@ -671,7 +671,7 @@ export abstract class SimpleType<TNative> extends BaseType
         const span = $JD.createElement('span', { "class":"jannesen-ui-output" });
         changed();
         self.bind('changed', changed);
-        span.bind('RemovedFromDocument', () => { self.unbind('changed', changed ); })
+        span.bind('RemovedFromDocument', () => { self.unbind('changed', changed ); });
         return span;
 
         function changed() {
