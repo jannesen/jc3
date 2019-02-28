@@ -1,4 +1,4 @@
 .vs/*
 www/*
-*.csproj.user
+*.nbuildproj.user
 tsconfig.json
