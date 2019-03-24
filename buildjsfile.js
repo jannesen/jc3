@@ -1,5 +1,4 @@
-﻿/* eslint smart-tabs: "on" */
-var $build = require(process.env.BUILDJS);
+﻿var $build = require(process.env.BUILDJS);
 
 var references = {
                     contrib:                "../.."
@@ -24,11 +23,11 @@ var tsconfig =  {
                                                         }
                     },
                     "include": [
-                            "jc3/*",
+                            "src/*",
                             "sample/*",
                             "test/*",
                             "tools/*"
-                        ],
+                        ]
                 };
 
 var tslint =    {

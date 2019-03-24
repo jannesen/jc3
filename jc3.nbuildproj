@@ -18,14 +18,9 @@
   <ItemGroup>
     <None Include="**\LICENSE" />
     <File Include="**\*" />
-  </ItemGroup>
-  <ItemGroup>
     <File Remove=".git\**" />
     <File Remove=".vs\**" />
     <File Remove="www\**" />
-    <None Remove=".git\**" />
-    <None Remove=".vs\**" />
-    <None Remove="www\**" />
   </ItemGroup>
   <ItemGroup>
     <File Remove="jc3.nbuildproj" />
