@@ -9,7 +9,7 @@
         > span {
             display:                    inline-block;
             color:                      white;
-            background-color:           lighten($jc-main-color, 40%);
+            background-color:           hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 40%) );
             padding:                    .5em 1em 0 1em;
             box-sizing:                 border-box;
             height:                     (26em / 12);
@@ -19,8 +19,8 @@
             user-select:                none;
 
             &.-active {
-                background-color:   lighten($jc-main-color, 10%);
-                border-color:       lighten($jc-main-color, 20%);
+                background-color:   hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 10%) );
+                border-color:       hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 20%) );
             }
             &.-disabled {
                 opacity:            .3;
@@ -28,7 +28,7 @@
             }
             &:not(.-active):hover {
                 cursor: pointer;
-                background-color:   lighten($jc-main-color, 25%);
+                background-color:   hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 25%) );
             }
         }
     }
