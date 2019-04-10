@@ -6,6 +6,8 @@
         "noErrorTruncation": true,
         "noImplicitAny": true,
         "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": false,
         "strict": true,
         "preserveConstEnums": false,
         "noEmitHelpers": true,
