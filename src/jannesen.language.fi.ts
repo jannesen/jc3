@@ -74,6 +74,7 @@ export const invalid_time                       = /*Invalid time*/ "Väärä aik
 export const invalid_time_syntax                = /*Invalid time syntax*/ "Käytä kaksoipistettä ajan erottimena";
 export const invalid_value_time                 = (s: string): string => "Väärä arvo " + s + " ikakentässä";
 export const items_to_few                       = /*To few items*/ "Muutamiin kohteisiin";
+export const items_to_many                      = /*To many items*/ "Moniin kohteisiin";
 export const loading                            = /*Loading...*/ "Lataa...";
 export const message_default_title              = /*Message*/ "Viesti";
 export const monthNames                         = ["tammikuu", "helmikuu", "maaliskuu", "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu", "syyskuu", "lokakuu", "marraskuu", "joulukuu"];
