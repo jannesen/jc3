@@ -477,11 +477,13 @@ export class DOMHTMLElement implements $J.IEventSource
     {
         var p:HTMLElement = <HTMLElement>(this._element.offsetParent);
 
-        while (p && p !== this._element.ownerDocument.body) {
-            if (getElementComputedStylePropertyString(p, "position") !== "static")
-                return element(p);
+        if (this._element.ownerDocument) {
+            while (p && p !== this._element.ownerDocument.body) {
+                if (getElementComputedStylePropertyString(p, "position") !== "static")
+                    return element(p);
 
-            p = <HTMLElement>(p.offsetParent);
+                p = <HTMLElement>(p.offsetParent);
+            }
         }
 
         /* tslint:disable:no-use-before-declare */
@@ -507,11 +509,12 @@ export class DOMHTMLElement implements $J.IEventSource
      */
     public get defaultView(): Window
     {
-        var w = this._element.ownerDocument.defaultView;
-        if (w === undefined)
-            w = <Window>((<any>this._element.ownerDocument).parentWindow);
+        const doc = this._element.ownerDocument;
+        if (!(doc && doc.defaultView)) {
+            throw new $J.InvalidStateError("defaultView is null.");
+        }
 
-        return w;
+        return doc.defaultView;
     }
 
     /**
@@ -565,7 +568,7 @@ export class DOMHTMLElement implements $J.IEventSource
     public get outerRect(): IClientRect
     {
         let rect = this._element.getBoundingClientRect();
-        let style = this._element.ownerDocument.defaultView.getComputedStyle(this._element);
+        let style = this.defaultView.getComputedStyle(this._element);
 
         let rtn = {
                     left:   rect.left   - parseFloatUndefined(style.marginLeft),
@@ -641,7 +644,7 @@ export class DOMHTMLElement implements $J.IEventSource
                                 width:  this._element.offsetWidth,
                                 height: this._element.offsetHeight
                             };
-        var style = this._element.ownerDocument.defaultView.getComputedStyle(this._element);
+        var style = this.defaultView.getComputedStyle(this._element);
 
         rtn.width  += parseFloatUndefined(style.marginLeft) + parseFloatUndefined(style.marginRight);
         rtn.height += parseFloatUndefined(style.marginTop)  + parseFloatUndefined(style.marginBottom);
@@ -1068,7 +1071,7 @@ export class DOMHTMLElement implements $J.IEventSource
      */
     public appendElement(tagName:string, attrs?:HTMLAttributes, ...children:AddNode[]): DOMHTMLElement
     {
-        var e = createElement.apply(this, arguments);
+        var e = createElement.apply(this, arguments as any /* typescript can't correctly check arguments */);
         this.appendChild(e);
         return e;
     }
@@ -1094,7 +1097,7 @@ export class DOMHTMLElement implements $J.IEventSource
     /**
      * !!DOC
      */
-    public contains(elm:DOMHTMLElement|Element|undefined):boolean
+    public contains(elm:DOMHTMLElement|Element|undefined|null):boolean
     {
         return elm ? this._element.contains((elm instanceof DOMHTMLElement) ? elm._element : elm) : false;
     }
@@ -1525,7 +1528,7 @@ export function setLocationHash(hash:string, replace?:boolean)
 //            console.log('new location: ' + url);
             location.assign(url);
             if (history.state && history.replaceState) //!!Work around a IE11 problem that the history state is copied to a new history entry.
-                history.replaceState(null, undefined);
+                history.replaceState(null, "", undefined);
         }
     }
 
@@ -1845,6 +1848,9 @@ function insertFragment(f:NodeFragment):Text|HTMLElement|DocumentFragment
 //
 function getElementComputedStylePropertyString(element:HTMLElement, propertyName:string): string
 {
+    if (!(element.ownerDocument && element.ownerDocument.defaultView)) {
+        throw new $J.InvalidStateError("defaultView is null.");
+    }
     return element.ownerDocument.defaultView.getComputedStyle(element).getPropertyValue(propertyName);
 }
 function getElementComputedStyleProperty(element:HTMLElement, propertyName:string, defaultValue:string|number|null): string|number|null
@@ -1865,6 +1871,9 @@ function getElementComputedStyleProperty(element:HTMLElement, propertyName:strin
 }
 function getElementComputedStyleProperties(element:HTMLElement, propertyNames:string[]): ICssValues
 {
+    if (!(element.ownerDocument && element.ownerDocument.defaultView)) {
+        throw new $J.InvalidStateError("defaultView is null.");
+    }
     let cssValues:ICssValues = {};
     let computedStyle = element.ownerDocument.defaultView.getComputedStyle(element);
 

@@ -594,8 +594,8 @@ export function datetimeToString(v: number|Date|null|undefined): string
  * !!DOC
  */
 export function objectToUrlArgs(args: IUrlArgs): string;
-export function objectToUrlArgs(name: string, args?: IUrlArgs|null): string;
-export function objectToUrlArgs(p1: string|IUrlArgs|null|undefined, p2?: IUrlArgs|null): string
+export function objectToUrlArgs(name: string, args?: IUrlArgs|null|void): string;
+export function objectToUrlArgs(p1: string|IUrlArgs|null|undefined|void, p2?: IUrlArgs|null|void): string
 {
     let rtn = "";
     let sep = "";

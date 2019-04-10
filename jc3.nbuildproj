@@ -4,11 +4,7 @@
     <NBuildProjectBuild Condition="'$(NBuildProjectBuild)'==''">$(MSBuildExtensionsPath)\Jannesen.NBuildProject\</NBuildProjectBuild>
     <ProjectGuid>c28a738b-772e-48d1-ae85-f2ebbce41881</ProjectGuid>
     <BuildJSDirectory>..\BuildJS</BuildJSDirectory>
-    <TypeScriptToolsVersion>2.9</TypeScriptToolsVersion>
-    <SccProjectName>Svn</SccProjectName>
-    <SccProvider>SubversionScc</SccProvider>
-    <SccAuxPath>Svn</SccAuxPath>
-    <SccLocalPath>Svn</SccLocalPath>
+    <TypeScriptToolsVersion>3.4</TypeScriptToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" Label="Configuration">
   </PropertyGroup>
@@ -16,21 +12,14 @@
   </PropertyGroup>
   <Import Project="$(NBuildProjectBuild)NBuildProject.props" />
   <ItemGroup>
-    <None Include="**\LICENSE" />
     <File Include="**\*" />
   </ItemGroup>
   <ItemGroup>
     <File Remove=".git\**" />
     <File Remove=".vs\**" />
     <File Remove="www\**" />
-    <None Remove=".git\**" />
-    <None Remove=".vs\**" />
-    <None Remove="www\**" />
-  </ItemGroup>
-  <ItemGroup>
     <File Remove="jc3.nbuildproj" />
     <File Remove="jc3.sln" />
-    <File Remove="JLib-Web.nbuildproj" />
   </ItemGroup>
   <Import Project="$(NBuildProjectBuild)NBuildProject.targets" />
   <Target Name="Cleanup">

@@ -20,7 +20,7 @@
         }
     },
     "include": [
-        "jc3/*",
+        "src/*",
         "sample/*",
         "test/*",
         "tools/*"

@@ -845,7 +845,7 @@ function isPromiseLike<T>(o: any): o is PromiseLike<T>
 export interface IAjaxArgs
 {
     method?:                string;
-    callargs?:              $J.IUrlArgs|null;
+    callargs?:              $J.IUrlArgs|null|void;
     url?:                   string;
     data?:                  Object|string|void;
     timeout?:               number;

@@ -141,8 +141,10 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|
                 state.state = undefined;
             }
 
+            let args = normalizeArgs(this._formargs);
+
             this.showDataPopup();
-            loader.open(this.contentNameClass, this.args, state, null, true);
+            loader.open(this.contentNameClass, args, state, null, true);
         }
     }
 
@@ -493,7 +495,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
             this.onresize(this.contentsize);
         } else {
             let callargs: $JA.AjaxCallRequestType<TCall>|null = null;
-            const formargs = this._formargs as any;
+            const formargs = this._formargs;
 
             if (formargs instanceof $JT.Record) {
                 formargs.assign(args);
@@ -517,13 +519,13 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
                     return;
                 }
 
-                callargs = formargs.clone() as $JA.AjaxCallRequestType<TCall>;
+                callargs = formargs.clone() as any/*!!ANY typescript limitation*/;
             }
 
             return $JA.Ajax(this.interfaceGet, { callargs: callargs }, ct)
                       .then((resultdata) => {
                                 this.clearResult();
-                                const datatable = new $JDATATABLE.DataTable<$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>>(resultdata, this.dataTableOpts());
+                                const datatable = new $JDATATABLE.DataTable<$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>>(resultdata as any/*!!ANY typescript limitation*/, this.dataTableOpts());
                                 const container = <div class="-result">
                                                       { datatable }
                                                   </div>;
@@ -609,7 +611,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
         if (!resultdata) {
             throw new $J.InvalidStateError("Invalid state, not recordset.");
         }
-        return UrlArgSet.RecordsetMap<$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>>(resultdata, rec, callback);
+        return UrlArgSet.RecordsetMap<$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>>(resultdata as any/*!!ANY typescript limitation*/, rec, callback);
     }
 
     protected               clearResult()
@@ -815,8 +817,10 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
             }
         }
 
-        if (onopen && initdata && (_data instanceof $JT.Record || _data instanceof $JT.Set)) {
-            _data.setDefault();
+        if (onopen && initdata) {
+            if (_data instanceof $JT.Record || _data instanceof $JT.Set) {
+                _data.setDefault();
+            }
             this.initNewData(_data as $JA.AjaxCallRequestType<TCall>);
         }
     }
@@ -841,7 +845,8 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     protected               validate(mode:StandardDialogMode): $JT.ValidateError[]|null {
         let errList: $JT.ValidateError[] = [];
 
-        if (this.data as any instanceof $JT.BaseType && !(this.data as $JT.BaseType).validate(errList)) {
+        const data = this.data as any;
+        if (data instanceof $JT.BaseType && !data.validate(errList)) {
             return errList;
         }
 
@@ -1000,3 +1005,4 @@ export class DataPopup extends $JPOPUP.Popup {
         }
     }
 }
+

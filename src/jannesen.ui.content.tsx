@@ -100,6 +100,8 @@ export const std_button_no_error:IDialogButton     = { "class": "btn btn-no",   
 export const std_button_yes:IDialogButton          = { "class": "btn btn-yes",    "text": $JL.yes,            "value": "YES"      };
 export const std_button_save:IDialogButton         = { "class": "btn btn-save",   "text": $JL.btn_save,       "value": "SAVE"     };
 export const std_button_remove:IDialogButton       = { "class": "btn btn-remove", "text": $JL.btn_remove,     "value": "REMOVE"   };
+export const std_button_next:IDialogButton         = { "class": "btn btn-next",   "text": $JL.btn_next,       "value": "NEXT"     };
+export const std_button_prev:IDialogButton         = { "class": "btn btn-prev",   "text": $JL.btn_prev,       "value": "PREVIOUS" };
 
 //-------------------------------------------------------------------------------------------------
 /**
@@ -1011,7 +1013,7 @@ export class DialogLoader<TArgs, TRtn> extends ContentLoader<DialogBase<TArgs, T
 
         return DialogFlags.Window;
     }
-    private             _centerDialog() {
+    public            _centerDialog() {
         let winSize = $JD.window.size;
         let pos:$JD.IPosition|undefined;
 
@@ -1046,7 +1048,7 @@ export class DialogLoader<TArgs, TRtn> extends ContentLoader<DialogBase<TArgs, T
             this._contentBody._layoutDialog(pos);
         }
     }
-    private             _resizeFullScreen()
+    public             _resizeFullScreen()
     {
         let winSize = $JD.window.size;
         this._container.css({ position: "fixed", top: 0, left: 0, width: winSize.width, height: winSize.height });

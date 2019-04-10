@@ -64,7 +64,7 @@ function promise_error(delay: number, cancellationToken:$JA.ICancellationToken)
             var timer = setTimeout(() => {
                             reject(new Error("promise_error"));
                         }, delay);
-            oncancel(() => { clearImmediate(timer); });
+            oncancel(() => { clearTimeout(timer); });
         }, cancellationToken);
 }
 

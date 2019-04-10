@@ -1241,7 +1241,7 @@ export class String extends SimpleType<string>
     /**
      *!!DOC
      */
-    public get Validator():RegExp|((s:string)=>void)|undefined {
+    public get Validator():RegExp|((s:string)=>boolean)|undefined {
         return this.getAttr("validator");
     }
 
@@ -1266,7 +1266,7 @@ export class String extends SimpleType<string>
                     return $JL.input_invalid;
                 }
             } else if (typeof validator === "function") {
-                if (!(<(s:string)=>void>validator)(value)) {
+                if (!validator(value)) {
                     return $JL.input_invalid;
                 }
             }
@@ -2467,9 +2467,9 @@ export type ISetItemDefConstructor<TSet extends Record|SimpleType<any>> =
                                 Name:           "Record";
                                 Attributes:     IRecordAttributes;
                                 FieldDef:       RecordIFieldDef<TSet>;
-                                new():          TSet;
+                                new():          Record<RecordIFieldDef<TSet>>; //TSLIMIT: new(): TSet create wrong typing in 3.4
                             } : {
-                                Name:           "Record";
+                                Name:           "SimpleType";
                                 Attributes:     ISimpleTypeAttributes<any>;
                                 NativeType:     string;
                                 new():          TSet
@@ -2490,9 +2490,9 @@ export type RecordOfSet<TSet extends RecordSet> = TSet extends Set<infer U> ? U 
  */
 export class Set<TSet extends Record|SimpleType<any>> extends BaseType
 {
-    public static   Name                            = "Set";
-    public static   Attributes                      = $J.extend<ISetAttributes>({ }, BaseType.Attributes);
-    public static   ItemDef:BaseType|undefined      = undefined;
+    public static   Name                                                            = "Set";
+    public static   Attributes                                                      = $J.extend<ISetAttributes>({ }, BaseType.Attributes);
+    public static   ItemDef:typeof Record| typeof SimpleType | undefined   = undefined;
 
     protected       _items!:TSet[];
 
@@ -2700,8 +2700,8 @@ export class Set<TSet extends Record|SimpleType<any>> extends BaseType
     /**
      *!!DOC
      */
-    public forEach(callback: (item: TSet, index:number, set: TSet[]) => void, thisArg?:any):void {
-        this._items.forEach((value, index, items) => callback.call(thisArg, value, items) );
+    public forEach(callback: (item: TSet, index:number) => void, thisArg?:any):void {
+        this._items.forEach((value, index) => callback.call(thisArg, value, index) );
     }
 
     /**

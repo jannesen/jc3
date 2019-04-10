@@ -653,7 +653,7 @@ export function get_browser_formstate(replace:boolean): $JUC.IFormState|undefine
 {
     if (history.replaceState) {
         if (!history.state) {
-            history.replaceState($J.generateUUID(), undefined);
+            history.replaceState($J.generateUUID(), "", undefined);
         }
 
         const href = location.href;
