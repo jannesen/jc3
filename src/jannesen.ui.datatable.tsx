@@ -50,7 +50,6 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
     private     _table:         $JD.DOMHTMLElement;
     private     _body:          $JD.DOMHTMLElement;
     private     _height:        number|undefined;
-    private     _width:         number|undefined;
     private     _rowHeight:     number|undefined;
     private     _visualRows:    number|undefined;
     private     _curTopRow:     number|undefined;
@@ -202,7 +201,6 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
         this._scrollbar.bind("changed", this._onscroll, this);
         this._container.appendChild(this._scrollbar);
         this._height        =
-        this._width         =
         this._rowHeight     =
         this._curTopRow     =
         this._curCountRow   =

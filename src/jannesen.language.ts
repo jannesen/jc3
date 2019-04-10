@@ -1,6 +1,51 @@
 ﻿/// <language code="en"/>
 import * as $J from "jc3/jannesen";
 
+export function errorToText(err: Error): string {
+    switch (err.name) {
+    case "MessageError":        return err.message;
+    case "InvalidStateError":   return "Internal error.";
+    case "NotImplentedError":   return "Not implemented.";
+    case "LoadError":           return "Error while loading.";
+
+    case "ServerError":
+        switch ((err as $J.ServerError).errCode) {
+        case "GENERAL-ERROR":   return "Error received from server.";
+        case "CONFIG-ERROR":    return "Server configuration error.";
+        case "REQUEST-ERROR":   return "Error in the request sent to the server.";
+        case "INTERNAL-ERROR":  return "Internal error while communicating with server.";
+        case "SERVICE-DOWN":    return "The application is unavailable at the moment. Please try again later.";
+        case "NO-ACCESS":       return "You do not have access to the requested data.";
+        case "ACCESS-BLOCK":    return "Access to the application is blocked.";
+        case "NO-DATA":         return "Data not available or data is removed.";
+        }
+
+        return "Error " + (err as $J.ServerError).errCode + " received from server.";
+
+    case "AjaxError":
+        switch ((err as $J.AjaxError).errCode) {
+        case "HTTP-ERROR":      return "Error http-" + (err as $J.AjaxError).httpStatus + " received from server.";
+
+        case "TIMEOUT":
+            if ((err as $J.AjaxError).callDefinition.method === "GET") {
+                return "Timeout while retrieving server data.";
+            }
+
+            return "A network failure occurred while communicating with the server." +
+                   "The order may have successfully processed, but the result has been lost.\n\n" +
+                   "Please confirm that your order has been processed correctly or not.";
+
+        default: return "Error while communicating with server.";
+        }
+
+    case "ConversionError":     return "Conversion error.";
+    case "FormatError":         return "Format error.";
+    case "ValidateError":       return "Validation error.";
+    case "FormError":           return "Error in form handeling";
+    default:                    return "Error: " + (err as Error).name;
+    }
+}
+
 export const btn_cancel                         = "Cancel";
 export const btn_ok                             = "OK";
 export const btn_close                          = "Close";
@@ -46,48 +91,3 @@ export const querysearch                        = "Search";
 export const queryexecute                       = "Execute";
 export const invalid_daterange                  = "Invalid daterange";
 export const invalid_datetimerange              = "Invalid datetimerange";
-
-export function errorToText(err: Error): string {
-    switch (err.name) {
-    case "MessageError": return err.message;
-    case "InvalidStateError": return "Internal error.";
-    case "NotImplentedError": return "Not implemented.";
-    case "LoadError": return "Error while loading.";
-
-    case "ServerError":
-        switch ((err as $J.ServerError).errCode) {
-        case "GENERAL-ERROR": return "Error received from server.";
-        case "CONFIG-ERROR": return "Server configuration error.";
-        case "REQUEST-ERROR": return "Error in the request sent to the server.";
-        case "INTERNAL-ERROR": return "Internal error while communicating with server.";
-        case "SERVICE-DOWN": return "The application is unavailable at the moment. Please try again later.";
-        case "NO-ACCESS": return "You do not have access to the requested data.";
-        case "ACCESS-BLOCK": return "Access to the application is blocked.";
-        case "NO-DATA": return "Data not available or data is removed.";
-        }
-
-        return "Error " + (err as $J.ServerError).errCode + " received from server.";
-
-    case "AjaxError":
-        switch ((err as $J.AjaxError).errCode) {
-        case "HTTP-ERROR": return "Error http-" + (err as $J.AjaxError).httpStatus + " received from server.";
-
-        case "TIMEOUT":
-            if ((err as $J.AjaxError).callDefinition.method === "GET") {
-                return "Timeout while retrieving server data.";
-            }
-
-            return "A network failure occurred while communicating with the server." +
-                   "The order may have successfully processed, but the result has been lost.\n\n" +
-                   "Please confirm that your order has been processed correctly or not.";
-
-        default: return "Error while communicating with server.";
-        }
-
-    case "ConversionError": return "Conversion error.";
-    case "FormatError": return "Format error.";
-    case "ValidateError": return "Validation error.";
-    case "FormError": return "Error in form handeling";
-    default: return "Error: " + (err as Error).name;
-    }
-}
