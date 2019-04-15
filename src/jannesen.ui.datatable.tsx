@@ -14,16 +14,20 @@ export interface IDataTableOpts<TRec extends $JT.Record>
     rowClick?:      (rec:TRec)=>void;
     columns:        IDataTableOptsColumn<TRec>[];
     buttons?:       IDataTableOptsButton<TRec>[];
+    sort?:          (a:TRec, b:TRec) => number;
 }
 
 export interface IDataTableOptsColumn<TRec extends $JT.Record>
 {
     title?:         string;
-    data?:          $JT.RecordFieldNames<TRec> | ((rec: TRec, idx:number)=>$JD.AddNode);
+    data?:          $JT.RecordFieldNames<TRec> | ((rec: TRec)=>string);
+    dataExt?:       (rec: TRec)=>$JD.AddNode;
+    dataFilter?:    (rec: TRec)=>string;
     format?:        string;
     style?:         string;
     width?:         string|number;
 }
+
 export interface IDataTableOptsButton<TRec extends $JT.Record>
 {
     className:      string;
@@ -39,13 +43,21 @@ export interface IDataTableState
 {
     toprow:         number;
     selectedrow:    number|null;
+    filter_enabled: boolean;
+    filter_text:    string;
 }
 
+const enum DelayReason {
+    Scroll      = 1,
+    Filter      = 2
+}
 export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
 {
     private     _opts:          IDataTableOpts<TRecord>;
-    private     _recordset:     $JT.Set<TRecord>;
+    private     _recordset:     TRecord[];
     private     _container:     $JD.DOMHTMLElement;
+    private     _filter_input:  $JD.DOMHTMLElement;
+    private     _filter_btn:    $JD.DOMHTMLElement;
     private     _scrollbar:     Scrollbar;
     private     _table:         $JD.DOMHTMLElement;
     private     _body:          $JD.DOMHTMLElement;
@@ -55,13 +67,17 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
     private     _curTopRow:     number|undefined;
     private     _curCountRow:   number|undefined;
     private     _selectedRow:   number|null|undefined;
-    private     _filltimeout:   any;
+    private     _filter_text:   string;
+    private     _filter_sset:   string[]|undefined;
+    private     _filter_rset:   TRecord[];
+    private     _delay_reason?: DelayReason;
+    private     _delay_timeout: number|undefined;
     private     _mouseenabled:  boolean;
     private     _mousemovecnt:  number|null;
 
     public get  recordset()
     {
-        return this._recordset;
+        return this._filter_rset;
     }
     public get  height() {
         const h = this._height;
@@ -76,7 +92,9 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
         if (typeof this._scrollbar.Value === 'number' && typeof this._selectedRow === 'number') {
             return  {
                         toprow:         this._scrollbar.Value,
-                        selectedrow:    this._selectedRow
+                        selectedrow:    this._selectedRow,
+                        filter_enabled: this._container.hasClass('-filter-enabled'),
+                        filter_text:    this._filter_text
                     };
         }
     }
@@ -84,9 +102,11 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
     {
         if (s) {
             this._scrollbar.Value = s.toprow;
+            this._container.toggleClass('-filter-enabled', s.filter_enabled);
+            this._filter_input.prop('value', s.filter_text);
 
             if (this._rowHeight) {
-                this._fillBody();
+                this._filterset(true);
                 this._select(s.selectedrow, true);
             } else {
                 this._selectedRow = s.selectedrow;
@@ -94,12 +114,22 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
         }
     }
 
+    public get  records() : ReadonlyArray<TRecord>
+    {
+        return this._filter_rset;
+    }
+
     public      constructor(recordset:$JT.Set<TRecord>, opts: IDataTableOpts<TRecord>)
     {
-        this._recordset    = recordset;
+        this._recordset    = recordset.toArray();
+        if (typeof opts.sort === 'function') {
+            this._recordset.sort(opts.sort);
+        }
         this._opts         = opts;
         this._mouseenabled = false;
         this._mousemovecnt = null;
+        this._filter_text  = '';
+        this._filter_rset  = this._recordset;
 
         this._container =   <div class="jannesen-datatable" tabIndex="0" onkeydown={(ev) => {
                                         if (this._onkeydown(ev)) {
@@ -171,12 +201,12 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
                                                                 if (this._opts.buttons && (ev.target as HTMLElement).tagName === "SPAN") {
                                                                     let b = helper_getbutton(this._opts.buttons, ev.target);
                                                                     if (b && typeof b.onClick === 'function') {
-                                                                        b.onClick(this._recordset.item(idx));
+                                                                        b.onClick(this._filter_rset[idx]);
                                                                         return ;
                                                                     }
                                                                 }
                                                                 if (typeof this._opts.rowClick === "function") {
-                                                                    this._opts.rowClick(this._recordset.item(idx));
+                                                                    this._opts.rowClick(this._filter_rset[idx]);
                                                                 }
                                                             }
                                                         }}
@@ -193,19 +223,30 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
                             { this._body }
                         </table>;
 
-        this._container.appendChild(<div class="-table">{this._table}</div>);
 
-        this._scrollbar = new Scrollbar({ class: "-scroll-vertical" });
+        this._container.appendChild(<>
+                                        <div class="-table">{ this._table }</div>
+                                        <div class="-filter">
+                                            { this._filter_input = <input class="-input" type="text" maxLength={64} tabIndex={-1}
+                                                                          oninput={() => { this._delay(DelayReason.Filter); } }
+                                                                          onkeydown={(ev) => { ev.stopPropagation(); } }
+                                                                   /> }
+                                            <span class="-close"  onclick={() => this._filterenabled(false) } />
+                                        </div>
+                                        { this._filter_btn = <div class="-filter-btn" onclick={() => this._filterenabled(!this._container.hasClass("-filter-enabled")) } /> }
+                                        { this._scrollbar = new Scrollbar({ class: "-scroll-vertical" }) }
+                                    </>);
         this._scrollbar.minValue = 0;
         this._scrollbar.Value    = 0;
-        this._scrollbar.bind("changed", this._onscroll, this);
-        this._container.appendChild(this._scrollbar);
+        this._scrollbar.bind("changed", () => { this._delay(DelayReason.Scroll); });
         this._height        =
         this._rowHeight     =
         this._curTopRow     =
         this._curCountRow   =
         this._selectedRow   =
-        this._filltimeout   = undefined;
+        this._filter_sset   =
+        this._delay_reason  =
+        this._delay_timeout = undefined;
     }
 
     public get  container(): $JD.DOMHTMLElement
@@ -217,7 +258,6 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
     {
         if (this._height !== h) {
             this._container.css("height", this._height = h);
-            this._scrollbar.Size = h;
 
             let rowHeight:number;
 
@@ -234,25 +274,12 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
                 throw new $J.InvalidStateError("Can't determin row height.");
             }
 
-
             this._rowHeight  = rowHeight;
+            this._filter_btn.css('height', rowHeight);
+            this._scrollbar.container.css('top', rowHeight);
+            this._scrollbar.Size = h - rowHeight;
             this._visualRows = (this._height - (this._table.outerSize.height - this._body.outerSize.height)) / rowHeight;
-            const visualRows = Math.floor(this._visualRows);
-            this._scrollbar.maxValue = Math.max(0, this._recordset.count - visualRows);
-
-            if (typeof this._selectedRow === 'number') {
-                let v = this._scrollbar.Value;
-                if (typeof v === 'number' && v > this._selectedRow) {
-                    this._scrollbar.Value = v = this._selectedRow;
-                }
-
-                const m = Math.max(0, this._selectedRow - (visualRows - 1));
-                if (typeof v !== 'number' || v < m) {
-                    this._scrollbar.Value = m;
-                }
-            }
-
-            this._fillBody();
+            this._filterset(true);
         }
     }
     public      focus()
@@ -266,11 +293,13 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
 
     private     _onkeydown(ev:KeyboardEvent):boolean
     {
+        this._delay();
+
         if (!(ev.altKey || ev.ctrlKey || ev.metaKey)) {
             switch(ev.key) {
             case "Enter":
                 if (typeof this._selectedRow === 'number' && typeof this._opts.rowClick === "function") {
-                    this._opts.rowClick(this._recordset.item(this._selectedRow));
+                    this._opts.rowClick(this._filter_rset[this._selectedRow]);
                 }
                 return true;
 
@@ -299,7 +328,7 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
                 return true;
 
             case "End":
-                this._select(this._recordset.count - 1, true);
+                this._select(this._filter_rset.length - 1, true);
                 return true;
 
             case "Home":
@@ -334,11 +363,95 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
 
         return false;
     }
-    private     _onscroll(reason:$JT.ChangeReason)
-    {
-        this._delayedFill(100);
+    private     _filterenabled(e: boolean) {
+        this._delay();
+        this._container.toggleClass("-filter-enabled", e);
+        this._filterset(true);
     }
+    private     _filterset(force?:boolean) {
+        const enabled     = this._container.hasClass("-filter-enabled");
+        const filterText  = enabled? this._filter_input.prop('value').trim().toLowerCase() : '';
+        const filterArray = filterText !== '' ? filterText.split(' ') : null;
 
+        if (this._filter_text !== filterText || force) {
+            let new_rset = [] as TRecord[];
+
+            if (filterArray) {
+                if (!this._filter_sset) {
+                    this._filter_sset = this._recordset.map((rec, idx) => this._opts.columns.map((c) => {
+                                                                                let t:string|undefined;
+                                                                                if (typeof c.data === "string") {
+                                                                                    t = rec.field(c.data).toText(c.format);
+                                                                                }
+                                                                                else if (typeof c.data === "function") {
+                                                                                    t = c.data(rec);
+                                                                                }
+                                                                                else if (typeof c.dataFilter === 'function') {
+                                                                                    t = c.dataFilter(rec);
+                                                                                }
+
+                                                                                return (typeof t === 'string') ? t.toLowerCase() : '';
+                                                                            }).join(' '));
+                }
+
+                const toprec = typeof this._scrollbar.Value === 'number' ? this._filter_rset[this._scrollbar.Value] : undefined;
+                let toprow: number = 0;
+                let topfound:boolean = false;
+
+                for (let idx = 0 ; idx < this._recordset.length ; ++idx) {
+                    const rec = this._recordset[idx];
+                    if (rec === toprec) {
+                        topfound = true;
+                    }
+
+                    if (filterCompare(this._filter_sset[idx])) {
+                        if (topfound) {
+                            toprow = new_rset.length;
+                            topfound = false;
+                        }
+                        new_rset.push(rec);
+                    }
+                }
+
+                this._scrollbar.Value = toprow;
+            }
+            else {
+                new_rset = this._recordset;
+
+                if (typeof this._scrollbar.Value === 'number') {
+                    const toprow = new_rset.indexOf(this._filter_rset[this._scrollbar.Value]);
+                    this._scrollbar.Value = toprow >= 0 ? toprow : 0;
+                }
+            }
+
+            if (typeof this._selectedRow === 'number') {
+                const selectedrow = new_rset.indexOf(this._filter_rset[this._selectedRow]);
+                this._selectedRow = selectedrow >= 0 ? selectedrow : null;
+            }
+
+            this._filter_rset = new_rset;
+            this._filter_text = filterText;
+            this._curTopRow = undefined;
+            this._setScrollBar();
+            this._fillBody();
+        }
+
+        if (force && enabled) {
+            this._filter_input.attr("tabIndex", enabled ? 0 : -1);
+            this._filter_input.focus();
+        }
+
+        function filterCompare(s: string) {
+            if (filterArray !== null) {
+                for (let f of filterArray) {
+                    if (s.indexOf(f) < 0) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+    }
     private     _bottomVisibleRow(): number|undefined
     {
         if (typeof this._curTopRow === 'number' && typeof this._curCountRow === 'number') {
@@ -351,12 +464,11 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
             return bottomRow;
         }
     }
-
     private     _select(row:number|null, updateFill:boolean) {
         if (typeof row === 'number') {
-            if (this._recordset.count > 0) {
+            if (this._filter_rset.length > 0) {
                 if (row < 0)                        row = 0;
-                if (row >= this._recordset.count)   row = this._recordset.count - 1;
+                if (row >= this._filter_rset.length)   row = this._filter_rset.length - 1;
             }
             else
                 row = null;
@@ -403,13 +515,60 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
             this._setSelected(this._selectedRow = row);
         }
     }
-    private     _delayedFill(timeout:number)
+    private     _delay(reason?:DelayReason)
     {
-        if (this._filltimeout == null) {
-            this._filltimeout = $J.setTimeout(() => {
-                this._filltimeout = null;
-                this._fillBody();
-            }, timeout);
+        const self = this;
+
+        if (this._delay_reason !== reason) {
+            if (this._delay_reason) {
+                clearTimeout(this._delay_timeout)
+                this._delay_timeout = undefined;
+                exec();
+            }
+
+            if (reason) {
+                this._delay_reason = reason;
+                this._delay_timeout = $J.setTimeout(exec, 100);
+            }
+        }
+
+        function exec() 
+        {
+            const reason = self._delay_reason;
+            self._delay_reason = undefined;
+
+            switch (reason) {
+            case DelayReason.Scroll:
+                self._fillBody();
+                break;
+
+            case DelayReason.Filter:
+                self._filterset();
+                break;
+            }
+        }
+    }
+    private     _setScrollBar()
+    {
+        if (typeof this._visualRows === 'number') {
+            const visualRows = Math.floor(this._visualRows);
+            this._scrollbar.maxValue = Math.max(0, this._filter_rset.length - visualRows);
+
+            if (typeof this._scrollbar.Value === 'number' && this._scrollbar.Value > this._scrollbar.maxValue) {
+                this._scrollbar.Value = this._scrollbar.maxValue;
+            }
+
+            if (typeof this._selectedRow === 'number') {
+                let v = this._scrollbar.Value;
+                if (typeof v === 'number' && v > this._selectedRow) {
+                    this._scrollbar.Value = v = this._selectedRow;
+                }
+
+                const m = Math.max(0, this._selectedRow - (visualRows - 1));
+                if (typeof v !== 'number' || v < m) {
+                    this._scrollbar.Value = m;
+                }
+            }
         }
     }
     private     _fillBody()
@@ -418,7 +577,7 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
             const toprow     = this._scrollbar.Value;
 
             if (typeof toprow === 'number') {
-                const rowcount   = this._recordset.count;
+                const rowcount   = this._filter_rset.length;
                 const visualRows = Math.ceil(this._visualRows);
 
                 if (typeof this._curTopRow === 'number' && typeof this._curCountRow === 'number' &&
@@ -467,7 +626,8 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
             }
         }
     }
-    private     _setSelected(row:number|null|undefined)    {
+    private     _setSelected(row:number|null|undefined)
+    {
         if (typeof row === 'number') {
             if (typeof this._curTopRow === 'number') {
                 let idx = row - this._curTopRow;
@@ -482,13 +642,14 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
         let rows:$JD.DOMHTMLElement[] = [];
 
         while (n > 0) {
-            var rec = this._recordset.item(idx);
+            var rec = this._filter_rset[idx];
             var row = <tr/>;
 
             this._opts.columns.forEach((c, i) => row.appendChild(<td class={"-col" + i} style={c.style}>
                                                                 {
-                                                                      (typeof c.data === "string")   ? rec.field(c.data).toDom(c.format)
-                                                                    : (typeof c.data === "function") ? (c.data as (rec:$JT.Record, idx:number)=>$JD.AddNode)(rec, idx)
+                                                                      (typeof c.data    === "string")   ? rec.field(c.data).toDom(c.format)
+                                                                    : (typeof c.data    === "function") ? c.data(rec)
+                                                                    : (typeof c.dataExt === "function") ? c.dataExt(rec)
                                                                     : undefined
                                                                 }
                                                                 </td>));

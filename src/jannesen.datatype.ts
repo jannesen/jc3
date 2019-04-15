@@ -2542,14 +2542,6 @@ export class Set<TSet extends Record|SimpleType<any>> extends BaseType
     /**
      *!!DOC
      */
-    public get array():TSet[] {
-        var rtn:TSet[] = [];
-
-        this._items.forEach(v => rtn.push(v));
-
-        return rtn;
-    }
-
     public bind(eventName:"added",   handler:(ev:{ item:TSet, index: number})=>void, thisArg?:any): void;
     public bind(eventName:"removed", handler:(ev:{ item:TSet, index: number})=>void, thisArg?:any): void;
     public bind(eventName: string,   handler:(ev:any)                        =>void, thisArg?:any): void {
@@ -2709,6 +2701,13 @@ export class Set<TSet extends Record|SimpleType<any>> extends BaseType
      */
     public map<T>(callback: (item: TSet, index:number, set: TSet[]) => T, thisArg?:any):T[] {
         return this._items.map((value, index, items) => callback.call(thisArg, value, index, items));
+    }
+
+    /**
+     *!!DOC
+     */
+    public toArray():TSet[] {
+        return this._items.slice();
     }
 
     /**

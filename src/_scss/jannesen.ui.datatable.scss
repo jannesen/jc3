@@ -1,4 +1,9 @@
-﻿div.jannesen-datatable {
+﻿@keyframes jannesen-datatable-fade-btn {
+    0% { background-color: #f0f0f0; }
+  100% { background-color: #c8c8c8; }
+}
+
+div.jannesen-datatable {
     display:            block;
     position:           relative;
     overflow:           hidden;
@@ -12,6 +17,94 @@
         > table {
             box-sizing:     border-box;
             min-width:      100%;
+        }
+    }
+    >div.-filter {
+        display:            inline-block;
+        position:           absolute;
+        top:                0;
+        right:              20px;
+        z-index:            10;
+        margin:             0;
+        vertical-align:     top;
+        text-align:         left;
+        border:             .0833em solid #42455c;
+        padding:            .3333em;
+        box-sizing:         border-box;
+        background-color:   #eaeaea;
+        border-radius:      0px;
+        font-size:          12px;
+        overflow:           hidden;
+        transition:         border-color ease-in-out .2s, top ease-in-out .2s;
+
+
+        >.-input {
+            padding:            .1667em .25em;
+            margin:             0;
+            outline:            none;
+            width:              15em;
+            height:             1.667em;
+            box-sizing:         border-box;
+            vertical-align:     top;
+            text-align:         left;
+            border:             1px solid #cccccc;
+            color:              #000000;
+            background-color:   #ffffff;
+            font-family:        inherit;
+            font-size:          100%;
+            &:focus {
+                @include input-focus();
+            }
+        }
+        >.-close {
+            width:              1em;
+            height:             1em;
+            padding:            0 .1667em 0 .5em;
+            font-family:        FontAwesome;
+            font-weight:        normal;
+            font-style:         normal;
+            text-decoration:    none;
+            font-size:          1.5em;
+            color:              #9f9f9f;
+            transition:         color ease-in-out .2s;
+
+            &:before {
+                content:        $fa-icon-close;
+            }
+            &:hover {
+                color:          #000000;
+            }
+        }
+    }
+    &:not(.-filter-enabled) {
+        >div.-filter {
+            top:                -2.5em;
+        }
+    }
+    >div.-filter-btn {
+        position:       absolute;
+        display:        inline-block;
+        width:          16px;
+        top:            0;
+        right:          0;
+        padding:        0;
+        background:     #d8d8d8;
+        color:          #9f9f9f;
+        font-size:      1.333em;
+        transition:     color ease-in-out .2s;
+
+        &:before {
+            position:           absolute;
+            top:                0.0883em;
+            left:               0.1069em;
+            font-family:        FontAwesome;
+            font-weight:        normal;
+            font-style:         normal;
+            text-decoration:    none;
+            content:            $fa-icon-filter;
+        }
+        &:hover {
+            color:          #000000;
         }
     }
     >div.-scroll-vertical {
@@ -36,14 +129,11 @@ div.jannesen-scrollbar {
     display:            inline-block;
     background-color:   #f0f0f0;
     @include            user-select(none);
-//    width:              16px;
     cursor:             default;
 
     > div.-btn-up, > div.-btn-down {
         display:            inline-block;
         position:           absolute;
-//        width:              16px;
-//        height:             16px;
         padding:            0;
         &:before {
             padding-left:       5px;

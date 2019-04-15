@@ -58,7 +58,7 @@ export class UrlArgSet implements $JCONTENT.IUrlArgsSet
         this._curr = curr;
     }
 
-    public static   RecordsetMap<T extends $JT.Record>(recordset: $JT.Set<T>, currecord: T, mapper:(c:T)=>$J.IUrlArgsColl)
+    public static   RecordsetMap<T extends $JT.Record>(recordset: $JT.Set<T>|T[], currecord: T, mapper:(c:T)=>$J.IUrlArgsColl)
     {
         let set:$J.IUrlArgsColl[]  = [];
         let curr:number|null       = null;
@@ -607,7 +607,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
     protected abstract      dataTableOpts(): $JDATATABLE.IDataTableOpts<$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>>;
     protected               createUrlArgSet(rec:$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>, callback:(r:$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>) => $J.IUrlArgsColl)
     {
-        const resultdata = this.resultdata;
+        const resultdata = this._result && this._result.datatable && this._result.datatable.records;
         if (!resultdata) {
             throw new $J.InvalidStateError("Invalid state, not recordset.");
         }
