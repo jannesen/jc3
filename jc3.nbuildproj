@@ -13,8 +13,6 @@
   <Import Project="$(NBuildProjectBuild)NBuildProject.props" />
   <ItemGroup>
     <File Include="**\*" />
-  </ItemGroup>
-  <ItemGroup>
     <File Remove=".git\**" />
     <File Remove=".vs\**" />
     <File Remove="www\**" />
