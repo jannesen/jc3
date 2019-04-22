@@ -521,7 +521,7 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
 
         if (this._delay_reason !== reason) {
             if (this._delay_reason) {
-                clearTimeout(this._delay_timeout)
+                clearTimeout(this._delay_timeout);
                 this._delay_timeout = undefined;
                 exec();
             }
@@ -532,7 +532,7 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
             }
         }
 
-        function exec() 
+        function exec()
         {
             const reason = self._delay_reason;
             self._delay_reason = undefined;
