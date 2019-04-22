@@ -103,6 +103,10 @@ export const std_button_remove:IDialogButton       = { "class": "btn btn-remove"
 export const std_button_next:IDialogButton         = { "class": "btn btn-next",   "text": $JL.btn_next,       "value": "NEXT"     };
 export const std_button_prev:IDialogButton         = { "class": "btn btn-prev",   "text": $JL.btn_prev,       "value": "PREVIOUS" };
 
+
+const g_errorTranslators: ((err:Error)=>string|undefined)[] = [];
+
+
 //-------------------------------------------------------------------------------------------------
 /**
  * !!DOC
@@ -1607,6 +1611,46 @@ export function moveTracker(ev:UIEvent, initPos: $JD.IPosition, callback: (pos:$
     }
 }
 
+
+/**
+ * !!DOC
+ */
+export function registratedErrorTranslator(translator: (err:Error)=>string|undefined)
+{
+    if (g_errorTranslators.indexOf(translator) < 0) {
+        g_errorTranslators.splice(0, 0, translator);
+    }
+}
+
+/**
+ * !!DOC
+ */
+export function translateError(err: Error|Error[]): string
+{
+    if (err instanceof Error) {
+        for (let t of g_errorTranslators) {
+            try {
+                const r = t(err);
+                if (r) {
+                    return r;
+                }
+            }
+            catch (e) {
+                console.error("Error in error translator.", e);
+            }
+        }
+
+        return "UNKNOWN ERROR '" + (typeof err.name === 'string' ? err.name : "[UNDEFINED]") + "'.";
+    }
+
+    if (Array.isArray(err)) {
+        if (err.length > 0) {
+            return translateError(err[0]);
+        }
+    }
+
+    return "INTERNAL ERROR: INVALID ERROR ARGUMENT.";
+}
 /**
  * !!DOC
  */
@@ -1621,7 +1665,7 @@ export function errorToContent(err:string|Error|Error[]|$JD.DOMHTMLElement): $JD
     if (typeof err === "string") {
         msgbody.appendChild(<div class="-message">{ $JD.multilineStringToContent(err as string) }</div>);
     } else {
-        msgbody.appendChild(<div class="-message">{ $JD.multilineStringToContent(errorDescription(err)) } </div>);
+        msgbody.appendChild(<div class="-message">{ $JD.multilineStringToContent(translateError(err)) } </div>);
         let details = <div class="-details"><span class="-header">Fout details:</span></div>;
 
         errorObjToError(details, err);
@@ -1632,17 +1676,6 @@ export function errorToContent(err:string|Error|Error[]|$JD.DOMHTMLElement): $JD
 }
 
 //-------------------------------------------------------------------------------------------------
-function errorDescription(err:any):string {
-    if (Array.isArray(err) && err.length > 0) {
-        return errorDescription(err[0]);
-    }
-
-    if (err instanceof Error) {
-        return $JL.errorToText(err as Error);
-    }
-
-    return $JL.unknown_error;
-}
 function errorObjToError(body:$JD.DOMHTMLElement, err:any) {
     if (typeof err === "string") {
         body.appendChild(<div class="-error">{ err }</div>);
@@ -1806,6 +1839,9 @@ export function getContentBody(n:HTMLElement|null) {
 }
 
 $JD.window.bind("focusin", window_onfocusin);
+registratedErrorTranslator($JL.translateError)
+
+
 
 function nop()
 {
