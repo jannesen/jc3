@@ -296,12 +296,30 @@ div.jannesen-ui-content-error-message {
     > div.-details {
         margin:         1em 0 0 0em;
         font-size:      1em;
+        cursor:         default;
         color:          $jc-error-details-color;
+        > span.-expand {
+            display:    inline-block;
+            width:      1em;
+            color:      #000;
+        }
         > span.-header {
             border-bottom: 1px solid $jc-error-details-border-color;
         }
         div.-error {
-            margin:         0.5em 0 0 0.5em;
+            margin:         0.5em 0 0 1em;
+            display:        none;
+        }
+    }
+
+    &.-display-details {
+        > div.-details {
+            > span.-expand {
+                display:        none;
+            }
+            > div.-error {
+                display:        block;
+            }
         }
     }
 }
