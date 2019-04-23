@@ -279,43 +279,39 @@ export class Tooltip extends Popup
 {
     private     _bottom:        boolean;
     private     _right:         boolean;
-    private     _markerSize:    number;
-    private     _offsetX:       number;
+    private     _markerOuter:   $JD.DOMHTMLElement;
+    private     _markerInner:   $JD.DOMHTMLElement;
+    private     _markerSize!:   number;
+    private     _offsetX!:      number;
 
-                constructor(poselm: $JD.DOMHTMLElement, message:string)
+                constructor(parentelm: $JD.DOMHTMLElement, message:string)
     {
-        super(poselm,  "-tooltip");
+        super(parentelm,  "-tooltip");
 
-        const bottom = false;
-        const right  = poselm.css("text-align") === "right";
-
-
-        let markerSize = Math.round(bottom ? poselm.css("padding-bottom") + poselm.css("margin-bottom")
-                                           : poselm.css("padding-top")    + poselm.css("margin-top"));
-
-        if (markerSize < 5) {
-            this._offsetX = 4 - markerSize;
-            markerSize = 5;
-        } else {
-            this._offsetX = 0;
-        }
-
-        this._bottom     = bottom;
-        this._right      = right;
-        this._markerSize = markerSize;
+        this._bottom     = false;
+        this._right      = parentelm.css("text-align") === "right";
+        this._calcMarkerSize();
 
         this.Show([
-                    (<span class={bottom ? "-marker -top -outer" : "-marker -bottom -outer"} />).css("border-width", markerSize    ),
-                    (<span class={bottom ? "-marker -top -inner" : "-marker -bottom -inner"} />).css("border-width", markerSize - 1),
+                    ( this._markerOuter = <span class="-marker -outer" /> ),
+                    ( this._markerInner = <span class="-marker -inner" /> ),
                     <div class="-text">{ $JD.multilineStringToContent(message) }</div>
                   ]);
     }
 
     protected   PositionPopup(container:$JD.DOMHTMLElement, poselmOuterRect:$JD.IRect)
     {
-        let e:$JD.DOMHTMLElement|null;
-        let winSize       = $JD.window.size;
+        const winSize     = $JD.window.size;
         let posClientRect = { top: poselmOuterRect.top, left: poselmOuterRect.left, width: poselmOuterRect.width, height: poselmOuterRect.height };
+
+        if (!this._bottom && posClientRect.top - container.outerSize.height - this._offsetX < 0) {
+            this._bottom = true;
+            this._calcMarkerSize();
+        }
+
+        this._markerOuter.css("border-width", this._markerSize    );
+        this._markerInner.css("border-width", this._markerSize - 1);
+
         container.position = { top: 0, left: 0 };
         container.css("max-width", Math.max(winSize.width * 0.66, posClientRect.width));
 
@@ -330,8 +326,8 @@ export class Tooltip extends Popup
 
             if (markerRight < 4) markerRight = 4;
 
-            if (e = container.select("span.-marker.-outer")) e.css("right", markerRight    );
-            if (e = container.select("span.-marker.-inner")) e.css("right", markerRight + 1);
+            this._markerOuter.css("right", markerRight    );
+            this._markerInner.css("right", markerRight + 1);
         } else {
             let markerLeft = ((posClientRect.width > this._parentelm.css("font-size") * 2)
                                 ? this._parentelm.css("padding-left") + this._parentelm.css("font-size") / 3
@@ -344,8 +340,8 @@ export class Tooltip extends Popup
             }
 
             if (markerLeft < 4) markerLeft = 4;
-            if (e = container.select("span.-marker.-outer")) e.css("left", markerLeft    );
-            if (e = container.select("span.-marker.-inner")) e.css("left", markerLeft + 1);
+            this._markerOuter.css("left", markerLeft    );
+            this._markerInner.css("left", markerLeft + 1);
         }
 
         if (this._postionFixed) {
@@ -356,9 +352,30 @@ export class Tooltip extends Popup
             posClientRect.top  += view.pageYOffset;
         }
 
-        container.css("top", (this._bottom
-                                        ? (posClientRect.top + posClientRect.height - 1 + this._offsetX)
-                                        : (posClientRect.top - container.outerSize.height - this._offsetX)));
+        if (!this._bottom) {
+            container.css("top", posClientRect.top - container.outerSize.height - this._offsetX);
+            this._markerOuter.removeClass("-top").addClass("-bottom");
+            this._markerInner.removeClass("-top").addClass("-bottom");
+        }
+        else {
+            container.css("top", posClientRect.top + posClientRect.height - 1 + this._offsetX);
+            this._markerOuter.removeClass("-bottom").addClass("-top");
+            this._markerInner.removeClass("-bottom").addClass("-top");
+        }
+    }
+
+    private     _calcMarkerSize() {
+        const parentelm   = this._parentelm;
+        this._markerSize = Math.round(this._bottom ? parentelm.css("padding-bottom") + parentelm.css("margin-bottom")
+                                                 : parentelm.css("padding-top")    + parentelm.css("margin-top"));
+
+        if (this._markerSize < 5) {
+            this._offsetX    = 4 - this._markerSize;
+            this._markerSize = 5;
+        }
+        else {
+            this._offsetX    = 0;
+        }
     }
 }
 
