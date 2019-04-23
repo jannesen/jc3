@@ -2,50 +2,44 @@
 /// <language code="nl"/>
 import * as  $J from "jc3/jannesen";
 
-export function translateError(err: Error): string {
-    switch (err.name) {
-    case "MessageError":        return err.message;
-    case "InvalidStateError":   return "Interne fout.";
-    case "NotImplentedError":   return "Niet geïmplementeerd.";
-    case "LoadError":           return "Fout tijdens laden.";
+export const translateError = [
+    { errclass: "MessageError",         translator: (err:Error) => err.message },
+    { errclass: "InvalidStateError",    translator: "Interne fout." },
+    { errclass: "NotImplentedError",    translator: "Niet geïmplementeerd." },
+    { errclass: "LoadError",            translator: "Niet geïmplementeerd." },
+    { errclass: "ConversionError",      translator: "Conversie fout." },
+    { errclass: "FormatError",          translator: "Formaat fout." },
+    { errclass: "ValidateError",        translator: "Validatie fout." },
+    { errclass: "FormError",            translator: "Fout in form afhandeling." },
+    { errclass: $J.ServerError,         translator: (err:$J.ServerError) => {
+                                                       switch (err.errCode) {
+                                                       case "GENERAL-ERROR":   return "Fout ontvangen van server.";
+                                                       case "CONFIG-ERROR":    return "Server configuratie fout.";
+                                                       case "REQUEST-ERROR":   return "Fout in de 'request' welke naar de server is gestuurd.";
+                                                       case "INTERNAL-ERROR":  return "Interne fout tijdens verwerking.";
+                                                       case "SERVICE-DOWN":    return "De applicatie is niet beschikbaar op het moment. Probeer het later nog eens.";
+                                                       case "NO-ACCESS":       return "Je hebt geen toegang tot de gevraagde data.";
+                                                       case "ACCESS-BLOCK":    return "De toegang tot de applicantie is geblokkeerd.";
+                                                       case "NO-DATA":         return "Gegevens niet beschikbaar / verwijder.";
+                                                       }
+                                                       return "Fout " + err.errCode + " ontvangen van server.";
+                                                   } },
+    { errclass: $J.AjaxError,          translator: (err:$J.AjaxError) => {
+                                                       switch (err.errCode) {
+                                                       case "HTTP-ERROR":      return "Fout http-" + err.httpStatus + " ontvangen van server.";
+                                                       case "TIMEOUT":
+                                                           if (err.callDefinition.method === "GET") {
+                                                               return "Timeout tijdens ophalen data van server.";
+                                                           }
 
-    case "ServerError":
-        switch ((err as $J.ServerError).errCode) {
-        case "GENERAL-ERROR":   return "Fout ontvangen van server.";
-        case "CONFIG-ERROR":    return "Server configuratie fout.";
-        case "REQUEST-ERROR":   return "Fout in de 'request' welke naar de server is gestuurd.";
-        case "INTERNAL-ERROR":  return "Interne fout tijdens verwerking.";
-        case "SERVICE-DOWN":    return "De applicatie is niet beschikbaar op het moment. Probeer het later nog eens.";
-        case "NO-ACCESS":       return "Je hebt geen toegang tot de gevraagde data.";
-        case "ACCESS-BLOCK":    return "De toegang tot de applicantie is geblokkeerd.";
-        case "NO-DATA":         return "Gegevens niet beschikbaar / verwijder.";
-        }
+                                                           return "Er heeft een netwerkstoring plaats gevonden tijdens het communiceren met de server." +
+                                                                  "Het is mogelijk dat je opdracht goed is verwerkt, maar dat het resultaat verloren is gegaan.\n\n" +
+                                                                  "We verzoeken je te controleren of de opdracht goed is verwerkt.";
 
-        return "Fout " + (err as $J.ServerError).errCode + " ontvangen van server.";
-
-    case "AjaxError":
-        switch ((err as $J.AjaxError).errCode) {
-        case "HTTP-ERROR":      return "Error http-" + (err as $J.AjaxError).httpStatus + " ontvangen van server.";
-
-        case "TIMEOUT":
-            if ((err as $J.AjaxError).callDefinition.method === "GET") {
-                return "Timeout tijdens ophalen data van server.";
-            }
-
-            return "Er heeft een netwerkstoring plaats gevonden tijdens het communiceren met de server." +
-                   "Het is mogelijk dat je opdracht goed is verwerkt, maar dat het resultaat verloren is gegaan.\n\n" +
-                   "We verzoeken je te controleren of de opdracht goed is verwerkt.";
-
-        default: return "Fout tijdens communicatie met server.";
-        }
-
-    case "ConversionError":     return "Conversie fout.";
-    case "FormatError":         return "Formaat fout.";
-    case "ValidateError":       return "Validatie fout.";
-    case "FormError":           return "Fout in form afhandeling";
-    default:                    return "Error: " + (err as Error).name;
-    }
-}
+                                                       default: return "Fout tijdens communicatie met server.";
+                                                       }
+                                                   } }
+];
 
 export const btn_cancel                         = /*Cancel*/ "Annuleren";
 export const btn_ok                             = /*OK*/ "OK";

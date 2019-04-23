@@ -103,9 +103,27 @@ export const std_button_remove:IDialogButton       = { "class": "btn btn-remove"
 export const std_button_next:IDialogButton         = { "class": "btn btn-next",   "text": $JL.btn_next,       "value": "NEXT"     };
 export const std_button_prev:IDialogButton         = { "class": "btn btn-prev",   "text": $JL.btn_prev,       "value": "PREVIOUS" };
 
+/**
+ * !!DOC
+ */
+export type ErrorTranslateSet = (IErrorTranslate)[];
+export interface IErrorTranslate {
+    errclass:           string | IErrorConstructor<Error>;
+    translator:        string | ((err:any)=>string|undefined) | IErrorTranslatorRegExp | IErrorTranslatorRegExp[];
+    translateInner?:    boolean;
+}
+export interface IErrorConstructor<T extends Error>
+{
+    new(...args: any): T;
+    readonly prototype: T;
+}
+export interface IErrorTranslatorRegExp
+{
+    regex:      RegExp;
+    replace:    string | ((m:RegExpExecArray)=>string|undefined);
+}
 
-const g_errorTranslators: ((err:Error)=>string|undefined)[] = [];
-
+const g_errorTranslators: (((err:Error)=>string|undefined)  | ErrorTranslateSet)[] = [];
 
 //-------------------------------------------------------------------------------------------------
 /**
@@ -1615,7 +1633,7 @@ export function moveTracker(ev:UIEvent, initPos: $JD.IPosition, callback: (pos:$
 /**
  * !!DOC
  */
-export function registratedErrorTranslator(translator: (err:Error)=>string|undefined)
+export function registratedErrorTranslator(translator: ((err:Error)=>string|undefined) | ErrorTranslateSet)
 {
     if (g_errorTranslators.indexOf(translator) < 0) {
         g_errorTranslators.splice(0, 0, translator);
@@ -1625,22 +1643,10 @@ export function registratedErrorTranslator(translator: (err:Error)=>string|undef
 /**
  * !!DOC
  */
-export function translateError(err: Error|Error[]): string
+export function translateError(err: Error|Error[], innerError?:boolean): string
 {
     if (err instanceof Error) {
-        for (let t of g_errorTranslators) {
-            try {
-                const r = t(err);
-                if (r) {
-                    return r;
-                }
-            }
-            catch (e) {
-                console.error("Error in error translator.", e);
-            }
-        }
-
-        return "UNKNOWN ERROR '" + (typeof err.name === 'string' ? err.name : "[UNDEFINED]") + "'.";
+        return translateErrorError(err) || "ERROR: " +  (typeof err.name === 'string' ? err.name : "[UNDEFINED]");
     }
 
     if (Array.isArray(err)) {
@@ -1650,6 +1656,72 @@ export function translateError(err: Error|Error[]): string
     }
 
     return "INTERNAL ERROR: INVALID ERROR ARGUMENT.";
+}
+
+function translateErrorError(err: Error):string|undefined
+{
+    for (let translates of g_errorTranslators) {
+        try {
+            if (typeof translates === 'function') {
+                const r = translates(err);
+                if (r) {
+                    return r;
+                }
+            }
+            else if (Array.isArray(translates)) {
+                for (let translate of translates) {
+                    if ((typeof translate.errclass === 'string'   && translate.errclass === err.name) ||
+                        (typeof translate.errclass === 'function' && err instanceof translate.errclass)) {
+                        let rtn:string|undefined;
+                        if (typeof translate.translator === 'string') {
+                            rtn = translate.translator;
+                        }
+                        else if (typeof translate.translator === 'function') {
+                            rtn = translate.translator(err);
+                        }
+                        else if (Array.isArray(translate.translator)) {
+                            for (let translateregex of translate.translator) {
+                                rtn = translateErrorRegExp(err, translateregex);
+                                if (rtn) {
+                                    break;
+                                }
+                            }
+                        }
+                        else if (translate.translator instanceof Object) {
+                            rtn = translateErrorRegExp(err, translate.translator);
+                        }
+
+                        if (rtn) {
+                            if (translate.translateInner && err.innerError) {
+                                const ri = translateErrorError(err.innerError);
+                                if (ri) {
+                                    rtn += ' ' + ri;
+                                }
+                            }
+
+                            return rtn;
+                        }
+                    }
+                }
+            }
+        }
+        catch (e) {
+            console.error("Error in error translator.", e);
+        }
+    }
+}
+function translateErrorRegExp(err: Error, r: IErrorTranslatorRegExp)
+{
+    if (r.regex instanceof RegExp) {
+        if (r.regex.test(err.message)) {
+            if (typeof r.replace === 'string') {
+               return err.message.replace(r.regex, r.replace);
+            }
+            if (typeof r.replace === 'function') {
+                return r.replace(r.regex.exec(err.message)!);
+            }
+        }
+    }
 }
 /**
  * !!DOC
@@ -1839,7 +1911,7 @@ export function getContentBody(n:HTMLElement|null) {
 }
 
 $JD.window.bind("focusin", window_onfocusin);
-registratedErrorTranslator($JL.translateError)
+registratedErrorTranslator($JL.translateError);
 
 
 
