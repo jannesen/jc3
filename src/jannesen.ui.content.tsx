@@ -1738,7 +1738,7 @@ export function errorToContent(err:string|Error|Error[]|$JD.DOMHTMLElement): $JD
         msgbody.appendChild(<div class="-message">{ $JD.multilineStringToContent(err as string) }</div>);
     } else {
         msgbody.appendChild(<div class="-message">{ $JD.multilineStringToContent(translateError(err)) } </div>);
-        let details = <div class="-details" onclick={() => { msgbody.addClass("-display-details"); }} ><span class="-expand">+</span><span class="-header">Details:</span></div>;
+        let details = <div class="-details" onclick={() => { msgbody.addClass("-display-details"); }} ><span class="-expand">+</span><span class="-header">{ $JL.details }</span></div>;
 
         errorObjToError(details, err);
         msgbody.appendChild(details);

@@ -55,6 +55,7 @@ export const dayNamesShort                      = ["zon", "maa", "din", "woe", "
 export const dayNamesMin                        = ["zo", "ma", "di", "wo", "do", "vr", "za"];
 export const deletemessage_title                = /*Are you sure?*/ "Weet je het zeker?";
 export const deletemessage_message              = /*Are you sure you want to delete this?*/ "Weet je zeker dat je dit wilt verwijderen?";
+export const details                            = /*Details:*/ "Details:";
 export const errormessage_title                 = /*ERROR*/ "FOUT";
 export const incorrect_integer_value            = (s: string): string => "Foutief gehele getal " + s + ".";
 export const incorrect_boolean_value            = (s: string): string => "Foutieve boolean waarde " + s + ".";

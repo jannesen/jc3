@@ -55,6 +55,7 @@ export const dayNamesShort                      = ["su", "ma", "ti", "ke", "to",
 export const dayNamesMin                        = ["su", "ma", "ti", "ke", "to", "pe", "la"];
 export const deletemessage_title                = /*Are you sure?*/ "Oletko varma?";
 export const deletemessage_message              = /*Are you sure you want to delete this?*/ "Oletko varma että haluat poistaa tämän?";
+export const details                            = /*Details:*/ "Yksityiskohdat:";
 export const errormessage_title                 = /*ERROR*/ "VIRHE";
 export const incorrect_integer_value            = (s: string): string => "Virheellinen kokonaisluku " + s + ".";
 export const incorrect_boolean_value            = (s: string): string => "Väärä booliarvo " + s + ".";

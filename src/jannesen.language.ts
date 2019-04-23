@@ -54,6 +54,7 @@ export const dayNamesShort                      = ["sun", "mon", "tue", "wed", "
 export const dayNamesMin                        = ["su", "mo", "tu", "we", "th", "fr", "sa"];
 export const deletemessage_title                = "Are you sure?";
 export const deletemessage_message              = "Are you sure you want to delete this?";
+export const details                            = "Details:";
 export const errormessage_title                 = "ERROR";
 export const incorrect_integer_value            = (s: string) : string => "Incorrect integer value " + s + ".";
 export const incorrect_boolean_value            = (s: string) : string => "Incorrect boolean value " + s + ".";

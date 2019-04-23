@@ -55,6 +55,7 @@ export const dayNamesShort                      = [ "so", "mo", "di", "mi", "do"
 export const dayNamesMin                        = [ "so", "mo", "di", "mi", "do", "fr", "sa" ];
 export const deletemessage_title                = /*Are you sure?*/ "Bist du sicher?";
 export const deletemessage_message              = /*Are you sure you want to delete this?*/ "Möchten Sie das wirklich löschen?";
+export const details                            = /*Details:*/ "Einzelheiten:";
 export const errormessage_title                 = /*ERROR*/ "ERROR";
 export const incorrect_integer_value            = (s: string): string => "Falscher ganzzahliger Wert " + s + ".";
 export const incorrect_boolean_value            = (s: string): string => "Falscher boolescher Wert " + s + ".";
