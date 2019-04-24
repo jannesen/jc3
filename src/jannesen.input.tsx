@@ -1291,7 +1291,22 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
     protected       openDropdown() {
         this.focus();
         if (this._value) {
-            if ((this._value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) === 0 || (this._value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0) {
+            if ((this._value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) !== 0) {
+                const text = (this.getinputelm().prop("value") as string).trim();
+
+                if (text.length > 0) {
+                    this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown",
+                                     "-select",
+                                     true,
+                                     this._opts.before_dropdown,
+                                     (content) => {
+                                        content.Refresh(text);
+                                    });
+                    return;
+                }
+            }
+
+            if ((this._value.Datasource.flags & ($JT.SelectDatasourceFlags.StaticEnum|$JT.SelectDatasourceFlags.SearchAll)) !== 0) {
                 this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown",
                                  "-select",
                                  true,
