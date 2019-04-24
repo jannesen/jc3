@@ -89,6 +89,28 @@ export interface ICallArgs //!!TODO
     [key: string]: string|number|boolean|Object;
 }
 
+/**
+ * !!DOC
+ */
+export type ErrorTranslateSet = (IErrorTranslate)[];
+export interface IErrorTranslate {
+    errclass:           string | IErrorConstructor<Error>;
+    translator:         string | ((err:any)=>string|undefined) | IErrorTranslatorRegExp | IErrorTranslatorRegExp[];
+    translateInner?:    boolean;
+}
+export interface IErrorConstructor<T extends Error>
+{
+    new(...args: any): T;
+    readonly prototype: T;
+}
+export interface IErrorTranslatorRegExp
+{
+    regex:      RegExp;
+    replace:    string | ((m:RegExpExecArray)=>string|undefined);
+}
+
+const g_errorTranslators: (((err:Error)=>string|undefined)  | ErrorTranslateSet)[] = [];
+
 //=============================================== Error Classes ===================================
 /**
  *!!DOC
@@ -737,6 +759,101 @@ export function setTimeout(handler: ()=>void, delay:number, thisArg?:any) {
  */
 export function setInterval(handler: ()=>void, timeout: number, thisArg?: any) {
     return window.setInterval(eventWrapper("interval", handler, thisArg), timeout);
+}
+
+//=============================================== global ==========================================
+/**
+ * !!DOC
+ */
+export function registratedErrorTranslator(translator: ((err:Error)=>string|undefined) | ErrorTranslateSet)
+{
+    if (g_errorTranslators.indexOf(translator) < 0) {
+        g_errorTranslators.splice(0, 0, translator);
+    }
+}
+
+/**
+ * !!DOC
+ */
+export function translateError(err: Error|Error[], innerError?:boolean): string
+{
+    if (err instanceof Error) {
+        return translateErrorError(err) || "ERROR: " +  (typeof err.name === 'string' ? err.name : "[UNDEFINED]");
+    }
+
+    if (Array.isArray(err)) {
+        if (err.length > 0) {
+            return translateError(err[0]);
+        }
+    }
+
+    return "INTERNAL ERROR: INVALID ERROR ARGUMENT.";
+}
+
+function translateErrorError(err: Error):string|undefined
+{
+    for (let translates of g_errorTranslators) {
+        try {
+            if (typeof translates === 'function') {
+                const r = translates(err);
+                if (r) {
+                    return r;
+                }
+            }
+            else if (Array.isArray(translates)) {
+                for (let translate of translates) {
+                    if ((typeof translate.errclass === 'string'   && translate.errclass === err.name) ||
+                        (typeof translate.errclass === 'function' && err instanceof translate.errclass)) {
+                        let rtn:string|undefined;
+                        if (typeof translate.translator === 'string') {
+                            rtn = translate.translator;
+                        }
+                        else if (typeof translate.translator === 'function') {
+                            rtn = translate.translator(err);
+                        }
+                        else if (Array.isArray(translate.translator)) {
+                            for (let translateregex of translate.translator) {
+                                rtn = translateErrorRegExp(err, translateregex);
+                                if (rtn) {
+                                    break;
+                                }
+                            }
+                        }
+                        else if (translate.translator instanceof Object) {
+                            rtn = translateErrorRegExp(err, translate.translator);
+                        }
+
+                        if (rtn) {
+                            if (translate.translateInner && err.innerError) {
+                                const ri = translateErrorError(err.innerError);
+                                if (ri) {
+                                    rtn += ' ' + ri;
+                                }
+                            }
+
+                            return rtn;
+                        }
+                    }
+                }
+            }
+        }
+        catch (e) {
+            console.error("Error in error translator.", e);
+        }
+    }
+}
+function translateErrorRegExp(err: Error, r: IErrorTranslatorRegExp)
+{
+    if (r.regex instanceof RegExp) {
+        if (r.regex.test(err.message)) {
+            if (typeof r.replace === 'string') {
+               return err.message.replace(r.regex, r.replace);
+            }
+            if (typeof r.replace === 'function') {
+                return r.replace(r.regex.exec(err.message)!);
+            }
+        }
+    }
 }
 
 //=============================================== global ==========================================
