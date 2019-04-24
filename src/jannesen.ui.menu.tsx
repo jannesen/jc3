@@ -262,17 +262,19 @@ class Menu extends $JUP.Popup
         this._parent = parent;
 
         if (datasourceresult instanceof $JA.Task) {
-            this.Show(<div class="-loading" />, false);
-            // !!TODO loading async
+            this.ShowLoading();
+
+            datasourceresult.then((data) => {
+                                      this._showMenu(data);
+                                  },
+                                  (err) => {
+                                      this.showError(err);
+                                  });
         } else {
-            this.Show(<div class="-items">{ this._menuitems = optimizeMenuItem(datasourceresult) }</div>, true);
+            this._showMenu(datasourceresult);
         }
 
-        const container = this._container!;
-        container.data('menu', this);
-        container.bind("click",     this._onClick,     this);
-        container.bind('mouseover', this._onMouseOver, this);
-        container.bind('mousedown', (ev: any) => ev.preventDefault());
+        this._container!.data('menu', this);
         this._selected = null;
     }
 
@@ -341,6 +343,21 @@ class Menu extends $JUP.Popup
         return false;
     }
 
+    private     _showMenu(data: IMenuItem[])
+    {
+        const container = this._container;
+        if (container) {
+            if (data.length > 0) {
+                this.Show(<div class="-items">{ this._menuitems = optimizeMenuItem(data) }</div>, true);
+                container.bind("click",     this._onClick,     this);
+                container.bind('mouseover', this._onMouseOver, this);
+                container.bind('mousedown', (ev: any) => ev.preventDefault());
+            }
+            else {
+                this.showError("No data.");
+            }
+        }
+    }
     private     _selectItem(item: MenuEntry|null, openMenu:boolean)
     {
         if (this._selected !== item && this._selected) {

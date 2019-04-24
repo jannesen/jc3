@@ -43,17 +43,14 @@ div.jannesen-ui-menu.-popup {
     border:         1px solid $jc-menu-border-color;
     transition:     width ease-in-out $jc-main-transition-time;
     overflow:       hidden;
-    font-size:      1.2em;
     box-shadow:     2px 2px 2px rgba(0, 0, 0, 0.3);
 
     &.-first-menu {
         transition:     width ease-in-out $jc-main-transition-time;
     }
 
-    > div.-loading {
-    }
-
     > div.-items {
+        font-size:      1.2em;
         > div.-item {
             cursor:             pointer;
             height:             2em;

@@ -51,11 +51,12 @@ interface ICssPosition
 
 export abstract class Popup
 {
-    protected   _parentelm:         $JD.DOMHTMLElement;
-    protected   _container:         $JD.DOMHTMLElement|null;
-    protected   _postionFixed:      boolean;
-    protected   _poselmOuterRect:   $JD.IRect|undefined;
-    private     _eventCollection:   $J.EventCollection;
+    protected   _parentelm:             $JD.DOMHTMLElement;
+    protected   _container:             $JD.DOMHTMLElement|null;
+    protected   _postionFixed:          boolean;
+    protected   _poselmOuterRect:       $JD.IRect|undefined;
+    private     _eventCollection:       $J.EventCollection;
+    private     _transitionProperty:    string|undefined;
 
     public get  parentelm()
     {
@@ -100,17 +101,12 @@ export abstract class Popup
         this._eventCollection.unbindAll();
 
         if (container) {
-            let transition = container.css([ "transition-duration", "transition-property" ]);
-
-            if (typeof transition["transition-duration"] === 'string' && transition["transition-duration"] !== "0s" &&
-                (transition["transition-property"] === "height" || transition["transition-property"] === "width")) {
-                const transitionproperty = transition["transition-property"] as string;
-                container.css(transitionproperty, container.css(transitionproperty));
+            if (this._transitionProperty) {
                 container.bind("transitionend", removed);
                 timeout = setTimeout(removed, 1000);
                 setTimeout(() => {
                         if (container) {
-                            container.css(transitionproperty, 0);
+                            container.css(this._transitionProperty!, 0);
                         }
                     }, 0);
             } else {
@@ -130,7 +126,7 @@ export abstract class Popup
         }
     }
 
-    protected   Show(content: $JD.AddNode, starttransition?: boolean) {
+    protected   Show(content: $JD.AddNode, starttransition?: boolean, extclass?:string) {
         if (!this._container) {
             throw new $J.InvalidStateError("Popup already removed.");
         }
@@ -155,26 +151,36 @@ export abstract class Popup
                 if (e === $JD.body)
                     break;
             }
-
-            if (starttransition) {
-                let transition = this._container.css([ "transition-duration", "transition-property" ]);
-
-                if (typeof transition["transition-duration"] === 'string' && transition["transition-duration"] !== "0s" &&
-                    (transition["transition-property"] === "height" || transition["transition-property"] === "width")) {
-                    const transitionproperty = transition["transition-property"] as string;
-                    const container = this._container;
-
-                    if (content instanceof $JD.DOMHTMLElement) {
-                        content.css(transitionproperty, Math.ceil(content.css(transitionproperty) as number));
-                    }
-
-                    const value = Math.ceil(container.css(transitionproperty) as number);
-                    container.css(transitionproperty, 4);
-                    setTimeout(() => { container.css(transitionproperty, value); }, 0);
-                }
-            }
         } else {
             this._container.empty().appendChild(content);
+        }
+
+        this._container.removeClass("-loading").removeClass("-error");
+        if (extclass) {
+            this._container.addClass(extclass);
+        }
+
+        if (starttransition) {
+            let transition = this._container.css([ "transition-duration", "transition-property" ]);
+
+            if (typeof transition["transition-duration"] === 'string' && transition["transition-duration"] !== "0s" &&
+                (transition["transition-property"] === "height" || transition["transition-property"] === "width")) {
+                const transitionproperty = transition["transition-property"] as string;
+                const container = this._container;
+
+                if (content instanceof $JD.DOMHTMLElement) {
+                    content.css(transitionproperty, Math.ceil(content.css(transitionproperty) as number));
+                }
+
+                const value = Math.ceil(container.css(transitionproperty) as number);
+                container.css(transitionproperty, 4);
+                container.css("transition-duration", 0);
+                this._transitionProperty = transitionproperty;
+                setTimeout(() => {
+                                container.css("transition-duration", undefined);
+                                container.css(transitionproperty, value);
+                            }, 0);
+            }
         }
 
         try {
@@ -186,6 +192,23 @@ export abstract class Popup
         }
 
         this._container.css("visibility", undefined);
+    }
+    protected   ShowLoading()
+    {
+        if (this._container) {
+            this.Show(<div>loading . . .</div>, false, "-loading");
+        }
+    }
+    protected   showError(err:Error|string)
+    {
+        const container = this._container;
+        if (container) {
+            if (err instanceof Error) {
+                err = $J.translateError(err);
+            }
+
+            this.Show(<div>{ $JD.multilineStringToContent(err) }</div>, true, "-error");
+        }
     }
     protected   PositionPopup(container:$JD.DOMHTMLElement, poselmOuterRect:$JD.IRect, flags?: PositionFlags): void {
         if (flags === undefined) {
