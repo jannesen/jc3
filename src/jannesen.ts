@@ -827,7 +827,7 @@ function translateErrorError(err: Error):string|undefined
                             if (translate.translateInner && err.innerError) {
                                 const ri = translateErrorError(err.innerError);
                                 if (ri) {
-                                    rtn += ' ' + ri;
+                                    rtn += '\n' + ri;
                                 }
                             }
 

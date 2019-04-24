@@ -1538,7 +1538,7 @@ export function setLocationHash(hash:string, replace?:boolean)
 /**
  * !!DOC
  */
-export function multilineStringToContent(s:string|string[]|null): AddNode
+export function multilineStringToContent(s:string|string[]|null)
 {
     let lines:string[];
 
@@ -1553,7 +1553,7 @@ export function multilineStringToContent(s:string|string[]|null): AddNode
     }
 
     if (lines.length > 1) {
-        let rtn: AddNode[] = [];
+        let rtn: (DOMText|DOMHTMLElement)[] = [];
 
         for (let i = 0 ; i < lines.length ; ++i) {
             if (i > 0)              rtn.push(createElement("br"));
