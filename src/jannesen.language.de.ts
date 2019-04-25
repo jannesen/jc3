@@ -40,6 +40,7 @@ export const translateError = [
                                                        }
                                                    } }
 ];
+$J.registratedErrorTranslator(translateError);
 
 export const btn_cancel                         = /*Cancel*/ "Stornieren";
 export const btn_ok                             = /*OK*/ "OK";

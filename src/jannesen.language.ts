@@ -39,6 +39,7 @@ export const translateError = [
                                                        }
                                                    } }
 ];
+$J.registratedErrorTranslator(translateError);
 
 export const btn_cancel                         = "Cancel";
 export const btn_ok                             = "OK";

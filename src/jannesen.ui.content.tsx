@@ -1013,7 +1013,7 @@ export class DialogLoader<TArgs, TRtn> extends ContentLoader<DialogBase<TArgs, T
 
         return DialogFlags.Window;
     }
-    public            _centerDialog() {
+    public              _centerDialog() {
         let winSize = $JD.window.size;
         let pos:$JD.IPosition|undefined;
 
@@ -1048,7 +1048,7 @@ export class DialogLoader<TArgs, TRtn> extends ContentLoader<DialogBase<TArgs, T
             this._contentBody._layoutDialog(pos);
         }
     }
-    public             _resizeFullScreen()
+    public              _resizeFullScreen()
     {
         let winSize = $JD.window.size;
         this._container.css({ position: "fixed", top: 0, left: 0, width: winSize.width, height: winSize.height });
@@ -1795,7 +1795,6 @@ export function getContentBody(n:HTMLElement|null) {
 }
 
 $JD.window.bind("focusin", window_onfocusin);
-$J.registratedErrorTranslator($JL.translateError);
 
 function nop()
 {
