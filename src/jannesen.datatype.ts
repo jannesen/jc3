@@ -695,7 +695,7 @@ export abstract class SimpleType<TNative> extends BaseType
     /**
      *!!DOC
      */
-    public setValue(value:TNative|null|undefined, reason:ChangeReason): void {
+    public setValue(value:TNative|null|undefined, reason:ChangeReason=ChangeReason.Assign): void {
         if (value === undefined) {
             value = null;
         }
@@ -1938,7 +1938,10 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
         this.setValue(vjson as (TNative|TDatasource_Record<TDatasource>|null|undefined), ChangeReason.Parse);
     }
 
-    public  setValue(value:TNative|TDatasource_Record<TDatasource>|null|undefined, reason:ChangeReason): void {
+    /**
+     *!!DOC
+     */
+    public  setValue(value:TNative|TDatasource_Record<TDatasource>|null|undefined|this, reason:ChangeReason = ChangeReason.Assign): void {
         if (value instanceof Object) {
             const datasource = this.Datasource;
 
@@ -1946,14 +1949,28 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
                 throw new $J.InvalidStateError("SelectType.setValue object-value only allowed with remote datasource.");
             }
 
-            const key        = (value as any)[datasource.keyfieldname] as TNative;
+            const thisType = Object.getPrototypeOf(this).constructor;
 
-            if (typeof key !== Object.getPrototypeOf(this).constructor.NativeType) {
-                throw new $J.InvalidStateError("SelectType.setValue invalid object-value, key-type= '" + (typeof value) + "' expect '" + Object.getPrototypeOf(this).constructor.NativeType + "'.");
+            if (value instanceof thisType) {
+                const setvalue = (value as this)
+                if (datasource !== setvalue.Datasource) {
+                    throw new $J.InvalidStateError("SelectType.setValue value has invalid datasource.");
+                }
+
+                value = setvalue.value;
+                this._record = setvalue._record;
             }
+            else
+            {
+                const key = (value as any)[datasource.keyfieldname] as TNative;
 
-            this._record = value as any;
-            value = key;
+                if (typeof key !== thisType.NativeType) {
+                    throw new $J.InvalidStateError("SelectType.setValue invalid object-value, key-type= '" + (typeof value) + "' expect '" + Object.getPrototypeOf(this).constructor.NativeType + "'.");
+                }
+
+                this._record = value as any;
+                value = key;
+            }
         }
 
         super.setValue(value, reason);
