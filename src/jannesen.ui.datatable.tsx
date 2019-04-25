@@ -254,33 +254,17 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
         return this._container;
     }
 
-    public      setHeight(h:number)
+    public      setHeight(height:number)
     {
-        if (this._height !== h) {
-            this._container.css("height", this._height = h);
-
-            let rowHeight:number;
-
-            if (this._body.childNodesLength > 0) {
-                rowHeight = this._body.children[0].outerSize.height;
-            }
-            else {
-                this._body.appendChild(<tr><td>x</td></tr>);
-                rowHeight = this._body.children[0].outerSize.height;
-                this._body.empty();
-            }
-
-            if (rowHeight <= 0) {
-                throw new $J.InvalidStateError("Can't determin row height.");
-            }
-
-            this._rowHeight  = rowHeight;
-            this._filter_btn.css('height', rowHeight);
-            this._scrollbar.container.css('top', rowHeight);
-            this._scrollbar.Size = h - rowHeight;
-            this._visualRows = (this._height - (this._table.outerSize.height - this._body.outerSize.height)) / rowHeight;
-            this._filterset(true);
+        this._setHeight(height, this._getRowHeight());
+    }
+    public      setVisibleRows(n: number) {
+        if (n > this._recordset.length) {
+            n = this._recordset.length;
         }
+        const rowheight = this._getRowHeight();
+
+        this._setHeight(this._table.select('thead')!.css('height') + rowheight * n, rowheight);
     }
     public      focus()
     {
@@ -673,6 +657,35 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
         }
 
         return rows;
+    }
+    private     _setHeight(height:number,rowHeight:number) {
+        if (this._height !== height) {
+            this._container.css("height", this._height = height);
+            this._rowHeight  = rowHeight;
+            this._filter_btn.css('height', rowHeight);
+            this._scrollbar.container.css('top', rowHeight);
+            this._scrollbar.Size = height - rowHeight;
+            this._visualRows = (this._height - (this._table.outerSize.height - this._body.outerSize.height)) / rowHeight;
+            this._filterset(true);
+        }
+    }
+    private     _getRowHeight() {
+        let rowHeight:number;
+
+        if (this._body.childNodesLength > 0) {
+            rowHeight = this._body.children[0].outerSize.height;
+        }
+        else {
+            this._body.appendChild(<tr><td>x</td></tr>);
+            rowHeight = this._body.children[0].outerSize.height;
+            this._body.empty();
+        }
+
+        if (rowHeight <= 0) {
+            throw new $J.InvalidStateError("Can't determin row height.");
+        }
+
+        return rowHeight;
     }
 }
 
