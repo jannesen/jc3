@@ -1952,7 +1952,7 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
             const thisType = Object.getPrototypeOf(this).constructor;
 
             if (value instanceof thisType) {
-                const setvalue = (value as this)
+                const setvalue = (value as this);
                 if (datasource !== setvalue.Datasource) {
                     throw new $J.InvalidStateError("SelectType.setValue value has invalid datasource.");
                 }
