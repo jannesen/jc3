@@ -1250,6 +1250,7 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn>
         this.content.appendChild((header ? <div class="-header -dialog-move-target">{ header }</div> : null),
                                  (body   ? <div class="-body"                      >{ body   }</div> : null),
                                  (footer ? <div class="-footer"                    >{ footer }</div> : null));
+        this.formFormat();
     }
 
     protected           formTitle(): string|null
@@ -1300,6 +1301,9 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn>
     protected           formFooterButtons(): IDialogButton[]|null
     {
         return null;
+    }
+    protected           formFormat()
+    {
     }
 }
 

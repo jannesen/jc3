@@ -67,7 +67,11 @@ div.jannesen-ui-content {
     }
 
     > div.-loading {
-        display:            none;
+//        display:            none;
+        visibility:     hidden;
+        height:         0;
+        width:          0;
+        overflow:       hidden;
     }
 
     &.-loading,&.-execute {
