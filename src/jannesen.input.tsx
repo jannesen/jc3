@@ -452,21 +452,12 @@ export abstract class InputTextDropdownControl<TNativeValue,
         super.control_destroy();
     }
 
-    public                  getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>, className:string, focus:boolean, beforedropdown?: (ctl:this)=>any, onready?:(content:TDropdown)=>void):void {
-        if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass)) {
+    public                  getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>, className:string, focus:boolean, context?: $J.ICallArgs|false, onready?:(content:TDropdown)=>void):void {
+        if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass && $J.isEqual(this._activeDropdown.Context, context))) {
             this.closeDropdown(false);
 
-            let context:any = undefined;
-
-            if (typeof beforedropdown === "function") {
-                try {
-                    context = beforedropdown(this);
-                } catch(err) {
-                    return;
-                }
-
-                if (context === false)
-                    return;
+            if (!(context === undefined || context instanceof Object)) {
+                return;
             }
 
             this._activeDropdown  = new $JPOPUP.DropdownPopup(this as any /* Typing is ok */, dropdownClass, className, context);
@@ -1204,7 +1195,7 @@ export interface ISelectInputControlOptions<TNativeValue extends $JT.SelectValue
     filter?:                    (rec:$JT.TDatasource_Record<TDatasource>)=>(boolean|null|undefined);
     sort?:                      (rec1:$JT.TDatasource_Record<TDatasource>,rec2:$JT.TDatasource_Record<TDatasource>)=>number;
     fetchmax?:                  number;
-    before_dropdown?:           (ctl:SelectInput<TNativeValue,TDatasource>)=>$J.ICallArgs|boolean;
+    before_dropdown?:           (ctl:SelectInput<TNativeValue,TDatasource>)=>$J.ICallArgs|false;
     simpleDropdown?:            boolean;
     simpleNulltext?:            string;
     dropdown_height?:           number;
@@ -1217,14 +1208,16 @@ export interface ISelectInputControlOptions<TNativeValue extends $JT.SelectValue
 export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>> extends InputTextDropdownControl<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, SelectInput<TNativeValue,TDatasource>, ISelectInputControlOptions<TNativeValue,TDatasource>, $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>
 {
     private     _activelookup:      $JA.Task<any>|undefined;
-    private     _inputTimer:        any;
+    private     _dropdownContext:   $J.ICallArgs|false|undefined;
+    private     _inputTimer:        number|undefined;
 
                     constructor(value:$JT.SelectType<TNativeValue,TDatasource>, opts:ISelectInputControlOptions<TNativeValue,TDatasource>) {
         super(value, "text", "-select", opts, (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) === 0 || (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0);
         this.getinputelm().bind("paste",   this.input_textchange, this);
         this.getinputelm().bind("cut",     this.input_textchange, this);
-        this._activelookup = undefined;
-        this._inputTimer   = undefined;
+        this._activelookup    = undefined;
+        this._dropdownContext = undefined;
+        this._inputTimer      = undefined;
     }
 
     public          valueChanged(reason:$JT.ChangeReason): void {
@@ -1268,7 +1261,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
     }
 
     public          parseInput(validate:boolean): void {
-        if (this._text !== this._input.prop("value")) {
+        if (this._text !== this._input.prop("value") || (validate && !$J.isEqual(this._dropdownContext, this._getContext()))) {
             throw new $J.FormatError($JL.input_incomplete);
         }
     }
@@ -1298,7 +1291,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
                     this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown",
                                      "-select",
                                      true,
-                                     this._opts.before_dropdown,
+                                     this._dropdownContext = this._getContext(),
                                      (content) => {
                                         content.Refresh(text);
                                     });
@@ -1310,7 +1303,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
                 this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown",
                                  "-select",
                                  true,
-                                 this._opts.before_dropdown,
+                                 this._dropdownContext = this._getContext(),
                                  (content) => {
                                     content.Refresh("");
                                 });
@@ -1406,12 +1399,23 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
                 this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown",
                                  "-select",
                                  focus,
-                                 this._opts.before_dropdown,
+                                 this._dropdownContext = this._getContext(),
                                  (content) => {
                                     content.Refresh(text);
                                 });
             }
         }
+    }
+    private         _getContext()
+    {
+        if (typeof this._opts.before_dropdown === "function") {
+            try {
+                return this._opts.before_dropdown(this);
+            } catch(err) {
+                return false;
+            }
+        }
+        return undefined;
     }
     private         _inputTimerStop()
     {

@@ -412,12 +412,17 @@ export class DropdownPopup<TNativeValue,
     /* @internal */     _popupcontainer:    $JD.DOMHTMLElement;
     /* @internal */     _input:             TInput|null;
     private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>;
+    private             _context:           $J.ICallArgs|undefined;
     private             _content:           TDropdown|undefined;
     private             _onreadyHandler:    ((content:TDropdown)=>void)|undefined;
 
     public get          DropdownClass()
     {
         return this._dropdownClass;
+    }
+    public get          Context()
+    {
+        return this._context;
     }
     public get          Content()
     {
@@ -430,10 +435,8 @@ export class DropdownPopup<TNativeValue,
         this.Show(this._popupcontainer = <div class="-popup"/>);
         this._input          = input;
         this._dropdownClass  = dropdownClass;
+        this._context        = context;
         this._content        = undefined;
-
-        if (!(context instanceof Object))
-            context = undefined;
 
         if (typeof dropdownClass === 'function') {
             this._content = new dropdownClass(this, context);
