@@ -701,6 +701,11 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
     public  get         contentsize() {
         return this._size;
     }
+    public  get         content()
+    {
+        return this._content;
+    }
+
     public              constructor()
     {
         super("jannesen-ui-content-form");

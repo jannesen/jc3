@@ -37,7 +37,7 @@ export interface IDropdownConstructor<TNativeValue,
                                       TOpt extends $JI.IInputControlOptions,
                                       TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TOpt, TDropdown>>
 {
-    new     (popup: DropdownPopup<TNativeValue, TValue, TInput, TOpt, TDropdown>, context:$J.ICallArgs|undefined): TDropdown;
+    new     (popup: DropdownPopup<TNativeValue, TValue, TInput, TOpt, TDropdown>, context:$J.ICallArgs|null): TDropdown;
 }
 
 interface ICssPosition
@@ -412,7 +412,7 @@ export class DropdownPopup<TNativeValue,
     /* @internal */     _popupcontainer:    $JD.DOMHTMLElement;
     /* @internal */     _input:             TInput|null;
     private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>;
-    private             _context:           $J.ICallArgs|undefined;
+    private             _context:           $J.ICallArgs|null;
     private             _content:           TDropdown|undefined;
     private             _onreadyHandler:    ((content:TDropdown)=>void)|undefined;
 
@@ -429,7 +429,7 @@ export class DropdownPopup<TNativeValue,
         return this._content;
     }
 
-                        constructor(input:TInput, dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>, className:string, context:$J.ICallArgs|undefined)
+                        constructor(input:TInput, dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>, className:string, context:$J.ICallArgs|null)
     {
         super(input.container,  "-dropdown " + className);
         this.Show(this._popupcontainer = <div class="-popup"/>);
@@ -697,14 +697,7 @@ export abstract class DropdownContent<TNativeValue,
         let input = this.input;
 
         if (input) {
-            input.closeDropdown(true);
-
-            if (value !== undefined) {
-                const v = input.value;
-                if (v) {
-                    v.setValue(value, $JT.ChangeReason.UI);
-                }
-            }
+            input.dropdownClose(value);
         }
     }
     protected           PositionPopup() {
