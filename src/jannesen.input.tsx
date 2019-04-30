@@ -1292,8 +1292,8 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
     public          dropdownClose(value:any)
     {
         super.dropdownClose(value);
-        if (value != undefined && value != null && this._activeDropdown) {
-            this._inputContext = this._activeDropdown.Context;
+        if (value !== undefined && this._activeDropdown) {
+            this._inputContext = value !== null ? this._activeDropdown.Context : null;
         }
     }
 
@@ -1431,12 +1431,14 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
         if (typeof this._opts.before_dropdown === "function") {
             try {
                 const context = this._opts.before_dropdown(this);
-                return context !== undefined ? context : null;
+                if (context instanceof Object) {
+                    return context;
+                }
             } catch(err) {
                 return false;
             }
         }
-        return undefined;
+        return null;
     }
     private         _inputTimerStop()
     {
