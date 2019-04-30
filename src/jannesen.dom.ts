@@ -732,6 +732,8 @@ export class DOMHTMLElement implements $J.IEventSource
      */
     public css(propertyName:string): string|number;
     public css(propertyname:"animation"): string;
+    public css(propertyname:"animation-delay"): string;
+    public css(propertyname:"animation-duration"): string;
     public css(propertyName:"border-block-end-width"): number;
     public css(propertyName:"border-block-start-width"): number;
     public css(propertyName:"border-bottom-left-radius"): number;
@@ -768,6 +770,7 @@ export class DOMHTMLElement implements $J.IEventSource
     public css(propertyName:"top"): number;
     public css(propertyName:"width"): number;
     public css(propertyName:"z-index"): number;
+    public css(propertyName:"transition"): string;
     public css(propertyName:"transition-property"): string;
     public css(propertyName:"transition-duration"): string;
     public css(propertyName:string, value?:string|number): this;
@@ -1666,6 +1669,55 @@ export function nextTabStop(body:HTMLElement, cur:HTMLElement|null, back:boolean
         return nextFocus;
     }
 }
+
+
+/**
+ * !!DOC
+ */
+export function onAnimationTransitionEnd(elm: DOMHTMLElement, timeout:number, cb: ()=>void)
+{
+    let timeoutid:number|null;
+    let s:string;
+    let evts = new $J.EventCollection();
+
+    if ((s = elm.css("animation")) && !s.startsWith("none ")) {
+        evts.bind(elm, "animationstart", start);
+        evts.bind(elm, "animationend",   done);
+        timeoutid = $J.setTimeout(ontimeout, 500);
+        return true;
+    }
+    else
+    if ((s = elm.css("transition")) && !s.startsWith("none ")) {
+        evts.bind(elm, "transitionend",   done);
+        timeoutid = $J.setTimeout(ontimeout, timeout);
+        return true;
+    }
+    else {
+        $J.setTimeout(cb, 0);
+        return false;
+    }
+
+    function start() {
+        if (timeoutid) {
+            clearTimeout(timeoutid);
+            timeoutid = $J.setTimeout(ontimeout, timeout);
+        }
+    }
+    function done() {
+        evts.unbindAll();
+
+        if (timeoutid) {
+            clearTimeout(timeoutid);
+            timeoutid = null;
+            cb();
+        }
+    }
+    function ontimeout() {
+        timeoutid = null;
+        done();
+    }
+}
+
 
 //-------------------------------------------------------------------------------------------------
 // DOM event handlers

@@ -926,12 +926,12 @@ export class DialogLoader<TArgs, TRtn> extends ContentLoader<DialogBase<TArgs, T
                  .addClass("-loaded");
         $JD.window.bind("resize",  this._onWindowResize,  this);
 
-        waitAnimationAsync(container, 1000, undefined).then(() => {
-                                this._container.bind("click", this._onclick, this);
-                                if (this._contentBody && this._onTop)  {
-                                    this._focusFirst();
-                                }
-                            });
+        $JD.onAnimationTransitionEnd(container, 1000, () => {
+                                          this._container.bind("click", this._onclick, this);
+                                          if (this._contentBody && this._onTop)  {
+                                              this._focusFirst();
+                                          }
+                                      });
     }
 
     private             _cleanup()
@@ -1527,36 +1527,9 @@ export function normalizeUrlArgs(args:$J.IUrlArgs)
  */
 export function waitAnimationAsync<T>(elm: $JD.DOMHTMLElement, timeout:number, rtn:T)
 {
-    const animation = elm.css("animation");
-    if (animation && !animation.startsWith("none ")) {
-        return new $JA.Task<T>((resolve, reject, oncancel) => {
-                                    elm.bind("animationstart", start);
-                                    elm.bind("animationend",   done);
-                                    let   timeoutid:number|null = $J.setTimeout(ontimeout, 500);
-
-                                    function start() {
-                                        if (timeoutid) {
-                                            clearTimeout(timeoutid);
-                                            timeoutid = $J.setTimeout(ontimeout, timeout);
-                                        }
-                                    }
-                                    function done() {
-                                        if (timeoutid) {
-                                            clearTimeout(timeoutid);
-                                            timeoutid = null;
-                                        }
-                                        elm.unbind("animationstart", start);
-                                        elm.unbind("animationend",   done);
-                                        resolve(rtn);
-                                    }
-                                    function ontimeout() {
-                                        timeoutid = null;
-                                        done();
-                                    }
-                            });
-    } else {
-        return $JA.Task.resolve(rtn);
-    }
+    return new $JA.Task<T>((resolve, reject, oncancel) => {
+                              $JD.onAnimationTransitionEnd(elm, timeout, () => resolve(rtn));
+                           });
 }
 
 /**
