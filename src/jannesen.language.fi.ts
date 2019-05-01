@@ -22,7 +22,7 @@ export const translateError = [
                                                        case "ACCESS-BLOCK":    return "Access to the application is blocked.";
                                                        case "NO-DATA":         return "Data not available or data is removed.";
                                                        }
-                                                       return "Error " + err.errCode + " received from server.";
+                                                       return "Error from server: " + err.message;
                                                    } },
     { errclass: $J.AjaxError,          translator: (err:$J.AjaxError) => {
                                                        switch (err.errCode) {

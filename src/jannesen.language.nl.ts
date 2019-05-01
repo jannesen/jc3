@@ -22,7 +22,7 @@ export const translateError = [
                                                        case "ACCESS-BLOCK":    return "De toegang tot de applicantie is geblokkeerd.";
                                                        case "NO-DATA":         return "Gegevens niet beschikbaar / verwijder.";
                                                        }
-                                                       return "Fout " + err.errCode + " ontvangen van server.";
+                                                       return "Fout van server: " + err.message;
                                                    } },
     { errclass: $J.AjaxError,          translator: (err:$J.AjaxError) => {
                                                        switch (err.errCode) {

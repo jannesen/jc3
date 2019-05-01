@@ -200,8 +200,20 @@ export class ServerError extends __Error
     public  errCode:        string;
     public  serverError:    IServerErrorDetails;
 
-    constructor(message:string, serverError: IServerErrorDetails) {
-        super("ServerError", message);
+    constructor(serverError: IServerErrorDetails) {
+        let message:string|undefined;
+
+        if (serverError instanceof Object && Array.isArray(serverError.detail) && serverError.detail.length > 0) {
+            message = serverError.detail[0].message;
+            if (typeof message === 'string' && message.startsWith('[')) {
+                const i = message.indexOf('] ');
+                if (i > 0) {
+                    message = message.substr(i+2);
+                }
+            }
+        }
+
+        super("ServerError", (message !== undefined ? message : "Invalid error response received from server."));
         this.errCode     = (serverError instanceof Object && typeof serverError.code === "string" ? serverError.code : "UNKNOWN");
         this.serverError = serverError;
     }

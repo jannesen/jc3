@@ -938,7 +938,7 @@ export var AjaxDefaults:IAjaxCallDefinition<void,void,void> = {
                                                                                 return data;
                                                                             } else {
                                                                                 return (typeof data.code === 'string')
-                                                                                                ? new $J.ServerError("Error received from server.", data)
+                                                                                                ? new $J.ServerError(data)
                                                                                                 : undefined;
                                                                             }
                                                                         }
