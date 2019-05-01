@@ -25,10 +25,11 @@ export const enum TimeFormat {
  */
 export const enum ChangeReason
 {
-    Parse       = 0,
-    Assign      = 1,
-    UI          = 2,
-    _linked     = 100       // Internal value
+    Parse       =  0,
+    Assign      =  1,
+    Invalidate  =  2,
+    UI          = 10,
+    _linked     = 100      // Internal value
 }
 
 /**
@@ -1976,6 +1977,24 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
         super.setValue(value, reason);
     }
 
+    /**
+     *!!DOC
+     */
+    public  invalidate()
+    {
+        if (this._value !== null) {
+            this._record = undefined;
+            this._value  = null;
+
+            if (this._control) {
+                this._control.setError($JL.input_incomplete);
+            }
+
+            if (this._eventHandlers) {
+                this.trigger("changed", ChangeReason.Invalidate);
+            }
+        }
+    }
     /**
      *!!DOC
      */
