@@ -404,7 +404,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
         }
 
         // Construct new Task, but use subclassed constructor, if any
-        var slave = new (Object.getPrototypeOf(this).constructor)(internalResolver) as Task<any>;
+        var slave = new (this.constructor as any)(internalResolver) as Task<any>;
         this._enqueue({ task:this, onfulfilled, onrejected, slave });
         return slave;
     }

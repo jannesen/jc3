@@ -303,7 +303,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                              })
                        .then((formConstructor) => {
                                     ct.throwIfCancelled();
-                                    if (!(allowReUse && this._contentBody && Object.getPrototypeOf(this._contentBody).constructor === formConstructor && this._contentBody.canReOpen)) {
+                                    if (!(allowReUse && this._contentBody && this._contentBody.constructor === formConstructor && this._contentBody.canReOpen)) {
                                         newContent = new formConstructor();
                                         newContent._setContentNameClass(contentNameClass);
                                         const loadTask   = newContent._onload(ct);

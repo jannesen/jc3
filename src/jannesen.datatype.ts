@@ -264,7 +264,7 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
      */
     public clone(): any
     {
-        let c = new (Object.getPrototypeOf(this).constructor)();
+        let c = new (this.constructor as any)();
 
         c._attributes = this._attributes;
         c._uniqueid   = this._uniqueid;
@@ -333,7 +333,7 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
                 return r;
         }
 
-        return Object.getPrototypeOf(this).constructor.Attributes[name];
+        return (this.constructor as any).Attributes[name];
     }
 
     /**
@@ -700,8 +700,8 @@ export abstract class SimpleType<TNative> extends BaseType
         if (value === undefined) {
             value = null;
         }
-        if (value !== null && typeof value !== Object.getPrototypeOf(this).constructor.NativeType) {
-            throw new $J.InvalidStateError("setValue invalid value type got '" + (typeof value) + "' expect '" + Object.getPrototypeOf(this).constructor.NativeType + "'.");
+        if (value !== null && typeof value !== (this.constructor as any).NativeType) {
+            throw new $J.InvalidStateError("setValue invalid value type got '" + (typeof value) + "' expect '" + (this.constructor as any).NativeType + "'.");
         }
 
         if (this._value !== value) {
@@ -1950,9 +1950,9 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
                 throw new $J.InvalidStateError("SelectType.setValue object-value only allowed with remote datasource.");
             }
 
-            const thisType = Object.getPrototypeOf(this).constructor;
+            const thisType = this.constructor as any;
 
-            if (value instanceof thisType) {
+            if (value.constructor === thisType) {
                 const setvalue = (value as this);
                 if (datasource !== setvalue.Datasource) {
                     throw new $J.InvalidStateError("SelectType.setValue value has invalid datasource.");
@@ -1966,7 +1966,7 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
                 const key = (value as any)[datasource.keyfieldname] as TNative;
 
                 if (typeof key !== thisType.NativeType) {
-                    throw new $J.InvalidStateError("SelectType.setValue invalid object-value, key-type= '" + (typeof value) + "' expect '" + Object.getPrototypeOf(this).constructor.NativeType + "'.");
+                    throw new $J.InvalidStateError("SelectType.setValue invalid object-value, key-type= '" + (typeof value) + "' expect '" + (this.constructor as any).NativeType + "'.");
                 }
 
                 this._record = value as any;
@@ -2279,14 +2279,14 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
      *!!DOC
      */
     public get FieldDef(): TRec {
-        return Object.getPrototypeOf(this).constructor.FieldDef;
+        return (this.constructor as any).FieldDef;
     }
 
     /**
      *!!DOC
      */
     public get FieldNames(): string[] {
-        return Object.getOwnPropertyNames(Object.getPrototypeOf(this).constructor.FieldDef);
+        return Object.getOwnPropertyNames((this.constructor as any).FieldDef);
     }
 
     /**
@@ -2355,7 +2355,7 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
      */
     public contains(name:string):boolean
     {
-        return Object.getPrototypeOf(this).constructor.FieldDef.hasOwnProperty(name);
+        return (this.constructor as any).FieldDef.hasOwnProperty(name);
     }
 
     /**
@@ -2560,7 +2560,7 @@ export class Set<TSet extends Record|SimpleType<any>> extends BaseType
      *!!DOC
      */
     public get ItemDef(): ISetItemDefConstructor<TSet> {
-        const itemdef = Object.getPrototypeOf(this).constructor.ItemDef;
+        const itemdef = (this.constructor as any).ItemDef;
         if (!itemdef) {
             throw new $J.InvalidStateError("ItemDef not defined.");
         }
@@ -2588,7 +2588,7 @@ export class Set<TSet extends Record|SimpleType<any>> extends BaseType
      *!!DOC
      */
     public select(filter: (item:TSet)=>boolean): Set<TSet> {
-        let rtn = new (Object.getPrototypeOf(this).constructor)();
+        let rtn = new (this.constructor as any)();
 
         this.forEach((item) => {
                             if (filter(item)) {
@@ -2694,7 +2694,7 @@ export class Set<TSet extends Record|SimpleType<any>> extends BaseType
      */
     public createItem(): TSet
     {
-        return new (Object.getPrototypeOf(this).constructor.ItemDef)() as TSet;
+        return new ((this.constructor as any).ItemDef)() as TSet;
     }
 
     /**
