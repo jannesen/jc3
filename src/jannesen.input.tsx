@@ -1435,8 +1435,8 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
                     return context;
                 }
             } catch(err) {
-                return false;
             }
+            return false;
         }
         return null;
     }
