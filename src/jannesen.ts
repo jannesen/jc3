@@ -836,13 +836,6 @@ export function setTimeout(handler: ()=>void, delay:number, thisArg?:any) {
     return window.setTimeout(eventWrapper("timeout", handler, thisArg), delay);
 }
 
-/**
- * !!DOC
- */
-export function setInterval(handler: ()=>void, timeout: number, thisArg?: any) {
-    return window.setInterval(eventWrapper("interval", handler, thisArg), timeout);
-}
-
 //=============================================== runAsync ========================================
 const g_truepromise = Promise.resolve(true)
 let g_runQueue:((() => void)|null)[]|undefined = undefined;

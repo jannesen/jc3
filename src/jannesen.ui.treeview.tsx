@@ -1,8 +1,6 @@
-﻿
-/// <reference path="lib-ext.d.ts"/>
+﻿/// <reference path="lib-ext.d.ts"/>
 /* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
-import * as $J       from "jc3/jannesen";
 import * as $JA      from "jc3/jannesen.async";
 import * as $JD      from "jc3/jannesen.dom";
 
@@ -361,12 +359,25 @@ export class TreeViewItemList extends TreeViewItem
     public          expand(expand:boolean) {
         this._expanded = expand;
 
+        const height = this.list.element.scrollHeight;
+        this.list.css('overflow', undefined);
+
         if (expand) {
             this.container.addClass('-expanded').removeClass('-collapsed');
+            $JD.runTransition(this.list, (elm, progress) => {
+                                    if (progress < 1) {
+                                        elm.css('height', height * progress);
+                                    }
+                                    else {
+                                        elm.css('height', 'auto').css('overflow', 'visible');
+                                    }
+                                }, 200)
         } else {
             this.container.addClass('-collapsed').removeClass('-expanded');
+            $JD.runTransition(this.list, (elm, progress) => {
+                                    elm.css('height', height * (1 - progress));
+                                }, 200);
         }
-        this._transition(expand, 250);
     }
 
     /*@internal*/   onclick(callback:(item:TreeViewItemList, list: $JD.DOMHTMLElement) => void) {
@@ -385,38 +396,5 @@ export class TreeViewItemList extends TreeViewItem
 
     private         _toggle() {
         this.expand(!this._expanded);
-    }
-
-    private         _transition(expand:boolean, time:number) {
-        if (time > 0) {
-            const start = Date.now();
-
-            this.list.css('overflow', undefined);
-
-            const timer = $J.setInterval(() => {
-                const t = (Date.now() - start) / time;
-
-                if (t >= 1) {
-                    clearInterval(timer);
-
-                    if (expand) {
-                        this.list.css('height', 'auto').css('overflow', 'visible');
-                    } else {
-                        this.list.css('height', 0);
-                    }
-
-                    return;
-                }
-
-                const progress = (t<.5 ? 2*t*t : -1+(4-2*t)*t) * this.list.element.scrollHeight;
-                this.list.css('height', expand ? progress : this.list.element.scrollHeight - progress);
-            }, 20);
-        } else {
-            if (expand) {
-                this.list.css('height', 'auto').css('overflow', 'visible');
-            } else {
-                this.list.css('height', 0);
-            }
-        }
     }
 }

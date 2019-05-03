@@ -1709,6 +1709,104 @@ export function nextTabStop(body:HTMLElement, cur:HTMLElement|null, back:boolean
     }
 }
 
+//-------------------------------------------------------------------------------------------------
+// Transitions
+//
+interface ITransition
+{
+    elm:        DOMHTMLElement;
+    callback:   (elm:DOMHTMLElement, progress: number) => boolean|void,
+    time:       number;
+    start:      number;
+}
+
+const g_activeTransitions:ITransition[] = [];
+
+/**
+ * Start transition.
+ 
+ * @param elm
+ *  element to run transision on. Only on transition per element.
+ *  
+ * @param callback
+ *  the callback function for transtion this function has one argument progress with the value of 0 to 1.
+ *  The progress value is translated to ease-in-out. If the callback function returns false the transition is cancelled.
+ *  
+ * @param time
+ *  The total time of the transision if time === undefined the use 'transition-duration'for transtion time.
+ */
+export function runTransition(elm:DOMHTMLElement, callback: (elm:DOMHTMLElement, progress: number) => boolean|void, time?: number|string)
+{
+    if (time === undefined) {
+        time = elm.css('transition-duration');
+    }
+
+    if (typeof time === 'string') {
+        if (time.endsWith("s")) {
+            time = parseFloat(time.substr(0, time.length - 1)) * 1000;
+        }
+        else if (time.endsWith("ms")) {
+            time = parseFloat(time.substr(0, time.length - 1));
+        }
+        else {
+            time = 0;
+        }
+    }
+
+    const i = g_activeTransitions.findIndex((t) => t.elm.element === elm.element)
+    if (i >= 0) {
+        g_activeTransitions.splice(i, 1);
+    }
+
+    if (time > 10) {
+        if (callback(elm, 0) !== false) {
+            g_activeTransitions.push({
+                elm:      elm,
+                callback: callback,
+                time:     time,
+                start:    performance.now()
+            })
+
+            if (g_activeTransitions.length === 1) {
+                transitionSchedule();
+            }
+        }
+    }
+    else {
+        callback(elm, 1);
+    }
+}
+
+function transitionSchedule()
+{
+    requestAnimationFrame(() => {
+        const now = performance.now();
+
+        for (let i = 0; i < g_activeTransitions.length; ++i)
+        {
+            const t = g_activeTransitions[i];
+            const d = (now - t.start) / t.time;
+            let f:boolean|void;
+
+            if (d < 0 || d > 0.99) {
+                t.callback(t.elm, 1);
+                f = false;
+            }
+            else {
+                f = t.callback(t.elm, (d<.5 ? 2*d*d : -1+(4-2*d)*d));
+            }
+
+            if (f === false) {
+                g_activeTransitions.splice(i, 1);
+                --i;
+            }
+        }
+
+        if (g_activeTransitions.length > 0) {
+            transitionSchedule();
+        }
+    });
+}
 
 /**
  * !!DOC
