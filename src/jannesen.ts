@@ -843,6 +843,53 @@ export function setInterval(handler: ()=>void, timeout: number, thisArg?: any) {
     return window.setInterval(eventWrapper("interval", handler, thisArg), timeout);
 }
 
+//=============================================== runAsync ========================================
+const g_truepromise = Promise.resolve(true)
+let g_runQueue:((() => void)|null)[]|undefined = undefined;
+/**
+ * Add callback to the async queue. The callback is called before browser paint.
+ * Without multiple === true only 1 entry of the callback is on the async queue (only the last one).
+ * This is a way the debounce multple events to one event.
+ *
+ * @param callback
+ *  callback to call
+ *  
+ * @param multiple
+ *  normaly only 1 entry of the callback is on the async queue (only the last one).
+ *  If multiple === true the previous entry is not deleted.
+ */
+export function runAsync(callback: () => void, multiple?:boolean)
+{
+    if (!g_runQueue) {
+        g_runQueue = [ callback ];
+        g_truepromise.then(() => {
+            if (g_runQueue) {
+                for (let i = 0 ; i < g_runQueue.length ; ++i) {
+                    try {
+                        const cb = g_runQueue[i];
+                        if (cb) {
+                            cb();
+                        }
+                    }
+                    catch (e) {
+                        globalError("callbackAsync failed.", e);
+                    }
+                }
+                g_runQueue = undefined;
+            }                    
+        })
+    } else {
+        if (!multiple) {
+            const i = g_runQueue.indexOf(callback);
+            if (i >= 0) {
+                g_runQueue[i] = null;
+            }
+        }
+
+        g_runQueue.push(callback);
+    }
+}
+
 //=============================================== errorTranslator =================================
 export type ErrorTranslateSet = (IErrorTranslate)[];
 export interface IErrorTranslate {
