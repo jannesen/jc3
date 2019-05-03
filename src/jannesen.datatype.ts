@@ -2877,8 +2877,8 @@ export class EnumSelectDatasource<TNative extends SelectValue, TRecord extends I
  */
 export interface RemoteSelectDatasourceOpts
 {
-    callname_lookup:        string;
-    callname_fetchdata:     string;
+    callname_lookup?:       string;
+    callname_fetchdata?:    string;
     flags:                  SelectDatasourceFlags;
     cache_timeout?:         number;
     keyfieldname:           string;
@@ -2946,6 +2946,10 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
             return undefined;
         }
 
+        if (!this.opts.callname_lookup) {
+            throw new $J.InvalidStateError("RemoteSelectDatasource.lookup not defined.");
+        }
+
         const task = $JA.Ajax<$JA.IAjaxCallDefinition<any,void,TRecord>>({
                             method:                     "GET",
                             callname:                   this.opts.callname_lookup,
@@ -2979,6 +2983,10 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
         return task;
     }
     public  fetchdataAsync(ct:$JA.ICancellationToken, context:$J.IUrlArgsColl, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]|string> {
+        if (!this.opts.callname_fetchdata) {
+            throw new $J.InvalidStateError("RemoteSelectDatasource.fetch not defined.");
+        }
+
         let callargs: $J.IUrlArgsColl = {};
 
         if (context) {
