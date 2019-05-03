@@ -9,12 +9,14 @@ import * as $JUM from "jc3/jannesen.ui.menu";
 export interface AddTabArray extends Array<AddTab> {}
 export type AddTab    = Tab|undefined|false|AddTabArray;
 
-export interface ITabsAttr {
+export interface ITabsAttr
+{
     selectfirst?:   boolean;
     formhost?:      $JUC.Nullable<$JUC.IFormHost>;
 }
 
-export class Tabs extends $JD.Container {
+export class Tabs extends $JD.Container implements $JD.ISetSize
+{
     public      formhost?:             $JUC.Nullable<$JUC.IFormHost>;
     private     _tabHeader:             $JD.DOMHTMLElement;
     private     _children:              Tab[];
@@ -30,12 +32,6 @@ export class Tabs extends $JD.Container {
 
     public  get size() {
         return this._size;
-    }
-    public  set size(size:$JD.ISize|undefined) {
-        if (!$JD.compareSize(this._size, size)) {
-            this._container.setSize(this._size = size);
-            this._updsize();
-        }
     }
     public  get sizeContent() {
         return this._sizeContent;
@@ -125,6 +121,13 @@ export class Tabs extends $JD.Container {
             return loadTask;
         }
     }
+    public      setSize(size:$JD.ISize|undefined)
+    {
+        if (!$JD.compareSize(this._size, size)) {
+            this._container.setSize(this._size = size);
+            this._updsize();
+        }
+    }
 
     private     _addChild(child:AddTab) {
         if (Array.isArray(child)) {
@@ -172,7 +175,8 @@ export class Tabs extends $JD.Container {
     }
 }
 
-export interface ITabAttr {
+export interface ITabAttr
+{
     name?:              string;
     title:              string;
     enabled?:           boolean;
@@ -182,7 +186,8 @@ export interface ITabAttr {
     loadform?:          (loader:$JUC.FormLoader) => $JA.Task<void>;
 }
 
-export class Tab extends $JD.Container {
+export class Tab extends $JD.Container implements $JUC.IMoreMenu
+{
     private     _name?:             string;
     private     _titleElement:      $JD.DOMHTMLElement;
     private     _enabled:           boolean;
@@ -192,7 +197,7 @@ export class Tab extends $JD.Container {
     private     _active:            boolean;
     private     _loaded:            boolean;
     private     _size?:             $JD.ISize;
-    private     _formloader?:       $JUC.FormLoader;
+    private     _tabContent?:       $JD.AddNode;
 
     public get  Tabs() {
         const parent = this._container.parent;
@@ -223,9 +228,9 @@ export class Tab extends $JD.Container {
             this._titleElement.toggleClass("-disabled", !enabled);
         }
     }
-    public get  formloader()
+    public get  tabContent()
     {
-        return this._formloader || null;
+        return this._tabContent;
     }
 
     public      constructor(attr: ITabAttr, ...children: $JD.AddNode[]) {
@@ -265,21 +270,20 @@ export class Tab extends $JD.Container {
 
     public      moreMenuEnabled()
     {
-        return (this._loadform)
-                    ? (this._formloader && this._formloader.contentBody && this._formloader.contentBody.isIdle ? this._formloader.contentBody.moreMenuEnabled() : false)
-                    : !!this._moremenu;
+        if ($JUC.ImplementsMoreMenu(this._tabContent)) {
+            return this._tabContent.moreMenuEnabled();
+        }
+
+        return !!this._moremenu;
     }
     public      moreMenuDatasource(ct:$JA.ICancellationToken):$JUM.IDataSourceResult
     {
-        if (this._loadform) {
-            if (this._formloader && this._formloader.contentBody && this._formloader.contentBody.isIdle) {
-                return this._formloader.contentBody.moreMenuDatasource(ct);
-            }
+        if ($JUC.ImplementsMoreMenu(this._tabContent)) {
+            return this._tabContent.moreMenuDatasource(ct);
         }
-        else {
-            if (this._moremenu) {
-                return this._moremenu(ct);
-            }
+
+        if (this._moremenu) {
+            return this._moremenu(ct);
         }
 
         return [];
@@ -300,8 +304,8 @@ export class Tab extends $JD.Container {
     /*@internal*/       show(display: boolean) {
         this.container.show(display);
 
-        const formLoader = this._formloader;
-        if (formLoader) {
+        const formLoader = this._tabContent;
+        if ($JD.ImplementsShow(formLoader)) {
             formLoader.show(display);
         }
     }
@@ -311,17 +315,16 @@ export class Tab extends $JD.Container {
 
             try {
                 if (typeof this._loadcontent === 'function') {
-                    this._formloader = undefined;
-                    this._container.appendChild(this._loadcontent());
+                    this._container.appendChild(this._tabContent = this._loadcontent());
                     return;
                 }
                 else if (typeof this._loadform === 'function') {
-                    this._formloader = new $JUC.FormLoader(tabs.formhost);
-                    this._container.appendChild(this._formloader);
-                    return this._loadform(this._formloader);
+                    const loader = new $JUC.FormLoader(tabs.formhost);
+                    this._container.appendChild(this._tabContent = loader);
+                    return this._loadform(loader);
                 }
             } catch (e) {
-                this._formloader = undefined;
+                this._tabContent = undefined;
                 this._container.appendChild($JUC.errorToContent(e));
                 return;
             }
@@ -329,13 +332,14 @@ export class Tab extends $JD.Container {
     }
     /*@internal*/       setSize(size: $JD.ISize|undefined) {
         if (!$JD.compareSize(this._size, size)) {
-            this._size = size;
-            if (!this._loadform) {
-                this._container.setSize(size);
-                this._container.css("overflow", size ? "auto" : undefined);
+            this._container.setSize(this._size = size);
+
+            if ($JD.ImplementsSetSize(this._tabContent)) {
+                this._tabContent.setSize(size);
+                this._container.css("overflow", "hidden");
             }
-            else if (this._formloader) {
-                this._formloader.setSize(size);
+            else {
+                this._container.css("overflow", size ? "auto" : undefined);
             }
         }
     }

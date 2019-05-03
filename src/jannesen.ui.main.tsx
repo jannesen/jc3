@@ -402,12 +402,12 @@ export class Main extends $JD.Container
             this._transition_start = undefined;
         }
     }
-    private         _formChanged(reason:$JUC.FormChangedReason, sourceform:$JUC.Form)
+    private         _formChanged(reason:$JUC.FormChangedReason, sourceform:$JUC.Form|null)
     {
         let   form    = this._formloader.contentBody;
         let   isLoaded = form ? form.isLoaded : false;
 
-        if ((reason === $JUC.FormChangedReason.Loaded || reason === $JUC.FormChangedReason.TitleChanged) && form === sourceform) {
+        if ((reason === $JUC.FormChangedReason.Loaded || reason === $JUC.FormChangedReason.TitleChanged) && sourceform && form === sourceform) {
             let title:$JD.AddNode;
 
             try {
@@ -422,7 +422,7 @@ export class Main extends $JD.Container
             }
         }
 
-        if (reason === $JUC.FormChangedReason.Loaded && form === sourceform) {
+        if (reason === $JUC.FormChangedReason.Loaded && sourceform && form === sourceform) {
             const argset = form && form._formstate ? form._formstate.argset : undefined;
             this._nav_back   .toggleClass("-disabled", !(typeof this.gotoback === 'function'));
             this._nav_refresh.toggleClass("-disabled", !(this._formloader.contentBody && typeof (this._formloader.contentBody as any).refresh === 'function'));

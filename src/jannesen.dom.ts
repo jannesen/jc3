@@ -103,6 +103,9 @@ export interface IDOMContainer
     readonly container: AddNode;
 }
 
+/**
+ * !!DOC
+ */
 export interface HTMLAttributes {
     accept?:                string;
     acceptCharset?:         string;
@@ -242,10 +245,46 @@ export interface EventHandler<T> {
     (event: T): void;
 }
 
+/**
+ * !!DOC
+ */
 export interface AddArray extends Array<AddNode> {}
 export type AddNode    = DOMHTMLElement|DOMText|IDOMContainer|IToDom|HTMLElement|string|DOMNodeList|AddArray|undefined|null|false;
 export interface RemoveArray extends Array<RemoveNode> {}
 export type RemoveNode = DOMHTMLElement|DOMText|IDOMContainer|HTMLElement|Node|DOMNodeList|RemoveArray|undefined|null;
+
+/**
+ * !!DOC
+ */
+export interface ISetSize
+{
+    setSize(size:ISize|undefined):void;
+}
+
+/**
+ * !!DOC
+ */
+export function ImplementsSetSize(o: any): o is ISetSize
+{
+    return (o instanceof Object && typeof o.setSize === 'function');
+}
+
+/**
+ * !!DOC
+ */
+export interface IShow
+{
+    show(f:boolean):void;
+}
+
+/**
+ * !!DOC
+ */
+export function ImplementsShow(o: any): o is IShow
+{
+    return (o instanceof Object && typeof o.show === 'function');
+}
+
 
 interface DOMWindowEventMap extends WindowEventMap
 {
@@ -413,7 +452,7 @@ export class DOMHTMLDocument implements $J.IEventSource
 /**
  * !!DOC
  */
-export class DOMHTMLElement implements $J.IEventSource
+export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
 {
     private     _element:           HTMLElement;
     private     _events:            $J.IEventWrapper[]|undefined;

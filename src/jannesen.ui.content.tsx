@@ -21,6 +21,24 @@ interface IActiveTask
 /**
  * !!DOC
  */
+export interface IMoreMenu
+{
+    moreMenuEnabled():boolean
+    moreMenuDatasource(ct:$JA.ICancellationToken):$JUM.IDataSourceResult
+}
+
+/**
+ * !!DOC
+ */
+export function ImplementsMoreMenu(o: any): o is IMoreMenu
+{
+    return (o instanceof Object && typeof o.moreMenuEnabled === 'function' && typeof o.moreMenuDatasource === 'function');
+}
+
+//-------------------------------------------------------------------------------------------------
+/**
+ * !!DOC
+ */
 export interface IFormState<TState=any>
 {
     uuid:           string;
@@ -81,7 +99,7 @@ export interface IFormHost
     readonly    parent:                () => FormLoader|null;
     readonly    openform:              (formName:string, args:$J.IUrlArgsColl|IUrlArgsSet, historyReplace:boolean, ct:$JA.ICancellationToken|null) => $JA.Task<void>;
     readonly    historyChangeArgs:     (args:$J.IUrlArgsColl, historyReplace:boolean) => void;
-    readonly    formchanged:           (reason:FormChangedReason, form:Form) => void;
+    readonly    formchanged:           (reason:FormChangedReason, form:Form|null) => void;
 }
 export type Nullable<T> = {
     readonly [P in keyof T]?: T[P];
@@ -569,7 +587,7 @@ $J.applyMixins(ContentBody, [$J.EventHandling]);
 /**
  * !!DOC
  */
-export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError, TArgs | Error>
+export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError, TArgs | Error> implements $JD.ISetSize, $JD.IShow
 {
     private             _host:              IFormHost;
     protected           _showcalled:        boolean;
@@ -662,6 +680,18 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
 
         return this._display;
     }
+    public              moreMenuEnabled()
+    {
+        return this._contentBody && this._contentBody.isIdle ? this._contentBody.moreMenuEnabled() : false;
+    }
+    public              moreMenuDatasource(ct:$JA.ICancellationToken):$JUM.IDataSourceResult
+    {
+        if (this._contentBody && this._contentBody.isIdle) {
+            return this._contentBody.moreMenuDatasource(ct);
+        }
+
+        return [];
+    }
 
     protected           _setActiveTask(task:IActiveTask|null) {
         super._setActiveTask(task);
@@ -693,7 +723,7 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
 /**
  * !!DOC
  */
-export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<TArgs>, TArgs>
+export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<TArgs>, TArgs> implements IMoreMenu
 {
     /*@internal*/       _formstate:     IFormState<TState>|undefined;
     private            _size:          $JD.ISize|undefined;
@@ -704,6 +734,10 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
     public  get         content()
     {
         return this._content;
+    }
+    public  get         formSize()
+    {
+        return this._size;
     }
 
     public              constructor()

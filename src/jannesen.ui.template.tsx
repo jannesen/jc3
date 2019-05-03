@@ -249,7 +249,7 @@ export interface ITabAttr extends $JTAB.ITabAttr
     form?:      new () => BaseForm<any, any>;
 }
 
-export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,void,any>> extends SimpleForm<TCall>
+export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,void,any>> extends SimpleForm<TCall> implements $JCONTENT.IMoreMenu
 {
     private     _tabs: $JTAB.Tabs|undefined;
 
@@ -272,7 +272,7 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
     }
     public                  onresize(size: $JD.ISize) {
         if (this._tabs) {
-            this._tabs.size = size;
+            this._tabs.setSize(size);
         }
     }
     protected               dataReceived(data: $JA.AjaxCallResponseType<TCall>): void|$JA.Task<void> {
@@ -309,7 +309,7 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
                                 const activeTab = tabs.selectedTab;
                                 if (activeTab) {
                                     const loader = this.loader;
-                                    if (loader && activeTab.formloader && form === activeTab.formloader.contentBody) {
+                                    if (loader && activeTab.tabContent instanceof $JCONTENT.FormLoader && form === activeTab.tabContent.contentBody) {
                                         loader.host.formchanged(reason, form);
                                     }
                                 }
