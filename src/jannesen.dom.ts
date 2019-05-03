@@ -1715,7 +1715,7 @@ export function nextTabStop(body:HTMLElement, cur:HTMLElement|null, back:boolean
 interface ITransition
 {
     elm:        DOMHTMLElement;
-    callback:   (elm:DOMHTMLElement, progress: number) => boolean|void,
+    callback:   (elm:DOMHTMLElement, progress:number) => boolean|void;
     time:       number;
     start:      number;
 }
@@ -1724,14 +1724,14 @@ const g_activeTransitions:ITransition[] = [];
 
 /**
  * Start transition.
- 
+ *
  * @param elm
  *  element to run transision on. Only on transition per element.
- *  
+ *
  * @param callback
  *  the callback function for transtion this function has one argument progress with the value of 0 to 1.
  *  The progress value is translated to ease-in-out. If the callback function returns false the transition is cancelled.
- *  
+ *
  * @param time
  *  The total time of the transision if time === undefined the use 'transition-duration'for transtion time.
  */
@@ -1753,7 +1753,7 @@ export function runTransition(elm:DOMHTMLElement, callback: (elm:DOMHTMLElement,
         }
     }
 
-    const i = g_activeTransitions.findIndex((t) => t.elm.element === elm.element)
+    const i = g_activeTransitions.findIndex((t) => t.elm.element === elm.element);
     if (i >= 0) {
         g_activeTransitions.splice(i, 1);
     }
@@ -1765,7 +1765,7 @@ export function runTransition(elm:DOMHTMLElement, callback: (elm:DOMHTMLElement,
                 callback: callback,
                 time:     time,
                 start:    performance.now()
-            })
+            });
 
             if (g_activeTransitions.length === 1) {
                 transitionSchedule();

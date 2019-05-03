@@ -837,7 +837,7 @@ export function setTimeout(handler: ()=>void, delay:number, thisArg?:any) {
 }
 
 //=============================================== runAsync ========================================
-const g_truepromise = Promise.resolve(true)
+const g_truepromise = Promise.resolve(true);
 let g_runQueue:((() => void)|null)[]|undefined = undefined;
 /**
  * Add callback to the async queue. The callback is called before browser paint.
@@ -846,7 +846,7 @@ let g_runQueue:((() => void)|null)[]|undefined = undefined;
  *
  * @param callback
  *  callback to call
- *  
+ *
  * @param multiple
  *  normaly only 1 entry of the callback is on the async queue (only the last one).
  *  If multiple === true the previous entry is not deleted.
@@ -869,8 +869,8 @@ export function runAsync(callback: () => void, multiple?:boolean)
                     }
                 }
                 g_runQueue = undefined;
-            }                    
-        })
+            }
+        });
     } else {
         if (!multiple) {
             const i = g_runQueue.indexOf(callback);
@@ -904,7 +904,7 @@ export interface IErrorTranslatorRegExp
 const g_errorTranslators: (((err:Error)=>string|undefined)  | ErrorTranslateSet)[] = [];
 /**
  * registrate error localisation translator
- * 
+ *
  * @param translator
  *  The Translator
  */
@@ -917,7 +917,7 @@ export function registratedErrorTranslator(translator: ((err:Error)=>string|unde
 
 /**
  * translate err to localised text for use of display error text to user.
- * 
+ *
  * @param err
  *  The Error
  */

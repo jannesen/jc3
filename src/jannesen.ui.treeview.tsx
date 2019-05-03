@@ -371,7 +371,7 @@ export class TreeViewItemList extends TreeViewItem
                                     else {
                                         elm.css('height', 'auto').css('overflow', 'visible');
                                     }
-                                }, 200)
+                                }, 200);
         } else {
             this.container.addClass('-collapsed').removeClass('-expanded');
             $JD.runTransition(this.list, (elm, progress) => {

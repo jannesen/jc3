@@ -23,8 +23,8 @@ interface IActiveTask
  */
 export interface IMoreMenu
 {
-    moreMenuEnabled():boolean
-    moreMenuDatasource(ct:$JA.ICancellationToken):$JUM.IDataSourceResult
+    moreMenuEnabled():boolean;
+    moreMenuDatasource(ct:$JA.ICancellationToken):$JUM.IDataSourceResult;
 }
 
 /**
