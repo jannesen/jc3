@@ -89,28 +89,6 @@ export interface ICallArgs //!!TODO
     [key: string]: string|number|boolean|Object;
 }
 
-/**
- * !!DOC
- */
-export type ErrorTranslateSet = (IErrorTranslate)[];
-export interface IErrorTranslate {
-    errclass:           string | IErrorConstructor<Error>;
-    translator:         string | ((err:any)=>string|undefined) | IErrorTranslatorRegExp | IErrorTranslatorRegExp[];
-    translateInner?:    boolean;
-}
-export interface IErrorConstructor<T extends Error>
-{
-    new(...args: any): T;
-    readonly prototype: T;
-}
-export interface IErrorTranslatorRegExp
-{
-    regex:      RegExp;
-    replace:    string | ((m:RegExpExecArray)=>string|undefined);
-}
-
-const g_errorTranslators: (((err:Error)=>string|undefined)  | ErrorTranslateSet)[] = [];
-
 //=============================================== Error Classes ===================================
 /**
  *!!DOC
@@ -865,9 +843,30 @@ export function setInterval(handler: ()=>void, timeout: number, thisArg?: any) {
     return window.setInterval(eventWrapper("interval", handler, thisArg), timeout);
 }
 
-//=============================================== global ==========================================
+//=============================================== errorTranslator =================================
+export type ErrorTranslateSet = (IErrorTranslate)[];
+export interface IErrorTranslate {
+    errclass:           string | IErrorConstructor<Error>;
+    translator:         string | ((err:any)=>string|undefined) | IErrorTranslatorRegExp | IErrorTranslatorRegExp[];
+    translateInner?:    boolean;
+}
+export interface IErrorConstructor<T extends Error>
+{
+    new(...args: any): T;
+    readonly prototype: T;
+}
+export interface IErrorTranslatorRegExp
+{
+    regex:      RegExp;
+    replace:    string | ((m:RegExpExecArray)=>string|undefined);
+}
+
+const g_errorTranslators: (((err:Error)=>string|undefined)  | ErrorTranslateSet)[] = [];
 /**
- * !!DOC
+ * registrate error localisation translator
+ * 
+ * @param translator
+ *  The Translator
  */
 export function registratedErrorTranslator(translator: ((err:Error)=>string|undefined) | ErrorTranslateSet)
 {
@@ -877,9 +876,12 @@ export function registratedErrorTranslator(translator: ((err:Error)=>string|unde
 }
 
 /**
- * !!DOC
+ * translate err to localised text for use of display error text to user.
+ * 
+ * @param err
+ *  The Error
  */
-export function translateError(err: Error|Error[], innerError?:boolean): string
+export function translateError(err: Error|Error[]): string
 {
     if (err instanceof Error) {
         return translateErrorError(err) || "ERROR: " +  (typeof err.name === 'string' ? err.name : "[UNDEFINED]");
