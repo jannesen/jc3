@@ -295,7 +295,6 @@ interface Handler<T> {
 }
 
 function internalResolver(fulfill: (value: any) => void, reject: (reason: Error) => void) {/* no-op, sentinel value */ }
-var asyncHandlers:  Handler<any>[]|undefined;
 
 /**
  * !!DOC
@@ -750,7 +749,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
     private             _enqueue(h:Handler<any>)
     {
         if (this._state !== TaskState.Pending) {
-            Task._asyncUnwrap(h);
+            $J.runAsync(() => Task._unwrapper(h), true);
         } else {
             if (!this._handlers) {
                 this._handlers = [ h ];
@@ -774,26 +773,10 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
         if (this._handlers) {
             let handlers = this._handlers;
             this._handlers = undefined;
-            handlers.forEach((h) => Task._asyncUnwrap(h));
+            handlers.forEach((h) => $J.runAsync(() => Task._unwrapper(h), true));
         }
     }
 
-    private static      _asyncUnwrap(handler: Handler<any>)
-    {
-        if (!asyncHandlers) {
-            asyncHandlers = [ handler ];
-            setTimeout(() => {
-                if (asyncHandlers) {
-                    for (let i = 0 ; i < asyncHandlers.length ; ++i) {
-                        Task._unwrapper(asyncHandlers[i]);
-                    }
-                    asyncHandlers = undefined;
-                }
-            });
-        } else {
-            asyncHandlers.push(handler);
-        }
-    }
     private static      _unwrapper(handler: Handler<any>)
     {
         try {
