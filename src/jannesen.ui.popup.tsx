@@ -566,10 +566,9 @@ export class DropdownPopup<TNativeValue,
     {
         let winSize       = $JD.window.size;
         let left          = poselmOuterRect.left;
-        let top           = (poselmOuterRect.top + poselmOuterRect.height - 1);
         let size          = { width: poselmOuterRect.width, height: 2};
         let maxWidth      = Math.round((winSize.width) * ($JD.body.hasClass("jannesen-ui-mobile") ? 1 : 0.95));
-        let maxHeight     = winSize.height - top;
+        let maxHeight     = Math.max(winSize.height - (poselmOuterRect.top + poselmOuterRect.height), poselmOuterRect.top);
         let borderHeight:number;
         let borderWidth:number;
 
@@ -610,11 +609,11 @@ export class DropdownPopup<TNativeValue,
         if (left <= rest)
             left = Math.min(poselmOuterRect.left, rest);
 
-        if (top > winSize.height - size.height)
-            top = winSize.height - size.height;
-
         container.css({
-                "top":      top,
+                "top":      (((poselmOuterRect.top + poselmOuterRect.height - 1) + size.height < winSize.height)
+                                ? (poselmOuterRect.top + poselmOuterRect.height - 1)
+                                : poselmOuterRect.top - size.height
+                            ),
                 "left":     left,
                 "height":   size.height,
                 "width":    size.width

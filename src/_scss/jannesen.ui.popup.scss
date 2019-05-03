@@ -59,7 +59,7 @@
         overflow-y:     hidden;
         box-sizing:     border-box;
         overflow:       hidden;
-        transition:     height ease-in-out .2s;
+        transition:     height ease-in-out .2s, top ease-in-out .2s;
 
         &:focus  { @include input-focus();  }
 
