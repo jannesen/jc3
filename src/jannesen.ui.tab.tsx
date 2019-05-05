@@ -110,7 +110,7 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
             const loadTask = tab.loadTab(this, this._sizeContent);
 
             if (loadTask) {
-                this._timer = $J.setTimeout(() => this._setVisuableTab(tab as Tab,), 250);
+                this._timer = $J.setTimeout(() => this._setVisuableTab(tab as Tab), 250);
                 loadTask.finally(() => this._setVisuableTab(tab as Tab)); // Don't need to inform the formloader is already doing this.
             }
             else {
