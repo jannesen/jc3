@@ -86,7 +86,7 @@ export function isIUrlValue(v: Object): v is IUrlValue {
  */
 export interface ICallArgs //!!TODO
 {
-    [key: string]: string|number|boolean|Object;
+    [key: string]: string|number|boolean|Object|null;
 }
 
 //=============================================== Error Classes ===================================
