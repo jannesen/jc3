@@ -1,11 +1,11 @@
 ﻿$jc-input-forground-color:             #033c73 !default;
 $jc-input-background-color:            #ffffff !default;
 $jc-input-forground-disabled-color:    $jc-input-forground-color !default;
-$jc-input-background-disabled-color:   transparent !default;
+$jc-input-background-disabled-color:   #e8e8e8 !default;
 $jc-input-border-color:                #cccccc !default;
 $jc-input-border-error-color:          #dd5600 !default;
 $jc-input-border-focus-color:          #2fa4e7 !default;
-$jc-input-border-disabled-color:       transparent !default;
+$jc-input-border-disabled-color:       $jc-input-border-color !default;
 $jc-input-border-radius:               0px !default;
 $jc-input-padding-top-bottom:          0.33em !default;
 $jc-input-padding-left-right:          0.5em !default;
