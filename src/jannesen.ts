@@ -836,6 +836,51 @@ export function setTimeout(handler: ()=>void, delay:number, thisArg?:any) {
     return window.setTimeout(eventWrapper("timeout", handler, thisArg), delay);
 }
 
+export class Timeout
+{
+    private     _handler:      ()=>void;
+    private     _thisArg:       any;
+    private     _timeout:       number|undefined;
+
+                constructor(handler: ()=>void, thisArg?:any)
+    {
+        this._handler = handler;
+        this._thisArg = thisArg;
+        this._timeout = undefined;
+    }
+
+    public      start(timeout:number)
+    {
+        if (this._timeout === undefined) {
+            this._timeout = setTimeout(this._timeoutHandler, timeout, this);
+        }
+    }
+    public      set(timeout:number)
+    {
+        this.clear();
+        this._timeout = setTimeout(this._timeoutHandler, timeout, this);
+    }
+    public      clear()
+    {
+        if (this._timeout !== undefined) {
+            clearTimeout(this._timeout);
+            this._timeout = undefined;
+        }
+    }
+
+    private     _timeoutHandler()
+    {
+        this._timeout = undefined;
+
+        try {
+            this._handler.call(this._thisArg);
+        }
+        catch(e) {
+            globalError('Timeout.handler failed.', e);
+        }
+    }
+}
+
 //=============================================== runAsync ========================================
 const g_truepromise = Promise.resolve(true);
 let g_runQueue:((() => void)|null)[]|undefined = undefined;

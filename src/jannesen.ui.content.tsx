@@ -547,7 +547,7 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
 
         return this._loader.execute(executor, ct);
     }
-    public              executeDisplayError(e: Error): $JA.Task<void>
+    public              executeDisplayError(e:string|Error|Error[]): $JA.Task<void>
     {
         return this.execute((ct) => DialogError.show(e, ct));
     }
