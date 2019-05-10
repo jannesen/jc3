@@ -25,7 +25,7 @@ export interface IMenuButtonAttr
     menupos?:           MenuPosition;
     menuclass?:         string;
     firstmenuclass?:    string;
-    dataSource?:        (ct:$JA.ICancellationToken)=>IDataSourceResult;
+    dataSource?:        (ct:$JA.ICancellationToken)=>IDataSourceResult|undefined;
     onclick?:           (data:any)=>void;
 }
 export class MenuButton extends $JD.Container
