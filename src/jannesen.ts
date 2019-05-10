@@ -836,30 +836,53 @@ export function setTimeout(handler: ()=>void, delay:number, thisArg?:any) {
     return window.setTimeout(eventWrapper("timeout", handler, thisArg), delay);
 }
 
+/**
+ * Timeout class
+ */
 export class Timeout
 {
     private     _handler:      ()=>void;
     private     _thisArg:       any;
     private     _timeout:       number|undefined;
 
+    /**
+     * @param handler
+     *  handler to call when the timeout fires.
+     * @param thisArg
+     *  this value when calling handler
+     */
                 constructor(handler: ()=>void, thisArg?:any)
     {
         this._handler = handler;
         this._thisArg = thisArg;
         this._timeout = undefined;
     }
-
+    /**
+     * start timeout. If timeout is already running do noting.
+     * 
+     * @param timeout
+     *  timeout in ms.
+     */
     public      start(timeout:number)
     {
         if (this._timeout === undefined) {
             this._timeout = setTimeout(this._timeoutHandler, timeout, this);
         }
     }
+    /**
+     *  set timeout. If timeout is already running reset timeout to new value.
+     *  
+     * @param timeout
+     *  timeout in ms.
+     */
     public      set(timeout:number)
     {
         this.clear();
         this._timeout = setTimeout(this._timeoutHandler, timeout, this);
     }
+    /**
+     *  clear timeout
+     */
     public      clear()
     {
         if (this._timeout !== undefined) {
