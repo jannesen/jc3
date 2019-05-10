@@ -604,10 +604,16 @@ export abstract class SimpleType<TNative> extends BaseType
     }
 
     /**
-     *!!DOC
+     * Return true if data has a value (not equal default).
+     * If the data is bound to a input and the input is invalid then this functions returns false.
      */
     public get hasValue() {
-        return this.value !== this.Default;
+        try {
+            return this.value !== this.Default;
+        }
+        catch (e) {
+            return false;
+        }
     }
 
     /**
@@ -683,7 +689,6 @@ export abstract class SimpleType<TNative> extends BaseType
     }
 
 
-
     /**
      *!!DOC
      */
@@ -693,6 +698,19 @@ export abstract class SimpleType<TNative> extends BaseType
         }
     }
 
+    /**
+     * Return the value of the data.
+     * If the data is bound to a input and the input is invalid then this function return undefined.
+     */
+    public getValue()
+    {
+        try {
+            return this.value;
+        }
+        catch (e) {
+            return undefined;
+        }
+    }
     /**
      *!!DOC
      */
