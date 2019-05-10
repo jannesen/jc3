@@ -157,10 +157,10 @@ export class Main extends $JD.Container
                                                                                 title="Open side menu"/> }
                                 { this._title_div    = <div   class="-title"    /> }
                                 <div class="-right">
-                                    { this._nav_back    = <button class="-nav-back -disabled"    tabIndex="-1" onclick={() => { if (this.gotoback) this.gotoback(); } } title="Go back"/> }
-                                    { this._nav_refresh = <button class="-nav-refresh -disabled" tabIndex="-1" onclick={() => { this.refresh();                     } } title="Refresh" /> }
-                                    { this._nav_prev    = <button class="-nav-prev -disabled"    tabIndex="-1" onclick={() => { this.gotoprev();                    } } title="Previous record"/> }
-                                    { this._nav_next    = <button class="-nav-next -disabled"    tabIndex="-1" onclick={() => { this.gotonext();                    } } title="Next record"/> }
+                                    { this._nav_back    = <button class="-nav-back"    disabled={true} tabIndex="-1" onclick={() => { if (this.gotoback) this.gotoback(); } } title="Go back"/> }
+                                    { this._nav_refresh = <button class="-nav-refresh" disabled={true} tabIndex="-1" onclick={() => { this.refresh();                     } } title="Refresh" /> }
+                                    { this._nav_prev    = <button class="-nav-prev"    disabled={true} tabIndex="-1" onclick={() => { this.gotoprev();                    } } title="Previous record"/> }
+                                    { this._nav_next    = <button class="-nav-next"    disabled={true} tabIndex="-1" onclick={() => { this.gotonext();                    } } title="Next record"/> }
                                     { this._moremenu    = <$JUM.MenuButton class="jannesen-ui-menu -button -moremenu"
                                                                            title="Action menu"
                                                                            menupos={$JUM.MenuPosition.Right}
@@ -295,12 +295,12 @@ export class Main extends $JD.Container
     {
         if (this._formloader.contentBody && this._formloader.contentBody.contentNameClass === formNameClass) {
             this._moremenu.disabled = true;
-            this._nav_refresh.toggleClass("-disabled", true);
+            this._nav_refresh.disabled = true;
         }
 
         if (!(formstate && formstate.argset)) {
-            this._nav_prev.toggleClass("-disabled", true);
-            this._nav_next.toggleClass("-disabled", true);
+            this._nav_prev.disabled = true;
+            this._nav_next.disabled = true;
         }
 
         return this._formloader.open(formNameClass, args, formstate, ct);
@@ -308,7 +308,7 @@ export class Main extends $JD.Container
     private         _updateStyle(transition:boolean)
     {
         if (this._sidebar) {
-            this._sidebar_close!.toggleClass("-disabled", !this._sidebar_pinned);
+            this._sidebar_close!.disabled = !this._sidebar_pinned;
             this._sidebar_pin!.toggleClass("-true",       this._sidebar_pinned);
             this._sidebar_open!.css("width",              this._sidebar_visible && this._sidebar_pinned ? 0 : undefined);
             this._sidebar.toggleClass("-visible",        this._sidebar_visible);
@@ -424,10 +424,10 @@ export class Main extends $JD.Container
 
         if (reason === $JUC.FormChangedReason.Loaded && sourceform && form === sourceform) {
             const argset = form && form._formstate ? form._formstate.argset : undefined;
-            this._nav_back   .toggleClass("-disabled", !(typeof this.gotoback === 'function'));
-            this._nav_refresh.toggleClass("-disabled", !(this._formloader.contentBody && typeof (this._formloader.contentBody as any).refresh === 'function'));
-            this._nav_prev   .toggleClass("-disabled", !(argset && argset.hasPrev()));
-            this._nav_next   .toggleClass("-disabled", !(argset && argset.hasNext()));
+            this._nav_back   .disabled = !(typeof this.gotoback === 'function');
+            this._nav_refresh.disabled = !(this._formloader.contentBody && typeof (this._formloader.contentBody as any).refresh === 'function');
+            this._nav_prev   .disabled = !(argset && argset.hasPrev());
+            this._nav_next   .disabled = !(argset && argset.hasNext());
 
             if (isLoaded) {
                 form!.focus();

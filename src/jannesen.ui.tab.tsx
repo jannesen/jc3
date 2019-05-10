@@ -60,11 +60,11 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
 
         container.data('tabs', this);
 
-        this.addTab(children);
+        this._addChild(children);
         container.bind("AddedToDocument", this._updsize, this);
 
         if (attr && attr.selectfirst && this._children.length > 0) {
-            this.setTab(this._children[0]);
+            this.selectTab(this._children[0]);
         }
     }
 
@@ -79,12 +79,23 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
         super.trigger(eventName, ev);
     }
 
-    public      addTab(...children: AddTab[]) {
-        for (let child of children) {
-            this._addChild(child);
+    public      addTabAt(at:number|undefined, tab:Tab)
+    {
+        if (typeof at === 'number' && at < 0) at = 0;
+
+        if (typeof at === 'number' && at < this._children.length) {
+            const next = this._children[at];
+            this._children.splice(at, 0, tab);
+            next.titleElement.insertBefore(tab.titleElement);
+            next.container.insertBefore(tab);
+        }
+        else {
+            this._children.push(tab);
+            this._tabHeader.appendChild(tab.titleElement);
+            this._container.appendChild(tab);
         }
     }
-    public      setTab(tab: string|number|Tab|undefined): void|$JA.Task<void> {
+    public      selectTab(tab: string|number|Tab|undefined): void|$JA.Task<void> {
         if (typeof tab === 'string') {
             tab = this._children.find((t) => t.name === tab);
         }
@@ -136,9 +147,7 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
             }
         }
         else if (child instanceof Tab) {
-            this._children.push(child);
-            this._tabHeader.appendChild(child.titleElement);
-            this._container.appendChild(child);
+            this.addTabAt(undefined, child);
         }
     }
     private     _updsize() {
@@ -225,7 +234,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
     public set  enabled(enabled:boolean) {
         if (this._enabled !== enabled) {
             this._enabled = enabled;
-            this._titleElement.toggleClass("-disabled", !enabled);
+            this._titleElement.disabled = !enabled;
         }
     }
     public get  tabContent()
@@ -244,7 +253,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
         this._moremenu      = attr.moremenu;
 
         if (!this._enabled) {
-            this._titleElement.addClass("-disabled");
+            this._titleElement.disabled = true;
         }
         if (!this._loaded) {
             if (!(this._loadcontent = attr.loadcontent)) {
@@ -293,7 +302,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
         if (this._enabled && !this._active) {
             const tabs = this.Tabs;
             if (tabs) {
-                tabs.setTab(this);
+                tabs.selectTab(this);
             }
         }
     }

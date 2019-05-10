@@ -68,7 +68,7 @@ input.jannesen-input, textarea.jannesen-input, select.jannesen-input, div.jannes
         @include input-hover();
     }
 
-    &[disabled]:hover, &.-disabled:hover {
+    &[disabled]:hover {
         border-color: $jc-input-border-disabled-color
     }
 }
@@ -86,7 +86,7 @@ input.jannesen-input, textarea.jannesen-input, select.jannesen-input {
     padding:            $jc-input-padding-top-bottom $jc-input-padding-left-right;
 }
 
-input[disabled].jannesen-input, textarea[disabled].jannesen-input, select[disabled].jannesen-input, div.jannesen-input.-disabled, div.jannesen-input > input[disabled] {
+input:disabled.jannesen-input, textarea:disabled.jannesen-input, select:disabled.jannesen-input, div.jannesen-input[disabled], div.jannesen-input > input:disabled {
     background-color:   $jc-input-background-disabled-color;
     color:              $jc-input-forground-disabled-color;
     border-color:       $jc-input-border-disabled-color;
@@ -198,7 +198,7 @@ div.jannesen-input {
         }
     }
 
-    &.-disabled {
+    &[disabled] {
         > span.-dropdown-button {
             display: none;
         }

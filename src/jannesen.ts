@@ -859,7 +859,7 @@ export class Timeout
     }
     /**
      * start timeout. If timeout is already running do noting.
-     * 
+     *
      * @param timeout
      *  timeout in ms.
      */
@@ -871,7 +871,7 @@ export class Timeout
     }
     /**
      *  set timeout. If timeout is already running reset timeout to new value.
-     *  
+     *
      * @param timeout
      *  timeout in ms.
      */

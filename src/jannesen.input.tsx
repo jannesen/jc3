@@ -21,7 +21,7 @@ export interface IControlOptions
     name?:      string;
     extClass?:  string;
     width?:     number|string;
-    enabled?:   boolean;
+    disabled?:  boolean;
 }
 
 /**
@@ -31,6 +31,7 @@ export interface IControl<T extends $JT.BaseType>
 {
     readonly    value: T|undefined;
     readonly    isVisible: boolean;
+                disabled: boolean;
                 linkValue(value: T|undefined): void;
                 valueChanged(reason:$JT.ChangeReason): void;
                 attrChanged(attrName: string): void;
@@ -38,7 +39,6 @@ export interface IControl<T extends $JT.BaseType>
                 isDirty(): boolean;
                 setError(message: string|null): void;
                 focus(): void;
-                enabled(e?:boolean): boolean;
                 getinputelm(): $JD.DOMHTMLElement;
 }
 
@@ -69,6 +69,42 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
     protected   _opts:          TOpts;
     protected   _value:         TValue|undefined;
     protected   _errormsg:      ErrorMessage|undefined;
+
+    /**
+     * !!DOC
+     */
+    public get      isVisible() : boolean
+    {
+        return this._container.isVisible;
+    }
+
+    /**
+     * !!DOC
+     */
+    public get  disabled()
+    {
+        return this._container.disabled;
+    }
+    public set  disabled(d:boolean)
+    {
+        let cur = this._container.disabled;
+
+        d = !!d;
+        if (cur !== d) {
+            let input = this.getinputelm();
+
+            switch(input.prop("tagName")) {
+            case "INPUT":
+            case "TEXTAREA":
+            case "SELECT":
+                input.disabled = d;
+            }
+
+            this._container.disabled = d;
+        }
+    }
+
+
 
     constructor(opts: TOpts) {
         this._opts      = opts;
@@ -157,48 +193,16 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
     /**
      * !!DOC
      */
-    public get      isVisible() : boolean {
-        return this._container.isVisible;
-    }
-
-    /**
-     * !!DOC
-     */
-    public          focus() {
+    public      focus() {
         this.getinputelm().focus();
-    }
-
-    /**
-     * !!DOC
-     */
-    public          enabled(e?:boolean) {
-        let cur = !this._container.hasClass("-disabled");
-
-        if (e !== undefined) {
-            e = !!e;
-            if (cur !== e) {
-                let input = this.getinputelm();
-
-                switch(input.prop("tagName")) {
-                case "INPUT":
-                case "TEXTAREA":
-                case "SELECT":
-                    input.attr("disabled", e ? undefined:1);
-                }
-
-                this._container.toggleClass("-disabled", !(cur = e));
-            }
-        }
-
-        return cur;
     }
 
     protected       setcontainer(container: $JD.DOMHTMLElement) {
         container.bind("RemovedFromDocument", this.control_destroy, this);
         this._container = container;
 
-        if (this._opts.enabled !== null && this._opts.enabled !== undefined) {
-            this.enabled(this._opts.enabled);
+        if (typeof this._opts.disabled === 'boolean') {
+            this.disabled = this._opts.disabled;
         }
     }
 
@@ -785,7 +789,7 @@ export class Boolean extends SimpleControl<$JT.Boolean, IBooleanControlOptions>
     }
 
     private     _onClick(): void {
-        if (this.enabled()) {
+        if (!this.disabled) {
             this._setValueByUI(this._getValue() !== true);
         }
     }
@@ -1002,13 +1006,36 @@ export class SelectRadio<TNativeValue extends $JT.SelectValue, TDatasource exten
     protected   _value:         $JT.SelectType<TNativeValue, TDatasource>|undefined;
     protected   _keyvalue:      TNativeValue|null|undefined;
     protected   _buttons:       RadioButton<TNativeValue,TDatasource>[];
-    protected   _enabled:       boolean;
+    protected   _disabled:      boolean;
+
+    /**
+     * !!DOC
+     */
+    public get  isVisible() : boolean
+    {
+        return false;
+    }
+
+    /**
+     * !!DOC
+     */
+    public get  disabled() {
+        return this._disabled;
+    }
+    public set  disabled(d:boolean) {
+        this._disabled = !!d;
+
+        for (let b of this._buttons) {
+            b.disabled = d;
+        }
+    }
+
 
     constructor() {
         this._value    = undefined;
         this._keyvalue = undefined;
         this._buttons  = [];
-        this._enabled  = true;
+        this._disabled = false;
     }
 
     /**
@@ -1067,28 +1094,10 @@ export class SelectRadio<TNativeValue extends $JT.SelectValue, TDatasource exten
     /**
      * !!DOC
      */
-    public get  isVisible() : boolean {
-        return false;
-    }
-
-    /**
-     * !!DOC
-     */
     public      focus() {
         if (this._buttons.length > 0) {
             this._buttons[0].focus();
         }
-    }
-
-    /**
-     * !!DOC
-     */
-    public      enabled(e?:boolean): boolean {
-        if (e !== undefined) {
-            this._enabled = e;
-        }
-
-        return this._enabled;
     }
 
     public      getinputelm(): $JD.DOMHTMLElement
@@ -1138,6 +1147,21 @@ export class RadioButton<TNativeValue extends $JT.SelectValue, TDatasource exten
     private _container:     $JD.DOMHTMLElement;
     private _button:        $JD.DOMHTMLElement;
 
+    public get  container()
+    {
+        return this._container;
+    }
+
+    public get  disabled()
+    {
+        return this.container.disabled;
+    }
+    public set  disabled(d:boolean)
+    {
+        this.container.disabled = d;
+    }
+
+
     constructor(control: SelectRadio<TNativeValue,TDatasource>, keyvalue: TNativeValue, text:string, checked:boolean) {
         let container = <div class="jannesen-input -radio"/>;
         let button:$JD.DOMHTMLElement;
@@ -1164,10 +1188,6 @@ export class RadioButton<TNativeValue extends $JT.SelectValue, TDatasource exten
         this._button    = button;
     }
 
-    public get container() {
-        return this._container;
-    }
-
     public      focus() {
         this._button.focus();
     }
@@ -1183,7 +1203,7 @@ export class RadioButton<TNativeValue extends $JT.SelectValue, TDatasource exten
     }
 
     private _onClick() {
-        if (this._control) {
+        if (this._control && !this.disabled) {
             this._control._onclick(this._keyvalue);
             this.focus();
         }

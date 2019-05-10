@@ -711,6 +711,23 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
     /**
      * !!DOC
      */
+    public get  disabled()
+    {
+        return typeof this._element.getAttribute('disabled') === 'string';
+    }
+    public set  disabled(d:boolean)
+    {
+        if (d) {
+            this._element.setAttribute('disabled', '1');
+        }
+        else {
+            this._element.removeAttribute('disabled');
+        }
+    }
+
+    /**
+     * !!DOC
+     */
     public childNodes(idx:number): DOMHTMLElement
     {
         if (idx>=0 && idx < this._element.childNodes.length) {

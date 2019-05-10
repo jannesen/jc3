@@ -321,14 +321,14 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
         let rtn:void|$JA.Task<void>;
 
         if (typeof this.args._tab === 'string') {
-            rtn = tabs.setTab(this.args._tab);
+            rtn = tabs.selectTab(this.args._tab);
         }
 
         tabs.bind('selected',  this._onTabSelected, this);
         tabs.bind('visible',   this._onTabVisable, this);
 
         if (!tabs.selectedTab) {
-            rtn = tabs.setTab(0);
+            rtn = tabs.selectTab(0);
         }
 
         return rtn;

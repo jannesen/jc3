@@ -35,11 +35,11 @@ export class MenuButton extends $JD.Container
 
     public get  disabled()
     {
-        return this._container.hasClass("-disabled");
+        return this._container.disabled;
     }
     public set  disabled(disabled:boolean)
     {
-        this._container.toggleClass("-disabled", disabled);
+        this._container.disabled = disabled;
     }
     public get  attr() {
         return this._attr;

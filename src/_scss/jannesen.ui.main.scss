@@ -217,11 +217,11 @@ div.jannesen-ui-main {
                                 border-color     ease-in-out $jc-main-mouse-transition-time,
                                 width            ease-in-out $jc-main-sidebar-transition-time,
                                 opacity          linear $jc-main-sidebar-transition-time;
-            &::before {
+            &:before {
                 display:        inline-block;
                 position:       absolute;
             }
-            &.-disabled {
+            &:disabled {
                 opacity:        0;
                 pointer-events: none;
             }

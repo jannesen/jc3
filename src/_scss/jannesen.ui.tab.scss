@@ -22,7 +22,7 @@
                 background-color:   hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 10%) );
                 border-color:       hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 20%) );
             }
-            &.-disabled {
+            &[disabled] {
                 opacity:            .3;
                 text-decoration:    line-through;
             }
