@@ -467,7 +467,7 @@ export abstract class InputTextDropdownControl<TNativeValue,
         super.control_destroy();
     }
 
-    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>, className:string, focus:boolean, context?: $J.ICallArgs|null|false, onready?:(content:TDropdown)=>void):void {
+    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>, className:string, focus:boolean, context: $J.ICallArgs|null|false, onready?:(content:TDropdown)=>void):void {
         if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass && $J.isEqual(this._activeDropdown.Context, context))) {
             this.closeDropdown(false);
 
@@ -890,7 +890,7 @@ export class Date extends InputTextDropdownControl<number, $JT.Date, Date, IDate
                 this.focus();
                 this.parseInput(false);
                 this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-date",true);
+                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-date", true, null);
             } catch(e) {
                 this.setError(e.message);
             }
@@ -921,7 +921,7 @@ export class DateTime extends InputTextDropdownControl<number, $JT.DateTime, Dat
                 this.focus();
                 this.parseInput(false);
                 this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-time",true);
+                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-time", true, null);
             } catch(e) {
                 this.setError(e.message);
             }
@@ -982,7 +982,7 @@ export class Time extends InputTextDropdownControl<number, $JT.Time, Time, ITime
                 this.focus();
                 this.parseInput(false);
                 this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-time",true);
+                this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-time", true, null);
             } catch(e) {
                 this.setError(e.message);
             }
