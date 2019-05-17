@@ -1142,7 +1142,7 @@ export const enum StringOptions
     LowerCase               = 0x0002,
     UpperCase               = 0x0004,
     RemoveInvalidChars      = 0x0008,
-    KeepTrailingSpaces      = 0x0010
+    NoTrim                  = 0x0010
 }
 /**
  *!!DOC
@@ -1182,8 +1182,9 @@ export class String extends SimpleType<string>
 
     public cnvTextToValue(text: string): string|null {
         let options = this.Options;
-        if (!(options & StringOptions.KeepTrailingSpaces)) {
-            text = text.replace(/\s+$/, "");
+
+        if (!(options & StringOptions.NoTrim)) {
+            text = text.trim();
         }
         if (text === "") {
             return null;
