@@ -730,13 +730,13 @@ export abstract class SimpleType<TNative> extends BaseType
             this._value = value;
 
             if (this._control)
-                this._control.valueChanged(reason);
+                this._control.valueChanged(reason, true);
 
             if (this._eventHandlers)
                 this.trigger("changed", reason);
         } else {
-            if (this._control && this._control.isDirty())
-                this._control.valueChanged(reason);
+            if (this._control)
+                this._control.valueChanged(reason, false);
         }
     }
 

@@ -33,10 +33,9 @@ export interface IControl<T extends $JT.BaseType>
     readonly    isVisible: boolean;
                 disabled: boolean;
                 linkValue(value: T|undefined): void;
-                valueChanged(reason:$JT.ChangeReason): void;
+                valueChanged(reason:$JT.ChangeReason, changed:boolean): void;
                 attrChanged(attrName: string): void;
                 parseInput(validate:boolean): void;
-                isDirty(): boolean;
                 setError(message: string|null): void;
                 focus(): void;
                 getinputelm(): $JD.DOMHTMLElement;
@@ -132,14 +131,14 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
     public      linkValue(value: TValue|undefined): void {
         this._value = value;
         if (value) {
-            this.valueChanged($JT.ChangeReason._linked);
+            this.valueChanged($JT.ChangeReason._linked, true);
         }
     }
 
     /**
      * !!DOC
      */
-    public      valueChanged(reason:$JT.ChangeReason): void {
+    public      valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
         throw new $J.InvalidStateError("Not implemented valueChanged().");
     }
 
@@ -147,14 +146,6 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
      * !!DOC
      */
     public      attrChanged(attrName: string): void {
-    }
-
-    /**
-     * !!DOC
-     */
-    public      isDirty(): boolean
-    {
-        throw new $J.InvalidStateError("Not implemented isDirty().");
     }
 
     /**
@@ -290,8 +281,8 @@ export abstract class InputTextControl<TNativeValue,
         this.setcontainer(container);
     }
 
-    public          valueChanged(reason:$JT.ChangeReason): void {
-        if (this._value) {
+    public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
+        if (this._value && (changed || this.isDirty())) {
             let vvalue = this._value.internalvalue;
             this._text = (vvalue !== null ? this._value.cnvValueToText(vvalue, this._value.getAttr("format")) : "");
 
@@ -447,9 +438,9 @@ export abstract class InputTextDropdownControl<TNativeValue,
         this._activeDropdown = undefined;
     }
 
-    public                  valueChanged(reason:$JT.ChangeReason): void {
+    public                  valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
         this.closeDropdown(true);
-        super.valueChanged(reason);
+        super.valueChanged(reason, changed);
     }
     public                  dropdownClose(value:any)
     {
@@ -693,14 +684,16 @@ export class StringMultiLine extends SimpleControl<$JT.StringMultiLine, IStringM
         this.setcontainer(textarea);
     }
 
-    public          valueChanged(reason:$JT.ChangeReason): void {
-        let vvalue = this._value ? this._value.internalvalue : null;
-        this._text = vvalue !== null ? this._value!.cnvValueToText(vvalue) : "";
+    public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
+        if (this._value && (changed || this._container.prop("value") !== this._text)) {
+            let vvalue = this._value.internalvalue;
+            this._text = vvalue !== null ? this._value!.cnvValueToText(vvalue) : "";
 
-        if (this._container.prop("value") !== this._text)
-            this._container.prop("value", this._text);
+            if (this._container.prop("value") !== this._text)
+                this._container.prop("value", this._text);
 
-        this.setError(null);
+            this.setError(null);
+        }
     }
 
     public          parseInput(validate:boolean): void {
@@ -792,13 +785,6 @@ export class Boolean extends SimpleControl<$JT.Boolean, IBooleanControlOptions>
         if (!this.disabled) {
             this._setValueByUI(this._getValue() !== true);
         }
-    }
-
-    /**
-     * !!DOC
-     */
-    public      isDirty() {
-        return false;
     }
 
     private     _onKeyPress(ev:KeyboardEvent):void {
@@ -1071,12 +1057,6 @@ export class SelectRadio<TNativeValue extends $JT.SelectValue, TDatasource exten
     public      attrChanged(attrName: string): void {
     }
 
-    /**
-     * !!DOC
-     */
-    public      isDirty() {
-        return false;
-    }
 
     /**
      * !!DOC
@@ -1251,7 +1231,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
         this._inputTimer   = undefined;
     }
 
-    public          valueChanged(reason:$JT.ChangeReason): void {
+    public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
         this._activelookup = undefined;
 
         if (this._value) {
