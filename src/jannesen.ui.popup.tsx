@@ -410,6 +410,7 @@ export class DropdownPopup<TNativeValue,
                                 extends Popup
 {
     /* @internal */     _popupcontainer:    $JD.DOMHTMLElement;
+    /* @internal */     _focuselement:      $JD.DOMHTMLElement;
     /* @internal */     _input:             TInput|null;
     private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>;
     private             _context:           $J.ICallArgs|null;
@@ -429,10 +430,11 @@ export class DropdownPopup<TNativeValue,
         return this._content;
     }
 
-                        constructor(input:TInput, dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>, className:string, context:$J.ICallArgs|null)
+                        constructor(input:TInput, focuselement:$JD.DOMHTMLElement, dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>, className:string, context:$J.ICallArgs|null)
     {
         super(input.container,  "-dropdown " + className);
         this.Show(this._popupcontainer = <div class="-popup"/>);
+        this._focuselement   = focuselement;
         this._input          = input;
         this._dropdownClass  = dropdownClass;
         this._context        = context;
@@ -515,7 +517,7 @@ export class DropdownPopup<TNativeValue,
         if (this._container && this._input && this._poselmOuterRect) {
             if (!keepfocus) {
                 if (this._container.attr("tabIndex") !== undefined) {
-                    this._input.getinputelm().focus();
+                    this._focuselement.focus();
                     this._container.attr("tabIndex", undefined);
                 }
             }
@@ -710,20 +712,20 @@ export abstract class DropdownContent<TNativeValue,
 
     protected           ForwardTab(input:TInput|null, ev: Event|undefined) {
         if (input && ev instanceof KeyboardEvent && ev.key === 'Tab' && !ev.altKey && !ev.metaKey && !ev.ctrlKey &&
-            $global.document.activeElement === input.getinputelm().element) {
-            input.getinputelm().element.dispatchEvent(new KeyboardEvent(ev.type, {
-                                                                            code:       ev.code,
-                                                                            key:        ev.key,
-                                                                            location:   ev.location,
-                                                                            repeat:     ev.repeat,
-                                                                            altKey:     ev.altKey,
-                                                                            ctrlKey:    ev.ctrlKey,
-                                                                            metaKey:    ev.metaKey,
-                                                                            shiftKey:   ev.shiftKey,
-                                                                            bubbles:    true,
-                                                                            cancelable: true,
-                                                                            view:       $global.window
-                                                                        }));
+            $global.document.activeElement === this._popup._focuselement.element) {
+            this._popup._focuselement.element.dispatchEvent(new KeyboardEvent(ev.type, {
+                                                                                  code:       ev.code,
+                                                                                  key:        ev.key,
+                                                                                  location:   ev.location,
+                                                                                  repeat:     ev.repeat,
+                                                                                  altKey:     ev.altKey,
+                                                                                  ctrlKey:    ev.ctrlKey,
+                                                                                  metaKey:    ev.metaKey,
+                                                                                  shiftKey:   ev.shiftKey,
+                                                                                  bubbles:    true,
+                                                                                  cancelable: true,
+                                                                                  view:       $global.window
+                                                                              }));
         }
     }
 }

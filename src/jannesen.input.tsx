@@ -38,7 +38,6 @@ export interface IControl<T extends $JT.BaseType>
                 parseInput(validate:boolean): void;
                 setError(message: string|null): void;
                 focus(): void;
-                getinputelm(): $JD.DOMHTMLElement;
 }
 
 /**
@@ -466,7 +465,7 @@ export abstract class InputTextDropdownControl<TNativeValue,
                 return;
             }
 
-            this._activeDropdown  = new $JPOPUP.DropdownPopup(this as any /* Typing is ok */, dropdownClass, className, context);
+            this._activeDropdown  = new $JPOPUP.DropdownPopup(this as any /* Typing is ok */, this._input, dropdownClass, className, context);
             this._activeDropdown.container!.bind("blur", this.input_onblur, this);
         }
 
