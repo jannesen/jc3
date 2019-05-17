@@ -411,10 +411,10 @@ export abstract class InputTextDropdownControl<TNativeValue,
                                                TValue extends $JT.SimpleType<TNativeValue>,
                                                TInput extends InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, TDropdown>,
                                                TOpts extends IInputControlOptions,
-                                               TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TOpts, TDropdown>>
+                                               TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TDropdown>>
                                                     extends InputTextControl<TNativeValue, TValue, TOpts>
 {
-    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TValue, TInput, TOpts, TDropdown>|undefined;
+    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TValue, TInput, TDropdown>|undefined;
 
                             constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown: boolean)
     {
@@ -457,7 +457,7 @@ export abstract class InputTextDropdownControl<TNativeValue,
         super.control_destroy();
     }
 
-    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>, className:string, focus:boolean, context: $J.ICallArgs|null|false, onready?:(content:TDropdown)=>void):void {
+    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>, className:string, focus:boolean, context: $J.ICallArgs|null|false, onready?:(content:TDropdown)=>void):void {
         if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass && $J.isEqual(this._activeDropdown.Context, context))) {
             this.closeDropdown(false);
 

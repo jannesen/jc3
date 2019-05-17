@@ -17,7 +17,7 @@ interface ICurrentFetch<TRecord>
     searchtext?:    string|string[];
 }
 
-export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>> extends $JPOPUP.DropdownContent<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, $JI.ISelectInputControlOptions<TNativeValue,TDatasource>, SelectInputDropdown<TNativeValue,TDatasource>>
+export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>> extends $JPOPUP.DropdownContent<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, SelectInputDropdown<TNativeValue,TDatasource>>
 {
     private     _datasource:                TDatasource;
     private     _columns:                   $JT.ISelectTypeAttributeDropdownColumn[];
@@ -31,7 +31,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
     private     _mouseenabled:              boolean;
     private     _mousemovecnt:              number|undefined;
 
-    constructor(popup: $JPOPUP.DropdownPopup<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, $JI.ISelectInputControlOptions<TNativeValue,TDatasource>, SelectInputDropdown<TNativeValue,TDatasource>>, context: $J.IUrlArgsColl|undefined)
+    constructor(popup: $JPOPUP.DropdownPopup<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, SelectInputDropdown<TNativeValue,TDatasource>>, context: $J.IUrlArgsColl|undefined)
     {
         super(popup);
         const container = this.container!;

@@ -32,12 +32,11 @@ export const enum PositionFlags
     _fixed       = 0x88 // Bit mask fox fix position
 }
 export interface IDropdownConstructor<TNativeValue,
-                                      TValue extends $JT.SimpleType<TNativeValue>,
-                                      TInput extends $JI.InputTextDropdownControl<TNativeValue, TValue, TInput, TOpt, TDropdown>,
-                                      TOpt extends $JI.IInputControlOptions,
-                                      TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TOpt, TDropdown>>
+                                      TValue extends $JT.BaseType,
+                                      TInput extends IControlDropdown<TValue>,
+                                      TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown>>
 {
-    new     (popup: DropdownPopup<TNativeValue, TValue, TInput, TOpt, TDropdown>, context:$J.ICallArgs|null): TDropdown;
+    new     (popup: DropdownPopup<TNativeValue, TValue, TInput, TDropdown>, context:$J.ICallArgs|null): TDropdown;
 }
 
 interface ICssPosition
@@ -402,17 +401,22 @@ export class Tooltip extends Popup
     }
 }
 
+export interface IControlDropdown<TValue extends $JT.BaseType> extends $JI.IControl<TValue>
+{
+    readonly    container:          $JD.DOMHTMLElement;
+    dropdownClose(value:any):       void;
+}
+
 export class DropdownPopup<TNativeValue,
-                           TValue extends $JT.SimpleType<TNativeValue>,
-                           TInput extends $JI.InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, TDropdown>,
-                           TOpts extends $JI.IInputControlOptions,
-                           TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TOpts, TDropdown>>
+                           TValue extends $JT.BaseType,
+                           TInput extends IControlDropdown<TValue>,
+                           TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown>>
                                 extends Popup
 {
     /* @internal */     _popupcontainer:    $JD.DOMHTMLElement;
     /* @internal */     _focuselement:      $JD.DOMHTMLElement;
     /* @internal */     _input:             TInput|null;
-    private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TValue, TInput, TOpts, TDropdown>;
+    private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>;
     private             _context:           $J.ICallArgs|null;
     private             _content:           TDropdown|undefined;
     private             _onreadyHandler:    ((content:TDropdown)=>void)|undefined;
@@ -629,12 +633,11 @@ export class DropdownPopup<TNativeValue,
 }
 
 export abstract class DropdownContent<TNativeValue,
-                                      TValue extends $JT.SimpleType<TNativeValue>,
-                                      TInput extends $JI.InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, TDropdown>,
-                                      TOpts extends $JI.IInputControlOptions,
-                                      TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TOpts, TDropdown>>
+                                      TValue extends $JT.BaseType,
+                                      TInput extends IControlDropdown<TValue>,
+                                      TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown>>
 {
-    protected           _popup:         DropdownPopup<TNativeValue, TValue, TInput, TOpts, TDropdown>;
+    protected           _popup:         DropdownPopup<TNativeValue, TValue, TInput, TDropdown>;
 
     protected get       container()
     {
@@ -649,7 +652,7 @@ export abstract class DropdownContent<TNativeValue,
         return this._popup._popupcontainer;
     }
 
-                        constructor(popup:DropdownPopup<TNativeValue, TValue, TInput, TOpts, TDropdown>)
+                        constructor(popup:DropdownPopup<TNativeValue, TValue, TInput, TDropdown>)
     {
         this._popup   = popup;
     }
