@@ -314,6 +314,7 @@ interface DOMElementEventMap
     "blur":                       FocusEvent;
     "focus":                      FocusEvent;
     "focusin":                    FocusEvent;
+    "focusout":                   FocusEvent;
     "keydown":                    KeyboardEvent;
     "keypress":                   KeyboardEvent;
     "keyup":                      KeyboardEvent;
