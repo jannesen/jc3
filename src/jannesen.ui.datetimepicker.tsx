@@ -325,7 +325,7 @@ export class DateInputDropdown extends InputDropdown<$JT.Date, $JI.Date, $JI.IDa
         super(popup);
     }
 
-    public          OnInit()
+    public          OnLoad()
     {
         const value       = this.input!.value!;
         const nativeValue = value.value;
@@ -352,7 +352,7 @@ export class DateTimeInputDropdown extends InputDropdown<$JT.DateTime, $JI.DateT
         super(popup);
     }
 
-    public          OnInit()
+    public          OnLoad()
     {
         const value       = this.input!.value!;
         const nativeValue = value.value;
@@ -379,7 +379,7 @@ export class TimeInputDropdown extends InputDropdown<$JT.Time, $JI.Time, $JI.ITi
         super(popup);
     }
 
-    public          OnInit()
+    public          OnLoad()
     {
         const value       = this.input!.value!;
         const nativeValue = value.value;
@@ -408,7 +408,7 @@ export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue,
     protected       _from!: DatePicker;
     protected       _to!:   DatePicker;
 
-    public          OnInit() {
+    public          OnLoad() {
         this._from = new DatePicker();
         this._to   = new DatePicker();
         let self        = this;

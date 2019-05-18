@@ -2,6 +2,7 @@
 /* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
 import * as $J          from "jc3/jannesen";
+import * as $JA         from "jc3/jannesen.async";
 import * as $JD         from "jc3/jannesen.dom";
 import * as $JT         from "jc3/jannesen.datatype";
 import * as $JI         from "jc3/jannesen.input";
@@ -419,7 +420,8 @@ export class DropdownPopup<TNativeValue,
     private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>;
     private             _context:           $J.ICallArgs|null;
     private             _content:           TDropdown|undefined;
-    private             _onreadyHandler:    ((content:TDropdown)=>void)|undefined;
+    private             _cancellationToken: $JA.CancellationTokenSource;
+    private             _loadTask!:         $JA.Task<TDropdown>;
 
     public get          DropdownClass()
     {
@@ -433,68 +435,40 @@ export class DropdownPopup<TNativeValue,
     {
         return this._content;
     }
-
+    public get          LoadTask()
+    {
+        return this._loadTask;
+    }
                         constructor(input:TInput, focuselement:$JD.DOMHTMLElement, dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>, className:string, context:$J.ICallArgs|null)
     {
         super(input.container,  "-dropdown " + className);
         this.Show(this._popupcontainer = <div class="-popup"/>);
-        this._focuselement   = focuselement;
-        this._input          = input;
-        this._dropdownClass  = dropdownClass;
-        this._context        = context;
-        this._content        = undefined;
-
-        if (typeof dropdownClass === 'function') {
-            this._content = new dropdownClass(this, context);
-        } else {
-            let classNameParts = dropdownClass.split(":", 2);
-
-            require([ classNameParts[0] ],
-                (c:any) => {
-                    if (this._container) {
-                        try {
-                            if (classNameParts.length > 1) {
-                                c = c[classNameParts[1]];
-
-                                if (c === undefined) {
-                                    throw new $J.LoadError("Can't locate '" + classNameParts[1] + "' in module.");
-                                }
-                            }
-
-                            if (!((c.prototype) instanceof DropdownContent)) {
-                                throw new $J.LoadError("dropdownClass is not a DropdownContent constructor.");
-                            }
-
-                            const content = new c(this, context);
-                            this._content = content;
-                            content.OnInit();
-
-                            let onreadyHandler = this._onreadyHandler;
-                            this._onreadyHandler = undefined;
-                            if (onreadyHandler)
-                                onreadyHandler(content);
-                        }
-                        catch(e) {
-                            this.setMessage(e);
-                        }
-                    }
-                },
-                (e:any) => {
-                    let err = new $J.LoadError("Loading of module '" + classNameParts[0] + "' failed.");
-                    err.innerError = e;
-                    this.setMessage(err);
-                });
-        }
+        this._focuselement      = focuselement;
+        this._input             = input;
+        this._dropdownClass     = dropdownClass;
+        this._context           = context;
+        this._content           = undefined;
+        this._cancellationToken = new $JA.CancellationTokenDom(this.container);
     }
 
-    public              OnReadyHandler(onready:(content:TDropdown)=>void)
+    public              load()
     {
-        if (this._content) {
-            onready(this._content);
-        } else {
-            this._onreadyHandler = onready;
-        }
+        this._loadTask = loadDropdownConstructor(this._dropdownClass, this._cancellationToken)
+                             .then((constructor) => {
+                                       const content = new constructor(this, this._context) as TDropdown;
+                                       this._content = content;
+                                       const t = content.OnLoad(this._cancellationToken);
+                                       return (t) ? t.then(() => content) : content;
+                                   })
+                             .catch((err) => {
+                                        if (this.container) {
+                                            this.setMessage(err);
+                                        }
+
+                                        throw err;
+                                    });
     }
+
     public              Focus()
     {
         if (!this._container) {
@@ -508,6 +482,8 @@ export class DropdownPopup<TNativeValue,
     }
     public              Remove()
     {
+        this._cancellationToken.cancel();
+
         if (this._content) {
             this._content.OnRemove();
         }
@@ -657,7 +633,7 @@ export abstract class DropdownContent<TNativeValue,
         this._popup   = popup;
     }
 
-    public              OnInit()
+    public              OnLoad(ct:$JA.CancellationTokenSource): $JA.Task<void>|void
     {
     }
     public              OnFocus()
@@ -731,4 +707,38 @@ export abstract class DropdownContent<TNativeValue,
                                                                               }));
         }
     }
+}
+
+
+function loadDropdownConstructor<TNativeValue,
+                                 TValue extends $JT.BaseType,
+                                 TInput extends IControlDropdown<TValue>,
+                                 TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown>>(dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>, ct:$JA.ICancellationToken)
+{
+
+    if (typeof dropdownClass === 'function') {
+        return $JA.Task.resolve(dropdownClass);
+    }
+
+    let classNameParts = dropdownClass.split(":", 2);
+    if (classNameParts.length !== 2) {
+        throw new $J.InvalidStateError("Invalid dropdownClass '" + classNameParts + "'");
+    }
+
+    return $JA.Require(classNameParts[0], ct)
+              .then((r) => {
+                        if (r instanceof Object) {
+                            const c = (r as any)[classNameParts[1]];
+
+                            if (c !== undefined) {
+                                if (!$J.testContructorOf(c, DropdownContent as any)) {
+                                    throw new $J.LoadError("'" + classNameParts[1] + "' in module '" + classNameParts[0] + "' is not a DropdownContent constructor.");
+                                }
+
+                                return c as IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>;
+                            }
+                        }
+
+                        throw new $J.LoadError("Can't locate '" + classNameParts[1] + "' in module '" + classNameParts[0] + "'.");
+                    });
 }
