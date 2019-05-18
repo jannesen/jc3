@@ -457,7 +457,7 @@ export abstract class InputTextDropdownControl<TNativeValue,
         super.control_destroy();
     }
 
-    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>, className:string, focus:boolean, context: $J.ICallArgs|null|false, onready?:(content:TDropdown)=>void):void {
+    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>, className:string, focus:boolean, context:$J.ICallArgs|null|false, onready?:(content:TDropdown)=>void) {
         if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass && $J.isEqual(this._activeDropdown.Context, context))) {
             this.closeDropdown(false);
 
@@ -466,6 +466,7 @@ export abstract class InputTextDropdownControl<TNativeValue,
             }
 
             this._activeDropdown  = new $JPOPUP.DropdownPopup(this as any /* Typing is ok */, this._input, dropdownClass, className, context);
+            this._activeDropdown.load();
             this._activeDropdown.container!.bind("blur", this.input_onblur, this);
         }
 
@@ -474,7 +475,7 @@ export abstract class InputTextDropdownControl<TNativeValue,
         }
 
         if (onready) {
-            this._activeDropdown.OnReadyHandler(onready);
+            this._activeDropdown.LoadTask.then(onready);
         }
     }
     protected               closeDropdown(restorefocus:boolean) {
@@ -1307,25 +1308,13 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
                 const text = (this.getinputelm().prop("value") as string).trim();
 
                 if (text.length > 0) {
-                    this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown",
-                                     "-select",
-                                     true,
-                                     this._getContext(),
-                                     (content) => {
-                                        content.Refresh(text);
-                                    });
+                    this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown", "-select", true, this._getContext(), (content) => content.Refresh(text));
                     return;
                 }
             }
 
             if ((this._value.Datasource.flags & ($JT.SelectDatasourceFlags.StaticEnum|$JT.SelectDatasourceFlags.SearchAll)) !== 0) {
-                this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown",
-                                 "-select",
-                                 true,
-                                 this._getContext(),
-                                 (content) => {
-                                    content.Refresh("");
-                                });
+                this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown", "-select", true, this._getContext(), (content) => content.Refresh(""));
             }
         }
     }
@@ -1415,13 +1404,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
                 this.closeDropdown(false);
                 this._value.setValue(null, $JT.ChangeReason.UI);
             } else {
-                this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown",
-                                 "-select",
-                                 focus,
-                                 this._getContext(),
-                                 (content) => {
-                                    content.Refresh(text);
-                                });
+               this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown", "-select", focus, this._getContext(), (content) => content.Refresh(text));
             }
         }
     }

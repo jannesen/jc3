@@ -1,4 +1,5 @@
 ﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="../js/alameda.d.ts" />
 import * as $J   from "jc3/jannesen";
 import * as $JD  from "jc3/jannesen.dom";
 

@@ -1,6 +1,4 @@
 ﻿/// <reference path="lib-ext.d.ts"/>
-/// <reference path="../js/require.d.ts" />
-
 var tick_per_day            = (24*60*60*1000);
 var rounderror              = (1.005 * 100) - 100.5;
 var global_uniqueidcounter  = 1;

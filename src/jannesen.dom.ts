@@ -1,5 +1,4 @@
 ﻿/// <reference path="lib-ext.d.ts"/>
-/// <reference path="../js/require.d.ts" />
 import * as $J    from "jc3/jannesen";
 
 var ondomreadyHandlers:             $J.IEventWrapper[]|undefined  = [];
