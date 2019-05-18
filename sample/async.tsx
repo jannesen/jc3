@@ -70,7 +70,7 @@ function promise_error(delay: number, cancellationToken:$JA.ICancellationToken)
 
 function AjaxCall(url:string, cancellationToken:$JA.ICancellationToken)
 {
-    return $JA.Ajax<$JA.IAjaxCallDefinition<void, void, string>>(undefined, { url: require.mapUrl(url) }, cancellationToken)
+    return $JA.Ajax<$JA.IAjaxCallDefinition<void, void, string>>(undefined, { url }, cancellationToken)
               .then((d) => { $JD.body.appendChild(<p>{ JSON.stringify(d) }</p>); return d; });
 }
 
