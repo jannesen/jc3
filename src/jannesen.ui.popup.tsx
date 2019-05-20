@@ -201,17 +201,6 @@ export abstract class Popup
             this.Show(<div>loading . . .</div>, false, "-loading");
         }
     }
-    protected   showError(err:Error|string)
-    {
-        const container = this._container;
-        if (container) {
-            if (err instanceof Error) {
-                err = $J.translateError(err);
-            }
-
-            this.Show(<div>{ $JD.multilineStringToContent(err) }</div>, true, "-error");
-        }
-    }
     protected   PositionPopup(container:$JD.DOMHTMLElement, poselmOuterRect:$JD.IRect, flags?: PositionFlags): void {
         if (flags === undefined) {
             flags = PositionFlags.AlignLeft | PositionFlags.Bottom;

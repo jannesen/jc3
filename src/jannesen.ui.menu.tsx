@@ -268,7 +268,7 @@ class Menu extends $JUP.Popup
                                       this._showMenu(data);
                                   },
                                   (err) => {
-                                      this.showError(err);
+                                      this._showError(err);
                                   });
         } else {
             this._showMenu(datasourceresult);
@@ -354,8 +354,19 @@ class Menu extends $JUP.Popup
                 container.bind('mousedown', (ev: any) => ev.preventDefault());
             }
             else {
-                this.showError("No data.");
+                this._showError("No data.");
             }
+        }
+    }
+    private     _showError(err:Error|string)
+    {
+        const container = this._container;
+        if (container) {
+            if (err instanceof Error) {
+                err = $J.translateError(err);
+            }
+
+            this.Show(<div>{ $JD.multilineStringToContent(err) }</div>, true, "-error");
         }
     }
     private     _selectItem(item: MenuEntry|null, openMenu:boolean)
