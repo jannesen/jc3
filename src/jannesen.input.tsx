@@ -442,7 +442,7 @@ export abstract class InputTextDropdownControl<TNativeValue,
         this.closeDropdown(true);
         super.valueChanged(reason, changed);
     }
-    public                  dropdownClose(value:any)
+    public                  dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined)
     {
         this.closeDropdown(true);
 
@@ -451,6 +451,23 @@ export abstract class InputTextDropdownControl<TNativeValue,
             if (v) {
                 v.setValue(value, $JT.ChangeReason.UI);
             }
+        }
+
+        if (ev instanceof KeyboardEvent && ev.key === 'Tab' && !(ev.ctrlKey || ev.altKey && ev.metaKey) &&
+            $global.document.activeElement === this._input.element) {
+            $global.document.activeElement.dispatchEvent(new KeyboardEvent(ev.type, {
+                                                                               code:       ev.code,
+                                                                               key:        ev.key,
+                                                                               location:   ev.location,
+                                                                               repeat:     ev.repeat,
+                                                                               altKey:     ev.altKey,
+                                                                               ctrlKey:    ev.ctrlKey,
+                                                                               metaKey:    ev.metaKey,
+                                                                               shiftKey:   ev.shiftKey,
+                                                                               bubbles:    true,
+                                                                               cancelable: true,
+                                                                               view:       $global.window
+                                                                           }));
         }
     }
     protected               control_destroy() {
@@ -1286,9 +1303,9 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
         this.input_textchange();
     }
 
-    public          dropdownClose(value:TNativeValue|undefined)
+    public          dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined)
     {
-        super.dropdownClose(value);
+        super.dropdownClose(value, ev);
         if (value !== undefined && this._activeDropdown) {
             this._inputContext = value !== null ? this._activeDropdown.Calldata : null;
         }
@@ -1348,6 +1365,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
         if (!(evt.altKey || evt.ctrlKey || evt.metaKey)) {
             switch(evt.key) {
             case "ArrowDown":
+            case "F4":
                 evt.preventDefault();
                 evt.stopPropagation();
 

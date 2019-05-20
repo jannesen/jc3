@@ -406,8 +406,8 @@ export class Tooltip extends Popup
 
 export interface IControlDropdown<TValue extends $JT.BaseType, TDropdownRtn> extends $JI.IControl<TValue>
 {
-    readonly    container:                          $JD.DOMHTMLElement;
-    dropdownClose(value:TDropdownRtn|undefined):   void;
+    readonly    container:                                             $JD.DOMHTMLElement;
+    dropdownClose(value:TDropdownRtn|undefined, ev:Event|undefined):   void;
 }
 
 export class DropdownPopup<TNativeValue,
@@ -678,12 +678,12 @@ export abstract class DropdownContent<TNativeValue,
     {
         this._popup.setContent(content);
     }
-    protected           Close(value?:any)
+    protected           Close(value:TDropdownRtn|undefined, ev:Event|undefined)
     {
         let input = this.input;
 
         if (input) {
-            input.dropdownClose(value);
+            input.dropdownClose(value, ev);
         }
     }
     protected           PositionPopup() {

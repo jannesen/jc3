@@ -295,14 +295,10 @@ export abstract class InputDropdown<TValue extends $JT.SimpleType<number>,
                                         const value = ev && ev.value;
 
                                         if (value === undefined) {
-                                            this.Close(undefined);
+                                            this.Close(undefined, (ev ? ev.event : undefined));
                                         }
                                         else if (value === null || (minValue <= value && maxValue >= value)) {
-                                            this.Close(value);
-
-                                            if (ev) {
-                                                this.ForwardTab(input, ev.event);
-                                            }
+                                            this.Close(value, (ev ? ev.event : undefined));
                                         }
                                     }
                                 });
@@ -462,9 +458,7 @@ export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue,
                                     toclicked   = true;
 
                                     if (typeof begin !== 'number' || typeof end !== 'number') {
-                                        if (self.rtnValue(dtvalue, value, value)) {
-                                            self.ForwardTab(input, ev.event);
-                                        }
+                                        self.rtnValue(dtvalue, value, value, ev.event);
                                         return;
                                     }
                                 }
@@ -472,15 +466,13 @@ export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue,
 
                             if (fromclicked && toclicked) {
                                 if (typeof begin === 'number' && typeof end === 'number' && begin <= end) {
-                                    if (self.rtnValue(dtvalue, begin, end)) {
-                                        self.ForwardTab(input, ev.event);
-                                    }
+                                    self.rtnValue(dtvalue, begin, end, ev.event);
                                 }
                             }
                         }
                     }
                     else {
-                        self.Close(undefined);
+                        self.Close(undefined, undefined);
                     }
                 }
             }
@@ -488,7 +480,7 @@ export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue,
     }
 
     protected abstract  initState(value:TValue): void;
-    protected abstract  rtnValue(value:TValue, begin:number, end:number): boolean;
+    protected abstract  rtnValue(value:TValue, begin:number, end:number, ev:Event|undefined): void;
 }
 
 export class DateRangeInputDropdown extends RangeInputDropdown<$JTE.DateRange, $JIE.DateRange, $JIE.IDateRangeControlOptions, DateRangeInputDropdown>
@@ -517,17 +509,14 @@ export class DateRangeInputDropdown extends RangeInputDropdown<$JTE.DateRange, $
                            };
     }
 
-    protected           rtnValue(value:$JTE.DateRange, begin:number, end:number): boolean {
+    protected           rtnValue(value:$JTE.DateRange, begin:number, end:number, ev:Event|undefined): void {
         const minValue    = value.MinValue;
         const maxValue    = value.MaxValue;
 
         if ((minValue === undefined || minValue <= begin) &&
             (maxValue === undefined || maxValue >= end)) {
-            this.Close({ Begin: begin, End: end });
-            return true;
+            this.Close({ Begin: begin, End: end }, ev);
         }
-
-        return false;
     }
 }
 
@@ -574,7 +563,7 @@ export class DateTimeRangeInputDropdown extends RangeInputDropdown<$JTE.DateTime
                            };
     }
 
-    protected           rtnValue(value:$JTE.DateTimeRange, begin:number, end:number): boolean {
+    protected           rtnValue(value:$JTE.DateTimeRange, begin:number, end:number, ev:Event|undefined): void {
         const minValue    = value.MinValue;
         const maxValue    = value.MaxValue;
 
@@ -589,11 +578,8 @@ export class DateTimeRangeInputDropdown extends RangeInputDropdown<$JTE.DateTime
 
         if ((minValue === undefined || minValue <= begin) &&
             (maxValue === undefined || maxValue >= end)) {
-            this.Close({ Begin: begin, End: end });
-            return true;
+            this.Close({ Begin: begin, End: end }, ev);
         }
-
-        return false;
     }
 }
 

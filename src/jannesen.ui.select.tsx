@@ -91,7 +91,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
                                         });
         container.bind("click", (ev) => {
                                             this._mouseenabled = true;
-                                            this._clickrow(this._getrow(ev.target));
+                                            this._clickrow(this._getrow(ev.target), ev);
                                         });
         this._mouseenabled = false;
     }
@@ -244,18 +244,16 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
                     return true;
 
                 case "Tab": {
-                        const input = this.input;
-                        this._clickrow(this._selectedRow, false);
-                        this.ForwardTab(input, ev);
+                        this._clickrow(this._selectedRow, ev);
                     }
                     return true;
 
                 case "Enter":
-                    this._clickrow(this._selectedRow);
+                    this._clickrow(this._selectedRow, ev);
                     return true;
 
                 case "Escape":
-                    this.Close();
+                    this.Close(undefined, ev);
                     return true;
 
                 case "PageUp":
@@ -397,7 +395,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
             return p === 0 || (p > 0 && !/[A-Z-0-9]/.test(s[p-1]));
         }
     }
-    private     _clickrow(row:number|undefined, tab?:boolean)
+    private     _clickrow(row:number|undefined, ev:Event|undefined)
     {
         if (this._tbodydata && row !== undefined) {
             let rec = this._tbodydata[row];
@@ -409,14 +407,14 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
                         datasource.addrecord(rec);
                         v = rec;
                     }
-                    this.Close(v);
+                    this.Close(v, ev);
                     return;
                 }
             }
         }
 
-        if (tab) {
-            this.Close(undefined);
+        if (ev instanceof KeyboardEvent && ev.key === 'Tab' && !(ev.ctrlKey || ev.altKey || ev.metaKey)) {
+            this.Close(undefined, ev);
         }
     }
     private     _select(row?:number)
