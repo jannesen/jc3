@@ -411,11 +411,11 @@ export abstract class InputTextDropdownControl<TNativeValue,
                                                TValue extends $JT.SimpleType<TNativeValue>,
                                                TInput extends InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, TDropdown, TCalldata>,
                                                TOpts extends IInputControlOptions,
-                                               TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TDropdown, TCalldata>,
+                                               TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TDropdown, TCalldata, TNativeValue|null>,
                                                TCalldata = void>
                                                     extends InputTextControl<TNativeValue, TValue, TOpts>
 {
-    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TValue, TInput, TDropdown, TCalldata>|undefined;
+    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TValue, TInput, TDropdown, TCalldata, TNativeValue|null>|undefined;
 
                             constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown: boolean)
     {
@@ -458,7 +458,7 @@ export abstract class InputTextDropdownControl<TNativeValue,
         super.control_destroy();
     }
 
-    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown, TCalldata>, className:string, focus:boolean, calldata:TCalldata, onready?:(content:TDropdown)=>void) {
+    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown, TCalldata, TNativeValue|null>, className:string, focus:boolean, calldata:TCalldata, onready?:(content:TDropdown)=>void) {
         if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass && $J.isEqual(this._activeDropdown.Calldata, calldata))) {
             this.closeDropdown(false);
             this._activeDropdown  = new $JPOPUP.DropdownPopup(this as any /* Typing is ok */, this._input, dropdownClass, className, calldata);
@@ -1286,7 +1286,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
         this.input_textchange();
     }
 
-    public          dropdownClose(value:any)
+    public          dropdownClose(value:TNativeValue|undefined)
     {
         super.dropdownClose(value);
         if (value !== undefined && this._activeDropdown) {

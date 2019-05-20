@@ -17,7 +17,7 @@ interface ICurrentFetch<TRecord>
     searchtext?:    string|string[];
 }
 
-export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>> extends $JPOPUP.DropdownContent<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, SelectInputDropdown<TNativeValue,TDatasource>, $JI.SelectInputContext>
+export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>> extends $JPOPUP.DropdownContent<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, SelectInputDropdown<TNativeValue,TDatasource>, $JI.SelectInputContext, TNativeValue|null>
 {
     private     _datasource:                TDatasource;
     private     _columns:                   $JT.ISelectTypeAttributeDropdownColumn[];
