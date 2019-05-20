@@ -46,7 +46,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
         this._context     = context;
         this._searchtext  = "";
 
-        this._setMessage("loading...", true);
+        this.setMessage("loading...", false);
 
         container.bind("keydown", (ev) => {
                                             if (this._onkeydown(ev)) {
@@ -128,7 +128,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
                         this._fetchdata_start(searchtext, this.input!.get_opts().fetchmax || 250);
                     } else {
                         this._currectfetch = undefined;
-                        this._setMessage($JL.more_input_necessary);
+                        this.setMessage($JL.more_input_necessary, true);
                     }
                 }
             } else {
@@ -146,7 +146,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
         } catch(err) {
             this._currectfetch = undefined;
             this._data         = undefined;
-            this._setMessage(err);
+            this.setMessage(err, true);
         }
     }
     public      OnFocus()
@@ -157,6 +157,14 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
     public      OnRemove()
     {
         this._stopfetchdata();
+    }
+
+    public      setMessage(msg:string|Error, resetfocus?: boolean)
+    {
+        this._tbody            = undefined;
+        this._tbodydata        = undefined;
+        this._selectedRow      = undefined;
+        super.setMessage(msg, resetfocus);
     }
 
     private     _stopfetchdata()
@@ -191,7 +199,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
                                     if (typeof data === 'string' && data === "TOMANY-RESULTS") {
                                         this._currectfetch = undefined;
                                         this._data         = undefined;
-                                        this._setMessage($JL.more_input_necessary);
+                                        this.setMessage($JL.more_input_necessary, true);
                                         return;
                                     }
                                     else if (Array.isArray(data)) {
@@ -214,7 +222,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
                                 } catch(err) {
                                     this._currectfetch = undefined;
                                     this._data         = undefined;
-                                    this._setMessage(err);
+                                    this.setMessage(err, true);
                                 }
                             }
                         }
@@ -227,7 +235,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
 
                             if (this.container) {
                                 this.container.removeClass("-busy");
-                                this._setMessage(err);
+                                this.setMessage(err, true);
                             }
                         }
                     });
@@ -340,7 +348,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
             }
 
             if (tbdata.length === 0) {
-                this._setMessage($JL.no_result);
+                this.setMessage($JL.no_result, true);
                 return;
             }
 
@@ -373,7 +381,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
             }
             this.PositionPopup();
         } catch(err) {
-            this._setMessage(err);
+            this.setMessage(err, true);
         }
     }
     private     _datafilter(rec:$JT.TDatasource_Record<TDatasource>): boolean
@@ -471,13 +479,6 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
         }
 
         return undefined;
-    }
-    private     _setMessage(msg:string|Error, keepfocus?: boolean)
-    {
-        this._tbody            = undefined;
-        this._tbodydata        = undefined;
-        this._selectedRow      = undefined;
-        this.setMessage(msg, keepfocus);
     }
 }
 

@@ -485,10 +485,10 @@ export class DropdownPopup<TNativeValue,
         super.Remove();
     }
 
-    /* @internal */     setMessage(msg:string|Error, keepfocus?:boolean)
+    /* @internal */     setMessage(msg:string|Error, resetfocus?:boolean)
     {
         if (this._container && this._input && this._poselmOuterRect) {
-            if (!keepfocus) {
+            if (resetfocus) {
                 if (this._container.attr("tabIndex") !== undefined) {
                     this._focuselement.focus();
                     this._container.attr("tabIndex", undefined);
@@ -659,9 +659,9 @@ export abstract class DropdownContent<TNativeValue,
         return false;
     }
 
-    protected           setMessage(msg:string|Error, keepfocus?:boolean)
+    protected           setMessage(msg:string|Error, resetfocus?:boolean)
     {
-        this._popup.setMessage(msg, keepfocus);
+        this._popup.setMessage(msg, resetfocus);
     }
     protected           setContent(content:$JD.AddNode)
     {
