@@ -429,7 +429,7 @@ export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue,
         this.container!.bind('keydown', (ev) => {
                 switch (ev.key) {
                 case "Escape":
-                    this._popup.Remove();
+                    this.Close(undefined, ev);
                     break;
                 default:
                     active.onKeyDown(ev);

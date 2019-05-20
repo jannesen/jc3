@@ -238,18 +238,21 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
             const container = this.container;
             const input     = this.input;
 
-            if (this._selectedRow !== undefined && this._tbodydata && container && input) {
+            if (container && input) {
                 switch(ev.key) {
                 case "Backspace":
                     return true;
 
-                case "Tab": {
+                case "Tab":
+                    if (typeof this._selectedRow === 'number') {
                         this._clickrow(this._selectedRow, ev);
                     }
                     return true;
 
                 case "Enter":
-                    this._clickrow(this._selectedRow, ev);
+                    if (typeof this._selectedRow === 'number') {
+                        this._clickrow(this._selectedRow, ev);
+                    }
                     return true;
 
                 case "Escape":
@@ -257,23 +260,31 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
                     return true;
 
                 case "PageUp":
-                    this._select(this._selectedRow - calcPageStep(container));
+                    if (typeof this._selectedRow === 'number') {
+                        this._select(this._selectedRow - calcPageStep(container));
+                    }
                     return true;
 
                 case "PageDown":
-                    this._select(this._selectedRow + calcPageStep(container));
+                    if (typeof this._selectedRow === 'number') {
+                        this._select(this._selectedRow + calcPageStep(container));
+                    }
                     return true;
 
                 case "End":
-                    this._select(this._tbodydata.length - 1);
+                    if (this._tbodydata) {
+                        this._select(this._tbodydata.length - 1);
+                    }
                     return true;
 
                 case "Home":
-                    this._select(0);
+                    if (this._tbodydata) {
+                        this._select(0);
+                    }
                     return true;
 
                 case "ArrowUp":
-                    if (this._selectedRow > 0)
+                    if (typeof this._selectedRow === 'number' && this._selectedRow > 0)
                         this._select(this._selectedRow - 1);
                     else
                         input.getinputelm().focus();
@@ -281,9 +292,9 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasour
                     return true;
 
                 case "ArrowDown":
-                    if (this._selectedRow < this._tbodydata.length - 1)
+                    if (typeof this._selectedRow === 'number' && this._selectedRow < this._tbodydata!.length - 1) {
                         this._select(this._selectedRow + 1);
-
+                    }
                     return true;
 
                 default:

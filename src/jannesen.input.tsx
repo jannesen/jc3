@@ -444,30 +444,32 @@ export abstract class InputTextDropdownControl<TNativeValue,
     }
     public                  dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined)
     {
-        this.closeDropdown(true);
+        if (this._input) {
+            this.closeDropdown(true);
 
-        if (value !== undefined) {
-            const v = this.value;
-            if (v) {
-                v.setValue(value, $JT.ChangeReason.UI);
+            if (value !== undefined) {
+                const v = this.value;
+                if (v) {
+                    v.setValue(value, $JT.ChangeReason.UI);
+                }
             }
-        }
 
-        if (ev instanceof KeyboardEvent && ev.key === 'Tab' && !(ev.ctrlKey || ev.altKey && ev.metaKey) &&
-            $global.document.activeElement === this._input.element) {
-            $global.document.activeElement.dispatchEvent(new KeyboardEvent(ev.type, {
-                                                                               code:       ev.code,
-                                                                               key:        ev.key,
-                                                                               location:   ev.location,
-                                                                               repeat:     ev.repeat,
-                                                                               altKey:     ev.altKey,
-                                                                               ctrlKey:    ev.ctrlKey,
-                                                                               metaKey:    ev.metaKey,
-                                                                               shiftKey:   ev.shiftKey,
-                                                                               bubbles:    true,
-                                                                               cancelable: true,
-                                                                               view:       $global.window
-                                                                           }));
+            if (ev instanceof KeyboardEvent && ev.key === 'Tab' && !(ev.ctrlKey || ev.altKey && ev.metaKey) &&
+                $global.document.activeElement === this._input.element) {
+                $global.document.activeElement.dispatchEvent(new KeyboardEvent(ev.type, {
+                                                                                   code:       ev.code,
+                                                                                   key:        ev.key,
+                                                                                   location:   ev.location,
+                                                                                   repeat:     ev.repeat,
+                                                                                   altKey:     ev.altKey,
+                                                                                   ctrlKey:    ev.ctrlKey,
+                                                                                   metaKey:    ev.metaKey,
+                                                                                   shiftKey:   ev.shiftKey,
+                                                                                   bubbles:    true,
+                                                                                   cancelable: true,
+                                                                                   view:       $global.window
+                                                                               }));
+            }
         }
     }
     protected               control_destroy() {
