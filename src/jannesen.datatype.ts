@@ -2841,7 +2841,7 @@ export abstract class SelectDatasource<TNative extends SelectValue, TRecord exte
     /**
      *!!DOC
      */
-    public abstract fetchdataAsync(ct:$JA.ICancellationToken, context:$J.IUrlArgsColl|undefined, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]|string>;
+    public abstract fetchdataAsync(ct:$JA.ICancellationToken, context:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]|string>;
     /**
      *!!DOC
      */
@@ -2884,7 +2884,7 @@ export class EnumSelectDatasource<TNative extends SelectValue, TRecord extends I
     public  getrecordAsync(key:TNative): TRecord|undefined {
         return this.getrecord(key);
     }
-    public  fetchdataAsync(ct:$JA.ICancellationToken, context:$J.IUrlArgsColl, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]> {
+    public  fetchdataAsync(ct:$JA.ICancellationToken, context:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]> {
         if (searchtext !== undefined)
             throw new $J.InvalidStateError("EnumSelectDatasource.search not implemented.");
 
@@ -3002,7 +3002,7 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
 
         return task;
     }
-    public  fetchdataAsync(ct:$JA.ICancellationToken, context:$J.IUrlArgsColl, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]|string> {
+    public  fetchdataAsync(ct:$JA.ICancellationToken, context:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]|string> {
         if (!this.opts.callname_fetchdata) {
             throw new $J.InvalidStateError("RemoteSelectDatasource.fetch not defined.");
         }

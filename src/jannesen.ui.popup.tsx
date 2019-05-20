@@ -35,9 +35,10 @@ export const enum PositionFlags
 export interface IDropdownConstructor<TNativeValue,
                                       TValue extends $JT.BaseType,
                                       TInput extends IControlDropdown<TValue>,
-                                      TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown>>
+                                      TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown, TCalldata>,
+                                      TCalldata>
 {
-    new     (popup: DropdownPopup<TNativeValue, TValue, TInput, TDropdown>, context:$J.ICallArgs|null): TDropdown;
+    new     (popup: DropdownPopup<TNativeValue, TValue, TInput, TDropdown, TCalldata>, context:TCalldata): TDropdown;
 }
 
 interface ICssPosition
@@ -411,14 +412,15 @@ export interface IControlDropdown<TValue extends $JT.BaseType> extends $JI.ICont
 export class DropdownPopup<TNativeValue,
                            TValue extends $JT.BaseType,
                            TInput extends IControlDropdown<TValue>,
-                           TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown>>
+                           TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown, TCalldata>,
+                           TCalldata>
                                 extends Popup
 {
     /* @internal */     _popupcontainer:    $JD.DOMHTMLElement;
     /* @internal */     _focuselement:      $JD.DOMHTMLElement;
     /* @internal */     _input:             TInput|null;
-    private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>;
-    private             _context:           $J.ICallArgs|null;
+    private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown, TCalldata>;
+    private             _calldata:          TCalldata;
     private             _content:           TDropdown|undefined;
     private             _cancellationToken: $JA.CancellationTokenSource;
     private             _loadTask!:         $JA.Task<TDropdown>;
@@ -427,9 +429,9 @@ export class DropdownPopup<TNativeValue,
     {
         return this._dropdownClass;
     }
-    public get          Context()
+    public get          Calldata()
     {
-        return this._context;
+        return this._calldata;
     }
     public get          Content()
     {
@@ -439,14 +441,14 @@ export class DropdownPopup<TNativeValue,
     {
         return this._loadTask;
     }
-                        constructor(input:TInput, focuselement:$JD.DOMHTMLElement, dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>, className:string, context:$J.ICallArgs|null)
+                        constructor(input:TInput, focuselement:$JD.DOMHTMLElement, dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown, TCalldata>, className:string, calldata:TCalldata)
     {
         super(input.container,  "-dropdown " + className);
         this.Show(this._popupcontainer = <div class="-popup"/>);
         this._focuselement      = focuselement;
         this._input             = input;
         this._dropdownClass     = dropdownClass;
-        this._context           = context;
+        this._calldata          = calldata;
         this._content           = undefined;
         this._cancellationToken = new $JA.CancellationTokenDom(this.container);
     }
@@ -455,9 +457,9 @@ export class DropdownPopup<TNativeValue,
     {
         this._loadTask = loadDropdownConstructor(this._dropdownClass, this._cancellationToken)
                              .then((constructor) => {
-                                       const content = new constructor(this, this._context) as TDropdown;
+                                       const content = new constructor(this, this._calldata) as TDropdown;
                                        this._content = content;
-                                       const t = content.OnLoad(this._cancellationToken);
+                                       const t = content.OnLoad(this._calldata, this._cancellationToken);
                                        return (t) ? t.then(() => content) : content;
                                    })
                              .catch((err) => {
@@ -611,9 +613,10 @@ export class DropdownPopup<TNativeValue,
 export abstract class DropdownContent<TNativeValue,
                                       TValue extends $JT.BaseType,
                                       TInput extends IControlDropdown<TValue>,
-                                      TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown>>
+                                      TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown, TCalldata>,
+                                      TCalldata>
 {
-    protected           _popup:         DropdownPopup<TNativeValue, TValue, TInput, TDropdown>;
+    protected           _popup:         DropdownPopup<TNativeValue, TValue, TInput, TDropdown, TCalldata>;
 
     protected get       container()
     {
@@ -628,12 +631,12 @@ export abstract class DropdownContent<TNativeValue,
         return this._popup._popupcontainer;
     }
 
-                        constructor(popup:DropdownPopup<TNativeValue, TValue, TInput, TDropdown>)
+                        constructor(popup:DropdownPopup<TNativeValue, TValue, TInput, TDropdown, TCalldata>)
     {
         this._popup   = popup;
     }
 
-    public              OnLoad(ct:$JA.CancellationTokenSource): $JA.Task<void>|void
+    public              OnLoad(calldata:TCalldata, ct:$JA.CancellationTokenSource): $JA.Task<void>|void
     {
     }
     public              OnFocus()
@@ -713,7 +716,8 @@ export abstract class DropdownContent<TNativeValue,
 function loadDropdownConstructor<TNativeValue,
                                  TValue extends $JT.BaseType,
                                  TInput extends IControlDropdown<TValue>,
-                                 TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown>>(dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>, ct:$JA.ICancellationToken)
+                                 TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown, TCalldata>,
+                                 TCalldata>(dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown, TCalldata>, ct:$JA.ICancellationToken)
 {
 
     if (typeof dropdownClass === 'function') {
@@ -735,7 +739,7 @@ function loadDropdownConstructor<TNativeValue,
                                     throw new $J.LoadError("'" + classNameParts[1] + "' in module '" + classNameParts[0] + "' is not a DropdownContent constructor.");
                                 }
 
-                                return c as IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown>;
+                                return c as IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown, TCalldata>;
                             }
                         }
 

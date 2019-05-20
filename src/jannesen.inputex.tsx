@@ -25,7 +25,7 @@ export class DateRange extends $JI.InputTextDropdownControl<$JTE.IRangeValue, $J
                 this.focus();
                 this.parseInput(false);
                 this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateRangeInputDropdown", "-date", true, null);
+                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateRangeInputDropdown", "-date", true);
             } catch (e) {
                 this.setError(e.message);
             }
@@ -57,7 +57,7 @@ export class DateTimeRange extends $JI.InputTextDropdownControl<$JTE.IRangeValue
                 this.focus();
                 this.parseInput(false);
                 this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeRangeInputDropdown", "-time", true, null);
+                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeRangeInputDropdown", "-time", true);
             } catch (e) {
                 this.setError(e.message);
             }
