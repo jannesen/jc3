@@ -1299,10 +1299,38 @@ export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource exten
         return this._opts;
     }
 
-    /* @internal */ addChar(chr:string) {
-        let input = this.getinputelm();
-        input.prop("value", input.prop("value") + chr);
-        this.input_textchange();
+    /* @internal */ dropdownKeyDown(ev:KeyboardEvent) {
+        if ((ev.key.length === 1 || (ev.key === 'Backspace' && !ev.shiftKey)) && !(ev.ctrlKey || ev.altKey || ev.metaKey) && !this.disableKeyboard()) {
+            $J.runAsync(() => {
+                            let input = this.getinputelm();
+                            let v = input.prop("value") as string;
+
+                            switch(ev.key) {
+                            case 'Backspace':
+                                if (v.length === 0) {
+                                    return;
+                                }
+
+                                v = v.substr(0, v.length - 1);
+                                break;
+
+                            default:
+                                if (v.length > 64) {
+                                    return;
+                                }
+
+                                v = v + ev.key;
+                                break;
+                            }
+
+                            input.prop("value", v);
+
+                            this.input_textchange();
+                        });
+            return true;
+        }
+
+        return false;
     }
 
     public          dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined)

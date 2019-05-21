@@ -6,11 +6,24 @@
     background-color:   $jc-input-background-color;
 
     &.-loading {
+        cursor:             wait;
         transition-duration:   .5s !important;
 
+        &::before {
+            display:        block;
+            position:       absolute;
+            left:           .25em;
+            top:            50%;
+            margin-top:     -.5em;
+            font-size:      1.333em;
+            color:          #0000a0;
+            animation:      jannesen-ui-content-fadein-loading 1s linear 0s 1, jannesen-ui-content-spin 1s infinite linear;
+            z-index:        1000;
+            @include        fa-icon($fa-icon-refresh);
+        }
         > div {
             animation:          jannesen-ui-content-fadein-loading 1s ease-in .1s 1 normal both;
-            padding:            .25em .5em;
+            padding:            .25em .5em .25em 2em;
             color:              rgba(0,0,0,.5);
         }
     }
@@ -65,7 +78,7 @@
 
         &:focus  { @include input-focus();  }
 
-        &.-busy {
+        &:not(.-loading).-busy {
             cursor:             wait;
             animation:          jannesen-ui-fade-waitbackground 1s linear 0s 1 both;
             &::before {
@@ -73,11 +86,11 @@
                 position:       absolute;
                 left:           50%;
                 top:            50%;
-                margin-top:     -8px;
-                margin-left:    -8px;
-                font-size:      16px;
+                margin-top:     -.5em;
+                margin-left:    -.5em;
+                font-size:      1.333em;
                 color:          #0000a0;
-                animation:      jannesen-ui-fade-waitspinner 1s linear 0s 1, jannesen-ui-spin 1s infinite linear;
+                animation:      jannesen-ui-content-fadein-loading 1s linear 0s 1, jannesen-ui-content-spin 1s infinite linear;
                 z-index:        1000;
                 @include        fa-icon($fa-icon-refresh);
             }
@@ -108,12 +121,15 @@
         }
     }
 
-    &.-dropdown.-select {
+    &.-dropdown.-tablelist {
         > div.-popup {
             overflow-y:     auto;
 
             &.-position {
                 max-height:     20 * (1em * (13.525/12) + .2em) + 0.4em;
+                >div {
+                    overflow-y:     scroll;
+                }
             }
 
             &:not(.-position) {

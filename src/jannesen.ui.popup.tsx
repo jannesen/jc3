@@ -433,6 +433,12 @@ export class DropdownPopup<TNativeValue,
     {
         return this._loadTask;
     }
+
+    public get          focuselement()
+    {
+        return this._focuselement;
+    }
+
                         constructor(input:TInput, focuselement:$JD.DOMHTMLElement, dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown, TCalldata, TDropdownRtn>, className:string, calldata:TCalldata)
     {
         super(input.container,  "-dropdown " + className);
@@ -703,24 +709,243 @@ export abstract class DropdownContent<TNativeValue,
             this._popup.PositionPopup(container, poselmClientRect);
         }
     }
+}
 
-    protected           ForwardTab(input:TInput|null, ev: Event|undefined) {
-        if (input && ev instanceof KeyboardEvent && ev.key === 'Tab' && !ev.altKey && !ev.metaKey && !ev.ctrlKey &&
-            $global.document.activeElement === this._popup._focuselement.element) {
-            this._popup._focuselement.element.dispatchEvent(new KeyboardEvent(ev.type, {
-                                                                                  code:       ev.code,
-                                                                                  key:        ev.key,
-                                                                                  location:   ev.location,
-                                                                                  repeat:     ev.repeat,
-                                                                                  altKey:     ev.altKey,
-                                                                                  ctrlKey:    ev.ctrlKey,
-                                                                                  metaKey:    ev.metaKey,
-                                                                                  shiftKey:   ev.shiftKey,
-                                                                                  bubbles:    true,
-                                                                                  cancelable: true,
-                                                                                  view:       $global.window
-                                                                              }));
+export abstract class TableDropdown<TNativeValue,
+                           TValue extends $JT.BaseType,
+                           TInput extends IControlDropdown<TValue, TDropdownRtn>,
+                           TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TDropdown, TCalldata, TDropdownRtn>,
+                           TCalldata,
+                           TDropdownRtn>
+                        extends DropdownContent<TNativeValue, TValue, TInput, TDropdown, TCalldata, TDropdownRtn>
+{
+    private         _tbody:                     $JD.DOMHTMLElement|undefined;
+    private         _rowcount:                  number|undefined;
+    private         _selectedRow:               number|undefined;
+    private         _mouseenabled:              boolean;
+    private         _mousemovecnt:              number|undefined;
+
+    protected get   selectedRow()
+    {
+        return this._selectedRow;
+    }
+
+                    constructor(popup:DropdownPopup<TNativeValue, TValue, TInput, TDropdown, TCalldata, TDropdownRtn>)
+    {
+        super(popup);
+        const container = this.container!;
+
+        container.bind("keydown", (ev) => {
+                                            if (this.onKeyDown(ev)) {
+                                                this._mouseenabled = false;
+                                                ev.preventDefault();
+                                                ev.stopPropagation();
+                                            }
+                                        });
+        container.bind("mousemove", (ev) => {
+                                            if (!this._mouseenabled) {
+                                                if (this._mousemovecnt !== undefined) {
+                                                    if (++(this._mousemovecnt) >= 8) {
+                                                        this._mouseenabled = true;
+                                                    }
+                                                } else {
+                                                    this._mousemovecnt = 0;
+                                                    setTimeout(() => {
+                                                                        this._mousemovecnt = undefined;
+                                                                }, 350);
+                                                }
+                                            }
+                                        });
+        container.bind("mouseover", (ev) => {
+                                            if (this._selectedRow === undefined) {
+                                                this._mouseenabled = true;
+                                            }
+
+                                            if (this._mouseenabled) {
+                                                this.selectRow(this._getrow(ev.target));
+                                            }
+                                        });
+        container.bind("mouseleave", (ev) => {
+                                            if (this._mouseenabled) {
+                                                this.selectRow(undefined);
+                                            }
+                                        });
+        container.bind("wheel", (ev) => {
+                                            this._mouseenabled = true;
+                                            $J.setTimeout(()=> {
+                                                                this.selectRow(this._getrow(document.elementFromPoint(ev.clientX, ev.clientY)));
+                                                            }, 50);
+                                        });
+        container.bind("click", (ev) => {
+                                            this._mouseenabled = true;
+                                            if (typeof this._rowcount === 'number') {
+                                                this.clickrow(this._getrow(ev.target), ev);
+                                            }
+                                        });
+        this._mouseenabled = false;
+    }
+
+    public          OnFocus()
+    {
+        if (this._selectedRow === undefined && typeof this._rowcount === 'number') {
+            this.selectRow(0);
         }
+    }
+
+    protected abstract clickrow(row:number|undefined, ev:Event|undefined):void;
+    protected abstract tableColgroup():$JD.DOMHTMLElement[] | undefined;
+
+    protected       setTBody(rows:$JD.DOMHTMLElement[])
+    {
+        this._selectedRow = undefined;
+
+        if (!this._tbody) {
+            const tbody = <tbody>
+                             { rows }
+                          </tbody>;
+
+            const colgroup = this.tableColgroup();
+            this.setContent(<div class="-data">
+                                <table>
+                                    { colgroup && <colgroup>{ colgroup }</colgroup> }
+                                    { tbody }
+                                </table>
+                            </div>);
+            this._tbody = tbody;
+        }
+        else {
+            this._tbody.empty().appendChild(rows);
+        }
+
+        this._rowcount = rows.length;
+    }
+    protected       setMessage(msg:string|Error, restorefocus?: boolean)
+    {
+        this._tbody       = undefined;
+        this._rowcount    = undefined;
+        this._selectedRow = undefined;
+        super.setMessage(msg, restorefocus);
+    }
+    protected       setBusy()
+    {
+        this._rowcount = undefined;
+        this.container!.addClass("-busy");
+    }
+
+    protected       onKeyDown(ev:KeyboardEvent):boolean
+    {
+        if (!(ev.altKey || ev.ctrlKey || ev.metaKey)) {
+            const container = this.container;
+
+            if (this._popup && container) {
+                switch(ev.key) {
+                case "Backspace":
+                    return true;
+
+                case "Tab":
+                    if (typeof this._selectedRow === 'number') {
+                        this.clickrow(this._selectedRow, ev);
+                    }
+                    return true;
+
+                case "Enter":
+                    if (typeof this._selectedRow === 'number') {
+                        this.clickrow(this._selectedRow, ev);
+                    }
+                    return true;
+
+                case "Escape":
+                    this.Close(undefined, ev);
+                    return true;
+
+                case "PageUp":
+                    if (typeof this._selectedRow === 'number') {
+                        this.selectRow(this._selectedRow - calcPageStep(container));
+                    }
+                    return true;
+
+                case "PageDown":
+                    if (typeof this._selectedRow === 'number') {
+                        this.selectRow(this._selectedRow + calcPageStep(container));
+                    }
+                    return true;
+
+                case "End":
+                    if (typeof this._rowcount === 'number') {
+                        this.selectRow(this._rowcount - 1);
+                    }
+                    return true;
+
+                case "Home":
+                    if (typeof this._rowcount === 'number') {
+                        this.selectRow(0);
+                    }
+                    return true;
+
+                case "ArrowUp":
+                    if (typeof this._selectedRow === 'number' && this._selectedRow > 0) {
+                        this.selectRow(this._selectedRow - 1);
+                    }
+                    else {
+                        this._popup.focuselement.focus();
+                    }
+                    return true;
+
+                case "ArrowDown":
+                    if (typeof this._selectedRow === 'number') {
+                        this.selectRow(this._selectedRow + 1);
+                    }
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    protected       selectRow(row:number|undefined)
+    {
+        if (this._tbody) {
+            if (this._selectedRow !== undefined) {
+                this._tbody.childNodes(this._selectedRow).removeClass("-selected");
+                this._selectedRow = undefined;
+            }
+
+            if (row !== undefined && typeof this._rowcount === 'number' && this._rowcount > 0) {
+                row = Math.max(Math.min(row, this._rowcount - 1), 0);
+                let rowelm = this._tbody.childNodes(row);
+                rowelm.addClass("-selected");
+
+                let divrect = this.container!.clientRect;
+                let rowrect = rowelm.outerRect;
+
+                if (rowrect.bottom > divrect.bottom) {
+                    this.scrollelm.element.scrollTop += rowrect.bottom - divrect.bottom + 1 + Math.min(divrect.height - rowrect.height, 0);
+                }
+                if (rowrect.top < divrect.top) {
+                    this.scrollelm.element.scrollTop += rowrect.top - divrect.top - 1;
+                }
+
+                this._selectedRow = row;
+            }
+        }
+    }
+
+    private         _getrow(elm: any)
+    {
+        if (this._tbody) {
+            let tbody = this._tbody.element;
+
+            while (elm instanceof Element && elm !== document.body && elm.parentElement !== tbody) {
+                elm = elm.parentElement;
+            }
+
+            for(let n = 0 ; n < tbody.childNodes.length ; ++n) {
+                if (tbody.childNodes[n] === elm)
+                    return n;
+            }
+        }
+
+        return undefined;
     }
 }
 
@@ -757,4 +982,9 @@ function loadDropdownConstructor<TNativeValue,
 
                         throw new $J.LoadError("Can't locate '" + classNameParts[1] + "' in module '" + classNameParts[0] + "'.");
                     });
+}
+function calcPageStep(container:$JD.DOMHTMLElement): number
+{
+    let rowheight = container.css("font-size") * 1.167 + 2;
+    return Math.max(1, Math.floor(container.clientRect.height / rowheight - 0.9));
 }
