@@ -467,13 +467,11 @@ export class DropdownPopup<TNativeValue,
 
     public              Focus()
     {
-        if (!this._container) {
-            throw new $J.InvalidStateError("DropdownPopup not show");
-        }
-
-        this._container.attr("tabIndex", 1000).focus();
-        if (this._content) {
-            this._content.OnFocus();
+        if (this._container) {
+            this._container.attr("tabIndex", 1000).focus();
+            this._loadTask.then(() => {
+                                    this._content!.OnFocus();
+                                });
         }
     }
     public              Remove()
