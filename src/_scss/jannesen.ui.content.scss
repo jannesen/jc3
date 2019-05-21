@@ -23,8 +23,8 @@ $jc-confirm-box-shadow:                     4px 4px 4px rgba($jc-confirm-color, 
 
 
 @keyframes jannesen-ui-content-fadein-loading {
-      0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 @keyframes jannesen-ui-content-fadein-dialog {
@@ -36,7 +36,7 @@ $jc-confirm-box-shadow:                     4px 4px 4px rgba($jc-confirm-color, 
   100% { opacity: 0.2; transform: scale(0.9); }
 }
 @keyframes jannesen-ui-content-spin {
-  0%   { transform: rotate(0deg); }
+    0% { transform: rotate(0deg); }
   100% { transform: rotate(359deg); }
 }
 
