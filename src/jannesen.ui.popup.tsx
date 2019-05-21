@@ -185,6 +185,8 @@ export abstract class Popup
             }
         }
 
+        this._container.css("visibility", undefined);
+
         try {
             this.PositionPopup(this._container, this._poselmOuterRect = this._parentelm.outerRect);
         }
@@ -192,8 +194,6 @@ export abstract class Popup
             $JD.body.removeChild(this._container);
             throw e;
         }
-
-        this._container.css("visibility", undefined);
     }
     protected   ShowLoading()
     {
@@ -407,7 +407,7 @@ export class DropdownPopup<TNativeValue,
                            TDropdownRtn=TNativeValue|null>
                                 extends Popup
 {
-    /* @internal */     _popupcontainer:    $JD.DOMHTMLElement;
+    /* @internal */     _popupcontainer:    $JD.DOMHTMLElement|undefined;
     /* @internal */     _focuselement:      $JD.DOMHTMLElement;
     /* @internal */     _input:             TInput|null;
     private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown, TCalldata, TDropdownRtn>;
@@ -415,6 +415,7 @@ export class DropdownPopup<TNativeValue,
     private             _content:           TDropdown|undefined;
     private             _cancellationToken: $JA.CancellationTokenSource;
     private             _loadTask!:         $JA.Task<TDropdown>;
+    private             _loadingTimer:      $J.Timeout;
 
     public get          DropdownClass()
     {
@@ -435,13 +436,15 @@ export class DropdownPopup<TNativeValue,
                         constructor(input:TInput, focuselement:$JD.DOMHTMLElement, dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown, TCalldata, TDropdownRtn>, className:string, calldata:TCalldata)
     {
         super(input.container,  "-dropdown " + className);
-        this.Show(this._popupcontainer = <div class="-popup"/>);
         this._focuselement      = focuselement;
         this._input             = input;
         this._dropdownClass     = dropdownClass;
         this._calldata          = calldata;
         this._content           = undefined;
         this._cancellationToken = new $JA.CancellationTokenDom(this.container);
+        this._loadingTimer      = new $J.Timeout(this.ShowLoading, this);
+        this.Show(null);
+        this._loadingTimer.start(200);
     }
 
     public              load()
@@ -475,6 +478,7 @@ export class DropdownPopup<TNativeValue,
     }
     public              Remove()
     {
+        this._loadingTimer.clear();
         this._cancellationToken.cancel();
 
         if (this._content) {
@@ -495,7 +499,7 @@ export class DropdownPopup<TNativeValue,
                 }
             }
 
-            this._popupcontainer.empty();
+            let divMessage:$JD.DOMHTMLElement;
 
             if (msg instanceof Error) {
                 let m:$JD.AddNode[] = [];
@@ -519,12 +523,19 @@ export class DropdownPopup<TNativeValue,
                 } catch(e) {
                 }
 
-                this._popupcontainer.appendChild(<div class="-message -error">{ m }</div>);
+                divMessage = <div class="-message -error">{ m }</div>;
             } else {
-                this._popupcontainer.appendChild(<div class="-message">{ msg }</div>);
+                divMessage = <div class="-message">{ msg }</div>;
             }
 
-            this.PositionPopup(this._container, this._poselmOuterRect);
+            if (!this._popupcontainer) {
+                this._loadingTimer.clear();
+                this.Show(this._popupcontainer = <div class="-popup">{ divMessage }</div>);
+            }
+            else {
+                this._popupcontainer.empty().appendChild(divMessage);
+                this.PositionPopup(this._container, this._poselmOuterRect);
+            }
         }
     }
     /* @internal */     setContent(content:$JD.AddNode)
@@ -533,15 +544,20 @@ export class DropdownPopup<TNativeValue,
             throw new $J.InvalidStateError("Popup not show");
         }
 
-        this._popupcontainer.empty().appendChild(content);
-        this._container.attr("tabIndex", 1000);
-        this.PositionPopup(this._container, this._poselmOuterRect);
+        if (!this._popupcontainer) {
+            this._loadingTimer.clear();
+            this.Show(this._popupcontainer = <div class="-popup">{ content }</div>);
+        }
+        else {
+            this._popupcontainer.empty().appendChild(content);
+            this.PositionPopup(this._container, this._poselmOuterRect);
+        }
     }
     /* @internal */     PositionPopup(container:$JD.DOMHTMLElement, poselmOuterRect:$JD.IRect,)
     {
         let winSize       = $JD.window.size;
         let left          = poselmOuterRect.left;
-        let size          = { width: poselmOuterRect.width, height: 2};
+        let size:$JD.ISize;
         let maxWidth      = Math.round((winSize.width) * ($JD.body.hasClass("jannesen-ui-mobile") ? 1 : 0.95));
         let maxHeight     = Math.max(winSize.height - (poselmOuterRect.top + poselmOuterRect.height), poselmOuterRect.top);
         let borderHeight:number;
@@ -561,6 +577,12 @@ export class DropdownPopup<TNativeValue,
             size.width  += borderWidth;
             size.height = Math.round(size.height + 0.44);
             size.width  = Math.round(size.width  + 0.45);
+        }
+        else {
+            size = {
+                height: this.container!.element.scrollHeight + borderHeight,
+                width:  this.container!.element.scrollWidth + borderWidth
+            };
         }
 
         if (size.width < poselmOuterRect.width) {
@@ -620,7 +642,7 @@ export abstract class DropdownContent<TNativeValue,
     }
     protected get       scrollelm()
     {
-        return this._popup._popupcontainer;
+        return this._popup._popupcontainer!;
     }
 
                         constructor(popup:DropdownPopup<TNativeValue, TValue, TInput, TDropdown, TCalldata, TDropdownRtn>)

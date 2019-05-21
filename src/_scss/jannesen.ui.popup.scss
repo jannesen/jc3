@@ -6,8 +6,10 @@
     background-color:   $jc-input-background-color;
 
     &.-loading {
-        animation:          jannesen-ui-content-fadein-loading 1s ease-in .1s 1 normal both;
+        transition-duration:   .5s !important;
+
         > div {
+            animation:          jannesen-ui-content-fadein-loading 1s ease-in .1s 1 normal both;
             padding:            .25em .5em;
             color:              rgba(0,0,0,.5);
         }

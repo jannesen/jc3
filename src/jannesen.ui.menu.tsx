@@ -240,6 +240,7 @@ class Menu extends $JUP.Popup
     private     _parent:        MenuEntry|MenuButton;
     private     _menuitems:     MenuItem<any>[]|undefined;
     private     _selected:      MenuEntry|null;
+    private     _loadingTimer:  $J.Timeout;
 
     public get  root()
     {
@@ -258,16 +259,19 @@ class Menu extends $JUP.Popup
     {
         super(parentelmparentelm, $JD.classJoin("jannesen-ui-menu -popup", root.attr.menuclass, parent === root && root.attr.firstmenuclass));
 
-        this._root   = root;
-        this._parent = parent;
+        this._root         = root;
+        this._parent       = parent;
+        this._loadingTimer = new $J.Timeout(this.ShowLoading, this);
 
         if (datasourceresult instanceof $JA.Task) {
-            this.ShowLoading();
+            this._loadingTimer.start(200);
 
             datasourceresult.then((data) => {
+                                      this._loadingTimer.clear();
                                       this._showMenu(data);
                                   },
                                   (err) => {
+                                      this._loadingTimer.clear();
                                       this._showError(err);
                                   });
         } else {
@@ -292,6 +296,7 @@ class Menu extends $JUP.Popup
 
     public      Remove()
     {
+        this._loadingTimer.clear();
         this._selectItem(null, false);
         super.Remove();
     }
