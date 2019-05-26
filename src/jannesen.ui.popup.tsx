@@ -580,7 +580,7 @@ export class DropdownPopup<TNativeValue,
             size.height += borderHeight;
             size.width  += borderWidth;
             size.height = Math.round(size.height + 0.44);
-            size.width  = Math.round(size.width  + 0.45);
+            size.width  = Math.round(size.width  + 2.45); // Add extra of 2 px to keep browser little bit more happy
         }
         else {
             size = {
