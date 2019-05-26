@@ -18,7 +18,62 @@ interface ICurrentFetch<TRecord>
     data?:          TRecord[]|null;
 }
 
-export class SelectInputDropdown<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>> extends $JPOPUP.TableDropdown<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, SelectInputDropdown<TNativeValue,TDatasource>, $JI.SelectInputContext, TNativeValue|null>
+export class ValuesDropdown<TNativeValue,
+                            TValue extends $JT.SimpleType<TNativeValue>,
+                            TInput extends $JI.InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>, void>,
+                            TOpts extends $JI.IInputControlDropdownValuesOptions<TNativeValue>>
+                        extends $JPOPUP.TableDropdown<TNativeValue, TValue, TInput, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>, void, TNativeValue|null>
+{
+    private     _values?:   TNativeValue[];
+
+    public              OnLoad(calldata:void, ct:$JA.CancellationTokenSource): $JA.Task<void>|void
+    {
+        const input           = this.input;
+
+        if (input && input.value) {
+            try {
+                const values = (input.opts.dropdown_values!)(ct);
+
+                if (values instanceof $JA.Task) {
+                    return values.then((v) => { this._fillValues(v); })
+                                 .catch((e) => {
+                                     if (!(e instanceof $JA.OperationCanceledError)) {
+                                         this.setMessage(e);
+                                     }
+                                 });
+                 }
+                else {
+                    this._fillValues(values);
+                }
+            }
+            catch (e) {
+                this.setMessage(e);
+            }
+        }
+    }
+
+    protected   clickrow(row:number|undefined, ev:Event|undefined)
+    {
+        this.Close((this._values && typeof row === 'number' ? this._values[row] : undefined), ev);
+    }
+
+    private     _fillValues(values: TNativeValue[])
+    {
+        this._values = values;
+
+        const input = this.input;
+        const value = input && input.value;
+
+        if (value) {
+            const format = value.getAttr("format");
+            this.setTBody(values.map((v) => <tr><td>{ value.cnvValueToText(v, format) }</td></tr>));
+        }
+    }
+}
+
+export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
+                                 TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>>
+                extends $JPOPUP.TableDropdown<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, SelectInputDropdown<TNativeValue,TDatasource>, $JI.SelectInputContext, TNativeValue|null>
 {
     private     _datasource:                TDatasource;
     private     _columns:                   $JT.ISelectTypeAttributeDropdownColumn[];

@@ -793,7 +793,10 @@ export abstract class TableDropdown<TNativeValue,
     }
 
     protected abstract clickrow(row:number|undefined, ev:Event|undefined):void;
-    protected abstract tableColgroup():$JD.DOMHTMLElement[] | undefined;
+    protected       tableColgroup():$JD.DOMHTMLElement[] | undefined
+    {
+        return undefined;
+    }
 
     protected       setTBody(rows:$JD.DOMHTMLElement[])
     {

@@ -71,7 +71,7 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
     /**
      * !!DOC
      */
-    public get      isVisible() : boolean
+    public get  isVisible() : boolean
     {
         return this._container.isVisible;
     }
@@ -102,8 +102,18 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
         }
     }
 
+    /**
+     * !!DOC
+     */
+    public get  opts()
+    {
+        return this._opts;
+    }
 
 
+    /**
+     * !!DOC
+     */
     constructor(opts: TOpts) {
         this._opts      = opts;
         this._value     = undefined;
@@ -561,14 +571,47 @@ export abstract class InputTextDropdownControl<TNativeValue,
 /**
  * !!DOC
  */
-export interface IIntegerControlOptions extends IInputControlOptions
+export interface IInputControlDropdownValuesOptions<TNative> extends IInputControlOptions
+{
+    dropdown_values?:   (ct:$JA.ICancellationToken) => TNative[] | $JA.Task<TNative[]>;
+}
+
+export abstract class InputTextValuesDropdownControl<TNativeValue,
+                                                     TValue extends $JT.SimpleType<TNativeValue>,
+                                                     TInput extends InputTextValuesDropdownControl<TNativeValue, TValue, TInput, TOpts>,
+                                                     TOpts extends IInputControlDropdownValuesOptions<TNativeValue>>
+                                                        extends InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, $JSELECT.ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>
+{
+                constructor(value:TValue, type:string, typeClass:string, opts:TOpts)
+    {
+        super(value, type, typeClass, opts, typeof opts.dropdown_values === 'function');
+    }
+
+    protected   openDropdown() {
+        if (this.opts.dropdown_values && this._value) {
+            try {
+                this.focus();
+                this.parseInput(false);
+                this.setError(null);
+                this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", true);
+            } catch(e) {
+                this.setError(e.message);
+            }
+        }
+    }
+}
+//===================================== InputTextControl ==========================================
+/**
+ * !!DOC
+ */
+export interface IIntegerControlOptions extends IInputControlDropdownValuesOptions<number>
 {
 }
 
 /**
  * !!DOC
  */
-export class Integer extends InputTextControl<number, $JT.Integer, IIntegerControlOptions>
+export class Integer extends InputTextValuesDropdownControl<number, $JT.Integer, Integer, IIntegerControlOptions>
 {
     constructor(value:$JT.Integer, opts:IIntegerControlOptions) {
         super(value, "text", "-integer", opts);
@@ -591,14 +634,14 @@ export class Integer extends InputTextControl<number, $JT.Integer, IIntegerContr
 /**
  * !!DOC
  */
-export interface INumberControlOptions extends IInputControlOptions
+export interface INumberControlOptions extends IInputControlDropdownValuesOptions<number>
 {
 }
 
 /**
  * !!DOC
  */
-export class Number extends InputTextControl<number, $JT.Number, INumberControlOptions>
+export class Number extends InputTextValuesDropdownControl<number, $JT.Number, Number, INumberControlOptions>
 {
     constructor(value:$JT.Number, opts:INumberControlOptions) {
         super(value, "text", "-number", opts);
@@ -624,14 +667,14 @@ export class Number extends InputTextControl<number, $JT.Number, INumberControlO
 /**
  * !!DOC
  */
-export interface IStringControlOptions extends IInputControlOptions
+export interface IStringControlOptions extends IInputControlDropdownValuesOptions<string>
 {
 }
 
 /**
  * !!DOC
  */
-export class String extends InputTextControl<string, $JT.String, IStringControlOptions>
+export class String extends InputTextValuesDropdownControl<string, $JT.String, String, IStringControlOptions>
 {
     constructor(value:$JT.String, opts:IStringControlOptions) {
         super(value, ((value.Options & $JT.StringOptions.Password) ? "password" : "text"), "-string", opts);
@@ -657,13 +700,14 @@ export class String extends InputTextControl<string, $JT.String, IStringControlO
 
         return null;
     }
+
 }
 
 //===================================== StringMultiLine ===========================================
 /**
  * !!DOC
  */
-export interface IStringMultiLineControlOptions extends IStringControlOptions
+export interface IStringMultiLineControlOptions extends IInputControlOptions
 {
     height?:    number|string;
 }
@@ -849,7 +893,7 @@ export class Boolean extends SimpleControl<$JT.Boolean, IBooleanControlOptions>
 /**
  * !!DOC
  */
-export interface IDateControlOptions extends IInputControlOptions
+export interface IDateControlOptions extends IInputControlDropdownValuesOptions<number>
 {
 }
 
