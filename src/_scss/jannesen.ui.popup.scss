@@ -4,6 +4,7 @@
     padding:            0;
     color:              $jc-input-forground-color;
     background-color:   $jc-input-background-color;
+    user-select:        none;
 
     &.-loading {
         cursor:             wait;
