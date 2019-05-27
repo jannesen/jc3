@@ -227,22 +227,26 @@ export interface IInputControlOptions extends IControlOptions
     placeholder?: string;
 }
 
+
 /**
  * !!DOC
  */
 export abstract class InputTextControl<TNativeValue,
                                        TValue extends $JT.SimpleType<TNativeValue>,
-                                       TOpts extends IInputControlOptions>
+                                       TInput extends InputTextControl<TNativeValue, TValue, TInput, TOpts, TCalldata, TDropdown>,
+                                       TOpts extends IInputControlOptions,
+                                       TCalldata = void,
+                                       TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TCalldata> = $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TCalldata>>
                                             extends SimpleControl<TValue, TOpts>
 {
     protected   _input:             $JD.DOMHTMLElement;
     protected   _text:              string;
+    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TValue, TInput, TCalldata, TNativeValue|null, TDropdown>|undefined;
 
-    /**
-     * !!DOC
-     */
-                    constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown?: $JD.DOMHTMLElement) {
+                            constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown: boolean)
+    {
         super(opts);
+
 
         let container:$JD.DOMHTMLElement;
         let input = <input type={type} spellCheck={false} />;
@@ -256,7 +260,9 @@ export abstract class InputTextControl<TNativeValue,
         }
 
         if (dropdown) {
-            container = <div>{input}{dropdown}</div>;
+            const dropdownctl = <span class="-dropdown-button" />;
+            dropdownctl.bind("click", this.dropdown_click, this);
+            container = <div>{ input }{ dropdownctl }</div>;
         }
         else {
             container = input;
@@ -283,13 +289,26 @@ export abstract class InputTextControl<TNativeValue,
             container.css("width", opts.width);
         }
 
+        if (dropdown) {
+            if ($JD.body.hasClass("jannesen-ui-mobile")) {
+                this.getinputelm().bind("click", this.dropdown_click, this);
+            }
+
+            if (this.disableKeyboard()) {
+                this.getinputelm().attr("readonly", true).attr("tabIndex", 0);      // Don't use keyboard on mobile devices.
+            }
+        }
+
         this._input          = input;
         this._text           = "";
-
+        this._activeDropdown = undefined;
         this.setcontainer(container);
     }
 
-    public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
+    public                  valueChanged(reason:$JT.ChangeReason, changed:boolean): void
+    {
+        this.closeDropdown(true);
+
         if (this._value && (changed || this.isDirty())) {
             let vvalue = this._value.internalvalue;
             this._text = (vvalue !== null ? this._value.cnvValueToText(vvalue, this._value.getAttr("format")) : "");
@@ -299,157 +318,6 @@ export abstract class InputTextControl<TNativeValue,
         }
 
         this.setError(null);
-    }
-
-    public          isDirty() {
-        return (this._text !== this._input.prop("value"));
-    }
-
-    public          parseInput(validate:boolean): void {
-        if (this._value) {
-            let text = this._input.prop("value");
-
-            if (this._text !== text) {
-                this._value.setValue((text === "" ? null : this._value.cnvTextToValue(text)), $JT.ChangeReason.UI);
-            }
-        }
-    }
-    public          getinputelm(): $JD.DOMHTMLElement {
-        return this._input;
-    }
-
-    protected       control_destroy() {
-        super.control_destroy();
-    }
-    protected       defaultPlaceHolder(value: TValue): string|undefined {
-        return undefined;
-    }
-    protected       keyRemap(key: string): string|null {
-        return key;
-    }
-    protected       selectall(): void {
-        let elm = this._input.element as HTMLInputElement;
-        if (elm === document.activeElement && elm.selectionStart! >= 0) {
-            elm.selectionStart = 0;
-            elm.selectionEnd   = elm.value.length;
-        }
-    }
-    protected       input_onfocus(ev:FocusEvent): void {
-        if (this._container !== this._input) {
-            this._container.addClass("-focus");
-        }
-
-        if (ev.relatedTarget && !this.hasFocus(ev.relatedTarget as Element) && !($JD.body && $JD.body.hasClass("jannesen-ui-mobile"))) {
-            this.selectall();
-        }
-    }
-    protected       input_onblur(ev:FocusEvent): void {
-        if (this._container !== this._input) {
-            this._container.removeClass("-focus");
-        }
-
-        this._onblurparse();
-    }
-    protected       input_onkeydown(evt:KeyboardEvent) {
-        if (evt.key === "Tab" && !evt.altKey && !evt.ctrlKey && !evt.metaKey) {
-            this._onblurparse();
-        }
-    }
-    protected       input_onkeypress(evt:KeyboardEvent): void {
-        if (evt.key.length === 1) {
-            const key = this.keyRemap(evt.key);
-
-            if (key !== evt.key) {
-                evt.preventDefault();
-                if (typeof key === 'string') {
-                    let selectionStart = (this._input.element as any).selectionStart as number;
-                    let selectionEnd   = (this._input.element as any).selectionEnd   as number;
-
-                    if (selectionStart <= selectionEnd) {
-                        let inputtext = this._input.prop("value") as string;
-
-                        if (inputtext.length > selectionStart) {
-                            inputtext = inputtext.substr(0, selectionStart) + key + inputtext.substr(selectionEnd);
-                        } else {
-                            inputtext += key;
-                        }
-
-                        this._input.prop("value", inputtext);
-                        (this._input.element as any).selectionStart = selectionStart + 1;
-                        (this._input.element as any).selectionEnd   = selectionStart + 1;
-                    }
-                }
-            }
-
-            if (typeof key === 'string') {
-                this.setError(null);
-            }
-        }
-    }
-    protected       hasFocus(elm:Element): boolean {
-        let     e:Element|null|undefined;
-
-        for (e = elm ; e && e !== document.body ; e = e.parentElement) {
-            if (e === this._container.element)
-                return true;
-        }
-
-        return false;
-    }
-
-    protected       _onblurparse() {
-        try {
-            if (this._value) {
-                if (this._errormsg && this._errormsg.errorValue === this.getinputelm().prop("value")) {
-                    return;
-                }
-
-                this.parseInput(false);
-                this.setError(null);
-            }
-        } catch(e) {
-            this.setError(e.message);
-        }
-    }
-}
-
-/**
- * !!DOC
- */
-export abstract class InputTextDropdownControl<TNativeValue,
-                                               TValue extends $JT.SimpleType<TNativeValue>,
-                                               TInput extends InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, TCalldata, TDropdown>,
-                                               TOpts extends IInputControlOptions,                                               
-                                               TCalldata = void,
-                                               TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TCalldata> = $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TCalldata>>
-                                                    extends InputTextControl<TNativeValue, TValue, TOpts>
-{
-    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TValue, TInput, TCalldata, TNativeValue|null, TDropdown>|undefined;
-
-                            constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown: boolean)
-    {
-        let dropdownctl = dropdown ? <span class="-dropdown-button" /> : undefined;
-
-        super(value, type, typeClass, opts, dropdownctl);
-
-        if (dropdown) {
-            dropdownctl!.bind("click", this.dropdown_click, this);
-
-            if ($JD.body.hasClass("jannesen-ui-mobile")) {
-                this.getinputelm().bind("click", this.dropdown_click, this);
-            }
-        }
-
-        if (dropdown && this.disableKeyboard()) {
-            this.getinputelm().attr("readonly", true).attr("tabIndex", 0);      // Don't use keyboard on mobile devices.
-        }
-
-        this._activeDropdown = undefined;
-    }
-
-    public                  valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
-        this.closeDropdown(true);
-        super.valueChanged(reason, changed);
     }
     public                  dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined)
     {
@@ -481,12 +349,49 @@ export abstract class InputTextDropdownControl<TNativeValue,
             }
         }
     }
-    protected               control_destroy() {
-        this.closeDropdown(false);
-        super.control_destroy();
+    public                  isDirty()
+    {
+        return (this._text !== this._input.prop("value"));
+    }
+    public                  parseInput(validate:boolean): void
+    {
+        if (this._value) {
+            let text = this._input.prop("value");
+
+            if (this._text !== text) {
+                this._value.setValue((text === "" ? null : this._value.cnvTextToValue(text)), $JT.ChangeReason.UI);
+            }
+        }
+    }
+    public                  getinputelm(): $JD.DOMHTMLElement
+    {
+        return this._input;
     }
 
-    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TCalldata, TNativeValue|null, TDropdown>, className:string, focus:boolean, calldata:TCalldata, onready?:(content:TDropdown)=>void) {
+    protected   abstract    openDropdown(): void;
+
+    protected               defaultPlaceHolder(value: TValue): string|undefined
+    {
+        return undefined;
+    }
+    protected               keyRemap(key: string): string|null
+    {
+        return key;
+    }
+    protected               disableKeyboard()
+    {
+        return $JD.body.hasClass("jannesen-ui-mobile");
+    }
+    protected               selectall(): void
+    {
+        let elm = this._input.element as HTMLInputElement;
+        if (elm === document.activeElement && elm.selectionStart! >= 0) {
+            elm.selectionStart = 0;
+            elm.selectionEnd   = elm.value.length;
+        }
+    }
+    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TCalldata, TNativeValue|null, TDropdown>, className:string, focus:boolean, calldata:TCalldata, onready?:(content:TDropdown)=>void)
+    {
         if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass && $J.isEqual(this._activeDropdown.Calldata, calldata))) {
             this.closeDropdown(false);
             this._activeDropdown  = new $JPOPUP.DropdownPopup(this as any /* Typing is ok */, this._input, dropdownClass, className, calldata);
@@ -502,7 +407,8 @@ export abstract class InputTextDropdownControl<TNativeValue,
             this._activeDropdown.LoadTask.then(onready);
         }
     }
-    protected               closeDropdown(restorefocus:boolean) {
+    protected               closeDropdown(restorefocus:boolean)
+    {
         if (this._activeDropdown) {
             if (restorefocus) {
                 const c = this._activeDropdown.container;
@@ -516,10 +422,8 @@ export abstract class InputTextDropdownControl<TNativeValue,
         }
     }
 
-    protected               disableKeyboard() {
-        return $JD.body.hasClass("jannesen-ui-mobile");
-    }
-    protected               dropdown_click() {
+    protected               dropdown_click()
+    {
         if (!this._activeDropdown) {
             this.openDropdown();
         } else {
@@ -527,8 +431,30 @@ export abstract class InputTextDropdownControl<TNativeValue,
             this.getinputelm().focus();
         }
     }
-    protected               input_onkeydown(evt:KeyboardEvent) {
+    protected               control_destroy()
+    {
+        this.closeDropdown(false);
+        super.control_destroy();
+    }
+    protected               input_onfocus(ev:FocusEvent): void
+    {
+        if (this._container !== this._input) {
+            this._container.addClass("-focus");
+        }
+
+        if (ev.relatedTarget && !this.hasFocus(ev.relatedTarget as Element) && !($JD.body && $JD.body.hasClass("jannesen-ui-mobile"))) {
+            this.selectall();
+        }
+    }
+    protected               input_onkeydown(evt:KeyboardEvent)
+    {
         switch(evt.key) {
+        case "Tab":
+            if (!(evt.altKey || evt.ctrlKey || evt.metaKey)) {
+                this.onblurparse();
+            }
+            break;
+
         case "ArrowDown":
         case "F4":
             if (!(evt.altKey || evt.ctrlKey || evt.metaKey)) {
@@ -539,7 +465,8 @@ export abstract class InputTextDropdownControl<TNativeValue,
             }
         }
     }
-    protected               input_onblur(ev:FocusEvent): void {
+    protected               input_onblur(ev:FocusEvent): void
+    {
         if (this._container !== this._input) {
             this._container.removeClass("-focus");
         }
@@ -549,10 +476,56 @@ export abstract class InputTextDropdownControl<TNativeValue,
                 this.closeDropdown(!ev.relatedTarget || ev.relatedTarget === $global.document.body);
             }
 
-            this._onblurparse();
+            this.onblurparse();
         }
     }
-    protected   abstract    openDropdown(): void;
+    protected               input_onkeypress(evt:KeyboardEvent): void
+    {
+        if (evt.key.length === 1) {
+            const key = this.keyRemap(evt.key);
+
+            if (key !== evt.key) {
+                evt.preventDefault();
+                if (typeof key === 'string') {
+                    let selectionStart = (this._input.element as any).selectionStart as number;
+                    let selectionEnd   = (this._input.element as any).selectionEnd   as number;
+
+                    if (selectionStart <= selectionEnd) {
+                        let inputtext = this._input.prop("value") as string;
+
+                        if (inputtext.length > selectionStart) {
+                            inputtext = inputtext.substr(0, selectionStart) + key + inputtext.substr(selectionEnd);
+                        } else {
+                            inputtext += key;
+                        }
+
+                        this._input.prop("value", inputtext);
+                        (this._input.element as any).selectionStart = selectionStart + 1;
+                        (this._input.element as any).selectionEnd   = selectionStart + 1;
+                    }
+                }
+            }
+
+            if (typeof key === 'string') {
+                this.setError(null);
+            }
+        }
+    }
+    protected               onblurparse()
+    {
+        try {
+            if (this._value) {
+                if (this._errormsg && this._errormsg.errorValue === this.getinputelm().prop("value")) {
+                    return;
+                }
+
+                this.parseInput(false);
+                this.setError(null);
+            }
+        } catch(e) {
+            this.setError(e.message);
+        }
+    }
     protected               hasFocus(elm:any): boolean
     {
         let     e:Element|null|undefined;
@@ -579,7 +552,7 @@ export abstract class InputTextValueDropdownControl<TNativeValue,
                                                     TValue extends $JT.SimpleType<TNativeValue>,
                                                     TInput extends InputTextValueDropdownControl<TNativeValue, TValue, TInput, TOpts>,
                                                     TOpts extends IInputControlDropdownValuesOptions<TNativeValue>>
-                                                        extends InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts>
+                                                        extends InputTextControl<TNativeValue, TValue, TInput, TOpts>
 {
                 constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown?:boolean)
     {
@@ -612,7 +585,7 @@ export abstract class InputTextValuesDropdownControl<TNativeValue,
                                                      TValue extends $JT.SimpleType<TNativeValue>,
                                                      TInput extends InputTextValuesDropdownControl<TNativeValue, TValue, TInput, TOpts>,
                                                      TOpts extends IInputControlDropdownValuesOptions<TNativeValue>>
-                                                        extends InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts>
+                                                        extends InputTextControl<TNativeValue, TValue, TInput, TOpts>
 {
                 constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown?:boolean)
     {
@@ -1288,7 +1261,7 @@ export interface ISelectInputControlOptions<TNativeValue extends $JT.SelectValue
  */
 export class SelectInput<TNativeValue extends $JT.SelectValue,
                          TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>>
-                extends InputTextDropdownControl<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, SelectInput<TNativeValue,TDatasource>, ISelectInputControlOptions<TNativeValue,TDatasource>, SelectInputContext, $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>
+                extends InputTextControl<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, SelectInput<TNativeValue,TDatasource>, ISelectInputControlOptions<TNativeValue,TDatasource>, SelectInputContext, $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>
 {
     private     _activelookup:      $JA.Task<any>|undefined;
     private     _inputContext:      SelectInputContext|undefined;
@@ -1441,7 +1414,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
                     }
 
                     if (ev) {
-                        this._onblurparse();
+                        this.onblurparse();
                     }
                 }
             }

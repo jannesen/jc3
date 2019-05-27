@@ -20,7 +20,7 @@ interface ICurrentFetch<TRecord>
 
 export class ValuesDropdown<TNativeValue,
                             TValue extends $JT.SimpleType<TNativeValue>,
-                            TInput extends $JI.InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, void, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>,
+                            TInput extends $JI.InputTextControl<TNativeValue, TValue, TInput, TOpts, void, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>,
                             TOpts extends $JI.IInputControlDropdownValuesOptions<TNativeValue>>
                         extends $JPOPUP.TableDropdown<TNativeValue, TValue, TInput, void, TNativeValue|null>
 {

@@ -278,7 +278,7 @@ $J.applyMixins(DatePicker, [$J.EventHandling]);
 
 //===================================== Dropdown ==================================================
 export abstract class InputDropdown<TValue extends $JT.SimpleType<number>,
-                                    TInput extends $JI.InputTextDropdownControl<number, TValue, TInput, TOpts>,
+                                    TInput extends $JI.InputTextControl<number, TValue, TInput, TOpts>,
                                     TOpts extends $JI.IInputControlOptions,
                                     TDropdown extends InputDropdown<TValue, TInput, TOpts, TDropdown>>
                                         extends $JPOPUP.DropdownContent<number, TValue, TInput>
@@ -396,7 +396,7 @@ export class TimeInputDropdown extends InputDropdown<$JT.Time, $JI.Time, $JI.ITi
 }
 
 export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue,
-                                         TInput extends $JI.InputTextDropdownControl<$JTE.IRangeValue, TValue, TInput, TOpt, void, TDropdown>,
+                                         TInput extends $JI.InputTextControl<$JTE.IRangeValue, TValue, TInput, TOpt, void, TDropdown>,
                                          TOpt extends $JI.IInputControlOptions,
                                          TDropdown extends $JPOPUP.DropdownContent<$JTE.IRangeValue, TValue, TInput>>
                                             extends $JPOPUP.DropdownContent<$JTE.IRangeValue, TValue, TInput>

@@ -13,7 +13,7 @@ import * as $JDTPICKER from "jc3/jannesen.ui.datetimepicker";
 export interface IDateRangeControlOptions extends $JI.IInputControlOptions {
 }
 
-export class DateRange extends $JI.InputTextDropdownControl<$JTE.IRangeValue, $JTE.DateRange, DateRange, IDateRangeControlOptions, void, $JDTPICKER.DateRangeInputDropdown> implements $JD.IDOMContainer {
+export class DateRange extends $JI.InputTextControl<$JTE.IRangeValue, $JTE.DateRange, DateRange, IDateRangeControlOptions, void, $JDTPICKER.DateRangeInputDropdown> implements $JD.IDOMContainer {
 
     constructor(range: $JTE.DateRange, opts: IDateRangeControlOptions) {
         super(range, "text", "-daterange", opts, true);
@@ -45,7 +45,7 @@ export class DateRange extends $JI.InputTextDropdownControl<$JTE.IRangeValue, $J
 export interface IDateTimeRangeControlOptions extends $JI.IInputControlOptions {
 }
 
-export class DateTimeRange extends $JI.InputTextDropdownControl<$JTE.IRangeValue, $JTE.DateTimeRange, DateTimeRange, IDateTimeRangeControlOptions, void, $JDTPICKER.DateTimeRangeInputDropdown> implements $JD.IDOMContainer {
+export class DateTimeRange extends $JI.InputTextControl<$JTE.IRangeValue, $JTE.DateTimeRange, DateTimeRange, IDateTimeRangeControlOptions, void, $JDTPICKER.DateTimeRangeInputDropdown> implements $JD.IDOMContainer {
 
     constructor(range: $JTE.DateTimeRange, opts: IDateTimeRangeControlOptions) {
         super(range, "text", "-datetimerange", opts, true);
