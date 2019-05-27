@@ -278,10 +278,10 @@ $J.applyMixins(DatePicker, [$J.EventHandling]);
 
 //===================================== Dropdown ==================================================
 export abstract class InputDropdown<TValue extends $JT.SimpleType<number>,
-                                    TInput extends $JI.InputTextDropdownControl<number, TValue, TInput, TOpts, TDropdown, void>,
+                                    TInput extends $JI.InputTextDropdownControl<number, TValue, TInput, TOpts>,
                                     TOpts extends $JI.IInputControlOptions,
                                     TDropdown extends InputDropdown<TValue, TInput, TOpts, TDropdown>>
-                                        extends $JPOPUP.DropdownContent<number, TValue, TInput, TDropdown, void, number|null>
+                                        extends $JPOPUP.DropdownContent<number, TValue, TInput>
 {
     protected       _datepicker!:       DatePicker;
 
@@ -316,7 +316,7 @@ export abstract class InputDropdown<TValue extends $JT.SimpleType<number>,
 
 export class DateInputDropdown extends InputDropdown<$JT.Date, $JI.Date, $JI.IDateControlOptions, DateInputDropdown>
 {
-                    constructor(popup:$JPOPUP.DropdownPopup<number, $JT.Date, $JI.Date, DateInputDropdown, void>)
+                    constructor(popup:$JPOPUP.DropdownPopup<number, $JT.Date, $JI.Date>)
     {
         super(popup);
     }
@@ -343,7 +343,7 @@ export class DateInputDropdown extends InputDropdown<$JT.Date, $JI.Date, $JI.IDa
 
 export class DateTimeInputDropdown extends InputDropdown<$JT.DateTime, $JI.DateTime, $JI.IDateTimeControlOptions, DateTimeInputDropdown>
 {
-                    constructor(popup:$JPOPUP.DropdownPopup<number, $JT.DateTime, $JI.DateTime, DateTimeInputDropdown, void>)
+                    constructor(popup:$JPOPUP.DropdownPopup<number, $JT.DateTime, $JI.DateTime>)
     {
         super(popup);
     }
@@ -370,7 +370,7 @@ export class DateTimeInputDropdown extends InputDropdown<$JT.DateTime, $JI.DateT
 
 export class TimeInputDropdown extends InputDropdown<$JT.Time, $JI.Time, $JI.ITimeControlOptions, TimeInputDropdown>
 {
-                    constructor(popup:$JPOPUP.DropdownPopup<number, $JT.Time, $JI.Time, TimeInputDropdown, void>)
+                    constructor(popup:$JPOPUP.DropdownPopup<number, $JT.Time, $JI.Time>)
     {
         super(popup);
     }
@@ -396,10 +396,10 @@ export class TimeInputDropdown extends InputDropdown<$JT.Time, $JI.Time, $JI.ITi
 }
 
 export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue,
-                                         TInput extends $JI.InputTextDropdownControl<$JTE.IRangeValue, TValue, TInput, TOpt, TDropdown, void>,
+                                         TInput extends $JI.InputTextDropdownControl<$JTE.IRangeValue, TValue, TInput, TOpt, void, TDropdown>,
                                          TOpt extends $JI.IInputControlOptions,
-                                         TDropdown extends $JPOPUP.DropdownContent<$JTE.IRangeValue, TValue, TInput, TDropdown, void, $JTE.IRangeValue|null>>
-                                            extends $JPOPUP.DropdownContent<$JTE.IRangeValue, TValue, TInput, TDropdown, void, $JTE.IRangeValue|null>
+                                         TDropdown extends $JPOPUP.DropdownContent<$JTE.IRangeValue, TValue, TInput>>
+                                            extends $JPOPUP.DropdownContent<$JTE.IRangeValue, TValue, TInput>
 {
     protected       _from!: DatePicker;
     protected       _to!:   DatePicker;

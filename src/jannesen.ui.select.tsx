@@ -20,9 +20,9 @@ interface ICurrentFetch<TRecord>
 
 export class ValuesDropdown<TNativeValue,
                             TValue extends $JT.SimpleType<TNativeValue>,
-                            TInput extends $JI.InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>, void>,
+                            TInput extends $JI.InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, void, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>,
                             TOpts extends $JI.IInputControlDropdownValuesOptions<TNativeValue>>
-                        extends $JPOPUP.TableDropdown<TNativeValue, TValue, TInput, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>, void, TNativeValue|null>
+                        extends $JPOPUP.TableDropdown<TNativeValue, TValue, TInput, void, TNativeValue|null>
 {
     private     _values?:   TNativeValue[];
 
@@ -73,7 +73,7 @@ export class ValuesDropdown<TNativeValue,
 
 export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
                                  TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>>
-                extends $JPOPUP.TableDropdown<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, SelectInputDropdown<TNativeValue,TDatasource>, $JI.SelectInputContext, TNativeValue|null>
+                extends $JPOPUP.TableDropdown<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, $JI.SelectInputContext, TNativeValue|null>
 {
     private     _datasource:                TDatasource;
     private     _columns:                   $JT.ISelectTypeAttributeDropdownColumn[];
@@ -82,7 +82,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     private     _currectfetch:              ICurrentFetch<$JT.TDatasource_Record<TDatasource>>|undefined;
     private     _tbodydata:                 ($JT.TDatasource_Record<TDatasource>|null)[]|undefined;
 
-    constructor(popup: $JPOPUP.DropdownPopup<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, SelectInputDropdown<TNativeValue,TDatasource>, $JI.SelectInputContext>, context: $JI.SelectInputContext)
+    constructor(popup: $JPOPUP.DropdownPopup<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, $JI.SelectInputContext>, context: $JI.SelectInputContext)
     {
         super(popup);
         const input   = popup._input!;

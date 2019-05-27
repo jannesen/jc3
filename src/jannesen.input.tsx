@@ -9,7 +9,6 @@ import * as $JR        from "jc3/jannesen.regional";
 import * as $JL        from "jc3/jannesen.language";
 import * as $JPOPUP    from "jc3/jannesen.ui.popup";
 import * as $JSELECT   from "jc3/jannesen.ui.select";
-import * as $JDTPICKER from "jc3/jannesen.ui.datetimepicker";
 
 //===================================== Control Interface =========================================
 /**
@@ -419,13 +418,13 @@ export abstract class InputTextControl<TNativeValue,
  */
 export abstract class InputTextDropdownControl<TNativeValue,
                                                TValue extends $JT.SimpleType<TNativeValue>,
-                                               TInput extends InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, TDropdown, TCalldata>,
-                                               TOpts extends IInputControlOptions,
-                                               TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TDropdown, TCalldata, TNativeValue|null>,
-                                               TCalldata = void>
+                                               TInput extends InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, TCalldata, TDropdown>,
+                                               TOpts extends IInputControlOptions,                                               
+                                               TCalldata = void,
+                                               TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TCalldata> = $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TCalldata>>
                                                     extends InputTextControl<TNativeValue, TValue, TOpts>
 {
-    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TValue, TInput, TDropdown, TCalldata, TNativeValue|null>|undefined;
+    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TValue, TInput, TCalldata, TNativeValue|null, TDropdown>|undefined;
 
                             constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown: boolean)
     {
@@ -487,7 +486,7 @@ export abstract class InputTextDropdownControl<TNativeValue,
         super.control_destroy();
     }
 
-    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TDropdown, TCalldata, TNativeValue|null>, className:string, focus:boolean, calldata:TCalldata, onready?:(content:TDropdown)=>void) {
+    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TCalldata, TNativeValue|null, TDropdown>, className:string, focus:boolean, calldata:TCalldata, onready?:(content:TDropdown)=>void) {
         if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass && $J.isEqual(this._activeDropdown.Calldata, calldata))) {
             this.closeDropdown(false);
             this._activeDropdown  = new $JPOPUP.DropdownPopup(this as any /* Typing is ok */, this._input, dropdownClass, className, calldata);
@@ -576,18 +575,52 @@ export interface IInputControlDropdownValuesOptions<TNative> extends IInputContr
     dropdown_values?:   (ct:$JA.ICancellationToken) => TNative[] | $JA.Task<TNative[]>;
 }
 
+export abstract class InputTextValueDropdownControl<TNativeValue,
+                                                    TValue extends $JT.SimpleType<TNativeValue>,
+                                                    TInput extends InputTextValueDropdownControl<TNativeValue, TValue, TInput, TOpts>,
+                                                    TOpts extends IInputControlDropdownValuesOptions<TNativeValue>>
+                                                        extends InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts>
+{
+                constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown?:boolean)
+    {
+        super(value, type, typeClass, opts, true);
+    }
+
+    protected   openDropdown()
+    {
+        if (this._value) {
+            try {
+                this.focus();
+                this.parseInput(false);
+                this.setError(null);
+                if (this.opts.dropdown_values) {
+                    this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", true);
+                }
+                else {
+                    this.getDropdownStd();
+                }
+            } catch(e) {
+                this.setError(e.message);
+            }
+        }
+    }
+
+    protected abstract getDropdownStd():void;
+}
+
 export abstract class InputTextValuesDropdownControl<TNativeValue,
                                                      TValue extends $JT.SimpleType<TNativeValue>,
                                                      TInput extends InputTextValuesDropdownControl<TNativeValue, TValue, TInput, TOpts>,
                                                      TOpts extends IInputControlDropdownValuesOptions<TNativeValue>>
-                                                        extends InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts, $JSELECT.ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>
+                                                        extends InputTextDropdownControl<TNativeValue, TValue, TInput, TOpts>
 {
-                constructor(value:TValue, type:string, typeClass:string, opts:TOpts)
+                constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown?:boolean)
     {
-        super(value, type, typeClass, opts, typeof opts.dropdown_values === 'function');
+        super(value, type, typeClass, opts, dropdown || typeof opts.dropdown_values === 'function');
     }
 
-    protected   openDropdown() {
+    protected   openDropdown()
+    {
         if (this.opts.dropdown_values && this._value) {
             try {
                 this.focus();
@@ -600,6 +633,7 @@ export abstract class InputTextValuesDropdownControl<TNativeValue,
         }
     }
 }
+
 //===================================== InputTextControl ==========================================
 /**
  * !!DOC
@@ -900,7 +934,7 @@ export interface IDateControlOptions extends IInputControlDropdownValuesOptions<
 /**
  * !!DOC
  */
-export class Date extends InputTextDropdownControl<number, $JT.Date, Date, IDateControlOptions, $JDTPICKER.DateInputDropdown>
+export class Date extends InputTextValueDropdownControl<number, $JT.Date, Date, IDateControlOptions>
 {
     constructor(value:$JT.Date, opts:IDateControlOptions) {
         super(value, "text", "-date", opts, true);
@@ -929,17 +963,9 @@ export class Date extends InputTextDropdownControl<number, $JT.Date, Date, IDate
         return null;
     }
 
-    protected   openDropdown() {
-        if (this._value) {
-            try {
-                this.focus();
-                this.parseInput(false);
-                this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-date", true);
-            } catch(e) {
-                this.setError(e.message);
-            }
-        }
+    protected   getDropdownStd()
+    {
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-date", true);
     }
 }
 
@@ -954,23 +980,15 @@ export interface IDateTimeControlOptions extends IInputControlOptions
 /**
  * !!DOC
  */
-export class DateTime extends InputTextDropdownControl<number, $JT.DateTime, DateTime, IDateTimeControlOptions, $JDTPICKER.DateTimeInputDropdown>
+export class DateTime extends InputTextValueDropdownControl<number, $JT.DateTime, DateTime, IDateTimeControlOptions>
 {
     constructor(value:$JT.DateTime, opts:IDateTimeControlOptions) {
         super(value, "text", "-datetime", opts, true);
     }
 
-    protected   openDropdown() {
-        if (this._value) {
-            try {
-                this.focus();
-                this.parseInput(false);
-                this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-time", true);
-            } catch(e) {
-                this.setError(e.message);
-            }
-        }
+    protected   getDropdownStd()
+    {
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-datetime", true);
     }
 }
 
@@ -985,7 +1003,7 @@ export interface ITimeControlOptions extends IInputControlOptions
 /**
  * !!DOC
  */
-export class Time extends InputTextDropdownControl<number, $JT.Time, Time, ITimeControlOptions, $JDTPICKER.TimeInputDropdown>
+export class Time extends InputTextValueDropdownControl<number, $JT.Time, Time, ITimeControlOptions>
 {
     constructor(value:$JT.Time, opts:ITimeControlOptions) {
         super(value, "text", "-time", opts, true);
@@ -1021,17 +1039,9 @@ export class Time extends InputTextDropdownControl<number, $JT.Time, Time, ITime
         return null;
     }
 
-    protected   openDropdown() {
-        if (this._value) {
-            try {
-                this.focus();
-                this.parseInput(false);
-                this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-time", true);
-            } catch(e) {
-                this.setError(e.message);
-            }
-        }
+    protected   getDropdownStd()
+    {
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-time", true);
     }
 }
 
@@ -1276,7 +1286,9 @@ export interface ISelectInputControlOptions<TNativeValue extends $JT.SelectValue
 /**
  * !!DOC
  */
-export class SelectInput<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>> extends InputTextDropdownControl<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, SelectInput<TNativeValue,TDatasource>, ISelectInputControlOptions<TNativeValue,TDatasource>, $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>, SelectInputContext>
+export class SelectInput<TNativeValue extends $JT.SelectValue,
+                         TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>>
+                extends InputTextDropdownControl<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, SelectInput<TNativeValue,TDatasource>, ISelectInputControlOptions<TNativeValue,TDatasource>, SelectInputContext, $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>
 {
     private     _activelookup:      $JA.Task<any>|undefined;
     private     _inputContext:      SelectInputContext|undefined;
