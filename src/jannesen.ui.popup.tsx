@@ -913,19 +913,7 @@ export abstract class TableDropdown<TNativeValue,
 
             if (row !== undefined && typeof this._rowcount === 'number' && this._rowcount > 0) {
                 row = Math.max(Math.min(row, this._rowcount - 1), 0);
-                let rowelm = this._tbody.childNodes(row);
-                rowelm.addClass("-selected");
-
-                let divrect = this.container!.clientRect;
-                let rowrect = rowelm.outerRect;
-
-                if (rowrect.bottom > divrect.bottom) {
-                    this.scrollelm.element.scrollTop += rowrect.bottom - divrect.bottom + 1 + Math.min(divrect.height - rowrect.height, 0);
-                }
-                if (rowrect.top < divrect.top) {
-                    this.scrollelm.element.scrollTop += rowrect.top - divrect.top - 1;
-                }
-
+                this._tbody.childNodes(row).addClass("-selected").element.scrollIntoView({ block: 'nearest' });
                 this._selectedRow = row;
             }
         }
