@@ -238,6 +238,7 @@ export abstract class InputTextControl<TNativeValue,
                                        TCalldata = void,
                                        TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TCalldata> = $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TCalldata>>
                                             extends SimpleControl<TValue, TOpts>
+                                            implements $JPOPUP.IControlDropdown<TValue, TNativeValue|null>
 {
     protected   _input:             $JD.DOMHTMLElement;
     protected   _text:              string;

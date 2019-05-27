@@ -39,7 +39,7 @@ export interface IDropdownConstructor<TNativeValue,
                                       TDropdownRtn,
                                       TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn>>
 {
-    new     (popup: DropdownPopup<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn, TDropdown>, calldata:TCalldata): TDropdown;
+    new     (popup: DropdownPopup<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn>, calldata:TCalldata): TDropdown;
 }
 
 interface ICssPosition
