@@ -308,6 +308,9 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
                                 if (!loader) {
                                     throw new $JA.OperationCanceledError("Form not active any more.");
                                 }
+                                if (!loader.host.openform) {
+                                    throw new $JA.OperationCanceledError("Host does not support openform.");
+                                }
                                 return loader.host.openform(formName, args, historyReplace, ct);
                             },
             formchanged:    (reason, form) => {

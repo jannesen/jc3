@@ -97,8 +97,8 @@ export const enum FormChangedReason {
 export interface IFormHost
 {
     readonly    parent:                () => FormLoader|null;
-    readonly    openform:              (formName:string, args:$J.IUrlArgsColl|IUrlArgsSet, historyReplace:boolean, ct:$JA.ICancellationToken|null) => $JA.Task<void>;
-    readonly    historyChangeArgs:     (args:$J.IUrlArgsColl, historyReplace:boolean) => void;
+    readonly    openform?:             (formName:string, args:$J.IUrlArgsColl|IUrlArgsSet, historyReplace:boolean, ct:$JA.ICancellationToken|null) => $JA.Task<void>;
+    readonly    historyChangeArgs?:    (args:$J.IUrlArgsColl, historyReplace:boolean) => void;
     readonly    formchanged:           (reason:FormChangedReason, form:Form|null) => void;
 }
 export type Nullable<T> = {
@@ -772,11 +772,15 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
             throw new $JA.OperationCanceledError("Form not active any more.");
         }
 
+        if (!loader.host.openform) {
+            throw new $J.InvalidStateError("Host does not support openform.");
+        }
+
         return loader.host.openform(formName, args, historyReplace, ct);
     }
     protected           historyChangeArgs(args:$J.IUrlArgsColl, historyReplace:boolean) {
         const loader = this.loader;
-        if (loader) {
+        if (loader && loader.host.historyChangeArgs) {
             loader.host.historyChangeArgs(args, historyReplace);
         }
     }
