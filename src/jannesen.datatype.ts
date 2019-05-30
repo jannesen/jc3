@@ -1564,7 +1564,7 @@ export class DateTime extends SimpleNumberType
     /**
      *!!DOC
      */
-    public get TimeZone(): ITimeZone {
+    public get TimeZone(): ITimeZone|undefined {
         return this.getAttr("timezone");
     }
     public get ValueIsUtc() {
@@ -1577,6 +1577,24 @@ export class DateTime extends SimpleNumberType
     {
         let     d = (new $global.Date());
         return this.ValueIsUtc ? d.getTime() : d.getTime() - (d.getTimezoneOffset() * 60 * 1000);
+    }
+    /**
+     * Return (local) date.
+     */
+    public toDateValue()
+    {
+        let value = this.value;
+
+        if (typeof value === 'number') {
+            const tz = this.TimeZone;
+            if (tz) {
+                value = tz.UtcToLocal(value);
+            }
+
+            value = $J.dateFromDatetime(value);
+        }
+
+        return value;
     }
 
     /* @internal */ valueToUI<T extends number|null>(v: T): T {
