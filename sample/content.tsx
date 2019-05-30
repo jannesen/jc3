@@ -47,7 +47,7 @@ function createTest()
 
 export class FormModule extends $JC.Form<any>
 {
-    protected       onload(ct:$JA.ICancellationToken):$JA.Task<void>|void
+    protected       onload(loader:$JC.FormLoader, ct:$JA.ICancellationToken):$JA.Task<void>|void
     {
         this.content.appendChild(<div>init</div>);
         return $JA.Delay(500, ct);
@@ -69,7 +69,7 @@ export class Dialog extends $JC.Dialog<void, string>
         return $JC.dialogShow(Dialog, undefined, context);
     }
 
-    protected           onload(ct:$JA.ICancellationToken)
+    protected           onload(loader:$JC.DialogLoader, ct:$JA.ICancellationToken)
     {
         return $JA.Delay(1000, ct);
     }

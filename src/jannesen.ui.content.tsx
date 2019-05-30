@@ -324,7 +324,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                     if (!(allowReUse && this._contentBody && this._contentBody.constructor === formConstructor && this._contentBody.canReOpen)) {
                                         newContent = new formConstructor();
                                         newContent._setContentNameClass(contentNameClass);
-                                        const loadTask   = newContent._onload(ct);
+                                        const loadTask   = newContent._onload(this, ct);
 
                                         if (loadTask instanceof $JA.Task) {
                                             return loadTask.then(() => {
@@ -528,8 +528,7 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
         this._scrollbox.data("contentbody", this);
     }
 
-
-    protected           onload(ct:$JA.ICancellationToken):$JA.Task<void>|void
+    protected           onload(loader:TLoader, ct:$JA.ICancellationToken):$JA.Task<void>|void
     {
     }
 
@@ -567,9 +566,9 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
             n.focus();
         }
     }
-    /*@internal*/       _onload(ct:$JA.ICancellationToken):$JA.Task<void>|void
+    /*@internal*/       _onload(loader:TLoader, ct:$JA.ICancellationToken):$JA.Task<void>|void
     {
-        return this.onload(ct);
+        return this.onload(loader, ct);
     }
     /*@internal*/       _setContentNameClass(contentNameClass:string|(new ()=>this))
     {

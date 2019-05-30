@@ -446,7 +446,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
         this._hasquery = false;
     }
 
-    protected               onload(ct:$JA.ICancellationToken):void
+    protected               onload(loader:$JCONTENT.FormLoader, ct:$JA.ICancellationToken):void
     {
         const formargs = this._formargs as any;
         if (formargs instanceof $JT.Record) {
@@ -642,7 +642,7 @@ export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
         this._resultcontainer = undefined;
     }
 
-    protected               onload(ct:$JA.ICancellationToken):void
+    protected               onload(loader:$JCONTENT.FormLoader, ct:$JA.ICancellationToken):void
     {
         if (this._formargs as any instanceof $JT.Record) {
             const formargs = this._formargs as $JT.Record;

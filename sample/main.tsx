@@ -87,7 +87,7 @@ export class IFrame extends $JCONTENT.Form<string>
         return this._src;
     }
 
-    protected       onload(ct:$JA.ICancellationToken)
+    protected       onload(loader:$JCONTENT.FormLoader, ct:$JA.ICancellationToken)
     {
         this.content.css({ "width":"100%", "height":"100%"});
         this.content.appendChild(this._iframe = <iframe style="width:100%; height:100%; overflow:hidden; border:0 none" />);
