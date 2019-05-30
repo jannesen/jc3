@@ -850,7 +850,7 @@ export class FormError extends Form<Error>
 /**
  * !!DOC
  */
-export class DialogLoader<TArgs, TRtn> extends ContentLoader<DialogBase<TArgs, TRtn>, TArgs>
+export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<TArgs, TRtn>, TArgs>
 {
     private             _parent!:           ContentLoader<ContentBody<any, any>, any>;
     private             _initDlgSize:       $JD.ISize|undefined;
