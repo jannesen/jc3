@@ -322,7 +322,7 @@ export abstract class InputTextControl<TNativeValue,
     }
     public                  dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined)
     {
-        if (this._input) {
+        if (this._activeDropdown && this._input) {
             this.closeDropdown(true);
 
             if (value !== undefined) {
@@ -410,16 +410,18 @@ export abstract class InputTextControl<TNativeValue,
     }
     protected               closeDropdown(restorefocus:boolean)
     {
-        if (this._activeDropdown) {
+        const activeDropdown = this._activeDropdown;
+        if (activeDropdown) {
+            this._activeDropdown = undefined;
+
             if (restorefocus) {
-                const c = this._activeDropdown.container;
+                const c = activeDropdown.container;
                 if (c && c.contains($global.document.activeElement)) {
                     this._input.focus();
                 }
             }
 
-            this._activeDropdown.Remove();
-            this._activeDropdown = undefined;
+            activeDropdown.Remove();
         }
     }
 
@@ -1365,9 +1367,12 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
 
     public          dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined)
     {
-        super.dropdownClose(value, ev);
-        if (value !== undefined && this._activeDropdown) {
-            this._inputContext = value !== null ? this._activeDropdown.Calldata : null;
+        const activeDropdown = this._activeDropdown;
+        if (activeDropdown && this._input) {
+            super.dropdownClose(value, ev);
+            if (value !== undefined) {
+                this._inputContext = value !== null ? activeDropdown.Calldata : null;
+            }
         }
     }
 
