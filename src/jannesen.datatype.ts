@@ -1991,10 +1991,8 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
                 throw new $J.InvalidStateError("SelectType.setValue object-value only allowed with remote datasource.");
             }
 
-            const thisType = this.constructor as any;
-
-            if (value.constructor === thisType) {
-                const setvalue = (value as this);
+            if (value instanceof SelectType) {
+                const setvalue = value;
                 if (datasource !== setvalue.Datasource) {
                     throw new $J.InvalidStateError("SelectType.setValue value has invalid datasource.");
                 }
@@ -2006,7 +2004,7 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
             {
                 const key = (value as any)[datasource.keyfieldname] as TNative;
 
-                if (typeof key !== thisType.NativeType) {
+                if (typeof key !== (this.constructor as any).NativeType) {
                     throw new $J.InvalidStateError("SelectType.setValue invalid object-value, key-type= '" + (typeof value) + "' expect '" + (this.constructor as any).NativeType + "'.");
                 }
 
