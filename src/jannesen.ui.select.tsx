@@ -182,7 +182,13 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     }
     protected   tableColgroup()
     {
-        return this._columns && this._columns.map((f) => <col style={"width:"+f.width} />);
+        return this._columns && this._columns.map((f) => {
+                                                            const col = <col/>;
+                                                            if (f.width) {
+                                                                col.css('width', f.width);
+                                                            }
+                                                            return col;
+                                                  });
     }
     protected   setMessage(msg:string|Error, resetfocus?: boolean)
     {

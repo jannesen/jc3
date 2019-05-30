@@ -1853,7 +1853,7 @@ export class Time extends SimpleNumberType
 export interface ISelectTypeAttributeDropdownColumn
 {
     fieldname:      string;
-    width:          string;
+    width?:         string;
 }
 
 /**
