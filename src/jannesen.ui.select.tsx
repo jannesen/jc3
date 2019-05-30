@@ -22,13 +22,13 @@ export class ValuesDropdown<TNativeValue,
                             TValue extends $JT.SimpleType<TNativeValue>,
                             TInput extends $JI.InputTextControl<TNativeValue, TValue, TInput, TOpts, void, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>,
                             TOpts extends $JI.IInputControlDropdownValuesOptions<TNativeValue>>
-                        extends $JPOPUP.TableDropdown<TNativeValue, TValue, TInput, void, TNativeValue|null>
+                        extends $JPOPUP.TableDropdown<TNativeValue, TInput, void>
 {
     private     _values?:   TNativeValue[];
 
     public              OnLoad(calldata:void, ct:$JA.CancellationTokenSource): $JA.Task<void>|void
     {
-        const input           = this.input;
+        const input           = this.control;
 
         if (input && input.value) {
             try {
@@ -61,7 +61,7 @@ export class ValuesDropdown<TNativeValue,
     {
         this._values = values;
 
-        const input = this.input;
+        const input = this.control;
         const value = input && input.value;
 
         if (value) {
@@ -73,7 +73,7 @@ export class ValuesDropdown<TNativeValue,
 
 export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
                                  TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>>
-                extends $JPOPUP.TableDropdown<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, $JI.SelectInputContext, TNativeValue|null>
+                extends $JPOPUP.TableDropdown<TNativeValue, $JI.SelectInput<TNativeValue,TDatasource>, $JI.SelectInputContext, TNativeValue|null>
 {
     private     _datasource:                TDatasource;
     private     _columns:                   $JT.ISelectTypeAttributeDropdownColumn[];
@@ -82,10 +82,10 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     private     _currectfetch:              ICurrentFetch<$JT.TDatasource_Record<TDatasource>>|undefined;
     private     _tbodydata:                 ($JT.TDatasource_Record<TDatasource>|null)[]|undefined;
 
-    constructor(popup: $JPOPUP.DropdownPopup<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, $JI.SelectInput<TNativeValue,TDatasource>, $JI.SelectInputContext>, context: $JI.SelectInputContext)
+    constructor(popup: $JPOPUP.DropdownPopup<TNativeValue, $JI.SelectInput<TNativeValue,TDatasource>, $JI.SelectInputContext>, context: $JI.SelectInputContext)
     {
         super(popup);
-        const input   = popup._input!;
+        const input   = popup._control!;
         const value = (input ? input.value : undefined);
         if (!value) {
             throw new $J.InvalidStateError("Input/value not available.");
@@ -129,7 +129,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
                     let searchtext   = this._datasource.filter_searchtext(this._searchtext);
 
                     if (searchtext.length > 0 || (this._datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0) {
-                        this._fetchdata(searchtext, this.input!.get_opts().fetchmax || 250);
+                        this._fetchdata(searchtext, this.control!.get_opts().fetchmax || 250);
                     } else {
                         this._currectfetch = undefined;
                         this.setMessage($JL.more_input_necessary, true);
@@ -191,7 +191,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     }
     protected   onKeyDown(ev:KeyboardEvent)
     {
-        const input = this.input;
+        const input = this.control;
         if (input) {
             if (input.dropdownKeyDown(ev)) {
                 return true;
@@ -226,7 +226,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
                                         return;
                                     }
                                     else if (Array.isArray(data)) {
-                                        let opts = this.input!.get_opts();
+                                        let opts = this.control!.get_opts();
 
                                         if (typeof opts.filter === "function") {
                                             data = data.filter(opts.filter);
@@ -264,7 +264,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     private     _filltable()
     {
         try {
-            const input = this.input!;
+            const input = this.control!;
             const value = input.value!;
             const data  = this._currectfetch && this._currectfetch.data;
 
@@ -315,7 +315,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     private     _datafilter(rec:$JT.TDatasource_Record<TDatasource>): boolean
     {
         if (Array.isArray(this._searchtext)) {
-            const value = this.input!.value!;
+            const value = this.control!.value!;
 
             for(let i = 0 ; i < this._searchtext.length ; ++i) {
                 let key = this._searchtext[i];

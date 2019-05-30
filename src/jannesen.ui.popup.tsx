@@ -4,8 +4,6 @@
 import * as $J          from "jc3/jannesen";
 import * as $JA         from "jc3/jannesen.async";
 import * as $JD         from "jc3/jannesen.dom";
-import * as $JT         from "jc3/jannesen.datatype";
-import * as $JI         from "jc3/jannesen.input";
 
 let screen_width_correction  = 0;
 let screen_height_correction = 0;
@@ -33,13 +31,12 @@ export const enum PositionFlags
     _fixed       = 0x88 // Bit mask fox fix position
 }
 export interface IDropdownConstructor<TNativeValue,
-                                      TValue extends $JT.BaseType,
-                                      TInput extends IControlDropdown<TValue, TDropdownRtn>,
+                                      TControl extends IControlDropdown<TDropdownRtn>,
                                       TCalldata,
                                       TDropdownRtn,
-                                      TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn>>
+                                      TDropdown extends DropdownContent<TNativeValue, TControl, TCalldata, TDropdownRtn>>
 {
-    new     (popup: DropdownPopup<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn>, calldata:TCalldata): TDropdown;
+    new     (popup: DropdownPopup<TNativeValue, TControl, TCalldata, TDropdownRtn>, calldata:TCalldata): TDropdown;
 }
 
 interface ICssPosition
@@ -393,24 +390,23 @@ export class Tooltip extends Popup
     }
 }
 
-export interface IControlDropdown<TValue extends $JT.BaseType, TDropdownRtn> extends $JI.IControl<TValue>
+export interface IControlDropdown<TDropdownRtn>
 {
     readonly    container:                                             $JD.DOMHTMLElement;
     dropdownClose(value:TDropdownRtn|undefined, ev:Event|undefined):   void;
 }
 
 export class DropdownPopup<TNativeValue,
-                           TValue extends $JT.BaseType,
-                           TInput extends IControlDropdown<TValue, TDropdownRtn>,
+                           TControl extends IControlDropdown<TDropdownRtn>,
                            TCalldata    = void,
                            TDropdownRtn = TNativeValue|null,
-                           TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn> = DropdownContent<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn>>
+                           TDropdown extends DropdownContent<TNativeValue, TControl, TCalldata, TDropdownRtn> = DropdownContent<TNativeValue, TControl, TCalldata, TDropdownRtn>>
                                 extends Popup
 {
     /* @internal */     _popupcontainer:    $JD.DOMHTMLElement|undefined;
     /* @internal */     _focuselement:      $JD.DOMHTMLElement;
-    /* @internal */     _input:             TInput|null;
-    private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn, TDropdown>;
+    /* @internal */     _control:           TControl|null;
+    private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TControl, TCalldata, TDropdownRtn, TDropdown>;
     private             _calldata:          TCalldata;
     private             _content:           TDropdown|undefined;
     private             _cancellationToken: $JA.CancellationTokenSource;
@@ -439,11 +435,11 @@ export class DropdownPopup<TNativeValue,
         return this._focuselement;
     }
 
-                        constructor(input:TInput, focuselement:$JD.DOMHTMLElement, dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn, TDropdown>, className:string, calldata:TCalldata)
+                        constructor(control:TControl, focuselement:$JD.DOMHTMLElement, dropdownClass:string|IDropdownConstructor<TNativeValue, TControl, TCalldata, TDropdownRtn, TDropdown>, className:string, calldata:TCalldata)
     {
-        super(input.container,  "-dropdown " + className);
+        super(control.container,  "-dropdown " + className);
         this._focuselement      = focuselement;
-        this._input             = input;
+        this._control           = control;
         this._dropdownClass     = dropdownClass;
         this._calldata          = calldata;
         this._content           = undefined;
@@ -489,13 +485,13 @@ export class DropdownPopup<TNativeValue,
             this._content.OnRemove();
         }
 
-        this._input = null;
+        this._control = null;
         super.Remove();
     }
 
     /* @internal */     setMessage(msg:string|Error, resetfocus?:boolean)
     {
-        if (this._container && this._input && this._poselmOuterRect) {
+        if (this._container && this._control && this._poselmOuterRect) {
             if (resetfocus) {
                 if (this._container.attr("tabIndex") !== undefined) {
                     this._focuselement.focus();
@@ -628,27 +624,26 @@ export class DropdownPopup<TNativeValue,
 }
 
 export abstract class DropdownContent<TNativeValue,
-                                      TValue extends $JT.BaseType,
-                                      TInput extends IControlDropdown<TValue, TDropdownRtn>,
+                                      TControl extends IControlDropdown<TDropdownRtn>,
                                       TCalldata    = void,
                                       TDropdownRtn = TNativeValue|null>
 {
-    protected           _popup:         DropdownPopup<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn>;
+    protected           _popup:         DropdownPopup<TNativeValue, TControl, TCalldata, TDropdownRtn>;
 
     protected get       container()
     {
         return this._popup.container;
     }
-    protected get       input():TInput|null
+    protected get       control():TControl|null
     {
-        return this._popup._input;
+        return this._popup._control;
     }
     protected get       scrollelm()
     {
         return this._popup._popupcontainer!;
     }
 
-                        constructor(popup:DropdownPopup<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn>)
+                        constructor(popup:DropdownPopup<TNativeValue, TControl, TCalldata, TDropdownRtn>)
     {
         this._popup   = popup;
     }
@@ -694,10 +689,10 @@ export abstract class DropdownContent<TNativeValue,
     }
     protected           Close(value:TDropdownRtn|undefined, ev:Event|undefined)
     {
-        let input = this.input;
+        let control = this.control;
 
-        if (input) {
-            input.dropdownClose(value, ev);
+        if (control) {
+            control.dropdownClose(value, ev);
         }
     }
     protected           PositionPopup() {
@@ -711,11 +706,10 @@ export abstract class DropdownContent<TNativeValue,
 }
 
 export abstract class TableDropdown<TNativeValue,
-                           TValue extends $JT.BaseType,
-                           TInput extends IControlDropdown<TValue, TDropdownRtn>,
-                           TCalldata,
-                           TDropdownRtn>
-                        extends DropdownContent<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn>
+                                    TControl extends IControlDropdown<TDropdownRtn>,
+                                    TCalldata,
+                                    TDropdownRtn = TNativeValue|null>
+                          extends DropdownContent<TNativeValue, TControl, TCalldata, TDropdownRtn>
 {
     private         _tbody:                     $JD.DOMHTMLElement|undefined;
     private         _rowcount:                  number|undefined;
@@ -728,7 +722,7 @@ export abstract class TableDropdown<TNativeValue,
         return this._selectedRow;
     }
 
-                    constructor(popup:DropdownPopup<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn>)
+                    constructor(popup:DropdownPopup<TNativeValue, TControl, TCalldata, TDropdownRtn>)
     {
         super(popup);
         const container = this.container!;
@@ -939,11 +933,10 @@ export abstract class TableDropdown<TNativeValue,
 }
 
 function loadDropdownConstructor<TNativeValue,
-                                 TValue extends $JT.BaseType,
-                                 TInput extends IControlDropdown<TValue, TDropdownRtn>,
-                                 TDropdown extends DropdownContent<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn>,
+                                 TControl extends IControlDropdown<TDropdownRtn>,
+                                 TDropdown extends DropdownContent<TNativeValue, TControl, TCalldata, TDropdownRtn>,
                                  TCalldata,
-                                 TDropdownRtn>(dropdownClass:string|IDropdownConstructor<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn, TDropdown>, ct:$JA.ICancellationToken)
+                                 TDropdownRtn>(dropdownClass:string|IDropdownConstructor<TNativeValue, TControl, TCalldata, TDropdownRtn, TDropdown>, ct:$JA.ICancellationToken)
 {
 
     if (typeof dropdownClass === 'function') {
@@ -965,7 +958,7 @@ function loadDropdownConstructor<TNativeValue,
                                     throw new $J.LoadError("'" + classNameParts[1] + "' in module '" + classNameParts[0] + "' is not a DropdownContent constructor.");
                                 }
 
-                                return c as IDropdownConstructor<TNativeValue, TValue, TInput, TCalldata, TDropdownRtn, TDropdown>;
+                                return c as IDropdownConstructor<TNativeValue, TControl, TCalldata, TDropdownRtn, TDropdown>;
                             }
                         }
 

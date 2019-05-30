@@ -281,7 +281,7 @@ export abstract class InputDropdown<TValue extends $JT.SimpleType<number>,
                                     TInput extends $JI.InputTextControl<number, TValue, TInput, TOpts>,
                                     TOpts extends $JI.IInputControlOptions,
                                     TDropdown extends InputDropdown<TValue, TInput, TOpts, TDropdown>>
-                                        extends $JPOPUP.DropdownContent<number, TValue, TInput>
+                                        extends $JPOPUP.DropdownContent<number, TInput>
 {
     protected       _datepicker!:       DatePicker;
 
@@ -289,7 +289,7 @@ export abstract class InputDropdown<TValue extends $JT.SimpleType<number>,
     {
         this._datepicker = new DatePicker();
         this._datepicker.bind('click',  (ev) => {
-                                    const input = this.input;
+                                    const input = this.control;
 
                                     if (input) {
                                         const value = ev && ev.value;
@@ -316,14 +316,14 @@ export abstract class InputDropdown<TValue extends $JT.SimpleType<number>,
 
 export class DateInputDropdown extends InputDropdown<$JT.Date, $JI.Date, $JI.IDateControlOptions, DateInputDropdown>
 {
-                    constructor(popup:$JPOPUP.DropdownPopup<number, $JT.Date, $JI.Date>)
+                    constructor(popup:$JPOPUP.DropdownPopup<number, $JI.Date>)
     {
         super(popup);
     }
 
     public          OnLoad()
     {
-        const value       = this.input!.value!;
+        const value       = this.control!.value!;
         const nativeValue = value.value;
         let minValue      = value.MinValue;
         let maxValue      = value.MaxValue;
@@ -343,14 +343,14 @@ export class DateInputDropdown extends InputDropdown<$JT.Date, $JI.Date, $JI.IDa
 
 export class DateTimeInputDropdown extends InputDropdown<$JT.DateTime, $JI.DateTime, $JI.IDateTimeControlOptions, DateTimeInputDropdown>
 {
-                    constructor(popup:$JPOPUP.DropdownPopup<number, $JT.DateTime, $JI.DateTime>)
+                    constructor(popup:$JPOPUP.DropdownPopup<number, $JI.DateTime>)
     {
         super(popup);
     }
 
     public          OnLoad()
     {
-        const value       = this.input!.value!;
+        const value       = this.control!.value!;
         const nativeValue = value.value;
         let minValue    = value.MinValue;
         let maxValue    = value.MaxValue;
@@ -370,14 +370,14 @@ export class DateTimeInputDropdown extends InputDropdown<$JT.DateTime, $JI.DateT
 
 export class TimeInputDropdown extends InputDropdown<$JT.Time, $JI.Time, $JI.ITimeControlOptions, TimeInputDropdown>
 {
-                    constructor(popup:$JPOPUP.DropdownPopup<number, $JT.Time, $JI.Time>)
+                    constructor(popup:$JPOPUP.DropdownPopup<number, $JI.Time>)
     {
         super(popup);
     }
 
     public          OnLoad()
     {
-        const value       = this.input!.value!;
+        const value       = this.control!.value!;
         const nativeValue = value.value;
         let minValue    = value.MinValue;
         let maxValue    = value.MaxValue;
@@ -398,8 +398,8 @@ export class TimeInputDropdown extends InputDropdown<$JT.Time, $JI.Time, $JI.ITi
 export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue,
                                          TInput extends $JI.InputTextControl<$JTE.IRangeValue, TValue, TInput, TOpt, void, TDropdown>,
                                          TOpt extends $JI.IInputControlOptions,
-                                         TDropdown extends $JPOPUP.DropdownContent<$JTE.IRangeValue, TValue, TInput>>
-                                            extends $JPOPUP.DropdownContent<$JTE.IRangeValue, TValue, TInput>
+                                         TDropdown extends $JPOPUP.DropdownContent<$JTE.IRangeValue, TInput>>
+                                            extends $JPOPUP.DropdownContent<$JTE.IRangeValue, TInput>
 {
     protected       _from!: DatePicker;
     protected       _to!:   DatePicker;
@@ -436,11 +436,11 @@ export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue,
                     break;
                 }
             });
-        this.initState(this.input!.value!);
+        this.initState(this.control!.value!);
 
         function rtnrange(datePicker:DatePicker, ev:ClickEvent|undefined)
         {
-            const input = self.input;
+            const input = self.control;
             if (input) {
                 const dtvalue = input.value;
                 if (dtvalue) {

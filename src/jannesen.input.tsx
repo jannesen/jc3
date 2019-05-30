@@ -236,13 +236,13 @@ export abstract class InputTextControl<TNativeValue,
                                        TInput extends InputTextControl<TNativeValue, TValue, TInput, TOpts, TCalldata, TDropdown>,
                                        TOpts extends IInputControlOptions,
                                        TCalldata = void,
-                                       TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TCalldata> = $JPOPUP.DropdownContent<TNativeValue, TValue, TInput, TCalldata>>
+                                       TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TInput, TCalldata> = $JPOPUP.DropdownContent<TNativeValue, TInput, TCalldata>>
                                             extends SimpleControl<TValue, TOpts>
-                                            implements $JPOPUP.IControlDropdown<TValue, TNativeValue|null>
+                                            implements $JPOPUP.IControlDropdown<TNativeValue|null>
 {
     protected   _input:             $JD.DOMHTMLElement;
     protected   _text:              string;
-    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TValue, TInput, TCalldata, TNativeValue|null, TDropdown>|undefined;
+    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TInput, TCalldata, TNativeValue|null, TDropdown>|undefined;
 
                             constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown: boolean)
     {
@@ -391,7 +391,7 @@ export abstract class InputTextControl<TNativeValue,
             elm.selectionEnd   = elm.value.length;
         }
     }
-    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TValue, TInput, TCalldata, TNativeValue|null, TDropdown>, className:string, focus:boolean, calldata:TCalldata, onready?:(content:TDropdown)=>void)
+    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TInput, TCalldata, TNativeValue|null, TDropdown>, className:string, focus:boolean, calldata:TCalldata, onready?:(content:TDropdown)=>void)
     {
         if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass && $J.isEqual(this._activeDropdown.Calldata, calldata))) {
             this.closeDropdown(false);
