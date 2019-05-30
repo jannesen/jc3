@@ -703,13 +703,16 @@ export abstract class SimpleType<TNative> extends BaseType
      * Return the value of the data.
      * If the data is bound to a input and the input is invalid then this function return undefined.
      */
-    public getValue()
+    public getValue():TNative|null|undefined;
+    public getValue(errValue:null):TNative|null;
+    public getValue(errValue:TNative):TNative|null;
+    public getValue(errValue?:TNative|null)
     {
         try {
             return this.value;
         }
         catch (e) {
-            return undefined;
+            return errValue;
         }
     }
     /**
