@@ -156,10 +156,15 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|
 
         if (content) {
             this._datapopup = new DataPopup(this.content.parent!, title!, content, contentClass, () => { this._removeDataPopup(); } );
-            this.bind("hide", this._removeDataPopup, this);
         }
     }
 
+    protected               onshow(display:boolean)
+    {
+        if (!display) {
+            this._removeDataPopup();
+        }
+    }
     protected               executeDialog<TArgs>(form:(new ()=>$JCONTENT.DialogBase<TArgs, string>) | string, args:TArgs)
     {
         return this.execute((context) => $JCONTENT.dialogShow(form, args, context));

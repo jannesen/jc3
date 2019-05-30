@@ -369,16 +369,13 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
         this._activeTask = task;
         this._isbusy = !!task;
     }
-    protected           _destroyContent(contentBody:TContentBody) {
-         contentBody.trigger("destroy");
-    }
     protected           _destroy() {
         this._container.unbind("keydown", this._onkeydown, this);
 
         for (let child of this._container.children) {
             const cb = child.data("contentbody") as TContentBody;
             if (cb instanceof ContentBody) {
-                this._destroyContent(cb);
+                cb._trigger_ondestroy();
                 this._container.removeChild(child);
             }
         }
@@ -452,7 +449,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
         for (let child of this._container.children) {
             const cb = child.data("contentbody") as TContentBody;
             if (cb instanceof ContentBody && cb !== this._contentBody) {
-                this._destroyContent(cb);
+                cb._trigger_ondestroy();
                 this._container.removeChild(child);
             }
         }
@@ -505,16 +502,10 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
     public              bind(eventName: string,            handler: (ev:any)=>void,                 thisArg?:any): void;
     public              bind(eventName: "keypress-cancel", handler: (event:KeyboardEvent)=>void,    thisArg?:any): void;
     public              bind(eventName: "keypress-ok",     handler: (event:KeyboardEvent)=>void,    thisArg?:any): void;
-    public              bind(eventName: "show",            handler: ()=>void,                       thisArg?:any): void;
-    public              bind(eventName: "hide",            handler: ()=>void,                       thisArg?:any): void;
-    public              bind(eventName: "destroy",         handler: ()=>void,                       thisArg?:any): void;
     public              bind(eventName: string,            handler: (ev:any)=>void,                 thisArg?:any): void         { throw new $J.InvalidStateError("Mixin not applied."); }
     public              unbind(eventName: string, handler: (ev?:any)=>void, thisArg?:any): void                                 { throw new $J.InvalidStateError("Mixin not applied."); }
     public              trigger(eventName: "keypress-cancel", data:KeyboardEvent      ): void;
     public              trigger(eventName: "keypress-ok",     data:KeyboardEvent      ): void;
-    public              trigger(eventName: "show",                                    ): void;
-    public              trigger(eventName: "hide",                                    ): void;
-    public              trigger(eventName: "destroy"                                  ): void;
     public              trigger(eventName: string,            data?: any              ): void                                   { throw new $J.InvalidStateError("Mixin not applied."); }
     // #endregion
 
@@ -529,6 +520,12 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
     }
 
     protected           onload(loader:TLoader, ct:$JA.ICancellationToken):$JA.Task<void>|void
+    {
+    }
+    protected           onshow(display:boolean)
+    {
+    }
+    protected           ondestroy()
     {
     }
 
@@ -577,6 +574,14 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
     /*@internal*/       _setLoader(container:TLoader|null)
     {
         this._loader = container;
+    }
+    /*@internal*/       _trigger_show(display:boolean)
+    {
+        this.onshow(display);
+    }
+    /*@internal*/       _trigger_ondestroy()
+    {
+        this.ondestroy();
     }
     /*@internal*/ abstract _openContent(args:TArgs, formState:IFormState|null|undefined, ct:$JA.ICancellationToken):$JA.Task<void>|void;
 }
@@ -667,12 +672,7 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
             if (this._display !== display) {
                 this._container.show(this._display = display);
                 if (this._contentBody) {
-                    if (display) {
-                        this._contentBody.trigger("show");
-                    }
-                    else {
-                        this._contentBody.trigger("hide");
-                    }
+                    this._contentBody._trigger_show(display);
                 }
             }
         }
@@ -707,15 +707,9 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
         this._showcalled = true;
 
         if (this._display) {
-            content.trigger("show");
+            content._trigger_show(true);
             content._trigger_resize(this._size);
         }
-    }
-    protected           _destroyContent(contentBody:Form<TArgs> | FormError) {
-        if (this._display) {
-            contentBody.trigger("hide");
-        }
-        super._destroyContent(contentBody);
     }
 }
 
@@ -942,7 +936,7 @@ export class DialogLoader<TArgs, TRtn> extends ContentLoader<DialogBase<TArgs, T
                  .css({ position:"absolute", top:0, left:0 })
                  .addClass("-init");
 
-        contentBody.trigger("show");
+        contentBody._trigger_show(true);
 
         this._initDlgSize = this.container.size;
         contentBody.dialogFlags = this._calcDialogFlags();
