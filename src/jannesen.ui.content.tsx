@@ -10,7 +10,7 @@ import * as $JUM    from "jc3/jannesen.ui.menu";
 //-------------------------------------------------------------------------------------------------
 //
 //
- 
+
 interface IActiveTask
 {
     task:           $JA.Task<any>;
@@ -605,7 +605,7 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
     }
     public              execute<TRtn>(executor: (context:$JA.Context) => $JA.Task<TRtn>, contextOptions?:$JA.IContextOptions): $JA.Task<TRtn>
     {
-        const loader = this._context.getrootcomponent(FormLoader)
+        const loader = this._context.getrootcomponent(FormLoader);
         return loader ? loader.execute(executor, contextOptions) : super.execute(executor, contextOptions);
     }
     public              saveFormState()
