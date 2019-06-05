@@ -248,7 +248,7 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
      */
     public get uniqueid():string {
         if (!this._uniqueid)
-            this._uniqueid = $J.uniqueid();
+            this._uniqueid = "_jid_" + $J.uniqueid();
 
         return this._uniqueid;
     }

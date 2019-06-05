@@ -823,10 +823,11 @@ function MathHelper(func:number, values:(number|null|undefined)[]): number|null|
 /**
  * !!DOC
  */
-export function uniqueid(): string {
-    return "_jid_" + (global_uniqueidcounter++).toString();
+export function uniqueid(): number {
+    return global_uniqueidcounter++;
 }
 
+//=============================================== Timeout =========================================
 /**
  * !!DOC
  */
@@ -1135,7 +1136,6 @@ export class EventHandling implements IEventSource
         eventTrigger(this._eventHandlers, eventName, data);
     }
 }
-
 
 interface IEventCollectionEntry
 {
