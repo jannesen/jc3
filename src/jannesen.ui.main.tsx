@@ -26,7 +26,7 @@ export interface IMainAttr
     sidebarVisible?:        boolean;
     sidebarWidth?:          number;
     sidebarPinned?:         boolean;
-    sidebarDataSource?:     (data:$JUT.TreeViewItemList|null, ct:$JA.ICancellationToken) => $JUT.IDataSourceResult;
+    sidebarDataSource?:     (data:$JUT.TreeViewItemList|null, ct:$JA.Context) => $JUT.IDataSourceResult;
     newform?:               (formName:string, args:$J.IUrlArgs, replaceHistory:boolean) => ($JUC.IFormState|undefined);
     gotoback?:              () => void;
     onsidebarclick?:        (data:$JUT.TreeViewItem) => void;
@@ -37,6 +37,7 @@ export interface IMainAttr
  */
 export class Main extends $JD.Container
 {
+    protected       _context:                   $JA.Context;
     private         _sidebar?:                  $JD.DOMHTMLElement;
     private         _sidebar_buttonbar?:        $JD.DOMHTMLElement;
     private         _sidebar_menu_container?:   $JD.DOMHTMLElement;
@@ -123,6 +124,7 @@ export class Main extends $JD.Container
     public          constructor(attr:IMainAttr)
     {
         super(<div class={ $JD.classJoin(attr["class"], "jannesen-ui-main") }/>);
+        this._context = new $JA.Context({ parent:null, component:this, dom:this.container });
 
         if (attr.sidebarDataSource) {
             this._sidebar = <div class="-sidebar" style="width:0" onmouseleave={() => { if (!this.sidebarPinned && !this._sidebar_resize_active) { this.sidebarVisible = false; } }}> {}
@@ -170,11 +172,7 @@ export class Main extends $JD.Container
                                                                            }} /> }
                                 </div>
                             </div>
-                            { this._formloader = new $JUC.FormLoader({
-                                                    openform:           (openform, args, historyReplace, ct) => this._openform(openform, args, historyReplace, ct),
-                                                    historyChangeArgs:  (args, historyReplace)               => this._historyChangeArgs(args, historyReplace),
-                                                    formchanged:        (reason, form)                       => this._formChanged(reason, form)
-                                                 }) }
+                            { this._formloader = new $JUC.FormLoader(this._context) }
                         </div>;
         this._container.appendChild(this._content);
 
@@ -190,17 +188,22 @@ export class Main extends $JD.Container
 
         this._container.bind("AddedToDocument", () => { this._updateStyle(false); });
         this._statechangeactive     = undefined;
+
+        {
+            const formhost = (this._context.values as $JUC.IContextFormHost);
+            formhost.openform          = (openform, args, historyReplace) => this._openform(openform, args, historyReplace);
+            formhost.historyChangeArgs = (args, historyReplace)           => this._historyChangeArgs(args, historyReplace);
+            formhost.formchanged       = (reason, form)                   => this._formChanged(reason, form);
+        }
     }
 
-    public          openform<TArgs=$J.IUrlArgs>(formNameClass:string|(new ()=>$JUC.Form<TArgs>), args:TArgs, saveformstate?:boolean, formstate?:$JUC.IFormState, ct?:$JA.ICancellationToken|null)
+    public          openform<TArgs=$J.IUrlArgs>(formNameClass:string|(new (context:$JA.Context)=>$JUC.Form<TArgs>), args:TArgs, saveformstate?:boolean, formstate?:$JUC.IFormState, contextOptions?:$JA.IContextOptions)
     {
-        if (ct === undefined) ct=null;
-
         if (saveformstate) {
             this._formloader.saveFormState();
         }
 
-        return this._openformex(formNameClass, args, formstate, ct);
+        return this._openformex(formNameClass, args, formstate, contextOptions);
     }
     public          gotosidebar()
     {
@@ -224,7 +227,7 @@ export class Main extends $JD.Container
             let prev = this._formloader.contentBody._formstate.argset.prev();
 
             if (prev) {
-                this._openform(".", prev, true, null);
+                this._openform(".", prev, true);
             }
         }
     }
@@ -233,7 +236,7 @@ export class Main extends $JD.Container
         if (this._formloader.contentBody && this._formloader.contentBody._formstate && this._formloader.contentBody._formstate.argset) {
             let next = this._formloader.contentBody._formstate.argset.next();
             if (next) {
-                this._openform(".", next, true, null);
+                this._openform(".", next, true);
             }
         }
     }
@@ -244,7 +247,7 @@ export class Main extends $JD.Container
         }
     }
 
-    /*@internal*/   _openform(formName:string, args:$J.IUrlArgsColl|$JUC.IUrlArgsSet, historyReplace:boolean, ct:$JA.ICancellationToken|null): $JA.Task<void>
+    /*@internal*/   _openform(formName:string, args:$J.IUrlArgsColl|$JUC.IUrlArgsSet, historyReplace:boolean): $JA.Task<void>
     {
         if (!historyReplace) {
             this._formloader.saveFormState();
@@ -268,7 +271,7 @@ export class Main extends $JD.Container
         try {
             nargs = $JUC.normalizeUrlArgs(args);
         } catch (err) {
-            return $JUC.DialogError.show(err, ct) as $JA.Task<void>;
+            return $JUC.DialogError.show(err, this._context) as $JA.Task<void>;
         }
 
         let formstate = (this.newform) ? this.newform(formName, nargs, historyReplace) : undefined;
@@ -277,7 +280,7 @@ export class Main extends $JD.Container
             formstate.argset = argset;
         }
 
-        return this._openformex(formName, nargs, formstate, ct);
+        return this._openformex(formName, nargs, formstate);
     }
     private         _historyChangeArgs(args:$J.IUrlArgsColl, historyReplace:boolean) {
         if (this.newform) {
@@ -291,7 +294,7 @@ export class Main extends $JD.Container
             }
         }
     }
-    private         _openformex<TArgs>(formNameClass:string|(new ()=>$JUC.Form<TArgs>), args:TArgs, formstate:$JUC.IFormState|undefined, ct:$JA.ICancellationToken|null)
+    private         _openformex<TArgs>(formNameClass:string|(new (context:$JA.Context)=>$JUC.Form<TArgs>), args:TArgs, formstate:$JUC.IFormState|undefined, contextOptions?:$JA.IContextOptions)
     {
         if (this._formloader.contentBody && this._formloader.contentBody.contentNameClass === formNameClass) {
             this._moremenu.disabled = true;
@@ -303,7 +306,7 @@ export class Main extends $JD.Container
             this._nav_next.disabled = true;
         }
 
-        return this._formloader.open(formNameClass, args, formstate, ct);
+        return this._formloader.open(formNameClass, args, formstate, contextOptions);
     }
     private         _updateStyle(transition:boolean)
     {

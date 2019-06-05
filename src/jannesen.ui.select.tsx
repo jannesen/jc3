@@ -12,7 +12,7 @@ import * as $JL      from "jc3/jannesen.language";
 
 interface ICurrentFetch<TRecord>
 {
-    ct:             $JA.CancellationTokenSource|null;
+    ct:             $JA.Context|null;
     task:           $JA.Task<TRecord[]|string>;
     searchtext?:    string|string[];
     data?:          TRecord[]|null;
@@ -26,7 +26,7 @@ export class ValuesDropdown<TNativeValue,
 {
     private     _values?:   TNativeValue[];
 
-    public              OnLoad(calldata:void, ct:$JA.CancellationTokenSource): $JA.Task<void>|void
+    public              OnLoad(calldata:void, ct:$JA.Context): $JA.Task<void>|void
     {
         const input           = this.control;
 
@@ -121,7 +121,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
                     this._filltable();
                 } else {
                     if (this._currectfetch && this._currectfetch.ct) {
-                        this._currectfetch.ct.cancel();
+                        this._currectfetch.ct.stop();
                     }
 
                     this._currectfetch = undefined;
@@ -152,7 +152,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     public      OnRemove()
     {
         if (this._currectfetch && this._currectfetch.ct) {
-            this._currectfetch.ct.cancel();
+            this._currectfetch.ct.stop();
         }
 
         this._currectfetch = undefined;
@@ -213,7 +213,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
 
     private     _fetchdata(searchtext?:string|string[], max?:number)
     {
-        const ct   = new $JA.CancellationTokenSource();
+        const ct   = new $JA.Context({ parent:this._popup.context });
         const task = this._datasource.fetchdataAsync(ct, this._context, searchtext, max) as (/*TS Limit*/ $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>);
         this._currectfetch = { ct, task, searchtext };
 

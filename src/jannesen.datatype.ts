@@ -79,7 +79,7 @@ export type SelectValue = number|string;
  */
 export type RecordSet<TRec extends IFieldDef = IFieldDef> = Set<Record<TRec>>;
 
-/* TODO assign mapping
+/* assign mapping
 type AssignSympleType  <T extends { new (...args: any[]): SimpleType<any> }>                        = string|InstanceType<T>["value"]|InstanceType<T>;
 type AssignRecord      <T extends { 'FieldDef': IFieldDef, new (...args: any[]): Record<any> }>     = AssignRecordMapper<T["FieldDef"]>;
 type AssignRecordMapper<T extends IFieldDef>                                                        = { [K in keyof T]?: AssignType<T[K]> };
@@ -2860,7 +2860,7 @@ export abstract class SelectDatasource<TNative extends SelectValue, TRecord exte
     /**
      *!!DOC
      */
-    public abstract fetchdataAsync(ct:$JA.ICancellationToken, context:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]|string>;
+    public abstract fetchdataAsync(context:$JA.Context, inputContext:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]|string>;
     /**
      *!!DOC
      */
@@ -2903,7 +2903,7 @@ export class EnumSelectDatasource<TNative extends SelectValue, TRecord extends I
     public  getrecordAsync(key:TNative): TRecord|undefined {
         return this.getrecord(key);
     }
-    public  fetchdataAsync(ct:$JA.ICancellationToken, context:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]> {
+    public  fetchdataAsync(context:$JA.Context, inputContext:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]> {
         if (searchtext !== undefined)
             throw new $J.InvalidStateError("EnumSelectDatasource.search not implemented.");
 
@@ -2990,14 +2990,13 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
         }
 
         const task = $JA.Ajax<$JA.IAjaxCallDefinition<any,void,TRecord>>({
-                            method:                     "GET",
-                            callname:                   this.opts.callname_lookup,
-                            response_contenttype:       $JA.MimeType.Json,
-                            }, {
-                            callargs:                   { key: key },
-                            },
-                            $JA.CancellationTokenSource.None
-                        ).then((data) => {
+                                                                             method:                     "GET",
+                                                                             callname:                   this.opts.callname_lookup,
+                                                                             response_contenttype:       $JA.MimeType.Json,
+                                                                         }, {
+                                                                             callargs:                   { key: key },
+                                                                         }, null)
+                        .then((data) => {
                                   if ((data as ({readonly [key:string]:any}))[this._keyfieldname] === key) {
                                       this._cache[ck].timeout = $global.Date.now() + this._cachetimeout;
                                       this._cache[ck].entry   = data;
@@ -3011,27 +3010,27 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
 
                                   delete this._cache[ck];
                                   throw new $J.InvalidStateError("Recieved invalid record from backend.");
-                               },
-                               (err) => {
+                              },
+                              (err) => {
                                   delete this._cache[ck];
                                   throw err;
-                               });
+                              });
 
         this._cache[ck] = { entry: task };
 
         return task;
     }
-    public  fetchdataAsync(ct:$JA.ICancellationToken, context:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]|string> {
+    public  fetchdataAsync(context:$JA.Context, inputContext:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]|string> {
         if (!this.opts.callname_fetchdata) {
             throw new $J.InvalidStateError("RemoteSelectDatasource.fetch not defined.");
         }
 
         let callargs: $J.IUrlArgsColl = {};
 
-        if (context) {
-            for (var key in context) {
-                if (context.hasOwnProperty(key)) {
-                    var value = context[key];
+        if (inputContext) {
+            for (var key in inputContext) {
+                if (inputContext.hasOwnProperty(key)) {
+                    var value = inputContext[key];
                     if (value !== undefined && value !== null) {
                         callargs[key] = value;
                     }
@@ -3047,14 +3046,11 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
         const url = $J.objectToUrlArgs(this.opts.callname_fetchdata, callargs);
 
         return $JA.Ajax<$JA.IAjaxCallDefinition<void,void,TRecord[]|string>>({
-                            method:                 "GET",
-                            response_contenttype:   $JA.MimeType.Json,
-                        },
-                        {
-                            url
-                        },
-                        ct
-                  );
+                                                                                  method:                 "GET",
+                                                                                  response_contenttype:   $JA.MimeType.Json,
+                                                                             }, {
+                                                                                  url
+                                                                             }, context);
     }
     public  filter_searchtext(searchtext:string|string[]): string|string[] {
         const fetch_filter = this._opts.fetch_filter;

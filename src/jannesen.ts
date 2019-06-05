@@ -121,15 +121,8 @@ export class NotImplentedError extends __Error
 }
 
 /**
- *!!DOC
+ * !!DOC
  */
-export class LoadError extends __Error
-{
-    constructor(message:string) {
-        super("LoadError", message);
-    }
-}
-
 export interface IAjaxCallDefinition
 {
     method:                 string;

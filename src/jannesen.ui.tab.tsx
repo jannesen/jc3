@@ -11,13 +11,13 @@ export type AddTab    = Tab|undefined|false|AddTabArray;
 
 export interface ITabsAttr
 {
+    context?:       $JA.Context;
     selectfirst?:   boolean;
-    formhost?:      $JUC.Nullable<$JUC.IFormHost>;
 }
 
 export class Tabs extends $JD.Container implements $JD.ISetSize
 {
-    public      formhost?:             $JUC.Nullable<$JUC.IFormHost>;
+    protected   _context:               $JA.Context;
     private     _tabHeader:             $JD.DOMHTMLElement;
     private     _children:              Tab[];
     private     _size:                  $JD.ISize|undefined;
@@ -29,7 +29,10 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
     public  get Tabs() {
         return this._children;
     }
-
+    public  get context()
+    {
+        return this._context;
+    }
     public  get size() {
         return this._size;
     }
@@ -50,7 +53,7 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
 
         super(container);
 
-        this.formhost     = attr && attr.formhost;
+        this._context     = new $JA.Context({ parent: attr && attr.context, component:this, dom: container });
         this._tabHeader   = tabheader;
         this._children    = [];
         this._size        = undefined;
@@ -200,7 +203,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
     private     _name?:             string;
     private     _titleElement:      $JD.DOMHTMLElement;
     private     _enabled:           boolean;
-    private     _moremenu?:         (ct:$JA.ICancellationToken) => $JUM.IDataSourceResult;
+    private     _moremenu?:         (ct:$JA.Context) => $JUM.IDataSourceResult;
     private     _loadcontent?:      () => $JD.AddNode;
     private     _loadform?:         (loader:$JUC.FormLoader) => $JA.Task<void>;
     private     _active:            boolean;
@@ -285,7 +288,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
 
         return !!this._moremenu;
     }
-    public      moreMenuDatasource(ct:$JA.ICancellationToken):$JUM.IDataSourceResult
+    public      moreMenuDatasource(ct:$JA.Context):$JUM.IDataSourceResult
     {
         if ($JUC.ImplementsMoreMenu(this._tabContent)) {
             return this._tabContent.moreMenuDatasource(ct);
@@ -328,7 +331,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
                     return;
                 }
                 else if (typeof this._loadform === 'function') {
-                    const loader = new $JUC.FormLoader(tabs.formhost);
+                    const loader = new $JUC.FormLoader(tabs.context);
                     this._container.appendChild(this._tabContent = loader);
                     return this._loadform(loader);
                 }

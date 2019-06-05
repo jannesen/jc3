@@ -421,7 +421,7 @@ export abstract class InputTextControl<TNativeValue,
                 }
             }
 
-            activeDropdown.Remove();
+            activeDropdown.Stop();
         }
     }
 
@@ -548,7 +548,7 @@ export abstract class InputTextControl<TNativeValue,
  */
 export interface IInputControlDropdownValuesOptions<TNative> extends IInputControlOptions
 {
-    dropdown_values?:   (ct:$JA.ICancellationToken) => TNative[] | $JA.Task<TNative[]>;
+    dropdown_values?:   (context:$JA.Context) => TNative[] | $JA.Task<TNative[]>;
 }
 
 export abstract class InputTextValueDropdownControl<TNativeValue,
@@ -1565,7 +1565,7 @@ export class ErrorMessage
 
     private         _removePopup() {
         if (this._popup) {
-            this._popup.Remove();
+            this._popup.Stop();
             this._popup = undefined;
         }
     }

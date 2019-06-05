@@ -7,14 +7,16 @@ import * as $JD      from "jc3/jannesen.dom";
 export type IDataSourceResult = $JA.Task<TreeViewItem[]>|TreeViewItem[];
 export interface ITreeViewAttr
 {
-    dataSource:   (item:TreeViewItemList|null, ct:$JA.ICancellationToken) => IDataSourceResult;
+    context?:     $JA.Context|null;
+    dataSource:   (item:TreeViewItemList|null, context:$JA.Context) => IDataSourceResult;
     onclick?:     (item:TreeViewItemEndPoint) => void;
 }
 
 export class TreeView extends $JD.Container
 {
-    private         _retrieveData:  (item:TreeViewItemList|null, cancellationToken: $JA.ICancellationToken) => IDataSourceResult;
+    private         _retrieveData:  (item:TreeViewItemList|null, cancellationToken: $JA.Context) => IDataSourceResult;
     private         _selection:     number[]|null;
+    private         _context:       $JA.Context;
 
     public set      selection(selection: number[]) {
         let selectedItem:TreeViewItem|null;
@@ -65,6 +67,7 @@ export class TreeView extends $JD.Container
 
     public          constructor(attr: ITreeViewAttr) {
         super(<div class="jannesen-ui-treeview" tabIndex="0" />);
+        this._context      = new $JA.Context({ parent: attr.context, component: this,  dom: this._container});
         this._retrieveData = attr.dataSource;
         this._container.bind("click",   this._onclick,   this);
         this._container.bind("keydown", this._onkeydown, this);
@@ -153,7 +156,7 @@ export class TreeView extends $JD.Container
         var listItems: IDataSourceResult;
 
         try {
-            listItems = this._retrieveData(item, new $JA.CancellationTokenDom(this.container));
+            listItems = this._retrieveData(item, this._context);
         } catch (err) {
             this._showError(parent, err);
             return;
@@ -356,7 +359,7 @@ export class TreeViewItemList extends TreeViewItem
         this._loaded    = false;
     }
 
-    public          expand(expand:boolean) {
+    /*@internal*/   expand(expand:boolean) {
         this._expanded = expand;
 
         const height = this.list.element.scrollHeight;
@@ -379,7 +382,6 @@ export class TreeViewItemList extends TreeViewItem
                                 }, 200);
         }
     }
-
     /*@internal*/   onclick(callback:(item:TreeViewItemList, list: $JD.DOMHTMLElement) => void) {
         if (!this._loaded) {
             this._loaded = true;

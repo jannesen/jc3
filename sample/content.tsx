@@ -40,19 +40,19 @@ function createTest()
                                                                                                        }, context)));
                                 }}>execute</button>
                             </div>
-                            { ac = new $JC.FormLoader() }
+                            { ac = new $JC.FormLoader(null) }
                         </div>);
     return ac;
 }
 
 export class FormModule extends $JC.Form<any>
 {
-    protected       onload(loader:$JC.FormLoader, ct:$JA.ICancellationToken):$JA.Task<void>|void
+    protected       onload(ct:$JA.Context):$JA.Task<void>|void
     {
         this.content.appendChild(<div>init</div>);
         return $JA.Delay(500, ct);
     }
-    protected       onopen(args:any, state:void, ct:$JA.ICancellationToken):$JA.Task<void>|void
+    protected       onopen(args:any, state:void, ct:$JA.Context):$JA.Task<void>|void
     {
         this.content.appendChild(<div>open</div>,
                                  <div>
@@ -64,12 +64,12 @@ export class FormModule extends $JC.Form<any>
 
 export class Dialog extends $JC.Dialog<void, string>
 {
-    public static       show(context:$JA.ICancellationToken|$JC.AsyncContext): $JA.Task<string|undefined>
+    public static       show(context:$JA.Context): $JA.Task<string|undefined>
     {
         return $JC.dialogShow(Dialog, undefined, context);
     }
 
-    protected           onload(loader:$JC.DialogLoader, ct:$JA.ICancellationToken)
+    protected           onload(ct:$JA.Context)
     {
         return $JA.Delay(1000, ct);
     }

@@ -36,9 +36,9 @@ function normalizeArgs(args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record|nul
 }
 
 //-------------------------------------------------------------------------------------------------
-export var hasPermission:(o:string|$JA.IAjaxCallDefinition<any,any,any>|(new()=>BaseForm<any,any>)|(new()=>StandardDialog<any,any>), method?:string) => boolean = (cls) => true;
+export var hasPermission:(o:string|$JA.IAjaxCallDefinition<any,any,any>|(new(context:$JA.Context)=>BaseForm<any,any>)|(new()=>StandardDialog<any,any>), method?:string) => boolean = (cls) => true;
 
-export function setHasPermission(f: (o:string|$JA.IAjaxCallDefinition<any,any,any>|(new()=>BaseForm<any,any>)|(new()=>StandardDialog<any,any>), method?:string) => boolean)
+export function setHasPermission(f: (o:string|$JA.IAjaxCallDefinition<any,any,any>|(new(context:$JA.Context)=>BaseForm<any,any>)|(new()=>StandardDialog<any,any>), method?:string) => boolean)
 {
     hasPermission = f;
 }
@@ -124,9 +124,9 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|
         return this._formargs;
     }
 
-    public                  constructor()
+    public                  constructor(context:$JA.Context)
     {
-        super();
+        super(context);
 
         let queryargs_type = this.interfaceGet.callargs_type;
         this._formargs   = (queryargs_type) ? new queryargs_type() : null as any;
@@ -144,7 +144,7 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|
             let args = normalizeArgs(this._formargs);
 
             this.showDataPopup();
-            loader.open(this.contentNameClass, args, state, null, true);
+            loader.open(this.contentNameClass, args, state, undefined, true);
         }
     }
 
@@ -155,7 +155,7 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|
         this._removeDataPopup();
 
         if (content) {
-            this._datapopup = new DataPopup(this.content.parent!, title!, content, contentClass, () => { this._removeDataPopup(); } );
+            this._datapopup = new DataPopup(this.content.parent!, this.context, title!, content, contentClass, () => { this._removeDataPopup(); } );
         }
     }
 
@@ -165,26 +165,26 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|
             this._removeDataPopup();
         }
     }
-    protected               executeDialog<TArgs>(form:(new ()=>$JCONTENT.DialogBase<TArgs, string>) | string, args:TArgs)
+    protected               executeDialog<TArgs>(form:(new (context:$JA.Context)=>$JCONTENT.DialogBase<TArgs, string>) | string, args:TArgs)
     {
         return this.execute((context) => $JCONTENT.dialogShow(form, args, context));
     }
 
-    protected               executeDialogAndRefresh<TArgs>(form:(new ()=>$JCONTENT.DialogBase<TArgs, string|null>) | string, args:TArgs)
+    protected               executeDialogAndRefresh<TArgs>(form:(new (context:$JA.Context)=>$JCONTENT.DialogBase<TArgs, string|null>) | string, args:TArgs)
     {
         this.execute((context) => $JCONTENT.dialogShow(form, args, context)
                                            .then((rtn) => { if (rtn==="OK" || rtn==="DELETE") this.refresh(); }));
     }
-    protected               openform(formName:string, args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record|null|void, historyReplace?:boolean, ct?:$JA.ICancellationToken|null)
+    protected               openform(formName:string, args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record|null|void, historyReplace?:boolean)
     {
-        return super.openform(formName, normalizeArgs(args), historyReplace, ct);
+        return super.openform(formName, normalizeArgs(args), historyReplace);
     }
 
     private                 _removeDataPopup()
     {
         if (this._datapopup) {
             this.unbind("hide", this._removeDataPopup, this);
-            this._datapopup.Remove();
+            this._datapopup.Stop();
             this._datapopup = null;
         }
     }
@@ -208,13 +208,13 @@ export abstract class SimpleForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
         return "jannesen-ui-template-simpleform";
     }
 
-    public                  constructor()
+    public                  constructor(context:$JA.Context)
     {
-        super();
+        super(context);
         this._resultdata = undefined;
     }
 
-    protected               onopen(args:$J.IUrlArgsColl, state:void, ct:$JA.ICancellationToken):$JA.Task<void>|void
+    protected               onopen(args:$J.IUrlArgsColl, state:void, ct:$JA.Context):$JA.Task<void>|void
     {
         this.showDataPopup();
         let callargs:$JT.Record|undefined;
@@ -236,7 +236,7 @@ export abstract class SimpleForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
         if (this._formstate && this._formstate.argset) {
             let next = this._formstate.argset.next();
             if (next) {
-                this.openform(".", next, true, undefined);
+                this.openform(".", next, true);
                 return true;
             }
         }
@@ -251,7 +251,7 @@ export abstract class SimpleForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
  */
 export interface ITabAttr extends $JTAB.ITabAttr
 {
-    form?:      new () => BaseForm<any, any>;
+    form?:      new (context:$JA.Context) => BaseForm<any, any>;
 }
 
 export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,void,any>> extends SimpleForm<TCall> implements $JCONTENT.IMoreMenu
@@ -262,8 +262,8 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
         return "overflow:hidden";
     }
 
-    public                  constructor(className?: string) {
-        super();
+    public                  constructor(context:$JA.Context) {
+        super(context);
         this._tabs = undefined;
     }
 
@@ -271,7 +271,7 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
         const tab = this._tabs && this._tabs.activeTab;
         return tab ? tab.moreMenuEnabled() : false;
     }
-    public                  moreMenuDatasource(ct:$JA.ICancellationToken):$JMENU.IDataSourceResult {
+    public                  moreMenuDatasource(ct:$JA.Context):$JMENU.IDataSourceResult {
         const tab = this._tabs && this._tabs.activeTab;
         return tab ? tab.moreMenuDatasource(ct) : [];
     }
@@ -281,7 +281,7 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
         }
     }
     protected               dataReceived(data: $JA.AjaxCallResponseType<TCall>): void|$JA.Task<void> {
-        const tabs = <$JTAB.Tabs>
+        const tabs = <$JTAB.Tabs context={ this.context }>
                      {
                         this.createTab(data).map((tab) => {
                                                     if (tab) {
@@ -301,28 +301,17 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
                      }
                      </$JTAB.Tabs>;
 
-        tabs.formhost = {
-            parent:         () => this.loader,
-            openform:       (formName, args, historyReplace, ct) => {
-                                const loader = this.loader;
-                                if (!loader) {
-                                    throw new $JA.OperationCanceledError("Form not active any more.");
-                                }
-                                if (!loader.host.openform) {
-                                    throw new $JA.OperationCanceledError("Host does not support openform.");
-                                }
-                                return loader.host.openform(formName, args, historyReplace, ct);
-                            },
-            formchanged:    (reason, form) => {
-                                const activeTab = tabs.selectedTab;
-                                if (activeTab) {
-                                    const loader = this.loader;
-                                    if (loader && activeTab.tabContent instanceof $JCONTENT.FormLoader && form === activeTab.tabContent.contentBody) {
-                                        loader.host.formchanged(reason, form);
-                                    }
-                                }
-                            }
-        };
+        (tabs.context.values as $JCONTENT.IContextFormHost).formchanged = (reason, form) => {
+                                                                              const activeTab = tabs.selectedTab;
+                                                                              if (activeTab) {
+                                                                                  if (this.loader && activeTab.tabContent instanceof $JCONTENT.FormLoader && activeTab.tabContent.contentBody === form) {
+                                                                                      const formchanged = (this.context.values as $JCONTENT.IContextFormHost).formchanged;
+                                                                                      if (formchanged) {
+                                                                                          formchanged(reason, form);
+                                                                                      }
+                                                                                  }
+                                                                              }
+                                                                          };
 
         this.setContent(this._tabs = tabs);
 
@@ -349,11 +338,7 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
         this.historyChangeArgs(this.args, true);
     }
     private                 _onTabVisable(tab:$JTAB.Tab) {
-        const loader = this.loader;
-
-        if (loader) {
-            loader.host.formchanged($JCONTENT.FormChangedReason.TabChanged, this);
-        }
+        this.formChanged($JCONTENT.FormChangedReason.TabChanged);
     }
 }
 
@@ -366,9 +351,9 @@ export abstract class QueryForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record
     protected get           interfaceGet():         TCall   { throw new $J.InvalidStateError("interfaceGet not implemented."); }
     public    get           canReOpen():boolean     { return true;                             }
 
-    public                  constructor()
+    public                  constructor(context:$JA.Context)
     {
-        super();
+        super(context);
 
         let queryargs_type = this.interfaceGet.callargs_type;
         this._formargs = (queryargs_type) ? new queryargs_type() : null as any;
@@ -446,15 +431,15 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
     protected get           contentClass()          { return "jannesen-ui-template-queryform -searchform"; }
     protected get           resultdata()            { return this._result ? this._result.resultdata : undefined; }
 
-    public                  constructor()
+    public                  constructor(context:$JA.Context)
     {
-        super();
+        super(context);
 
         this._result   = undefined;
         this._hasquery = false;
     }
 
-    protected               onload(loader:$JCONTENT.FormLoader, ct:$JA.ICancellationToken):void
+    protected               onload(ct:$JA.Context):void
     {
         const formargs = this._formargs as any;
         if (formargs instanceof $JT.Record) {
@@ -478,7 +463,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
             }
         }
     }
-    protected               onopen(args:$J.IUrlArgs, state:ISearchFormState<any>|null|undefined, ct:$JA.ICancellationToken):$JA.Task<void>|void
+    protected               onopen(args:$J.IUrlArgs, state:ISearchFormState<any>|null|undefined, ct:$JA.Context):$JA.Task<void>|void
     {
         this.showDataPopup();
         if (state) {
@@ -643,14 +628,14 @@ export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
     protected get           contentClass()          { return "jannesen-ui-template-queryform -reportform"; }
     protected get           resultdata()            { return this._resultdata; }
 
-    public                  constructor()
+    public                  constructor(context:$JA.Context)
     {
-        super();
+        super(context);
         this._resultdata      = undefined;
         this._resultcontainer = undefined;
     }
 
-    protected               onload(loader:$JCONTENT.FormLoader, ct:$JA.ICancellationToken):void
+    protected               onload(ct:$JA.Context):void
     {
         if (this._formargs as any instanceof $JT.Record) {
             const formargs = this._formargs as $JT.Record;
@@ -670,7 +655,7 @@ export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
             this.setContent(elmqueryform, true);
         }
     }
-    protected               onopen(args:$J.IUrlArgs, state:any|null|undefined, ct:$JA.ICancellationToken):$JA.Task<void>|void
+    protected               onopen(args:$J.IUrlArgs, state:any|null|undefined, ct:$JA.Context):$JA.Task<void>|void
     {
         this.showDataPopup();
         let callargs: $JT.Record|null = null;
@@ -763,9 +748,9 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     protected get           dlgmode()           { return this.args.dlgmode || StandardDialogMode.Post; }
     protected get           contentClass()      { return "jannesen-ui-template-standard-dialog"; }
 
-    public                  constructor()
+    public                  constructor(context:$JA.Context)
     {
-        super();
+        super(context);
         let interfaceSave = this.interfaceSave;
         this.callargs = (interfaceSave.callargs_type) ? (new interfaceSave.callargs_type()) : undefined;
         this.data     = (interfaceSave.request_type)  ? (new interfaceSave.request_type()) as any : undefined;
@@ -774,7 +759,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     protected               onload()
     {
     }
-    protected               onopen(args: TArgs, ct: $JA.ICancellationToken)
+    protected               onopen(args: TArgs, ct: $JA.Context)
     {
         this.copyData(true, this.args, this.callargs, this.data);
 
@@ -879,7 +864,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     {
         return true;
     }
-    protected               onDelete(context:$JCONTENT.AsyncContext): $JA.Task<TRtn|string>
+    protected               onDelete(context:$JA.Context): $JA.Task<TRtn|string>
     {
         const intfDel = this.interfaceDelete;
 
@@ -915,7 +900,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     {
         return "DELETE";
     }
-    protected               onSave(context:$JCONTENT.AsyncContext): $JA.Task<TRtn|string|null>
+    protected               onSave(context:$JA.Context): $JA.Task<TRtn|string|null>
     {
         const dlgmode = this.dlgmode;
         const errList = this.validate(dlgmode);
@@ -983,7 +968,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
  *!!DOC
  */
 export class DataPopup extends $JPOPUP.Popup {
-    constructor(poselm: $JD.DOMHTMLElement, title: string, data:$JD.AddNode, contentClass:string|undefined, onclose: ()=>void) {
+    constructor(poselm: $JD.DOMHTMLElement, context:$JA.Context, title: string, data:$JD.AddNode, contentClass:string|undefined, onclose: ()=>void) {
         const header  = <div class="-header">
                             { title }
                             <span class="-close" onclick={ onclose }></span>
@@ -995,7 +980,8 @@ export class DataPopup extends $JPOPUP.Popup {
                             </div>
                         </div>;
 
-        super(poselm, "-data-popup", content);
+        super(poselm, "-data-popup", context);
+        this.Show(content);
 
         header.bind("mousedown",  this._onMove, this);
         header.bind("touchstart", this._onMove, this);

@@ -17,6 +17,7 @@ export const enum MenuPosition
 
 export interface IMenuButtonAttr
 {
+    context?:           $JA.Context;
     class?:             string;
     style?:             string;
     tabIndex?:          number;
@@ -25,13 +26,14 @@ export interface IMenuButtonAttr
     menupos?:           MenuPosition;
     menuclass?:         string;
     firstmenuclass?:    string;
-    dataSource?:        (ct:$JA.ICancellationToken)=>IDataSourceResult|undefined;
+    dataSource?:        (ct:$JA.Context)=>IDataSourceResult|undefined;
     onclick?:           (data:any)=>void;
 }
 export class MenuButton extends $JD.Container
 {
     private     _attr:          IMenuButtonAttr;
     private     _activeMenu:    Menu|null;
+    private     _context:       $JA.Context;
 
     public get  disabled()
     {
@@ -56,6 +58,7 @@ export class MenuButton extends $JD.Container
         this._applyAttr(attr, 'onclick');
         this._attr       = attr;
         this._activeMenu = null;
+        this._context    = new $JA.Context({ parent:attr.context, component:this, dom:this.container });
 
         this._container.bind("blur",    this.closeMenu,   this);
         this._container.bind("click",   this._toggleMenu, this);
@@ -65,10 +68,10 @@ export class MenuButton extends $JD.Container
     public      openMenu(): void
     {
         if (!this._activeMenu && this._attr.dataSource) {
-            const result = this._attr.dataSource(new $JA.CancellationTokenDom(this.container));
+            const result = this._attr.dataSource(this._context);
             if (result) {
                 this._container.focus();
-                this._activeMenu = new Menu(this._container, result, this, this);
+                this._activeMenu = new Menu(this._container, result, this, this, this._context);
                 this._container.addClass("-active");
             }
         }
@@ -76,7 +79,7 @@ export class MenuButton extends $JD.Container
     public      closeMenu(): void
     {
         if (this._activeMenu) {
-            this._activeMenu.Remove();
+            this._activeMenu.Stop();
             this._activeMenu = null;
             this._container.removeClass("-active");
         }
@@ -167,7 +170,7 @@ export class MenuSeperator extends MenuItem<IMenuSeparatorAttr>
 export interface IMenuEntryAttr {
     class?:         string;
     content?:       $JD.AddNode;
-    dataSource?:    (cancellationToken:$JA.ICancellationToken)=>IDataSourceResult;
+    dataSource?:    (cancellationToken:$JA.Context)=>IDataSourceResult;
     data?:          any;
     onclick?:       (data:any)=>void;
 }
@@ -206,16 +209,16 @@ export class MenuEntry extends MenuItem<IMenuEntryAttr>
         this._applyAttr(attr, "onclick");
     }
 
-    public      select(openMenu: boolean)
+    public      select(menu: Menu, openMenu: boolean)
     {
         this.container.addClass('-selected');
 
         if (!this._activeSubMenu && openMenu && this.hasSubMenu) {
             const parent = this.parent;
             if (parent) {
-                const result = this._attr.dataSource!(new $JA.CancellationTokenDom(this.container));
+                const result = this._attr.dataSource!(menu.context);
                 if (result) {
-                    this._activeSubMenu = new Menu(this._container, result, parent.root, this);
+                    this._activeSubMenu = new Menu(this._container, result, parent.root, this, menu.context);
                 }
             }
         }
@@ -228,7 +231,7 @@ export class MenuEntry extends MenuItem<IMenuEntryAttr>
     public      closeMenu()
     {
         if (this._activeSubMenu) {
-            this._activeSubMenu.Remove();
+            this._activeSubMenu.Stop();
             this._activeSubMenu = null;
         }
     }
@@ -255,9 +258,9 @@ class Menu extends $JUP.Popup
         return this._selected;
     }
 
-    public      constructor(parentelmparentelm: $JD.DOMHTMLElement, datasourceresult: IDataSourceResult, root: MenuButton, parent: MenuEntry|MenuButton)
+    public      constructor(parentelmparentelm: $JD.DOMHTMLElement, datasourceresult: IDataSourceResult, root: MenuButton, parent: MenuEntry|MenuButton, parentContext: $JA.Context)
     {
-        super(parentelmparentelm, $JD.classJoin("jannesen-ui-menu -popup", root.attr.menuclass, parent === root && root.attr.firstmenuclass));
+        super(parentelmparentelm, $JD.classJoin("jannesen-ui-menu -popup", root.attr.menuclass, parent === root && root.attr.firstmenuclass), parentContext);
 
         this._root         = root;
         this._parent       = parent;
@@ -294,7 +297,7 @@ class Menu extends $JUP.Popup
         }
     }
 
-    public      Remove()
+    protected   Remove()
     {
         this._loadingTimer.clear();
         this._selectItem(null, false);
@@ -321,7 +324,7 @@ class Menu extends $JUP.Popup
 
             case "ArrowRight":
                 if (this._selected && this._selected.hasSubMenu) {
-                    this._selected.select(true);
+                    this._selected.select(this, true);
                 }
                 return true;
 
@@ -382,7 +385,7 @@ class Menu extends $JUP.Popup
         }
 
         if (item) {
-            item.select(openMenu);
+            item.select(this, openMenu);
             this._selected = item;
         }
     }

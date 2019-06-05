@@ -20,36 +20,43 @@ class Content implements $JD.IDOMContainer
     private     _argv:          string[];
     private     _intnameparts:  string[];
     private     _intfaceobj:    any;
+    private     _context:       $JA.Context;
 
     constructor(hasharg:string) {
         this.container = <div/>;
         this._argv         = hasharg.split('!');
         this._intnameparts = this._argv[0].split(':', 2);
         this._intfaceobj   = null;
+        this._context      = new $JA.Context({ parent:null, component:this  });
+        $JA.Require(this._intnameparts[0], this._context)
+           .then((intfaceobj) => {
+                     this.container.empty();
+                     try {
+                         if (!(intfaceobj instanceof Object)) {
+                             throw new Error("Invalid interface file.");
+                         }
 
-        require([ this._intnameparts[0] ],
-                (intfaceobj:any) => {
-                    this.container.empty();
-                    try {
-                        this._intfaceobj = intfaceobj;
-                        if (this._intnameparts.length===1) {
-                            this._index();
-                        }
-                        if (this._intnameparts.length===2) {
-                            let callopts = intfaceobj[this._intnameparts[1]];
-                            if (!(callopts && callopts.callname))
-                                throw new Error("Unknown interface.");
+                         this._intfaceobj = intfaceobj;
+                         if (this._intnameparts.length===1) {
+                             this._index();
+                         }
+                         if (this._intnameparts.length===2) {
+                             let callopts = (intfaceobj as any)[this._intnameparts[1]];
+                             if (!(callopts && callopts.callname)) {
+                                 throw new Error("Unknown interface.");
+                             }
 
-                            this._call(callopts);
-                        }
-                    }
-                    catch(err) {
-                        this.container.appendChild("ERROR: " + err.message);
-                    }
-                },
-                (err:any)   => {
-                    this.container.empty().appendChild("ERROR: Loading interface failed: " + err.message);
-                });
+                             this._call(callopts);
+                         }
+                     }
+                     catch(err) {
+                         this.container.appendChild("ERROR: " + err.message);
+                     }
+                 },
+                 (err) => {
+                     this.container.empty().appendChild("ERROR: Loading interface failed: " + err.message);
+                 });
+
     }
 
     private     _index(): void {
@@ -104,20 +111,18 @@ class Content implements $JD.IDOMContainer
                                     if (errList.length === 0) {
                                         let response = <div>loading</div>;
                                         responsecontainer.empty().appendChild(<h1>RESPONSE</h1>, response);
-                                        $JA.Ajax(callDefinitions, args, new $JA.CancellationTokenDom(response))
-                                           .then((data) => {
-                                                     response.empty().appendChild(this._createResponse(data));
-                                                 },
-                                                 (err) => {
-                                                     response.empty().appendChild($JUC.errorToContent(err));
-                                                 });
+
+                                        const responseContext = new $JA.Context({ parent:this._context, dom: response });
+                                        $JA.Ajax(callDefinitions, args, responseContext)
+                                           .then((data) => { response.empty().appendChild(this._createResponse(data)); },
+                                                 (err)  => { response.empty().appendChild($JUC.errorToContent(err));   });
                                     } else {
                                         const firstControl = errList[0].control;
                                         if (firstControl) {
                                             firstControl.focus();
                                         }
                                         else {
-                                            $JUC.DialogError.show(errList, new $JA.CancellationTokenDom(this.container));
+                                            $JUC.DialogError.show(errList, this._context);
                                         }
                                     }
                                 }}>CALL</button>);

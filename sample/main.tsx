@@ -72,7 +72,7 @@ export function main()
 
 export class Blank extends $JCONTENT.Form
 {
-    protected       onopen(err:Error, state:void, ct:$JA.ICancellationToken)
+    protected       onopen(err:Error, state:void, ct:$JA.Context)
     {
     }
 }
@@ -87,13 +87,13 @@ export class IFrame extends $JCONTENT.Form<string>
         return this._src;
     }
 
-    protected       onload(loader:$JCONTENT.FormLoader, ct:$JA.ICancellationToken)
+    protected       onload(ct:$JA.Context)
     {
         this.content.css({ "width":"100%", "height":"100%"});
         this.content.appendChild(this._iframe = <iframe style="width:100%; height:100%; overflow:hidden; border:0 none" />);
     }
 
-    protected       onopen(src:string, state:void, ct:$JA.ICancellationToken)
+    protected       onopen(src:string, state:void, ct:$JA.Context)
     {
         this._iframe.attr("src", this._src = src);
     }
@@ -101,7 +101,7 @@ export class IFrame extends $JCONTENT.Form<string>
 
 export class Welkom extends $JCONTENT.Form
 {
-    protected       onopen(err:Error, state:void, ct:$JA.ICancellationToken)
+    protected       onopen(err:Error, state:void, ct:$JA.Context)
     {
         this.content.appendChild(<h1>Welkom</h1>);
         return $JA.Delay(1000, ct);
@@ -115,7 +115,7 @@ export class Welkom extends $JCONTENT.Form
     {
         return true;
     }
-    public          moreMenuDatasource(ct:$JA.ICancellationToken):$JMENU.IDataSourceResult
+    public          moreMenuDatasource(ct:$JA.Context):$JMENU.IDataSourceResult
     {
         return [
                     <$JMENU.MenuEntry content="item 1" onclick={() => this.execute((context) => $JCONTENT.DialogMessage.show({

@@ -11,280 +11,6 @@ export var  MimeType =
 };
 
 //=================================================================================================
-// CancellationToken
-//
-/**
- *!!DOC
- */
-export class OperationCanceledError extends __Error
-{
-    constructor(message?:string) {
-        super("OperationCanceledError", message || "Operation canceled.");
-    }
-}
-
-/**
- *!!DOC
- */
-export class TimeoutError extends __Error
-{
-    constructor(message?:string) {
-        super("TimeoutError", message || "Timeout");
-    }
-}
-
-/**
- *!!DOC
- */
-export class BusyError extends __Error
-{
-    constructor(message:string) {
-        super("BusyError", message);
-    }
-}
-
-//=================================================================================================
-// CancellationToken
-//
-/**
- * !!DOC
- */
-export interface ICancellationToken
-{
-    readonly            canBeCanceled:  boolean;
-    readonly            isCancelled:    boolean;
-    readonly            reason:         Error|undefined;
-    register            (action: (reason: Error)=>void): void;
-    unregister          (action: (reason: Error)=>void): void;
-    throwIfCancelled    ():void;
-}
-
-class CancellationTokenNone implements ICancellationToken
-{
-    constructor()
-    {
-    }
-
-    public  get     canBeCanceled()
-    {
-        return false;
-    }
-    public  get     isCancelled()
-    {
-        return false;
-    }
-    public  get     reason():Error|undefined
-    {
-        return undefined;
-    }
-    public          register(action: (reason: Error)=>void)
-    {
-    }
-    public          unregister(action: (reason: Error)=>void)
-    {
-    }
-    public          throwIfCancelled()
-    {
-    }
-}
-
-/**
- * !!DOC
- */
-export class CancellationTokenSource implements ICancellationToken
-{
-    private     _linked:        ICancellationToken[]|undefined;
-    private     _reason:        Error|undefined;
-    private     _actions:       ((reason: Error)=>void)[]|undefined;
-    private     _linkcancel:    ((reason: Error)=>void)|undefined;
-
-    public static readonly None = (new CancellationTokenNone() as ICancellationToken);
-
-    constructor(...linked:(ICancellationToken|null)[])
-    {
-        this._reason  = undefined;
-        this._actions = undefined;
-        this.addLinked(linked);
-    }
-
-    public  get     canBeCanceled()
-    {
-        return true;
-    }
-    public  get     isCancelled()
-    {
-        return this.reason !== undefined;
-    }
-    public  get     reason()
-    {
-        if (!this._reason && !this._actions) {
-            this._reason = this.linkedReason();
-        }
-
-        return this._reason;
-    }
-
-    public          register(action: (reason: Error)=>void)
-    {
-        if (this.reason) {
-            throw this._reason;
-        }
-
-        if (!this._actions) {
-            this.linkedRegister();
-            this._actions = [ action ];
-        } else {
-            this._actions.push(action);
-        }
-    }
-    public          unregister(action: (reason: Error)=>void):void
-    {
-        if (this._actions) {
-            let i = 0;
-
-            while (i < this._actions.length) {
-                if (this._actions[i] === action) {
-                    if (this._actions.length > 1) {
-                        this._actions.splice(i, 1);
-                    } else {
-                        this.linkedUnregister();
-                        this._actions = undefined;
-                        return;
-                    }
-                } else {
-                    ++i;
-                }
-            }
-        }
-    }
-    public          throwIfCancelled()
-    {
-        const reason = this.reason;
-
-        if (reason) {
-            throw reason;
-        }
-    }
-    public          cancel(reason?:Error)
-    {
-        if (!this._reason) {
-            if (!(reason instanceof Error)) {
-                reason = new OperationCanceledError();
-            }
-            this._reason = reason;
-
-            if (this._actions) {
-                let actions   = this._actions;
-                this._actions = undefined;
-                this.linkedUnregister();
-
-                for(let i = 0 ; i < actions.length ; ++i) {
-                    try {
-                        actions[i].call(undefined, reason);
-                    } catch(e) {
-                        $J.globalError("CancellationToken action failed.", e);
-                    }
-                }
-            }
-        }
-    }
-
-    protected       addLinked(linked:(ICancellationToken|null|undefined)[])
-    {
-        for (let l of linked) {
-            if (l) {
-                if (!this._linked) {
-                    this._linked = [ l ];
-                } else {
-                    this._linked.push(l);
-                }
-            }
-        }
-    }
-    protected       linkedReason():Error|undefined
-    {
-        if (this._linked) {
-            for (var l of this._linked) {
-                const r = l.reason;
-                if (r) {
-                    return r;
-                }
-            }
-        }
-
-        return undefined;
-    }
-    protected       linkedRegister()
-    {
-        if (this._linked) {
-            if (!this._linkcancel) {
-                this._linkcancel = (reason) => this.cancel(reason);
-            }
-
-            for (var l of this._linked) {
-                l.register(this._linkcancel);
-            }
-        }
-    }
-    protected       linkedUnregister()
-    {
-        if (this._linked) {
-            for (var l of this._linked) {
-                if (typeof this._linkcancel !== 'function') {
-                    throw new $J.InvalidStateError();
-                }
-
-                l.unregister(this._linkcancel);
-            }
-        }
-    }
-}
-
-/**
- * !!DOC
- */
-export class CancellationTokenDom extends CancellationTokenSource
-{
-    private         _element:       $JD.DOMHTMLElement;
-    private         _eventhandler:  (()=>void)|undefined;
-
-                    constructor(element:$JD.DOMHTMLElement|undefined|null, ...linked:(ICancellationToken|null|undefined)[])
-    {
-        if (!element) {
-            throw new $J.InvalidStateError("argument error: element === undefined.");
-        }
-
-        super();
-        this._element = element;
-        this.addLinked(linked);
-    }
-
-    protected       linkedReason():Error|undefined
-    {
-        if (!this._element.isLive) {
-            return new OperationCanceledError("DOM Element not part of document.");
-        }
-
-        return super.linkedReason();
-    }
-    protected       linkedRegister()
-    {
-        this._eventhandler = () => { this.cancel(new OperationCanceledError("DOM Element removed from document.")); };
-        this._element.bind("RemovedFromDocument", this._eventhandler);
-
-        super.linkedRegister();
-    }
-    protected       linkedUnregister()
-    {
-        super.linkedUnregister();
-        if (this._eventhandler) {
-            this._element.unbind("RemovedFromDocument", this._eventhandler);
-            this._eventhandler = undefined;
-        }
-    }
-}
-
-//=================================================================================================
 // Task
 //
 interface Handler<T> {
@@ -319,16 +45,316 @@ export interface TaskInspection<T>
     readonly    reason:         Error;
 }
 
+//=============================================== Errors ==========================================
+/**
+ *!!DOC
+ */
+export class LoadError extends __Error
+{
+    constructor(message:string) {
+        super("LoadError", message);
+    }
+}
+
+/**
+ *!!DOC
+ */
+export class OperationCanceledError extends __Error
+{
+    constructor(message?:string) {
+        super("OperationCanceledError", message || "Operation canceled.");
+    }
+}
+
+/**
+ *!!DOC
+ */
+export class TimeoutError extends __Error
+{
+    constructor(message?:string) {
+        super("TimeoutError", message || "Timeout");
+    }
+}
+
+/**
+ *!!DOC
+ */
+export class BusyError extends __Error
+{
+    constructor(message:string) {
+        super("BusyError", message);
+    }
+}
+
+//=============================================== Context =========================================
+
+interface IContextRegistrationObject
+{
+    obj:            Object;
+    stopCallback?:  (reason: Error)=>void;
+}
+
+export interface IContextOptions
+{
+    parent?:        Context|null;
+    component?:     Object;
+    timeout?:       number;
+    dom?:           $JD.DOMHTMLElement;
+}
+
+export interface IContextValues
+{
+
+}
+
+export class Context
+{
+    private         _id:                    number;
+    private         _parent:                Context|null|undefined;
+    private         _component:             Object|undefined;
+    private         _stopReason:            Error|null;
+    private         _registrations:         IContextRegistrationObject[]|null;
+    private         _timeout?:              number;
+    private         _timer?:                number;
+    private         _domelement?:           $JD.DOMHTMLElement;
+    private         _domelementhandler?:    () => void;
+    private         _values?:               any;
+    private         _valueProxy?:           ProxyHandler<any>;
+
+    public  get     parent()
+    {
+        return this._parent;
+    }
+    public  get     component()
+    {
+        return this._component;
+    }
+    public  get     isStopped():boolean
+    {
+        return !!this.stopReason;
+    }
+    public  get     stopReason():Error|null
+    {
+        if (this._stopReason) {
+            return this._stopReason;
+        }
+
+        if (this._parent) {
+            return this._stopReason = this._parent.stopReason;
+        }
+
+        if (this._timeout && this._timeout <= performance.now()) {
+            return this._stopReason = new TimeoutError();
+        }
+
+        if (this._domelement && !this._domelement.isLive) {
+            return this._stopReason = new OperationCanceledError();
+        }
+
+        return null;
+    }
+    public  get     values(): IContextValues
+    {
+        if (!this._valueProxy) {
+            this._valueProxy = new Proxy(this._values = {} as any,
+                               {
+                                   get: (obj, prop) => {
+                                            if (obj.hasOwnProperty(prop)) {
+                                                return obj[prop];
+                                            }
+
+                                            let p = this._parent;
+                                            while (p) {
+                                                if (p._values) {
+                                                    if (p._values.hasOwnProperty(prop)) {
+                                                        return p._values[prop];
+                                                    }
+                                                }
+                                                p = p._parent;
+                                            }
+
+                                            return undefined;
+                                        }
+                               });
+        }
+
+        return this._valueProxy!;
+    }
+
+                    constructor(opts:IContextOptions)
+    {
+        this._id            = $J.uniqueid();
+        this._parent        = opts.parent;
+        this._component     = opts.component;
+        this._stopReason    = null;
+        this._registrations = null;
+        this._domelement    = opts.dom;
+        this._timeout       = typeof opts.timeout === 'number' ? Math.round(performance.now() + opts.timeout) : undefined;
+    }
+
+    public          getcomponent<T>(type:new(...args:any)=>T)
+    {
+        let context = this._parent;
+
+        while (context) {
+            if (context._component instanceof type) {
+                return context._component;
+            }
+
+            context = context.parent;
+        }
+
+        return undefined;
+    }
+    public          getrootcomponent<T>(type:new(...args:any)=>T)
+    {
+        let context    = this._parent;
+        let rtn:T|undefined;
+
+        while (context) {
+            if (context._component instanceof type) {
+                rtn = context._component;
+            }
+
+            context = context.parent;
+        }
+
+        return rtn;
+    }
+    public          register(obj:Object, stopCallback:(reason: Error)=>void)
+    {
+        if (!this._registrations) {
+            this._registerDepend();
+            this._registrations = [ {obj, stopCallback} ];
+        } else {
+            this._registrations.push({obj, stopCallback});
+        }
+    }
+    public          unregister(obj:Object):void
+    {
+        let n = 0;
+        if (this._registrations) {
+            let i = 0;
+
+            while (i < this._registrations.length) {
+                if (this._registrations[i].obj === obj) {
+                    ++n;
+                    if (this._registrations.length > 1) {
+                        this._registrations.splice(i, 1);
+                    } else {
+                        this._unregisterDepend();
+                        this._registrations = null;
+                        return;
+                    }
+                } else {
+                    ++i;
+                }
+            }
+        }
+
+        console.assert(n === 1);
+    }
+    public          throwIfStopped()
+    {
+        const reason = this.stopReason;
+
+        if (reason) {
+            throw reason;
+        }
+    }
+    public          stop(stopReason?:Error)
+    {
+        if (!this._stopReason) {
+            if (!(stopReason instanceof Error)) {
+                stopReason = new OperationCanceledError();
+            }
+
+            this._stopReason = stopReason;
+
+            if (this._registrations) {
+                const registrations = this._registrations.slice(0);
+                for(let i = 0 ; i < registrations.length ; ++i) {
+                    const registration = registrations[i];
+
+                    try {
+                        const cb = registration.stopCallback;
+                        if (cb) {
+                            registration.stopCallback = undefined;
+                            cb.call(registration.obj, stopReason);
+                        }
+                    } catch(e) {
+                        $J.globalError("Context.stopCallback failed.", e);
+                    }
+                }
+            }
+        }
+    }
+
+    private         _registerDepend()
+    {
+        if (this._parent) {
+            this._parent.register(this, this.stop);
+            this._stopReason = this._parent.stopReason;
+        }
+
+        if (this._timeout && !this._stopReason) {
+            const t = this._timeout - performance.now();
+            if (t <= 0) {
+                this.stop(new TimeoutError());
+            }
+            else {
+                this._timer = setTimeout(() => {
+                                             this._timer = undefined;
+                                             this.stop(new TimeoutError());
+                                         }, t);
+            }
+        }
+
+        if (this._domelement) {
+            if (!this._domelement.isLive) {
+                this.stop(new OperationCanceledError());
+            }
+            else {
+                this._domelement.bind('RemovedFromDocument', this._domelementhandler = () => {
+                                                                 this.stop(new OperationCanceledError());
+                                                             });
+            }
+        }
+    }
+    private         _unregisterDepend()
+    {
+        if (this._timer) {
+            clearTimeout(this._timer);
+            this._timer = undefined;
+        }
+
+        if (this._domelementhandler) {
+            this._domelement!.unbind('RemovedFromDocument', this._domelementhandler);
+            this._domelementhandler = undefined;
+        }
+
+        if (this._parent) {
+            this._parent.unregister(this);
+        }
+    }
+
+    public          toString()
+    {
+        return "Context#" + this._id;
+    }
+}
+
 /**
  * !!DOC
  */
 export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
 {
+    private _id:                    number;
     private _state:                 TaskState;
+    private _context:               Context|null;
     private _result:                T|Error|undefined;
     private _handlers:              Handler<any>[]|undefined;
     private _called:                boolean;
-    private _cancellationToken:     ICancellationToken|null|undefined;
     private _cancelHandler:         ((reason: Error)=>void)|undefined;
 
     readonly [Symbol.toStringTag]: "Promise";
@@ -339,21 +365,26 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
                         constructor(executor: (resolver:  (value: T | PromiseLike<T>) => void,
                                                reject:    (reason: Error) => void,
                                                oncancel:  (handler:(reason: Error)=>void) => void) => void,
-                                    cancellationToken?: ICancellationToken|null)
+                                    context: Context|null)
     {
+        this._id                = $J.uniqueid();
         this._state             = TaskState.Pending;
+        this._context           = context;
         this._result            = undefined;
         this._handlers          = undefined;
         this._called            = false;
-        this._cancellationToken = cancellationToken;
         this._cancelHandler     = undefined;
+
+        if (typeof executor !== "function") {
+            throw new $J.InvalidStateError("Task resolver is not a function");
+        }
 
         if (executor === internalResolver) {
             return;
         }
 
-        if (typeof executor !== "function") {
-            throw new $J.InvalidStateError("Task resolver is not a function");
+        if (this._context) {
+            this._context.register(this, this._stop);
         }
 
         try {
@@ -370,8 +401,12 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
                         }
                     },
                     (action) => {
-                        if (cancellationToken && typeof action === 'function' && !this._called) {
-                            cancellationToken.register(this._cancelHandler = action);
+                        if (this._context) {
+                            this._context.throwIfStopped();
+                        }
+
+                        if (typeof action === 'function' && !this._called) {
+                            this._cancelHandler = action;
                         }
                     });
         } catch (e) {
@@ -405,6 +440,9 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
 
         // Construct new Task, but use subclassed constructor, if any
         var slave = new (this.constructor as any)(internalResolver) as Task<any>;
+        if (slave._context) {
+            slave._context.register(slave, slave._stop);
+        }
         this._enqueue({ task:this, onfulfilled, onrejected, slave });
         return slave;
     }
@@ -530,104 +568,85 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
                         }
                     }
                 }
-            });
+            }, null);
     }
     /**
      * !!DOC
      */
-    public static       success<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(executor: (ct: ICancellationToken) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>], cancellationToken?: ICancellationToken, timeout?: number): Task<[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]>;
-    public static       success<T1, T2, T3, T4, T5, T6, T7, T8, T9>(executor: (ct: ICancellationToken) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>], cancellationToken?: ICancellationToken, timeout?: number): Task<[T1, T2, T3, T4, T5, T6, T7, T8, T9]>;
-    public static       success<T1, T2, T3, T4, T5, T6, T7, T8>(executor: (ct: ICancellationToken) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>], cancellationToken?: ICancellationToken, timeout?: number): Task<[T1, T2, T3, T4, T5, T6, T7, T8]>;
-    public static       success<T1, T2, T3, T4, T5, T6, T7>(executor: (ct: ICancellationToken) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>], cancellationToken?: ICancellationToken, timeout?: number): Task<[T1, T2, T3, T4, T5, T6, T7]>;
-    public static       success<T1, T2, T3, T4, T5, T6>(executor: (ct: ICancellationToken) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>], cancellationToken?: ICancellationToken, timeout?: number): Task<[T1, T2, T3, T4, T5, T6]>;
-    public static       success<T1, T2, T3, T4, T5>(executor: (ct: ICancellationToken) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>], cancellationToken?: ICancellationToken, timeout?: number): Task<[T1, T2, T3, T4, T5]>;
-    public static       success<T1, T2, T3, T4>(executor: (ct: ICancellationToken) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>], cancellationToken?: ICancellationToken, timeout?: number): Task<[T1, T2, T3, T4]>;
-    public static       success<T1, T2, T3>(executor: (ct: ICancellationToken) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>], cancellationToken?: ICancellationToken, timeout?: number): Task<[T1, T2, T3]>;
-    public static       success<T1, T2>(executor: (ct: ICancellationToken) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>], cancellationToken?: ICancellationToken, timeout?: number): Task<[T1, T2]>;
-    public static       success<T1>(executor: (ct: ICancellationToken) => [T1 | PromiseLike<T1>], cancellationToken?: ICancellationToken, timeout?: number): Task<[T1]>;
-    public static       success<T>(executor: (ct: ICancellationToken) => (T | PromiseLike<T>)[], cancellationToken?: ICancellationToken, timeout?: number): Task<T[]>;
-    public static       success(executor: (ct: ICancellationToken) => any[], cancellationToken?: ICancellationToken, timeout?: number): Task<any>
+    public static       success<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(executor: (context: Context) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>, T10 | PromiseLike<T10>], context: Context|null, timeout?: number): Task<[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]>;
+    public static       success<T1, T2, T3, T4, T5, T6, T7, T8, T9>(executor: (context: Context) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>, T9 | PromiseLike<T9>], context: Context|null, timeout?: number): Task<[T1, T2, T3, T4, T5, T6, T7, T8, T9]>;
+    public static       success<T1, T2, T3, T4, T5, T6, T7, T8>(executor: (context: Context) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>, T8 | PromiseLike<T8>], context: Context|null, timeout?: number): Task<[T1, T2, T3, T4, T5, T6, T7, T8]>;
+    public static       success<T1, T2, T3, T4, T5, T6, T7>(executor: (context: Context) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>, T7 | PromiseLike<T7>], context: Context|null, timeout?: number): Task<[T1, T2, T3, T4, T5, T6, T7]>;
+    public static       success<T1, T2, T3, T4, T5, T6>(executor: (context: Context) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>, T6 | PromiseLike<T6>], context: Context|null, timeout?: number): Task<[T1, T2, T3, T4, T5, T6]>;
+    public static       success<T1, T2, T3, T4, T5>(executor: (context: Context) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>, T5 | PromiseLike<T5>], context: Context|null, timeout?: number): Task<[T1, T2, T3, T4, T5]>;
+    public static       success<T1, T2, T3, T4>(executor: (context: Context) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>, T4 | PromiseLike<T4>], context: Context|null, timeout?: number): Task<[T1, T2, T3, T4]>;
+    public static       success<T1, T2, T3>(executor: (context: Context) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>, T3 | PromiseLike<T3>], context: Context|null, timeout?: number): Task<[T1, T2, T3]>;
+    public static       success<T1, T2>(executor: (context: Context) => [T1 | PromiseLike<T1>, T2 | PromiseLike<T2>], context: Context|null, timeout?: number): Task<[T1, T2]>;
+    public static       success<T1>(executor: (context: Context) => [T1 | PromiseLike<T1>], context: Context|null, timeout?: number): Task<[T1]>;
+    public static       success<T>(executor: (context: Context) => (T | PromiseLike<T>)[], context: Context|null, timeout?: number): Task<T[]>;
+    public static       success(executor: (context: Context) => any[], context: Context|null, timeout?: number): Task<any>
     {
-        if (cancellationToken && cancellationToken.isCancelled) {
-            return Task.reject(cancellationToken.reason as Error);
-        }
+        const successContext = new Context({ parent: context, timeout: timeout });
 
-        let ct     = new CancellationTokenSource();
-        let values = executor(ct);
+        let values:any[];
+        try {
+            values = executor(successContext);
+        }
+        catch(e) {
+            return Task.reject(e);
+        }
 
         if (values === null || values === undefined || values.length === 0) {
             return Task.resolve([]);
         }
 
-        if (cancellationToken) {
-            if (cancellationToken.isCancelled) {
-                cancellationHandler(cancellationToken.reason as Error);
-            } else {
-                cancellationToken.register(cancellationHandler);
-            }
-        }
+        const task = new Task((resolved, reject, oncancel) => {
+                                  let done:boolean[] = [];
+                                  let rtn:any[]      = [];
+                                  let rejected       = false;
+                                  let reason:Error;
+                                  let ndone          = 0;
 
-        return new Task((resolved, reject, oncancel) => {
-                let done:boolean[] = [];
-                let rtn:any[]      = [];
-                let rejected       = false;
-                let reason:Error;
-                let timer          = (typeof timeout === 'number' && timeout > 0) ? $J.setTimeout(() => { timer = undefined; ct.cancel(new TimeoutError()); }, timeout) : undefined;
-                let ndone          = 0;
+                                  values.forEach((task, index) => {
+                                                     if (isPromiseLike(task)) {
+                                                         done[index] = false;
+                                                         rtn[index]  = undefined;
+                                                         (task as PromiseLike<any>).then((v)  => {
+                                                                                             rtn[index] = v;
+                                                                                             checkDone(index);
+                                                                                         },
+                                                                                         (r) => {
+                                                                                             if (!rejected) {
+                                                                                                 rejected = true;
+                                                                                                 reason   = r;
+                                                                                                 successContext.stop(r);
+                                                                                             }
+                                                                                             checkDone(index);
+                                                                                         });
+                                                     } else {
+                                                         done[index] = true;
+                                                         rtn[index]  = task;
+                                                     }
+                                                 });
 
-                values.forEach((task, index) => {
-                                                    if (isPromiseLike(task)) {
-                                                        done[index] = false;
-                                                        rtn[index]  = undefined;
-                                                        (task as PromiseLike<any>).then((v)  => {
-                                                                                            done[index] = true;
-                                                                                            rtn[index] = v;
-                                                                                            checkDone();
-                                                                                        },
-                                                                                        (r) => {
-                                                                                            if (!rejected) {
-                                                                                                rejected = true;
-                                                                                                reason   = r;
-                                                                                            }
-                                                                                            done[index] = true;
-                                                                                            if (!checkDone()) {
-                                                                                                ct.cancel();
-                                                                                            }
-                                                                                        });
-                                                    } else {
-                                                        done[index] = true;
-                                                        rtn[index]  = task;
-                                                    }
-                                                });
+                                  function checkDone(index:number) {
+                                      done[index] = true;
 
-                oncancel(() => ct.cancel());
+                                      while (ndone < done.length && done[ndone]) {
+                                          if (++ndone >= done.length) {
+                                              if (!rejected) {
+                                                  resolved(rtn);
+                                              } else {
+                                                  reject(reason);
+                                              }
+                                              return true;
+                                          }
+                                      }
+                                      return false;
+                                  }
+                              }, null);
 
-                function checkDone() {
-                    while (ndone < done.length && done[ndone]) {
-                        if (++ndone >= done.length) {
-                            if (timer) {
-                                clearTimeout(timer);
-                            }
-
-                            if (cancellationToken) {
-                                cancellationToken.unregister(cancellationHandler);
-                            }
-
-                            if (!rejected) {
-                                resolved(rtn);
-                            } else {
-                                reject(reason);
-                            }
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-            });
-
-        function cancellationHandler(reason:Error) {
-            ct.cancel(reason);
-        }
+        return task;
     }
     /**
      * !!DOC
@@ -639,14 +658,11 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
         }
 
         return new Task<T|undefined>((resolved, reject) => {
-                tasks.forEach((task) => { task.then((r) => {
-                                                        resolved(r);
-                                                    },
-                                                    (reason:Error) => {
-                                                        reject(reason);
-                                                    });
-                                });
-            });
+                tasks.forEach((task) => {
+                                   task.then((result) => { resolved(result); },
+                                             (reason) => { reject(reason);   });
+                              });
+            }, null);
     }
 
     /**
@@ -658,7 +674,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
     public static       from(o:any):Task<any>
     {
         if (isPromiseLike(o)) {
-            return new Task<any>((r,e) => o.then(r,e));
+            return new Task<any>((r,e) => o.then(r,e), null);
         }
 
         if (o instanceof Error) {
@@ -672,8 +688,9 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
      */
     public static       reject<T>(reason: Error)
     {
-        let rtn = new Task<T>(internalResolver);
-        rtn._reject(reason);
+        let rtn = new Task<T>(internalResolver, null);
+        rtn._state  = TaskState.Rejected;
+        rtn._result = (reason instanceof Error) ? reason : new Error('' + reason);
         return rtn;
     }
     /**
@@ -683,11 +700,34 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
     public static       resolve<T>(value: T|PromiseLike<T>): Task<T>;
     public static       resolve<T>(value?: T|PromiseLike<T>)
     {
-        let rtn = new Task<T>(internalResolver);
-        rtn._resolve(value as T|PromiseLike<T>);
+        let rtn = new Task<T>(internalResolver, null);
+
+        if (isPromiseLike(value)) {
+            if (rtn._context) {
+                rtn._context.register(rtn, rtn._stop);
+            }
+            rtn._resolve(value as T|PromiseLike<T>);
+        }
+        else {
+            rtn._state  = TaskState.Fulfilled;
+            rtn._result = value;
+        }
         return rtn;
     }
 
+    private             _stop(reason: Error)
+    {
+        const cancelHandler = this._cancelHandler;
+        if (cancelHandler) {
+            this._cancelHandler = undefined;
+            try {
+                cancelHandler(reason);
+            }
+            catch(err) {
+                $J.globalError("Task.cancelHandler failed.", err);
+            }
+        }
+    }
     private             _followThenable(slave: PromiseLike<T>) {
         var called = false;
         try {
@@ -761,20 +801,18 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
     }
     private             _flush()
     {
-        if (this._cancelHandler) {
-            if (!this._cancellationToken)
-                throw new $J.InvalidStateError();
+        this._cancelHandler = undefined;
 
-            this._cancellationToken.unregister(this._cancelHandler);
-            this._cancelHandler     = undefined;
+        if (this._context) {
+            this._context.unregister(this);
         }
-
-        this._cancellationToken = null;
 
         if (this._handlers) {
             let handlers = this._handlers;
             this._handlers = undefined;
-            handlers.forEach((h) => $J.runAsync(() => Task._unwrapper(h), true));
+            for (let h of handlers) {
+                Task._unwrapper(h);
+            }
         }
     }
 
@@ -812,6 +850,11 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
         } catch (e) {
             $J.globalError("Task._unwrapper failed.", e);
         }
+    }
+
+    public              toString()
+    {
+        return "Task#" + this._id;
     }
 }
 
@@ -941,7 +984,7 @@ export type AjaxCallResponseType<TCall extends IAjaxCallDefinition<any,any,any>>
 /**
  * !!DOC
  */
-export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinitions:TCall|undefined, args: IAjaxArgs, cancellationToken: ICancellationToken|null): Task<AjaxCallResponseType<TCall>>
+export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinitions:TCall|undefined, args: IAjaxArgs, context: Context|null): Task<AjaxCallResponseType<TCall>>
 {
     let opts = $J.extend({}, args, callDefinitions, AjaxDefaults) as IAjaxOpts;
 
@@ -1116,7 +1159,7 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
 
                 throw new $J.InvalidStateError("No decoder for '" + contenttype + "'.");
             }
-        }, cancellationToken);
+        }, context);
 }
 
 //=================================================================================================
@@ -1126,17 +1169,18 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
 /**
  * !!DOC
  */
-export function Delay(delay: number, cancellationToken: ICancellationToken)
+export function Delay(delay: number, context: Context|null)
 {
     return new Task<void>((resolve, reject, oncancel) => {
-            let timer = setTimeout(() => {
-                                        resolve(undefined);
-                                    }, delay);
             oncancel((reason) => {
                         clearTimeout(timer);
                         reject(reason);
                      });
-        }, cancellationToken);
+
+            var timer = setTimeout(() => {
+                                       resolve(undefined);
+                                   }, delay);
+        }, context);
 }
 
 //=================================================================================================
@@ -1146,16 +1190,18 @@ export function Delay(delay: number, cancellationToken: ICancellationToken)
 /**
  * !!DOC
  */
-export type Module = Object | Function;
+export type Module = { [ name:string]: any } | Function;
 
 /**
  * !!DOC
  */
-export function Require(modules: string,   cancellationToken: ICancellationToken): Task<Module>;
-export function Require(modules: string[], cancellationToken: ICancellationToken): Task<Module[]>;
-export function Require(modules: string|string[], cancellationToken: ICancellationToken): Task<any>
+export function Require(modules: string,   context: Context|null): Task<Module>;
+export function Require(modules: string[], context: Context|null): Task<Module[]>;
+export function Require(modules: string|string[], context: Context|null): Task<any>
 {
     return new Task<Module|Module[]>((resolve, reject, oncancel) => {
+            oncancel((reason) => reject(reason));
+
             if (Array.isArray(modules)) {
                 if (modules.length === 0) {
                     throw new $J.InvalidStateError("Argument error modules.length === 0.");
@@ -1177,8 +1223,6 @@ export function Require(modules: string|string[], cancellationToken: ICancellati
                 }
             }
 
-            oncancel((reason) => reject(reason));
-
             function callback()
             {
                 resolve(Array.isArray(modules) ? arguments : arguments[0]);
@@ -1190,7 +1234,7 @@ export function Require(modules: string|string[], cancellationToken: ICancellati
                         sfailed += (sfailed.length === 0 ? "'" : ", '") + n + "'";
                     });
 
-                reject(new $J.LoadError("Loading of module " + sfailed + " failed."));
+                reject(new LoadError("Loading of module " + sfailed + " failed."));
             }
-        }, cancellationToken);
+        }, context);
 }

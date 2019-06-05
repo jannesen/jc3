@@ -52,6 +52,7 @@ export abstract class Popup
 {
     protected   _parentelm:             $JD.DOMHTMLElement;
     protected   _container:             $JD.DOMHTMLElement|null;
+    protected   _context:               $JA.Context;
     protected   _postionFixed:          boolean;
     protected   _poselmOuterRect:       $JD.IRect|undefined;
     private     _eventCollection:       $J.EventCollection;
@@ -60,6 +61,10 @@ export abstract class Popup
     public get  parentelm()
     {
         return this._parentelm;
+    }
+    public get  context()
+    {
+        return this._context;
     }
     public get  container()
     {
@@ -70,9 +75,11 @@ export abstract class Popup
         return this._poselmOuterRect;
     }
 
-                constructor(parentelm: $JD.DOMHTMLElement, className: string, content?: $JD.AddNode)
+                constructor(parentelm: $JD.DOMHTMLElement, className: string, parentContext: $JA.Context|undefined)
     {
         this._parentelm       = parentelm;
+        this._context         = new $JA.Context({ parent:parentContext, component:this });
+        this._context.register(this, this.Remove);
         this._postionFixed    = false;
         this._eventCollection = new $J.EventCollection();
 
@@ -85,21 +92,24 @@ export abstract class Popup
 
         this._container = <div class={"jannesen-ui-popup " + className} />;
         this._container.data("popup", this);
-
-        if (content) {
-            this.Show(content);
-        }
     }
 
-    public      Remove()
+    public      Stop()
     {
-        let timeout:number;
-        let container = this._container;
-        this._container = null;
+        this._context.stop();
+    }
 
-        this._eventCollection.unbindAll();
+    protected   Remove()
+    {
+        let timeout:number|undefined;
+        let container = this._container;
 
         if (container) {
+            this._container = null;
+            this._context.unregister(this);
+            this._context.stop();
+            this._eventCollection.unbindAll();
+
             if (this._transitionProperty) {
                 container.bind("transitionend", removed);
                 timeout = setTimeout(removed, 1000);
@@ -297,7 +307,7 @@ export class Tooltip extends Popup
 
                 constructor(parentelm: $JD.DOMHTMLElement, message:string)
     {
-        super(parentelm,  "-tooltip");
+        super(parentelm,  "-tooltip", undefined);
 
         this._bottom     = false;
         this._right      = parentelm.css("text-align") === "right";
@@ -409,7 +419,6 @@ export class DropdownPopup<TNativeValue,
     private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TControl, TCalldata, TDropdownRtn, TDropdown>;
     private             _calldata:          TCalldata;
     private             _content:           TDropdown|undefined;
-    private             _cancellationToken: $JA.CancellationTokenSource;
     private             _loadTask!:         $JA.Task<TDropdown>;
     private             _loadingTimer:      $J.Timeout;
 
@@ -437,13 +446,12 @@ export class DropdownPopup<TNativeValue,
 
                         constructor(control:TControl, focuselement:$JD.DOMHTMLElement, dropdownClass:string|IDropdownConstructor<TNativeValue, TControl, TCalldata, TDropdownRtn, TDropdown>, className:string, calldata:TCalldata)
     {
-        super(control.container,  "-dropdown " + className);
+        super(control.container,  "-dropdown " + className, undefined);
         this._focuselement      = focuselement;
         this._control           = control;
         this._dropdownClass     = dropdownClass;
         this._calldata          = calldata;
         this._content           = undefined;
-        this._cancellationToken = new $JA.CancellationTokenDom(this.container);
         this._loadingTimer      = new $J.Timeout(this.ShowLoading, this);
         this.Show(null);
         this._loadingTimer.start(200);
@@ -451,11 +459,11 @@ export class DropdownPopup<TNativeValue,
 
     public              load()
     {
-        this._loadTask = loadDropdownConstructor(this._dropdownClass, this._cancellationToken)
+        this._loadTask = loadDropdownConstructor(this._dropdownClass, this._context)
                              .then((constructor) => {
                                        const content = new constructor(this, this._calldata) as TDropdown;
                                        this._content = content;
-                                       const t = content.OnLoad(this._calldata, this._cancellationToken);
+                                       const t = content.OnLoad(this._calldata, this._context);
                                        return (t) ? t.then(() => content) : content;
                                    })
                              .catch((err) => {
@@ -476,10 +484,9 @@ export class DropdownPopup<TNativeValue,
                                 });
         }
     }
-    public              Remove()
+    protected           Remove()
     {
         this._loadingTimer.clear();
-        this._cancellationToken.cancel();
 
         if (this._content) {
             this._content.OnRemove();
@@ -648,7 +655,7 @@ export abstract class DropdownContent<TNativeValue,
         this._popup   = popup;
     }
 
-    public              OnLoad(calldata:TCalldata, ct:$JA.CancellationTokenSource): $JA.Task<void>|void
+    public              OnLoad(calldata:TCalldata, ct:$JA.Context): $JA.Task<void>|void
     {
     }
     public              OnFocus()
@@ -936,7 +943,7 @@ function loadDropdownConstructor<TNativeValue,
                                  TControl extends IControlDropdown<TDropdownRtn>,
                                  TDropdown extends DropdownContent<TNativeValue, TControl, TCalldata, TDropdownRtn>,
                                  TCalldata,
-                                 TDropdownRtn>(dropdownClass:string|IDropdownConstructor<TNativeValue, TControl, TCalldata, TDropdownRtn, TDropdown>, ct:$JA.ICancellationToken)
+                                 TDropdownRtn>(dropdownClass:string|IDropdownConstructor<TNativeValue, TControl, TCalldata, TDropdownRtn, TDropdown>, ct:$JA.Context)
 {
 
     if (typeof dropdownClass === 'function') {
@@ -955,14 +962,14 @@ function loadDropdownConstructor<TNativeValue,
 
                             if (c !== undefined) {
                                 if (!$J.testContructorOf(c, DropdownContent as any)) {
-                                    throw new $J.LoadError("'" + classNameParts[1] + "' in module '" + classNameParts[0] + "' is not a DropdownContent constructor.");
+                                    throw new $JA.LoadError("'" + classNameParts[1] + "' in module '" + classNameParts[0] + "' is not a DropdownContent constructor.");
                                 }
 
                                 return c as IDropdownConstructor<TNativeValue, TControl, TCalldata, TDropdownRtn, TDropdown>;
                             }
                         }
 
-                        throw new $J.LoadError("Can't locate '" + classNameParts[1] + "' in module '" + classNameParts[0] + "'.");
+                        throw new $JA.LoadError("Can't locate '" + classNameParts[1] + "' in module '" + classNameParts[0] + "'.");
                     });
 }
 function calcPageStep(container:$JD.DOMHTMLElement): number

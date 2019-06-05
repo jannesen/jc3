@@ -10,11 +10,11 @@ import * as $JUM    from "jc3/jannesen.ui.menu";
 //-------------------------------------------------------------------------------------------------
 //
 //
-
+ 
 interface IActiveTask
 {
     task:           $JA.Task<any>;
-    ct:             $JA.CancellationTokenSource;
+    ct:             $JA.Context;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ interface IActiveTask
 export interface IMoreMenu
 {
     moreMenuEnabled():boolean;
-    moreMenuDatasource(ct:$JA.ICancellationToken):$JUM.IDataSourceResult;
+    moreMenuDatasource(ct:$JA.Context):$JUM.IDataSourceResult;
 }
 
 /**
@@ -33,6 +33,13 @@ export interface IMoreMenu
 export function ImplementsMoreMenu(o: any): o is IMoreMenu
 {
     return (o instanceof Object && typeof o.moreMenuEnabled === 'function' && typeof o.moreMenuDatasource === 'function');
+}
+
+export interface IContextFormHost extends $JA.IContextValues
+{
+    openform?:             (formName:string, args:$J.IUrlArgsColl|IUrlArgsSet, historyReplace:boolean) => void;
+    historyChangeArgs?:    (args:$J.IUrlArgsColl, historyReplace:boolean) => void;
+    formchanged:           (reason:FormChangedReason, form:Form|null) => void;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -94,16 +101,6 @@ export const enum FormChangedReason {
     TitleChanged,
     TabChanged
 }
-export interface IFormHost
-{
-    readonly    parent:                () => FormLoader|null;
-    readonly    openform?:             (formName:string, args:$J.IUrlArgsColl|IUrlArgsSet, historyReplace:boolean, ct:$JA.ICancellationToken|null) => $JA.Task<void>;
-    readonly    historyChangeArgs?:    (args:$J.IUrlArgsColl, historyReplace:boolean) => void;
-    readonly    formchanged:           (reason:FormChangedReason, form:Form|null) => void;
-}
-export type Nullable<T> = {
-    readonly [P in keyof T]?: T[P];
-};
 
 export var  dialogfullscreenflags = DialogFlags.Window;     // Allowed DialogFlags for fullscreen.
 /**
@@ -125,45 +122,11 @@ export const std_button_prev:IDialogButton         = { "class": "btn btn-prev", 
 /**
  * !!DOC
  */
-export class AsyncContext implements $JA.ICancellationToken
-{
-    private             _ct:        $JA.ICancellationToken;
-    private             _parent:    ContentLoader;
-
-    public get          ct()            { return this._ct;     }
-    public get          parent()        { return this._parent; }
-
-    public get          canBeCanceled() { return this._ct.canBeCanceled; }
-    public get          isCancelled()   { return this._ct.isCancelled;   }
-    public get          reason()        { return this._ct.reason;        }
-
-    public              constructor(ct:$JA.ICancellationToken, parent:ContentLoader)
-    {
-        this._ct     = ct;
-        this._parent = parent;
-    }
-
-    public              register(action:(reason:Error)=>void)
-    {
-        this._ct.register(action);
-    }
-    public              unregister(action:(reason: Error)=>void)
-    {
-        this._ct.unregister(action);
-    }
-    public              throwIfCancelled()
-    {
-        this._ct.throwIfCancelled();
-    }
-}
-//-------------------------------------------------------------------------------------------------
-/**
- * !!DOC
- */
 export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoader, any> = ContentBody<any,any>, TArgs = any> extends $JD.Container
 {
     protected           _contentBody:   TContentBody|null;
     protected           _overlay:       $JD.DOMHTMLElement;
+    protected           _context:       $JA.Context;
     protected           _isbusy:        boolean;
     protected           _activeTask:    IActiveTask|null;
     private             _execute_cnt:   number;
@@ -180,11 +143,12 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
         return this._isbusy;
     }
 
-    public              constructor(className:string)
+    public              constructor(className:string, parentContext:$JA.Context|null)
     {
         const overlay = <div class="-overlay" tabIndex={-1} />;
         super(<div class={ className } >{ overlay }</div>);
         this._overlay     = overlay;
+        this._context     = new $JA.Context({ parent:parentContext, component:this });
         this._contentBody = null;
         this._isbusy      = false;
         this._activeTask  = null;
@@ -210,24 +174,24 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
         if (this._activeTask) {
             const oldActiveTask = this._activeTask;
             return new $JA.Task((resolver) => {
-                                    oldActiveTask.ct.cancel(new $JA.OperationCanceledError("Load cancelled by new load."));
+                                    oldActiveTask.ct.stop(new $JA.OperationCanceledError("Load cancelled by new load."));
                                     oldActiveTask.task.finally(resolver as () => void);
-                                }).then((x) => {});
+                                }, null).then((x) => {});
         } else {
             return $JA.Task.resolve();
         }
     }
-    public              execute<TRtn>(executor: (context:AsyncContext) => $JA.Task<TRtn>, ct?:$JA.ICancellationToken|null): $JA.Task<TRtn>
+    public              execute<TRtn>(executor: (context:$JA.Context) => $JA.Task<TRtn>, contextOptions?:$JA.IContextOptions): $JA.Task<TRtn>
     {
         let active:     IActiveTask;
+
+        const executeContext     = new $JA.Context($J.extend<$JA.IContextOptions>({ parent:this._context, dom:this._container }, contextOptions));
 
         if (this._activeTask) {
             return $JA.Task.reject(new $JA.BusyError("Content loader busy."));
         }
 
-        const ctd     = new $JA.CancellationTokenDom(this._container, ct);
-        ctd.throwIfCancelled();
-        const context = new AsyncContext(ctd, this);
+        executeContext.throwIfStopped();
 
         this._overlay.css("z-index", (this._container.css("z-index") || 0) + 999);
 
@@ -237,7 +201,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
         let task:$JA.Task<TRtn>;
 
         try {
-            task = executor(context);
+            task = executor(executeContext);
         } catch (e) {
             task = $JA.Task.reject(e);
         }
@@ -247,7 +211,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                     throw e;
                                 }
 
-                                return (DialogError.show(e, context) as $JA.Task<void>)
+                                return (DialogError.show(e, executeContext) as $JA.Task<void>)
                                        .then(() => { throw e; });
                           })
                    .finally(() => {
@@ -263,7 +227,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                 }
                             });
 
-        this._setActiveTask(active = { task, ct:ctd });
+        this._setActiveTask(active = { task, ct:executeContext });
 
         if (this._container.contains($global.document.activeElement) && $global.document.activeElement !== this._overlay.element) {
             this._overlay.focus();
@@ -279,7 +243,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
         }
     }
 
-    protected           _open(contentNameClass:string|(new ()=>TContentBody), args:TArgs, formstate:IFormState|undefined, ct:$JA.CancellationTokenSource, allowReUse:boolean): $JA.Task<void>
+    protected           _open(contentNameClass:string|(new (context:$JA.Context)=>TContentBody), args:TArgs, formstate:IFormState|undefined, executeContext:$JA.Context, allowReUse:boolean): $JA.Task<void>
     {
         let active:     IActiveTask;
         let newContent: TContentBody;
@@ -289,7 +253,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
 
         let task = this.cancel()
                        .then(() => {
-                                    ct.throwIfCancelled();
+                                    executeContext.throwIfStopped();
 
                                     if (typeof contentNameClass === "string") {
                                         let     nameparts = contentNameClass.split(":", 2);
@@ -298,7 +262,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                             nameparts.push("FormModule");
                                         }
 
-                                        return $JA.Require(nameparts[0], ct)
+                                        return $JA.Require(nameparts[0], executeContext)
                                                     .then((module) => {
                                                         const constructor = (module as any)[nameparts[1]];
                                                         if (typeof constructor !== 'function') {
@@ -309,26 +273,26 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                                             throw new Error("Invalid type of content-class '" + contentNameClass + "'.");
                                                         }
 
-                                                        return constructor as (new ()=>TContentBody);
+                                                        return constructor as (new (context:$JA.Context)=>TContentBody);
                                                     });
                                     }
 
                                     if ($J.testContructorOf(contentNameClass, this.getRequesttedContentType)) {
-                                        return $JA.Task.resolve<new ()=>TContentBody>(contentNameClass);
+                                        return $JA.Task.resolve<new (context:$JA.Context)=>TContentBody>(contentNameClass);
                                     }
 
                                     throw new $J.InvalidStateError("FormLoader.open: argument exception 'form': invalid type.");
                              })
                        .then((formConstructor) => {
-                                    ct.throwIfCancelled();
+                                    executeContext.throwIfStopped();
                                     if (!(allowReUse && this._contentBody && this._contentBody.constructor === formConstructor && this._contentBody.canReOpen)) {
-                                        newContent = new formConstructor();
+                                        newContent = new formConstructor(this._context);
                                         newContent._setContentNameClass(contentNameClass);
-                                        const loadTask   = newContent._onload(this, ct);
+                                        const loadTask   = newContent._onload(executeContext);
 
                                         if (loadTask instanceof $JA.Task) {
                                             return loadTask.then(() => {
-                                                                    ct.throwIfCancelled();
+                                                                    executeContext.throwIfStopped();
                                                                     this._setcontentBody(newContent);
                                                                  });
                                         } else {
@@ -337,7 +301,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                     }
                              })
                        .then(() => {
-                                    return this._contentBody!._openContent(args, formstate, ct);
+                                    return this._contentBody!._openContent(args, formstate, executeContext);
                              })
                        .then(() => {
                                     if (newContent) {
@@ -361,7 +325,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                     }
                                 });
 
-        this._setActiveTask(active = { task, ct });
+        this._setActiveTask(active = { task, ct:executeContext });
         return task;
     }
     protected abstract  _showContent(contentBody:TContentBody):void;
@@ -465,13 +429,15 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
  */
 export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs = any> implements $J.EventHandling
 {
+    protected           _context:           $JA.Context;
     protected           _loader:            TLoader|null;
-    protected           _contentNameClass!: string|(new ()=>this);
+    protected           _contentNameClass!: string|(new (context:$JA.Context)=>this);
     protected           _args:              TArgs|undefined;
     /*@internal*/       _scrollbox:         $JD.DOMHTMLElement;
     /*@internal*/       _content:           $JD.DOMHTMLElement;
     /*@internal*/       _shownow?:          boolean;
 
+    public get          context()                           { return this._context;          }
     public get          loader()                            {
         const loader = this._loader;
         return loader && loader.contentBody === this ? loader :null;
@@ -492,7 +458,7 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
         const loader = this._loader;
         return !!loader && loader.contentBody === this && !(loader.isBusy || this._content.hasClass("-loading"));
     }
-    protected get       scrollbody():$JD.DOMHTMLElement     { return this._scrollbox;          }
+    protected get       scrollbody():$JD.DOMHTMLElement     { return this._scrollbox;        }
     protected get       content():$JD.DOMHTMLElement        { return this._content;          }
     protected get       contentClass():string|undefined     { return undefined;              }
     protected get       scrollBoxStyle():string|undefined   { return undefined;              }
@@ -509,8 +475,10 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
     public              trigger(eventName: string,            data?: any              ): void                                   { throw new $J.InvalidStateError("Mixin not applied."); }
     // #endregion
 
-    public              constructor(className:string)
+    public              constructor(context:$JA.Context, className:string)
     {
+        console.assert(context instanceof $JA.Context);
+        this._context = new $JA.Context({ parent:context, component:this });
         this._loader  = null;
         this._args    = undefined;
         this._scrollbox = <div class="-scrollbox -loading" style={ this.scrollBoxStyle }>
@@ -519,7 +487,7 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
         this._scrollbox.data("contentbody", this);
     }
 
-    protected           onload(loader:TLoader, ct:$JA.ICancellationToken):$JA.Task<void>|void
+    protected           onload(ct:$JA.Context):$JA.Task<void>|void
     {
     }
     protected           onshow(display:boolean)
@@ -535,13 +503,13 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
             this.focusFirstInput();
         }
     }
-    public              execute<T>(executor: (context: AsyncContext) => $JA.Task<T>, ct?:$JA.ICancellationToken):$JA.Task<T>
+    public              execute<T>(executor: (context: $JA.Context) => $JA.Task<T>, contextOptions?:$JA.IContextOptions):$JA.Task<T>
     {
         if (!this._loader) {
-            return $JA.Task.reject(new $J.InvalidStateError("Dialog not active."));
+            throw new $J.InvalidStateError("Dialog not active.");
         }
 
-        return this._loader.execute(executor, ct);
+        return this._loader.execute(executor, contextOptions);
     }
     public              executeDisplayError(e:string|Error|Error[]): $JA.Task<void>
     {
@@ -563,11 +531,11 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
             n.focus();
         }
     }
-    /*@internal*/       _onload(loader:TLoader, ct:$JA.ICancellationToken):$JA.Task<void>|void
+    /*@internal*/       _onload(ct:$JA.Context):$JA.Task<void>|void
     {
-        return this.onload(loader, ct);
+        return this.onload(ct);
     }
-    /*@internal*/       _setContentNameClass(contentNameClass:string|(new ()=>this))
+    /*@internal*/       _setContentNameClass(contentNameClass:string|(new (context:$JA.Context)=>this))
     {
         this._contentNameClass = contentNameClass;
     }
@@ -581,9 +549,10 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
     }
     /*@internal*/       _trigger_ondestroy()
     {
+        this._context.stop();
         this.ondestroy();
     }
-    /*@internal*/ abstract _openContent(args:TArgs, formState:IFormState|null|undefined, ct:$JA.ICancellationToken):$JA.Task<void>|void;
+    /*@internal*/ abstract _openContent(args:TArgs, formState:IFormState|null|undefined, ct:$JA.Context):$JA.Task<void>|void;
 }
 $J.applyMixins(ContentBody, [$J.EventHandling]);
 
@@ -593,50 +562,39 @@ $J.applyMixins(ContentBody, [$J.EventHandling]);
  */
 export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError, TArgs | Error> implements $JD.ISetSize, $JD.IShow
 {
-    private             _host:              IFormHost;
     protected           _showcalled:        boolean;
     protected           _display:           boolean;
     protected           _size?:             $JD.ISize;
 
     protected get       getRequesttedContentType()  { return Form as any /* Work around Typescript problem #5843 */;  }
 
-    public get          host()
-    {
-        return this._host;
-    }
     public get          size()
     {
         return this._size;
     }
 
-    public              constructor(host?: Nullable<IFormHost>)
+    public              constructor(context:$JA.Context|null)
     {
-        super("jannesen-ui-content -form");
-        this._host       = {
-                                parent:                (host && host.parent           ) || (() => null ),
-                                openform:              (host && host.openform         ) || (() => { throw new $J.NotImplentedError("openform"); }),
-                                historyChangeArgs:     (host && host.historyChangeArgs) || nop,
-                                formchanged:           (host && host.formchanged)       || nop
-                           };
+        super("jannesen-ui-content -form", context);
         this._showcalled = false;
         this._display    = true;
     }
 
-    public              open(formNameClass:string|(new ()=>Form<TArgs>), args:TArgs, formstate?:IFormState, ct?:$JA.ICancellationToken|null, refresh?:boolean): $JA.Task<void>
+    public              open(formNameClass:string|(new (context:$JA.Context)=>Form<TArgs>), args:TArgs, formstate?:IFormState, contextOptions?:$JA.IContextOptions, refresh?:boolean): $JA.Task<void>
     {
-        const ctd = new $JA.CancellationTokenDom(this._container, ct);
-        return this._open(formNameClass, args, formstate, ctd, !refresh)
+        const executeContext = new $JA.Context($J.extend<$JA.IContextOptions>({ parent:this._context, dom:this._container }, contextOptions));
+        return this._open(formNameClass, args, formstate, executeContext, !refresh)
                     .then(() => {
                               if (this._contentBody) {
-                                  this._host.formchanged(FormChangedReason.Loaded, this._contentBody);
+                                  this._contentBody.formChanged(FormChangedReason.Loaded);
                               }
                           },
                           (e) => {
-                              if (!ctd.isCancelled) {
-                                  return this._open(FormError, e, undefined, ctd, false)
+                              if (!executeContext.isStopped) {
+                                  return this._open(FormError, e, undefined, executeContext, false)
                                              .then(() => {
                                                         if (this._contentBody) {
-                                                            this._host.formchanged(FormChangedReason.Loaded, this._contentBody);
+                                                            this._contentBody.formChanged(FormChangedReason.Loaded);
                                                         }
                                                         throw e;
                                                    });
@@ -645,11 +603,10 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
                               throw e;
                         });
     }
-    public              execute<TRtn>(executor: (context:AsyncContext) => $JA.Task<TRtn>, ct?:$JA.ICancellationToken|null): $JA.Task<TRtn>
+    public              execute<TRtn>(executor: (context:$JA.Context) => $JA.Task<TRtn>, contextOptions?:$JA.IContextOptions): $JA.Task<TRtn>
     {
-        const parent = this._host.parent();
-
-        return parent ? parent.execute(executor, ct) : super.execute(executor, ct);
+        const loader = this._context.getrootcomponent(FormLoader)
+        return loader ? loader.execute(executor, contextOptions) : super.execute(executor, contextOptions);
     }
     public              saveFormState()
     {
@@ -683,7 +640,7 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
     {
         return this._contentBody && this._contentBody.isIdle ? this._contentBody.moreMenuEnabled() : false;
     }
-    public              moreMenuDatasource(ct:$JA.ICancellationToken):$JUM.IDataSourceResult
+    public              moreMenuDatasource(ct:$JA.Context):$JUM.IDataSourceResult
     {
         if (this._contentBody && this._contentBody.isIdle) {
             return this._contentBody.moreMenuDatasource(ct);
@@ -695,7 +652,7 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
     protected           _setActiveTask(task:IActiveTask|null) {
         super._setActiveTask(task);
         if (this._contentBody) {
-            this._host.formchanged(task ? FormChangedReason.Busy : FormChangedReason.Idle, this._contentBody);
+            this._contentBody.formChanged(task ? FormChangedReason.Busy : FormChangedReason.Idle);
         }
     }
     protected           _showContent(content:Form<TArgs> | FormError)
@@ -733,9 +690,9 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
         return this._size;
     }
 
-    public              constructor()
+    public              constructor(context:$JA.Context)
     {
-        super("jannesen-ui-content-form");
+        super(context, "jannesen-ui-content-form");
         this._formstate = undefined;
         this._size      = undefined;
     }
@@ -748,12 +705,12 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
     {
         return false;
     }
-    public              moreMenuDatasource(ct:$JA.ICancellationToken):$JUM.IDataSourceResult
+    public              moreMenuDatasource(ct:$JA.Context):$JUM.IDataSourceResult
     {
         return [];
     }
 
-    protected abstract  onopen(args:TArgs, state:TState|null|undefined, ct:$JA.ICancellationToken):$JA.Task<void>|void;
+    protected abstract  onopen(args:TArgs, state:TState|null|undefined, ct:$JA.Context):$JA.Task<void>|void;
     protected           onresize(size:$JD.ISize|undefined)
     {
     }
@@ -762,26 +719,37 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
         return undefined;
     }
 
-    protected           openform(formName:string, args:$J.IUrlArgsColl|IUrlArgsSet, historyReplace?:boolean, ct?:$JA.ICancellationToken|null)
+    protected           openform(formName:string, args:$J.IUrlArgsColl|IUrlArgsSet, historyReplace?:boolean):void
     {
-        if (historyReplace === undefined) historyReplace = false;
-        if (ct === undefined) ct = null;
-
-        const loader = this.loader;
-        if (!loader) {
-            throw new $JA.OperationCanceledError("Form not active any more.");
+        if (!this.loader) {
+            throw new $J.InvalidStateError("Form unloaded.");
         }
 
-        if (!loader.host.openform) {
+        if (historyReplace === undefined) historyReplace = false;
+
+        const openform = (this._context.values as IContextFormHost).openform;
+        if (!openform) {
             throw new $J.InvalidStateError("Host does not support openform.");
         }
 
-        return loader.host.openform(formName, args, historyReplace, ct);
+        openform(formName, args, historyReplace);
     }
     protected           historyChangeArgs(args:$J.IUrlArgsColl, historyReplace:boolean) {
-        const loader = this.loader;
-        if (loader && loader.host.historyChangeArgs) {
-            loader.host.historyChangeArgs(args, historyReplace);
+        if (this.loader) {
+            const historyChangeArgs = (this._context.values as IContextFormHost).historyChangeArgs;
+
+            if (historyChangeArgs) {
+                historyChangeArgs(args, historyReplace);
+            }
+        }
+    }
+    public              formChanged(reason:FormChangedReason) {
+        if (this.loader) {
+            const formchanged = (this._context.values as IContextFormHost).formchanged;
+
+            if (formchanged) {
+                formchanged(reason, this);
+            }
         }
     }
     protected           setContent(content:$JD.AddNode, shownow?:boolean)
@@ -797,7 +765,7 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
         }
     }
 
-    /*@internal*/       _openContent(args:TArgs, formstate:IFormState<TState>|undefined, ct:$JA.ICancellationToken)
+    /*@internal*/       _openContent(args:TArgs, formstate:IFormState<TState>|undefined, ct:$JA.Context)
     {
         this._args      = args;
         this._formstate = formstate;
@@ -835,7 +803,7 @@ export class FormError extends Form<Error>
 {
     public get          contentClass()         { return "-error"; }
 
-    protected           onopen(err:Error, state:void, ct:$JA.ICancellationToken)
+    protected           onopen(err:Error, state:void, ct:$JA.Context)
     {
         this.setContent(errorToContent(err));
     }
@@ -852,42 +820,36 @@ export class FormError extends Form<Error>
  */
 export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<TArgs, TRtn>, TArgs>
 {
-    private             _parent!:           ContentLoader<ContentBody<any, any>, any>;
     private             _initDlgSize:       $JD.ISize|undefined;
     private             _onTop:             boolean;
 
     protected get       getRequesttedContentType()  { return DialogBase as any /* Work around Typescript problem #5843 */;  }
 
+    public get          parent()
+    {
+        return this._context.getcomponent<ContentLoader>(ContentLoader as any);
+    }
     public get          isOnTop()
     {
         return this._onTop;
     }
 
-    public              constructor()
+    public              constructor(context:$JA.Context|null)
     {
-        super("jannesen-ui-content -dialog -window");
+        super("jannesen-ui-content -dialog -window", context);
         this._container.css("position", "absolute");
         this._initDlgSize     = undefined;
         this._onTop           = false;
     }
 
-    public              runAsync(form:string|(new ()=>DialogBase<TArgs, TRtn>), args:TArgs, context:AsyncContext|$JA.ICancellationToken|null)
+    public              runAsync(form:string|(new (context:$JA.Context)=>DialogBase<TArgs, TRtn>), args:TArgs)
     {
-        let ctd:$JA.CancellationTokenDom;
-
-        if (context instanceof AsyncContext) {
-            ctd = new $JA.CancellationTokenDom(this._container, context.ct);
-            this._parent = context.parent;
-        } else {
-            ctd = new $JA.CancellationTokenDom(this._container, context);
-        }
-
         $JD.body.appendChild(this);
         setDialogOnTop(this);
         this._centerDialog();
 
-        return this._open(form, args, undefined, ctd, false)
-                   .then(() => this._contentBody!._runDialogAsync(ctd))
+        return this._open(form, args, undefined, this._context, false)
+                   .then(() => this._contentBody!._runDialogAsync(this._context))
                    .then((r) => {
                              this._isbusy = true;
                              this._container.addClass("-unloading");
@@ -895,7 +857,7 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
                              return waitAnimationAsync(this._container, 1000, r);
                          },
                          (e) => {
-                             if (context && context.isCancelled) {
+                             if (this._context.isStopped) {
                                  throw e;
                              }
 
@@ -909,8 +871,11 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
                                 $JD.body.removeChild(this);
                                 this._cleanup();
 
-                                if (this._onTop && this._parent) {
-                                    this._parent.focus();
+                                if (this._onTop) {
+                                    const parent = this.parent;
+                                    if (parent) {
+                                        parent.focus();
+                                    }
                                 }
                                 resetWindowFullscreen();
                             });
@@ -1053,9 +1018,10 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
         let winSize = $JD.window.size;
         let pos:$JD.IPosition|undefined;
 
-        if (this._parent) {
+        const parent = this.parent;
+        if (parent) {
             try {
-                const rect = this._parent.container.outerRect;
+                const rect = parent.container.outerRect;
                 pos = { top: rect.top + rect.height / 2, left: rect.left + rect.width / 2 };
             } catch (e) {
             }
@@ -1111,9 +1077,9 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
 /**
  * !!DOC
  */
-export function dialogShow<TArgs,TRtn>(form:string|(new ()=>DialogBase<TArgs, TRtn>), args: TArgs, context:AsyncContext|$JA.ICancellationToken|null): $JA.Task<TRtn|string|undefined>
+export function dialogShow<TArgs,TRtn>(form:string|(new (context:$JA.Context)=>DialogBase<TArgs, TRtn>), args: TArgs, context:$JA.Context|null): $JA.Task<TRtn|string|undefined>
 {
-    return (new DialogLoader<TArgs, TRtn>()).runAsync(form, args, context);
+    return (new DialogLoader<TArgs, TRtn>(context)).runAsync(form, args);
 }
 
 /**
@@ -1147,9 +1113,9 @@ export abstract class DialogBase<TArgs, TRtn> extends ContentBody<DialogLoader<T
         }
     }
 
-    public              constructor()
+    public              constructor(context:$JA.Context)
     {
-        super("jannesen-ui-content-dialog");
+        super(context, "jannesen-ui-content-dialog");
         this._dialogFlags = 0;
         this._onclose     = null;
     }
@@ -1161,7 +1127,7 @@ export abstract class DialogBase<TArgs, TRtn> extends ContentBody<DialogLoader<T
         }
     }
 
-    protected abstract  onopen(args:TArgs, ct:$JA.ICancellationToken):$JA.Task<void>|void;
+    protected abstract  onopen(args:TArgs, ct:$JA.Context):$JA.Task<void>|void;
 
     protected           closeForm(rtn:TRtn|Error|string|undefined):void
     {
@@ -1171,7 +1137,7 @@ export abstract class DialogBase<TArgs, TRtn> extends ContentBody<DialogLoader<T
         this._onclose(rtn);
     }
 
-    /*@internal*/       _runDialogAsync(ct:$JA.ICancellationToken)
+    /*@internal*/       _runDialogAsync(ct:$JA.Context)
     {
         return new $JA.Task<TRtn|string|undefined>((resolver, reject, oncancel) => {
                                             oncancel((reason) => reject(reason));
@@ -1266,7 +1232,7 @@ export abstract class DialogBase<TArgs, TRtn> extends ContentBody<DialogLoader<T
                             .toggleClass("-scroll", false);
         }
     }
-    /*@internal*/       _openContent(args:TArgs, formstate:undefined, ct:$JA.ICancellationToken)
+    /*@internal*/       _openContent(args:TArgs, formstate:undefined, ct:$JA.Context)
     {
         return this.onopen(this._args = args, ct);
     }
@@ -1277,7 +1243,7 @@ export abstract class DialogBase<TArgs, TRtn> extends ContentBody<DialogLoader<T
  */
 export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn>
 {
-    protected           onopen(args: TArgs, ct: $JA.ICancellationToken)
+    protected           onopen(args: TArgs, ct: $JA.Context)
     {
         let header  = this.formHeader();
         let body    = this.formBody  ();
@@ -1358,7 +1324,7 @@ export interface IDialogMessageArgs
  */
 export class DialogMessage extends Dialog<IDialogMessageArgs, string>
 {
-    public static       show(args: IDialogMessageArgs, ct:$JA.ICancellationToken)
+    public static       show(args: IDialogMessageArgs, ct:$JA.Context)
     {
         return dialogShow(DialogMessage, args, ct);
     }
@@ -1394,7 +1360,7 @@ export class DialogMessage extends Dialog<IDialogMessageArgs, string>
  */
 export class DialogConfirm extends Dialog<{title:string, message:string|$JD.DOMHTMLElement}, string>
 {
-    public static       show(title:string, message:string|$JD.DOMHTMLElement, ct:$JA.ICancellationToken)
+    public static       show(title:string, message:string|$JD.DOMHTMLElement, ct:$JA.Context)
     {
         return dialogShow(DialogConfirm,
                           {
@@ -1438,7 +1404,7 @@ export class DialogConfirm extends Dialog<{title:string, message:string|$JD.DOMH
  */
 export class DialogError extends Dialog<string|Error|Error[]|$JD.DOMHTMLElement, void>
 {
-    public static       show(err: string|Error|Error[]|$JD.DOMHTMLElement, ct:$JA.ICancellationToken|null)
+    public static       show(err: string|Error|Error[]|$JD.DOMHTMLElement, ct:$JA.Context|null)
     {
         return dialogShow(DialogError, err, ct) as $JA.Task<void>;
     }
@@ -1484,23 +1450,23 @@ export abstract class AsyncContainer<TArgs> extends $JD.Container
         if (this._activeTask) {
             const oldActiveTask = this._activeTask;
             return new $JA.Task((resolver) => {
-                                    oldActiveTask.ct.cancel(new $JA.OperationCanceledError("Load cancelled by new load."));
+                                    oldActiveTask.ct.stop(new $JA.OperationCanceledError("Load cancelled by new load."));
                                     oldActiveTask.task.finally(resolver as () => void);
-                                });
+                                }, null);
         } else {
             return $JA.Task.resolve();
         }
     }
-    public              start(args:TArgs, ct?:$JA.ICancellationToken|null): $JA.Task<void>
+    public              start(args:TArgs, context:$JA.Context|null): $JA.Task<void>
     {
-        const ctd     = new $JA.CancellationTokenDom(this._container, ct);
-        ctd.throwIfCancelled();
+        const executeContext     = new $JA.Context({ parent: context, dom: this._container });
+        executeContext.throwIfStopped();
 
         const task = this.cancel()
                          .then(() => {
                                     this._container.empty().addClass("-loading");
-                                    return this.run(args, ctd);
-                             })
+                                    return this.run(args, executeContext);
+                               })
                          .then((content) => {
                                     this._container.removeClass("-loading");
                                     if (content !== undefined) {
@@ -1516,12 +1482,12 @@ export abstract class AsyncContainer<TArgs> extends $JD.Container
                                     throw err;
                                });
 
-        this._activeTask = { task, ct: ctd };
+        this._activeTask = { task, ct:executeContext };
 
         return task;
     }
 
-    protected abstract  run(args:TArgs, ct:$JA.ICancellationToken|null): $JA.Task<$JD.AddNode>;
+    protected abstract  run(args:TArgs, ct:$JA.Context|null): $JA.Task<$JD.AddNode>;
 }
 //-------------------------------------------------------------------------------------------------
 /**
@@ -1560,7 +1526,7 @@ export function waitAnimationAsync<T>(elm: $JD.DOMHTMLElement, timeout:number, r
 {
     return new $JA.Task<T>((resolve, reject, oncancel) => {
                               $JD.onAnimationTransitionEnd(elm, timeout, () => resolve(rtn));
-                           });
+                           }, null);
 }
 
 /**
@@ -1803,7 +1769,3 @@ export function getContentBody(n:HTMLElement|null) {
 }
 
 $JD.window.bind("focusin", window_onfocusin);
-
-function nop()
-{
-}

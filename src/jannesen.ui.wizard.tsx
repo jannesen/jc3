@@ -34,8 +34,8 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
 
     protected get           contentClass()      { return "jannesen-ui-template-wizard-dialog"; }
 
-    public constructor() {
-        super();
+    public constructor(context:$JA.Context) {
+        super(context);
 
         this.saveButton = <button class={$JCONTENT.std_button_save.class} onclick={() => this.cmdSave()}>{$JCONTENT.std_button_save.text}</button>;
         this.prevButton = <button class={$JCONTENT.std_button_prev.class} onclick={() => this.switch(false)}>{$JCONTENT.std_button_prev.text}</button>;
@@ -49,7 +49,7 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
     protected               onload() {
     }
 
-    protected               onopen(args: TArgs, ct: $JA.ICancellationToken) {
+    protected               onopen(args: TArgs, ct: $JA.Context) {
         this.copyData(true, this.args, this.callargs, this.data);
 
         let title = this.formTitle();
@@ -199,7 +199,7 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
         }
     }
 
-    protected               onSave(context:$JCONTENT.AsyncContext): $JA.Task<TRtn|string|null>
+    protected               onSave(context:$JA.Context): $JA.Task<TRtn|string|null>
     {
         const errList = this.validate();
 
