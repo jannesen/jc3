@@ -1987,29 +1987,39 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
         if (value instanceof Object) {
             const datasource = this.Datasource;
 
-            if (!(datasource instanceof RemoteSelectDatasource)) {
-                throw new $J.InvalidStateError("SelectType.setValue object-value only allowed with remote datasource.");
-            }
+            if (datasource instanceof RemoteSelectDatasource) {
+                if (value instanceof SelectType) {
+                    const setvalue = value;
+                    if (datasource !== setvalue.Datasource) {
+                        throw new $J.InvalidStateError("SelectType.setValue value has invalid datasource.");
+                    }
 
-            if (value instanceof SelectType) {
-                const setvalue = value;
-                if (datasource !== setvalue.Datasource) {
-                    throw new $J.InvalidStateError("SelectType.setValue value has invalid datasource.");
+                    value = setvalue.value;
+                    this._record = setvalue._record;
                 }
+                else
+                {
+                    const key = (value as any)[datasource.keyfieldname] as TNative;
 
-                value = setvalue.value;
-                this._record = setvalue._record;
-            }
-            else
-            {
-                const key = (value as any)[datasource.keyfieldname] as TNative;
+                    if (typeof key !== (this.constructor as any).NativeType) {
+                        throw new $J.InvalidStateError("SelectType.setValue invalid object-value, key-type= '" + (typeof value) + "' expect '" + (this.constructor as any).NativeType + "'.");
+                    }
 
-                if (typeof key !== (this.constructor as any).NativeType) {
-                    throw new $J.InvalidStateError("SelectType.setValue invalid object-value, key-type= '" + (typeof value) + "' expect '" + (this.constructor as any).NativeType + "'.");
+                    this._record = value as any;
+                    value = key;
                 }
+            }
+            else {
+                if (value instanceof SelectType) {
+                    if (datasource !== value.Datasource) {
+                        throw new $J.InvalidStateError("SelectType.setValue value has invalid datasource.");
+                    }
 
-                this._record = value as any;
-                value = key;
+                    value = value.value;
+                }
+                else {
+                    throw new $J.InvalidStateError("SelectType.setValue value invalid value type.");
+                }
             }
         }
 
