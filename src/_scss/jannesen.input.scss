@@ -1,6 +1,6 @@
 ﻿$jc-input-forground-color:             #033c73 !default;
 $jc-input-background-color:            #ffffff !default;
-$jc-input-forground-disabled-color:    $jc-input-forground-color !default;
+$jc-input-forground-disabled-color:    #606060 !default;
 $jc-input-background-disabled-color:   #e8e8e8 !default;
 $jc-input-border-color:                #cccccc !default;
 $jc-input-border-error-color:          #dd5600 !default;
@@ -87,9 +87,9 @@ input.jannesen-input, textarea.jannesen-input, select.jannesen-input {
 }
 
 input:disabled.jannesen-input, textarea:disabled.jannesen-input, select:disabled.jannesen-input, div.jannesen-input[disabled], div.jannesen-input > input:disabled {
-    background-color:   $jc-input-background-disabled-color;
-    color:              $jc-input-forground-disabled-color;
-    border-color:       $jc-input-border-disabled-color;
+    background-color:   $jc-input-background-disabled-color !important;
+    color:              $jc-input-forground-disabled-color  !important;
+    border-color:       $jc-input-border-disabled-color     !important;
     pointer-events:     none;
 }
 
