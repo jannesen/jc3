@@ -86,10 +86,14 @@ input.jannesen-input, textarea.jannesen-input, select.jannesen-input {
     padding:            $jc-input-padding-top-bottom $jc-input-padding-left-right;
 }
 
-input:disabled.jannesen-input, textarea:disabled.jannesen-input, select:disabled.jannesen-input, div.jannesen-input[disabled], div.jannesen-input > input:disabled {
+input:disabled.jannesen-input, textarea:disabled.jannesen-input, select:disabled.jannesen-input, div[disabled].jannesen-input.-dropdown, div.jannesen-input > input:disabled {
     background-color:   $jc-input-background-disabled-color !important;
     color:              $jc-input-forground-disabled-color  !important;
     border-color:       $jc-input-border-disabled-color     !important;
+    pointer-events:     none;
+}
+
+div.jannesen-input[disabled] {
     pointer-events:     none;
 }
 
@@ -199,6 +203,12 @@ div.jannesen-input {
     }
 
     &[disabled] {
+        &.-button,> span.-button {
+            background-color:   $jc-input-background-disabled-color !important;
+            color:              $jc-input-forground-disabled-color  !important;
+            border-color:       $jc-input-border-disabled-color     !important;
+        }
+
         > span.-dropdown-button {
             display: none;
         }
@@ -216,7 +226,7 @@ div.jannesen-input {
         display:        inline-block;
         white-space:    normal;
         line-height:    1.125em;
-        padding:        $jc-input-padding-top-bottom 0 $jc-input-padding-top-bottom 0.5em;
+        padding:        calc(#{$jc-input-padding-top-bottom} + 1px) 0 $jc-input-padding-top-bottom 0.5em;
         margin-top:     1px;
         vertical-align: top;
     }
