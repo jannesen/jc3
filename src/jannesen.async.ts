@@ -45,6 +45,16 @@ export interface TaskInspection<T>
     readonly    reason:         Error;
 }
 
+
+/**
+ * !!DOC
+ */
+export interface ITaskContext<T>
+{
+    task:       Task<T>;
+    context:    Context;
+}
+
 //=============================================== Errors ==========================================
 /**
  *!!DOC
@@ -104,7 +114,6 @@ export interface IContextOptions
 
 export interface IContextValues
 {
-
 }
 
 export class Context
