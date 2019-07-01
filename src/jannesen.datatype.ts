@@ -599,7 +599,7 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
     /**
      *!!DOC
      */
-    protected validateValue(): ValidateValueResult {
+    public validateValue(): ValidateValueResult {
         return null;
     }
 
