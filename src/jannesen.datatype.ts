@@ -564,12 +564,13 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
     /**
      *!!DOC
      */
-    public setError(msg?:string): BaseType {
+    public setError(msg?:string): boolean {
         if (this._control && typeof this._control.setError === "function") {
             this._control.setError(msg || null);
+            return true;
         }
 
-        return this;
+        return false;
     }
 
     /**
