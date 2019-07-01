@@ -32,6 +32,9 @@ var __Error = (function () {
         this.message = message;
         this.stack = Error().stack;
     }
+    __Error.prototype.toMessageString = function () {
+        return '[' + this.name + ']: ' + this.message;
+    };
     __Error.prototype.toString = function () {
         return this.message;
     };

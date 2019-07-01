@@ -7,6 +7,7 @@ interface Error
 
 interface __Error extends Error
 {
+    toMessageString():      string;
 }
 
 interface __ErrorConstructor {

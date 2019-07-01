@@ -241,6 +241,17 @@ export class ValidateErrors extends __Error
 
         return false;
     }
+    public      toMessageString()
+    {
+        let rtn:string = '';
+
+        for (let e of this._errors) {
+            let s = e.path  ? '[ValidateErrors][' + e.path +']: ' + stringErrorToMessage(e.error) : stringErrorToMessage(e.error);
+            rtn = rtn.length > 0 ? rtn + '\n' + s : s;
+        }
+
+        return rtn;
+    }
 }
 
 //===================================== BaseType ==================================================

@@ -1679,23 +1679,13 @@ function errorToMsg(err:Error): $JD.DOMHTMLElement {
     let msg = <div class="-error"/>;
 
     for(let e:Error|undefined=err ; e instanceof Error ; e = e.innerError) {
-        if (e instanceof $J.ServerError && e.serverError instanceof Object && Array.isArray(e.serverError.detail)) {
-            for (let d of e.serverError.detail) {
-                if (f)
-                    msg.appendChild(<br/>);
-                else
-                    f = true;
-
-                msg.appendChild("[ServerError.detail]: " + d.message);
-            }
-        }
-        else {
+        for (let m of (e instanceof __Error ? e.toMessageString() : "[" + e.name + "]: " + e.toString()).split('\n')) {
             if (f)
                 msg.appendChild(<br/>);
             else
                 f = true;
 
-            msg.appendChild("[" + e.name + "]: " + (typeof e.message === "string" ? e.message : "[UNKNOWN]" ));
+            msg.appendChild(m);
         }
     }
 
