@@ -10,8 +10,9 @@
         width:                      1.2em;
         text-align:                 center;
         display:                    inline-block;
-        font:                       normal normal normal 1em FontAwesome;
+        font:                       normal normal normal 1em 'Font Awesome 5 Pro';
         font-size:                  inherit;
+        font-weight:                $font-awesome-solid;
         text-rendering:             auto;
         -webkit-font-smoothing:     antialiased;
         -moz-osx-font-smoothing:    grayscale;

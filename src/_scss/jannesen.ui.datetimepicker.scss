@@ -84,8 +84,8 @@
                 display:        none;
             }
             &:before {
-                font-family:        FontAwesome;
-                font-weight:        normal;
+                font-family:        'Font Awesome 5 Pro';
+                font-weight:        $font-awesome-solid;
                 font-style:         normal;
                 text-decoration:    none;
                 vertical-align:     middle;
@@ -94,13 +94,15 @@
             &.-prev {
                 left:0;
                 &:before {
-                    content:        $fa-icon-chevron-left;
+                    font-weight:    $font-awesome-solid;
+                    content:        fa-content($fa-var-chevron-left);
                 }
             }
             &.-next {
                 right:0;
                 &:before {
-                    content:        $fa-icon-chevron-right;
+                    font-weight:    $font-awesome-solid;
+                    content:        fa-content($fa-var-chevron-right);
                 }
             }
         }
@@ -157,8 +159,9 @@ div.jannesen-ui-daterangepicker {
 
         > i.-icon.-calendar {
             display: inline-block;
-            font: normal normal normal 14px/1 FontAwesome;
+            font: normal normal normal 14px/1 'Font Awesome 5 Pro';
             font-size: inherit;
+            font-weight:    $font-awesome-solid;
             text-rendering: auto;
             -webkit-font-smoothing: antialiased;
             cursor: pointer;

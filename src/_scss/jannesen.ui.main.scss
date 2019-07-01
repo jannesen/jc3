@@ -27,9 +27,8 @@ div.jannesen-ui-main {
             > button.-close {
                 color:          #af0000;
                 &::before {
-                    top:            0.0909em;
-                    left:           0.2791em;
-                    content:        $fa-icon-close;
+                    font-weight:    $font-awesome-solid;
+                    content:        fa-content($fa-var-times);
                 }
                 &:hover {
                     color:          #ff0000;
@@ -40,11 +39,10 @@ div.jannesen-ui-main {
                 color:          #009000;
                 &::before {
                     font-size:      80%;
-                    top:            0.25em;
-                    left:           0.5532em;
                     transform:      rotate(90deg);
                     transition:     transform linear $jc-main-sidebar-transition-time;
-                    content:        $fa-icon-thumb-tack;
+                    font-weight:    $font-awesome-solid;
+                    content:        fa-content($fa-var-thumbtack);
                 }
                 &.-true {
                     &::before {
@@ -66,7 +64,7 @@ div.jannesen-ui-main {
             color:              #ffffff;
             background-color:   hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 10%));
             padding:            2px;
-            overflow:           auto;
+            overflow:           hidden;
 
             &::-webkit-scrollbar {
                 width:          8px;
@@ -140,50 +138,44 @@ div.jannesen-ui-main {
 
             button.-sidebar {
                 &::before {
-                    font-size:      110%;
-                    top:            0.0455em;
-                    left:           0.2272em;
-                    content:        $fa-icon-navicon;
+                    font-size:      100%;
+                    font-weight:    $font-awesome-solid;
+                    content:        fa-content($fa-var-bars);
                 }
             }
             button.-nav-back {
                 &::before {
                     font-size:      80%;
-                    top:            .25em;
-                    left:           .375em;
-                    content:        $fa-icon-long-arrow-left;
+                    font-weight:    $font-awesome-solid;
+                    content:        fa-content($fa-var-long-arrow-left);
                 }
             }
             button.-nav-refresh {
                 &::before {
                     font-size:      80%;
-                    top:            .25em;
-                    left:           .4462em;
-                    content:        $fa-icon-refresh;
+                    font-weight:    $font-awesome-solid;
+                    content:        fa-content($fa-var-sync);
                 }
             }
             button.-nav-prev {
                 &::before {
-                    font-size:      110%;
-                    top:            0;
-                    left:           0.4737em;
-                    content:        $fa-icon-angle-left;
+                    font-size:      100%;
+                    font-weight:    $font-awesome-solid;
+                    content:        fa-content($fa-var-angle-left);
                 }
             }
             button.-nav-next {
                 &::before {
-                    font-size:      110%;
-                    top:            0;
-                    left:           0.4737em;
-                    content:        $fa-icon-angle-right;
+                    font-size:      100%;
+                    font-weight:    $font-awesome-solid;
+                    content:        fa-content($fa-var-angle-right);
                 }
             }
             button.-moremenu {
                 &::before {
-                    font-size:      120%;
-                    top:            0.02em;
-                    left:           0.47592em;
-                    content:        $fa-ellipsis-v;
+                    font-size:      100%;
+                    font-weight:    $font-awesome-solid;
+                    content:        fa-content($fa-var-ellipsis-v);
                 }
             }
         }
@@ -210,7 +202,7 @@ div.jannesen-ui-main {
             font-size:          1em;
             background-color:   rgba(0,0,0,0);
             overflow:           hidden;
-            font:               normal normal normal 20px FontAwesome;
+            font:               normal normal normal 20px 'Font Awesome 5 Pro';
 
             transition:         background-color ease-in-out $jc-main-mouse-transition-time,
                                 color            ease-in-out $jc-main-mouse-transition-time,
@@ -218,8 +210,15 @@ div.jannesen-ui-main {
                                 width            ease-in-out $jc-main-sidebar-transition-time,
                                 opacity          linear $jc-main-sidebar-transition-time;
             &:before {
-                display:        inline-block;
                 position:       absolute;
+                top:            0;
+                right:          0;
+                width:          100%;
+                height:         100%;
+                display:        flex;
+                flex-direction: row;
+                align-items:    center;
+                justify-content:center;
             }
             &:disabled {
                 opacity:        0;

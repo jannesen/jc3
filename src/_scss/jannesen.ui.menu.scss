@@ -34,7 +34,8 @@ button.jannesen-ui-menu.-button {
         font-size:          1.4em;
         @include            fa-icon();
         &::after {
-            content: $fa-icon-ellipsis-v;
+            font-weight:    $font-awesome-solid;
+            content:        fa-content($fa-var-ellipsis-v);
         }
     }
 }
@@ -77,7 +78,8 @@ div.jannesen-ui-menu.-popup {
                 padding-left:       1em;
                 @include            fa-icon();
                 &::after {
-                    content:        $fa-icon-caret-right;
+                    font-weight:    $font-awesome-solid;
+                    content:        fa-content($fa-var-caret-right);
                 }
             }
         }

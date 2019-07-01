@@ -60,7 +60,7 @@ div.jannesen-datatable {
             width:              1em;
             height:             1em;
             padding:            0 .1667em 0 .5em;
-            font-family:        FontAwesome;
+            font-family:        'Font Awesome 5 Pro';
             font-weight:        normal;
             font-style:         normal;
             text-decoration:    none;
@@ -69,7 +69,8 @@ div.jannesen-datatable {
             transition:         color ease-in-out .2s;
 
             &:before {
-                content:        $fa-icon-close;
+                font-weight:    $font-awesome-solid;
+                content:        fa-content($fa-var-times);
             }
             &:hover {
                 color:          #000000;
@@ -96,12 +97,11 @@ div.jannesen-datatable {
         &:before {
             position:           absolute;
             top:                0.0883em;
-            left:               0.1069em;
-            font-family:        FontAwesome;
-            font-weight:        normal;
+            font-family:        'Font Awesome 5 Pro';
+            font-weight:        $font-awesome-solid;
             font-style:         normal;
             text-decoration:    none;
-            content:            $fa-icon-filter;
+            content:            fa-content($fa-var-filter);
         }
         &:hover {
             color:          #000000;
@@ -137,9 +137,9 @@ div.jannesen-scrollbar {
         padding:            0;
         &:before {
             padding-left:       5px;
-            font-family:        FontAwesome;
+            font-family:        'Font Awesome 5 Pro';
             font-size:          12px;
-            font-weight:        normal;
+            font-weight:        $font-awesome-solid;
             font-style:         normal;
             text-decoration:    none;
             color:              #c8c8c8;
@@ -176,13 +176,15 @@ div.jannesen-scrollbar {
     > div.-btn-up {
         top:        0;
         &:before {
-            content:    $fa-icon-caret-up
+            font-weight:    $font-awesome-solid;
+            content:        fa-content($fa-var-caret-up)
         }
     }
     > div.-btn-down {
         bottom:         0;
         &:before {
-            content:    $fa-icon-caret-down
+            font-weight:    $font-awesome-solid;
+            content:        fa-content($fa-var-caret-down)
         }
     }
 }

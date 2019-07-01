@@ -20,7 +20,8 @@
             color:          #0000a0;
             animation:      jannesen-ui-content-fadein-loading 1s linear 0s 1, jannesen-ui-content-spin 1s infinite linear;
             z-index:        1000;
-            @include        fa-icon($fa-icon-refresh);
+            font-weight:    $font-awesome-solid;
+            @include        fa-icon($fa-var-sync);
         }
         > div {
             animation:          jannesen-ui-content-fadein-loading 1s ease-in .1s 1 normal both;
@@ -93,7 +94,8 @@
                 color:          #0000a0;
                 animation:      jannesen-ui-content-fadein-loading 1s linear 0s 1, jannesen-ui-content-spin 1s infinite linear;
                 z-index:        1000;
-                @include        fa-icon($fa-icon-refresh);
+                font-weight:    $font-awesome-solid;
+                @include        fa-icon($fa-var-sync);
             }
         }
 

@@ -66,7 +66,7 @@ div.jannesen-ui-template-data-popup {
             &::before {
                 top: 0.0909em;
                 left: 0.2791em;
-                @include fa-icon($fa-icon-close);
+                @include fa-icon($fa-var-times, $font-awesome-solid);
             }
 
             &:hover {

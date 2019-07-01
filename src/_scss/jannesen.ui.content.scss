@@ -106,7 +106,7 @@ div.jannesen-ui-content {
                 line-height:    1em;
                 color:          #000000;
                 animation:      jannesen-ui-content-spin 1s infinite linear;
-                @include        fa-icon($fa-icon-spinner);
+                @include        fa-icon($fa-var-spinner, $font-awesome-solid);
             }
         }
     }
@@ -217,7 +217,7 @@ div.jannesen-ui-content-dialog {
                     border:     0;
                     outline:    0;
                 }
-                &.-close:before { @include fa-icon($fa-icon-close); }
+                &.-close:before { @include fa-icon($fa-var-times, $font-awesome-solid); }
             }
         }
     }
@@ -351,7 +351,7 @@ div.jannesen-ui-content-asynccontainer {
             color:          #af1200;
             animation:      jannesen-ui-content-spin 1s infinite linear;
             z-index:        1000;
-            @include        fa-icon($fa-icon-refresh);
+            @include        fa-icon($fa-var-sync, $font-awesome-solid);
         }
     }
 }

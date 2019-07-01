@@ -37,17 +37,21 @@ $jc-line-icon-btn-width:             1.5em !default;
         padding-left: 2.25em;
 
         &:before {
-            display:            block;
+            display:            flex;
             position:           absolute;
-            top:                0.15em;
+            top:                0;
             left:               0.25em;
-            font-family:        FontAwesome;
+            font-family:        'Font Awesome 5 Pro';
             font-weight:        normal;
             font-style:         normal;
             text-decoration:    none;
             font-size:          1.5em;
             opacity:            0.6;
             transition:         opacity ease-in-out .2s;
+            width:              100%;
+            height:             100%;
+            flex-direction:     row;
+            align-items:        center;
         }
         &:not(:disabled):hover:before {
             opacity: 1;
@@ -56,61 +60,71 @@ $jc-line-icon-btn-width:             1.5em !default;
 
     &.btn-cancel {
         &:before {
-            content:    $fa-icon-close;
+            font-weight:$font-awesome-solid;
+            content:    fa-content($fa-var-times);
             color:      #ff0000;
         }
     }
     &.btn-ok {
         &:before {
-            content:    $fa-icon-check;
+            font-weight:$font-awesome-solid;
+            content:    fa-content($fa-var-check);
             color:      #00c000;
         }
     }
     &.btn-no {
         &:before {
-            content:    $fa-icon-close;
+            font-weight:$font-awesome-solid;
+            content:    fa-content($fa-var-times);
             color:      #ff0000;
         }
     }
     &.btn-yes {
         &:before {
-            content:    $fa-icon-check;
+            font-weight:$font-awesome-solid;
+            content:    fa-content($fa-var-check);
             color:      #00c000;
         }
     }
     &.btn-save {
         &:before {
-            content:    $fa-icon-save;
+            font-weight:$font-awesome-solid;
+            content:    fa-content($fa-var-save);
             color:      #00c000;
         }
     }
     &.btn-remove {
         &:before {
-            content:    $fa-icon-trash;
+            font-weight:$font-awesome-solid;
+            content:    fa-content($fa-var-trash);
             color:      #e87800;
         }
     }
     &.btn-add {
         &:before {
-            content:    $fa-icon-plus;
+            font-weight:$font-awesome-solid;
+            content:    fa-content($fa-var-plus);
             color:      #3fc03f;
         }
     }
     &.btn-search {
         &:before {
-            content:    $fa-icon-search;
+            font-weight:$font-awesome-solid;
+            content:    fa-content($fa-var-search);
             color:      #3f3fff;
         }
     }
     &.btn-next {
         &:before {
-            content:    $fa-icon-arrow-right;
+            font-weight:$font-awesome-solid;
+            content:    fa-content($fa-var-arrow-right);
             color:      #3f3fff;
         }
     }
     &.btn-prev {
         &:before {
-            content:    $fa-icon-arrow-left;
+            font-weight:$font-awesome-solid;
+            content:    fa-content($fa-var-arrow-left);
             color:      #3f3fff;
         }
     }
@@ -118,11 +132,12 @@ $jc-line-icon-btn-width:             1.5em !default;
 
 @mixin line-icon-btn-helper($content, $color, $size, $width, $height) {
     &:before {
-        font-size:  1em * $size;
-        top:        1em * ((12 - $height * $size) / 2) / (12 * $size);
-        left:       1em * ((12 * ($jc-line-icon-btn-width / 1em) - $width * $size) / 2) / (12 * $size);
-        color:      $color;
-        content:    $content;
+        font-size:      1em * $size;
+        top:            1em * ((12 - $height * $size) / 2) / (12 * $size);
+        left:           1em * ((12 * ($jc-line-icon-btn-width / 1em) - $width * $size) / 2) / (12 * $size);
+        color:          $color;
+        font-weight:    $font-awesome-solid;
+        content:        fa-content($content);
     }
 }
 
@@ -160,9 +175,9 @@ $jc-line-icon-btn-width:             1.5em !default;
             opacity:        1;
         }
     }
-    &.-edit     { @include line-icon-btn-helper($fa-icon-pencil, #0035ff, 1.5, 10.29, 12) }
-    &.-add      { @include line-icon-btn-helper($fa-icon-plus,   #00d000, 1.5,  9.43, 11) }
-    &.-delete   { @include line-icon-btn-helper($fa-icon-trash,  #c50000, 1.5,  9.43, 12) }
-    &.-ban      { @include line-icon-btn-helper($fa-icon-ban,    #c50000, 1.5, 10.29, 12) }
-    &.-search   { @include line-icon-btn-helper($fa-icon-search, #c50000, 1.5, 10.29, 12) }
+    &.-edit     { @include line-icon-btn-helper($fa-var-pencil, #0035ff, 1.5, 10.29, 12) }
+    &.-add      { @include line-icon-btn-helper($fa-var-plus,   #00d000, 1.5,  9.43, 11) }
+    &.-delete   { @include line-icon-btn-helper($fa-var-trash,  #c50000, 1.5,  9.43, 12) }
+    &.-ban      { @include line-icon-btn-helper($fa-var-ban,    #c50000, 1.5, 10.29, 12) }
+    &.-search   { @include line-icon-btn-helper($fa-var-search, #c50000, 1.5, 10.29, 12) }
 }
