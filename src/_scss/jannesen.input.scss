@@ -195,6 +195,11 @@ div.jannesen-input {
         padding:            $jc-input-padding-top-bottom 0;
         @include            user-select(none);
         @include            fa-icon();
+        opacity:            .3;
+        transition:         opacity ease-in-out .2s;
+        &:hover {
+            opacity:            1;
+        }
         &:before {
             font-size:      1.2em;
             text-align:     center;
