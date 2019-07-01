@@ -87,6 +87,19 @@ export interface ICallArgs //!!TODO
     [key: string]: string|number|boolean|Object|null;
 }
 
+/**
+ * !!DOC
+ */
+export interface ISetFocusOnError extends Error
+{
+    setFocusOnError():  boolean;
+}
+
+export function isISetFocusOnError(o:Error): o is ISetFocusOnError
+{
+    return o instanceof Error && typeof (o as any).setFocusOnError === 'function';
+}
+
 //=============================================== Error Classes ===================================
 /**
  *!!DOC

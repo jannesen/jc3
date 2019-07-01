@@ -99,32 +99,24 @@ class Content implements $JD.IDOMContainer
         let responsecontainer = <div/>;
 
         callcontent.appendChild(<button onclick={() => {
-                                    let errList: $JT.ValidateError[] = [];
+                                    $JA.Task.resolve()
+                                            .then(() => args.callargs instanceof $JT.BaseType ? args.callargs.validateAsync({ context:null }) : $JT.ValidateResult.OK )
+                                            .then((r) => r === $JT.ValidateResult.OK && args.data instanceof $JT.BaseType ? args.data.validateAsync({ context:null }) : r)
+                                            .then(() => {
+                                                        let response = <div>loading</div>;
+                                                        responsecontainer.empty().appendChild(<h1>RESPONSE</h1>, response);
 
-                                    if (args.callargs) {
-                                        (args.callargs as $JT.BaseType).validate(errList);
-                                    }
-                                    if (args.data) {
-                                        (args.data as $JT.BaseType).validate(errList);
-                                    }
+                                                        const responseContext = new $JA.Context({ parent:this._context, dom: response });
+                                                        return $JA.Ajax(callDefinitions, args, responseContext)
+                                                                  .then((data) => { response.empty().appendChild(this._createResponse(data)); });
+                                                  })
+                                            .catch((err) => {
+                                                        if (err instanceof $JT.ValidateErrors && err.setFocusOnError()) {
+                                                            return;
+                                                        }
 
-                                    if (errList.length === 0) {
-                                        let response = <div>loading</div>;
-                                        responsecontainer.empty().appendChild(<h1>RESPONSE</h1>, response);
-
-                                        const responseContext = new $JA.Context({ parent:this._context, dom: response });
-                                        $JA.Ajax(callDefinitions, args, responseContext)
-                                           .then((data) => { response.empty().appendChild(this._createResponse(data)); },
-                                                 (err)  => { response.empty().appendChild($JUC.errorToContent(err));   });
-                                    } else {
-                                        const firstControl = errList[0].control;
-                                        if (firstControl) {
-                                            firstControl.focus();
-                                        }
-                                        else {
-                                            $JUC.DialogError.show(errList, this._context);
-                                        }
-                                    }
+                                                        return $JUC.DialogError.show(err, this._context);
+                                                    });
                                 }}>CALL</button>);
 
         callcontent.appendChild(responsecontainer);

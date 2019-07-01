@@ -92,7 +92,7 @@ export abstract class RangeValue extends $JT.SimpleType<IRangeValue> {
 
         return v;
     }
-    protected validateValue() {
+    public validateValue() {
         let value = this._value;
 
         if (value !== null) {

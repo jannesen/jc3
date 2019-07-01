@@ -136,6 +136,15 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
     /**
      * !!DOC
      */
+    public      preValidate()
+    {
+        this.parseInput(true);
+        return null;
+    }
+
+    /**
+     * !!DOC
+     */
     public      parseInput(validate:boolean): void {
         throw new $J.InvalidStateError("Not implemented parseInput().");
     }
@@ -1083,7 +1092,8 @@ export class SelectRadio<TNativeValue extends $JT.SelectValue, TDatasource exten
     /**
      * !!DOC
      */
-    public      parseInput(validate:boolean): void {
+    public      preValidate() {
+        return null;
     }
 
     /**

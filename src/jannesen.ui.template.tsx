@@ -219,7 +219,7 @@ export abstract class SimpleForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
         this.showDataPopup();
         let callargs:$JT.Record|undefined;
 
-        const formargs = this._formargs as any;
+        const formargs = this._formargs;
         if (formargs instanceof $JT.Record) {
             formargs.assign(args);
             callargs = formargs.clone();
@@ -361,38 +361,28 @@ export abstract class QueryForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record
 
     protected               onExecuteQuery()
     {
-        try {
-            this.showDataPopup();
-            const formargs = this._formargs as any;
-            if (formargs instanceof $JT.Record) {
-                let errList: $JT.ValidateError[] = [];
-
-                if (!(formargs.validate(errList, true) && this.validateQuery(errList))) {
-                    const firstControl = errList.length > 0 && errList[0].control;
-                    if (firstControl) {
-                        firstControl.focus();
-                    }
-                    else {
-                        this.execute((context) => $JCONTENT.DialogError.show(errList, context));
-                    }
-
-                    return;
-                }
-            }
-
-            this.openform('~'+this.contentNameClass, this._formargs, true);
-        } catch (err) {
-            this.execute((context) => $JCONTENT.DialogError.show(err, context));
-        }
+        this.showDataPopup();
+        this.execute((context) => (this._formargs instanceof $JT.Record ? this._formargs.validateAsync({ context:context }) : $JA.Task.resolve($JT.ValidateResult.OK))
+                                       .then(() => {
+                                                 const r = this.validateQuery();
+                                                 if (r instanceof Error) throw r;
+                                                 return r;
+                                             })
+                     )
+            .then((f) => {
+                      if (f === $JT.ValidateResult.OK) {
+                          return this.openform('~'+this.contentNameClass, this._formargs, true);
+                      }
+                  });
     }
     protected               errorToContent(err:Error)
     {
         return $JCONTENT.errorToContent(err);
     }
 
-    protected               validateQuery(errors?:$JT.ValidateError[])
+    protected               validateQuery(): $JT.ValidateResult|$JT.ValidateErrors
     {
-        return true;
+        return $JT.ValidateResult.OK;
     }
 }
 
@@ -467,7 +457,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
     {
         this.showDataPopup();
         if (state) {
-            if (this._formargs as any instanceof $JT.Record) {
+            if (this._formargs as unknown instanceof $JT.Record) {
                 (this._formargs as $JT.Record).assign(state.callargs);
             }
 
@@ -495,20 +485,16 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
 
                 if (this._hasquery) {
                     if (!args || Object.getOwnPropertyNames(args).length === 0) {
-                        this.initArgs(this._formargs);
+                        this.initArgs(formargs);
                         return ;
                     }
 
                     if (formargs.FieldNames.findIndex((n) => args.hasOwnProperty(n)) < 0) {
                         return ;
                     }
-
-                    if (!(formargs.validate(undefined, false) && this.validateQuery())) {
-                        return;
-                    }
                 }
 
-                if (!formargs.validate()) {
+                if (!(formargs.validateSync({ seterror:false }) === $JT.ValidateResult.OK && this.validateQuery() === $JT.ValidateResult.OK)) {
                     return;
                 }
 
@@ -523,24 +509,16 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
                                                       { datatable }
                                                   </div>;
 
-                                this._result = {
-                                                    callargs,
-                                                    resultdata,
-                                                    container,
-                                                    datatable
-                                               };
+                                this._result = { callargs, resultdata, container, datatable };
                                 this.content.appendChild(container);
                                 this.onresize(this.contentsize);
                             },
                             (err) => {
                                 this.clearResult();
                                 const container = <div class="-result -error">
-                                                        { this.errorToContent(err) }
+                                                      { this.errorToContent(err) }
                                                   </div>;
-                                this._result = {
-                                                    callargs,
-                                                    container
-                                               };
+                                this._result = { callargs, container };
                                 this.content.appendChild(container);
                             });
         }
@@ -637,7 +615,7 @@ export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
 
     protected               onload(ct:$JA.Context):void
     {
-        if (this._formargs as any instanceof $JT.Record) {
+        if (this._formargs as unknown instanceof $JT.Record) {
             const formargs = this._formargs as $JT.Record;
             const elmqueryform = <div class="-query">
                                     <div class="-form">{ this.queryform(this._formargs) }</div>
@@ -658,9 +636,9 @@ export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
     protected               onopen(args:$J.IUrlArgs, state:any|null|undefined, ct:$JA.Context):$JA.Task<void>|void
     {
         this.showDataPopup();
-        let callargs: $JT.Record|null = null;
 
-        const formargs = this._formargs as any;
+        let callargs: $JT.Record|null = null;
+        const formargs = this._formargs;
 
         if (formargs instanceof $JT.Record) {
             formargs.assign(args);
@@ -669,7 +647,7 @@ export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
                 return;
             }
 
-            if (!(formargs.validate(undefined, false) && this.validateQuery())) {
+            if (!(formargs.validateSync({ seterror:false }) === $JT.ValidateResult.OK && this.validateQuery() === $JT.ValidateResult.OK)) {
                 return;
             }
 
@@ -835,15 +813,8 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
 
         return btns;
     }
-    protected               validate(mode:StandardDialogMode): $JT.ValidateError[]|null {
-        let errList: $JT.ValidateError[] = [];
-
-        const data = this.data as any;
-        if (data instanceof $JT.BaseType && !data.validate(errList)) {
-            return errList;
-        }
-
-        return null;
+    protected               validate(mode:StandardDialogMode, ct:$JA.Context): $JA.Task<$JT.ValidateResult> {
+        return this.data as unknown instanceof $JT.BaseType ? (this.data as unknown as $JT.BaseType).validateAsync({ context:ct }) : $JA.Task.resolve($JT.ValidateResult.OK);
     }
     protected               cmdCancel()
     {
@@ -903,31 +874,21 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     protected               onSave(context:$JA.Context): $JA.Task<TRtn|string|null>
     {
         const dlgmode = this.dlgmode;
-        const errList = this.validate(dlgmode);
 
-        if (!errList) {
-            let opts = {
-                            callargs: this.callargs,
-                            data:     this.data
-                       } as $JA.IAjaxArgs;
+        return this.validate(dlgmode, context)
+                   .then(() => {
+                             let opts = {
+                                             callargs: this.callargs,
+                                             data:     this.data
+                                        } as $JA.IAjaxArgs;
 
-            switch (dlgmode) {
-            case StandardDialogMode.Create:     opts.method = 'POST';       break;
-            case StandardDialogMode.Edit:       opts.method = 'PUT';        break;
-            }
-            return $JA.Ajax(this.interfaceSave, opts, context)
-                      .then((r) => this.onSaved(r));
-        } else {
-            const firstControl = errList.length > 0 && errList[0].control;
-            if (firstControl) {
-                firstControl.focus();
-                throw new $JA.OperationCanceledError("Validation failed.");
-            }
-            else {
-                return $JCONTENT.DialogError.show(errList, context)
-                                .then<TRtn|string>(() => { throw new $JA.OperationCanceledError("Validation failed."); });
-            }
-        }
+                             switch (dlgmode) {
+                             case StandardDialogMode.Create:     opts.method = 'POST';       break;
+                             case StandardDialogMode.Edit:       opts.method = 'PUT';        break;
+                             }
+                             return $JA.Ajax(this.interfaceSave, opts, context)
+                                       .then((r) => this.onSaved(r));
+                         });
     }
     protected               onSaved(r:$JA.AjaxCallResponseType<TCall>): TRtn|string|null
     {

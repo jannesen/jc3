@@ -130,15 +130,9 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
         return btns;
     }
 
-     protected               validate(): $JT.ValidateError[]|null {
-        let errList: $JT.ValidateError[] = [];
-        const data = this.data as any;
-
-        if (data instanceof $JT.BaseType && !data.validate(errList)) {
-            return errList;
-        }
-
-        return null;
+    protected               validate(ct:$JA.Context): $JA.Task<$JT.ValidateResult>
+    {
+        return this.data as unknown instanceof $JT.BaseType ? (this.data as unknown as $JT.BaseType).validateAsync({ context:ct }) : $JA.Task.resolve($JT.ValidateResult.OK);
     }
 
     protected               cmdCancel()
@@ -201,30 +195,18 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
 
     protected               onSave(context:$JA.Context): $JA.Task<TRtn|string|null>
     {
-        const errList = this.validate();
+        return this.validate(context)
+                   .then(() => {
+                             let opts = {
+                                             callargs: this.callargs,
+                                             data:     this.data
+                                        } as $JA.IAjaxArgs;
 
-        if (!errList) {
-            let opts = {
-                            callargs: this.callargs,
-                            data:     this.data
-                       } as $JA.IAjaxArgs;
-
-            opts.method = 'POST';
-
-            return $JA.Ajax(this.interfaceSave, opts, context)
-                      .then((r) => this.onSaved(r));
-        } else {
-            const firstControl = errList.length > 0 && errList[0].control;
-            if (firstControl) {
-                firstControl.focus();
-                throw new $JA.OperationCanceledError("Validation failed.");
-            }
-            else {
-                return $JCONTENT.DialogError.show(errList, context)
-                                .then<TRtn|string>(() => { throw new $JA.OperationCanceledError("Validation failed."); });
-            }
-        }
+                             return $JA.Ajax(this.interfaceSave, opts, context)
+                                       .then((r) => this.onSaved(r));
+                         });
     }
+
     protected               onSaved(r:$JA.AjaxCallResponseType<TCall>): TRtn|string|null
     {
         return "OK";

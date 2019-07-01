@@ -119,6 +119,25 @@ export const std_button_next:IDialogButton         = { "class": "btn btn-next", 
 export const std_button_prev:IDialogButton         = { "class": "btn btn-prev",   "text": $JL.btn_prev,       "value": "PREVIOUS" };
 
 //-------------------------------------------------------------------------------------------------
+const nativeFocus = HTMLElement.prototype.focus;
+
+HTMLElement.prototype.focus = function (options?:FocusOptions) {
+                                  let node:HTMLElement|null = this;
+
+                                  while (node && node !== $global.document.body) {
+                                      const contentLoader = $JD.getElementData(node, "contentloader");
+                                      if (contentLoader instanceof ContentLoader) {
+                                          if (contentLoader._focusHandler(this, options)) {
+                                            return;
+                                          }
+                                      }
+                                      node = node.parentElement;
+                                  }
+
+                                  nativeFocus.call(this, options);
+                              };
+
+//-------------------------------------------------------------------------------------------------
 /**
  * !!DOC
  */
@@ -131,6 +150,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
     protected           _activeTask:    IActiveTask|null;
     private             _execute_cnt:   number;
     private             _loading_cnt:   number;
+    private             _restoreFocus?: { target:HTMLElement, options?:FocusOptions };
 
     protected abstract get getRequesttedContentType(): new ()=>TContentBody;
 
@@ -211,6 +231,12 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                     throw e;
                                 }
 
+                                if ($J.isISetFocusOnError(e)) {
+                                    if (e.setFocusOnError()) {
+                                        throw e;
+                                    }
+                                }
+
                                 return (DialogError.show(e, executeContext) as $JA.Task<void>)
                                        .then(() => { throw e; });
                           })
@@ -221,15 +247,24 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
 
                                 if (--(this._execute_cnt) === 0) {
                                     this._container.removeClass("-execute");
+
                                     if (this._overlay.element === $global.document.activeElement && this._contentBody) {
-                                        this._contentBody.focus();
+                                        if (this._restoreFocus) {
+                                            this._restoreFocus.target.focus(this._restoreFocus.options);
+                                        }
+                                        else {
+                                            this._contentBody.focus();
+                                        }
                                     }
+
+                                    this._restoreFocus = undefined;
                                 }
                             });
 
         this._setActiveTask(active = { task, ct:executeContext });
 
-        if (this._container.contains($global.document.activeElement) && $global.document.activeElement !== this._overlay.element) {
+        if ($global.document.activeElement instanceof HTMLElement && this._container.contains($global.document.activeElement) && $global.document.activeElement !== this._overlay.element) {
+            this._restoreFocus = { target:$global.document.activeElement };
             this._overlay.focus();
         }
 
@@ -376,7 +411,17 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
             }
         }
     }
-    /*@internal*/       _onfocusin(target:HTMLElement) {
+    /*@internal*/       _focusHandler(target:HTMLElement, options?:FocusOptions)
+    {
+        if (this._execute_cnt > 0 && this._overlay.element !== target) {
+            this._restoreFocus = { target, options };
+            return true;
+        }
+
+        return false;
+    }
+    /*@internal*/       _onfocusin(target:HTMLElement)
+    {
         if (this.isBusy) {
             if (target !== this._overlay.element) {
                 this._overlay.focus();
