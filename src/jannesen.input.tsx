@@ -447,8 +447,6 @@ export abstract class InputTextControl<TNativeValue,
         case "ArrowDown":
         case "F4":
             if (!(evt.altKey || evt.ctrlKey || evt.metaKey)) {
-                evt.preventDefault();
-                evt.stopPropagation();
                 this.openDropdown();
                 return;
             }
@@ -1418,9 +1416,6 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
             switch(evt.key) {
             case "ArrowDown":
             case "F4":
-                evt.preventDefault();
-                evt.stopPropagation();
-
                 if (this._inputTimer || this._activeDropdown) {
                     this._inputTimerStop();
                     this._updatedropdown(true);
