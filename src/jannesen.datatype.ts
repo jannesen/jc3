@@ -348,7 +348,7 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
     /**
      *!!DOC
      */
-    public clone(): any
+    public clone(): this
     {
         let c = new (this.constructor as any)();
 
@@ -2580,8 +2580,8 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
     /**
      *!!DOC
      */
-    public clone():Record<TRec> {
-        let c = super.clone() as Record<TRec>;
+    public clone():this {
+        let c = super.clone();
 
         if (this._fields) {
             c._fields = <IRecord>{};
@@ -2879,8 +2879,8 @@ export class Set<TSet extends Record|SimpleType<any>> extends BaseType
     /**
      *!!DOC
      */
-    public clone():Set<TSet> {
-        let c = super.clone() as Set<TSet>;
+    public clone():this {
+        let c = super.clone();
 
         c._items = this._items.map((i) => i.clone()) as any;
 
