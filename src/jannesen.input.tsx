@@ -26,30 +26,7 @@ export interface IControlOptions
 /**
  * !!DOC
  */
-export interface IControl<T extends $JT.BaseType>
-{
-    readonly    value: T|undefined;
-    readonly    isVisible: boolean;
-                disabled: boolean;
-                linkValue(value: T|undefined): void;
-                valueChanged(reason:$JT.ChangeReason, changed:boolean): void;
-                attrChanged(attrName: string): void;
-                parseInput(validate:boolean): void;
-                setError(message: string|null): void;
-                focus(): void;
-}
-
-/**
- * !!DOC
- */
-export interface IControlContainer<T extends $JT.BaseType> extends IControl<T>, $JD.IDOMContainer
-{
-}
-
-/**
- * !!DOC
- */
-export interface ISelectRadioControl<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>> extends IControl<$JT.SelectType<TNativeValue, TDatasource>>
+export interface ISelectRadioControl<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>> extends $JT.IControl<$JT.SelectType<TNativeValue, TDatasource>>
 {
     getRadioButton(key:TNativeValue, text?:string): $JD.DOMHTMLElement;
 }
@@ -60,7 +37,7 @@ export interface ISelectRadioControl<TNativeValue extends $JT.SelectValue, TData
  */
 export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
                                     TOpts extends IControlOptions>
-                                        implements IControlContainer<TValue>
+                                        implements $JT.IControlContainer<TValue>
 {
     protected   _container!:    $JD.DOMHTMLElement;
     protected   _opts:          TOpts;

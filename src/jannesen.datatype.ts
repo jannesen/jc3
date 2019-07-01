@@ -95,6 +95,7 @@ type AssignType       <T> = T extends { new (...args: any[]): SimpleType<any> } 
                           : never;
 */
 
+//===================================== Interfaces ================================================
 /**
  * !!DOC
  */
@@ -135,12 +136,44 @@ export interface IBaseConstructor<TValue,TAttr>
 }
 
 /**
+ * !!DOC
+ */
+export interface IControl<T extends BaseType>
+{
+    readonly    value: T|undefined;
+    readonly    isVisible: boolean;
+                disabled: boolean;
+                linkValue(value: T|undefined): void;
+                valueChanged(reason:ChangeReason, changed:boolean): void;
+                attrChanged(attrName: string): void;
+                parseInput(validate:boolean): void;
+                setError(message: string|null): void;
+                focus(): void;
+}
+
+/**
+ * !!DOC
+ */
+export interface IControlContainer<T extends BaseType> extends IControl<T>, $JD.IDOMContainer
+{
+}
+
+/**
+ * !!DOC
+ */
+export interface IConstructControl<TValue extends BaseType, TInput extends IControl<BaseType>, TOpts>
+{
+    new(v:TValue, opts: TOpts):         TInput;
+}
+
+//===================================== ValidateError =============================================
+/**
  *!!DOC
  */
 export class ValidateError extends __Error
 {
     public value:           BaseType;
-    public control:         $JI.IControl<BaseType>|null;
+    public control:         IControl<BaseType>|null;
     public error:           Error | undefined;
 
     constructor(message:string|Error, value:BaseType) {
@@ -163,13 +196,7 @@ export class ValidateError extends __Error
     }
 }
 
-//===================================== private ===================================================
-export interface IConstructControl<TValue extends BaseType, TInput extends $JI.IControl<BaseType>, TOpts>
-{
-    new(v:TValue, opts: TOpts):         TInput;
-}
-
-//===================================== Interfaces ================================================
+//===================================== BaseType ==================================================
 /**
  *!!DOC
  */
@@ -187,7 +214,7 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
     public static   Name = "BaseType";
     public static   Attributes:IBaseTypeAttributes = {};
 
-    protected   _control:       $JI.IControl<BaseType>|undefined;
+    protected   _control:       IControl<BaseType>|undefined;
     protected   _attributes:    ({ [ key:string]: any; } | undefined);
     protected   _uniqueid:      string|undefined;
 
@@ -391,7 +418,7 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
     /**
      *!!DOC
      */
-    public getControl(opt?:$JI.IControlOptions):$JI.IControlContainer<BaseType> {
+    public getControl(opt?:$JI.IControlOptions):IControlContainer<BaseType> {
         throw new $J.NotImplentedError("$JT.BaseType.getControl");
     }
 
@@ -479,7 +506,7 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
     /**
      *!!DOC
      */
-    public unlinkControl(ctl:$JI.IControl<BaseType>) {
+    public unlinkControl(ctl:IControl<BaseType>) {
         if (this._control === ctl) {
             this._control.linkValue(undefined);
             this._control = undefined;
@@ -503,11 +530,11 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
     /**
      *!!DOC
      */
-    protected getinputcontrol<T extends $JI.IControl<BaseType>, TOpts>(modulename: string, classname: string, opts:TOpts|undefined):T {
+    protected getinputcontrol<T extends IControl<BaseType>, TOpts>(modulename: string, classname: string, opts:TOpts|undefined):T {
         return this.linkControl<T>(new (getModuleClass(modulename, classname))(this, (opts instanceof Object ? opts : emptyOpts as TOpts)));
     }
 
-    public  linkControl<TControl extends $JI.IControl<BaseType>>(ctl:TControl):TControl {
+    public  linkControl<TControl extends IControl<BaseType>>(ctl:TControl):TControl {
         if (this._control) {
             this._control.linkValue(undefined);
             this._control = undefined;
@@ -1002,7 +1029,7 @@ export class Integer extends SimpleNumberType
         return subClassHelper(Integer, attr);
     }
 
-    public getControl(opts?:$JI.IIntegerControlOptions):$JI.IControlContainer<Integer> {
+    public getControl(opts?:$JI.IIntegerControlOptions):IControlContainer<Integer> {
         return this.getinputcontrol<$JI.Integer, $JI.IIntegerControlOptions>("jc3/jannesen.input", "Integer", opts);
     }
 
@@ -1064,7 +1091,7 @@ export class Number extends SimpleNumberType
         return subClassHelper(Number, attr);
     }
 
-    public getControl(opts?:$JI.INumberControlOptions):$JI.IControlContainer<Number> {
+    public getControl(opts?:$JI.INumberControlOptions):IControlContainer<Number> {
         return this.getinputcontrol<$JI.Number, $JI.INumberControlOptions>("jc3/jannesen.input", "Number", opts);
     }
 
@@ -1172,7 +1199,7 @@ export class String extends SimpleType<string>
         return subClassHelper(String, attr);
     }
 
-    public getControl(opts?:$JI.IStringControlOptions):$JI.IControlContainer<String> {
+    public getControl(opts?:$JI.IStringControlOptions):IControlContainer<String> {
         return this.getinputcontrol<$JI.String, $JI.IStringControlOptions>("jc3/jannesen.input", "String", opts);
     }
 
@@ -1312,7 +1339,7 @@ export class StringMultiLine extends String {
         return subClassHelper(StringMultiLine, attr);
     }
 
-    public getControl(opts?:$JI.IStringMultiLineControlOptions):$JI.IControlContainer<String> {
+    public getControl(opts?:$JI.IStringMultiLineControlOptions):IControlContainer<String> {
         return this.getinputcontrol<$JI.StringMultiLine, $JI.IStringMultiLineControlOptions>("jc3/jannesen.input", "StringMultiLine", opts);
     }
 
@@ -1360,7 +1387,7 @@ export class Boolean extends SimpleType<boolean>
         return this.value;
     }
 
-    public getControl(opts?:$JI.IBooleanControlOptions):$JI.IControlContainer<Boolean> {
+    public getControl(opts?:$JI.IBooleanControlOptions):IControlContainer<Boolean> {
         return this.getinputcontrol<$JI.Boolean, $JI.IBooleanControlOptions>("jc3/jannesen.input", "Boolean", opts);
     }
 
@@ -1439,7 +1466,7 @@ export class Date extends SimpleNumberType
         return subClassHelper(Date, attr);
     }
 
-    public getControl(opts?:$JI.IDateControlOptions):$JI.IControlContainer<Date> {
+    public getControl(opts?:$JI.IDateControlOptions):IControlContainer<Date> {
         return this.getinputcontrol<$JI.Date, $JI.IDateControlOptions>("jc3/jannesen.input", "Date", opts);
     }
 
@@ -1523,7 +1550,7 @@ export class DateTime extends SimpleNumberType
         return subClassHelper(DateTime, attr);
     }
 
-    public getControl(opts?:$JI.IDateTimeControlOptions):$JI.IControlContainer<DateTime> {
+    public getControl(opts?:$JI.IDateTimeControlOptions):IControlContainer<DateTime> {
         return this.getinputcontrol<$JI.DateTime, $JI.IDateTimeControlOptions>("jc3/jannesen.input", "DateTime", opts);
     }
 
@@ -1646,7 +1673,7 @@ export class Time extends SimpleNumberType
         this.value =  typeof v === 'number' ? Math.round($J.round(v, this.Precision) * this.Factor) : null;
     }
 
-    public getControl(opts?:$JI.ITimeControlOptions):$JI.IControlContainer<Time> {
+    public getControl(opts?:$JI.ITimeControlOptions):IControlContainer<Time> {
         return this.getinputcontrol<$JI.Time, $JI.ITimeControlOptions>("jc3/jannesen.input", "Time", opts);
     }
 
@@ -1948,14 +1975,14 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
     /**
      *!!DOC
      */
-    public getControl(opt?:$JI.ISelectInputControlOptions<TNative,TDatasource>): $JI.IControlContainer<SelectType<TNative,TDatasource>> {
+    public getControl(opt?:$JI.ISelectInputControlOptions<TNative,TDatasource>): IControlContainer<SelectType<TNative,TDatasource>> {
         return this.getControlInput(opt);
     }
 
     /**
      *!!DOC
      */
-    public getControlInput(opts?:$JI.ISelectInputControlOptions<TNative,TDatasource>): $JI.IControlContainer<SelectType<TNative,TDatasource>> {
+    public getControlInput(opts?:$JI.ISelectInputControlOptions<TNative,TDatasource>): IControlContainer<SelectType<TNative,TDatasource>> {
         return this.getinputcontrol<$JI.SelectInput<TNative,TDatasource>, $JI.ISelectInputControlOptions<TNative,TDatasource>>("jc3/jannesen.input", "SelectInput", opts);
     }
 

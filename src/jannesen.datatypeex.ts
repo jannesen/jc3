@@ -3,7 +3,6 @@ import * as $J   from "jc3/jannesen";
 import * as $JT  from "jc3/jannesen.datatype";
 import * as $JR  from "jc3/jannesen.regional";
 import * as $JL  from "jc3/jannesen.language";
-import * as $JI  from "jc3/jannesen.input";
 import * as $JIE from "jc3/jannesen.inputex";
 
 var rounderror = 100.5 - (1.005 * 100);
@@ -152,7 +151,7 @@ export class DateRange extends RangeValue {
         return { Begin: $J.parseDate(parts[0]), End: $J.parseDate(parts[1]) };
     }
 
-    public  getControl(opts?: $JIE.IDateRangeControlOptions): $JI.IControlContainer<DateRange> {
+    public  getControl(opts?: $JIE.IDateRangeControlOptions): $JT.IControlContainer<DateRange> {
         return this.getinputcontrol<$JIE.DateRange, $JIE.IDateRangeControlOptions>("jc3/jannesen.inputex", "DateRange", opts);
     }
 
@@ -212,7 +211,7 @@ export class DateTimeRange extends RangeValue {
         return { Begin: $J.parseDatetimeNumber(parts[0]), End: $J.parseDatetimeNumber(parts[1]) };
     }
 
-    public  getControl(opts?: $JIE.IDateTimeRangeControlOptions): $JI.IControlContainer<DateTimeRange> {
+    public  getControl(opts?: $JIE.IDateTimeRangeControlOptions): $JT.IControlContainer<DateTimeRange> {
         return this.getinputcontrol<$JIE.DateTimeRange, $JIE.IDateTimeRangeControlOptions>("jc3/jannesen.inputex", "DateTimeRange", opts);
     }
 
