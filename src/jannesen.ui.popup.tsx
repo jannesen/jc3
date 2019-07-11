@@ -775,6 +775,14 @@ export abstract class TableDropdown<TNativeValue,
                                                                 this.selectRow(this._getrow(document.elementFromPoint(ev.clientX, ev.clientY)));
                                                             }, 50);
                                         });
+
+        container.bind("mousedown", (ev) => {
+                                            this._mouseenabled = true;
+                                            if (ev.button === 0) {
+                                                ev.preventDefault();
+                                            }
+                                        });
+
         container.bind("click", (ev) => {
                                             this._mouseenabled = true;
                                             if (typeof this._rowcount === 'number') {

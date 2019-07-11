@@ -428,7 +428,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
             }
         }
         else {
-            if (target.tabIndex < 0) {
+            if (typeof target.getAttribute('tabIndex') === 'number') {
                 if (this._contentBody) {
                     this._contentBody.focus();
                 }
