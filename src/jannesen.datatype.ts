@@ -174,7 +174,7 @@ export interface IValidateOptions
 {
     seterror?:       boolean;
     partial?:       $JD.DOMHTMLElement;
-    preValidates?:  (() => $JA.Task<unknown>|null)[];
+    preValidates?:  () => ($JA.Task<unknown>|null)[];
 }
 
 /**
@@ -636,11 +636,10 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
         let errors:ValidateErrors|undefined;
         let rtn:{ task:$JA.Task<unknown>, value?:BaseType, path?:string }[] = [];
 
-        if (opts.preValidates) {
-            for (let pv of opts.preValidates) {
+        if (typeof opts.preValidates === 'function') {
+            for (let r of opts.preValidates()) {
                 try {
-                    const r = pv();
-                    if (r) {
+                    if (r instanceof $JA.Task) {
                         if (r.isPending) {
                             rtn.push({ task:r });
                         }
