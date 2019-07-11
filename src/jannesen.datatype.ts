@@ -1614,6 +1614,10 @@ export class Boolean extends SimpleType<boolean>
         return $JR.stringToBoolean(val);
     }
 
+    public cnvBooleanToValue(val:boolean): boolean {
+        return val;
+    }
+
     public get Tristate(): boolean {
         return !!this.getAttr("tristate");
     }
