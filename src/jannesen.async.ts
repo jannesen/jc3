@@ -677,11 +677,16 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
     /**
      * !!DOC
      */
+    public static       from<T>(o:Task<T>): Task<T>;
     public static       from<T>(o:PromiseLike<T>): Task<T>;
     public static       from<T>(o:Error):Task<void>;
     public static       from<T>(o:T):Task<T>;
     public static       from(o:any):Task<any>
     {
+        if (o instanceof Task) {
+            return o;
+        }
+
         if (isPromiseLike(o)) {
             return new Task<any>((r,e) => o.then(r,e), null);
         }
