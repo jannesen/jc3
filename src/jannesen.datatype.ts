@@ -804,7 +804,7 @@ export abstract class SimpleType<TNative> extends BaseType
     /**
      *!!DOC
      */
-    public assign(v:string|TNative|this) {
+    public assign(v:string|null|TNative|this) {
         this.setValue(this.convertAnyToValue(v), ChangeReason.Assign);
     }
 
@@ -2337,13 +2337,13 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
     /**
      *!!DOC
      */
-    public  assign(r:any):void {
-        if (r instanceof SelectType) {
+    public  assign(v:string|null|TNative|this):void {
+        if (v instanceof SelectType) {
             const datasource = this.Datasource;
 
-            if (datasource instanceof RemoteSelectDatasource && datasource === r.Datasource ) {
-                const value = r.value as TNative;
-                const record = r._record as any;
+            if (datasource instanceof RemoteSelectDatasource && datasource === v.Datasource ) {
+                const value  = v.value as TNative;
+                const record = v._record as any;
 
                 if (record && record[datasource.keyfieldname] === value) {
                     this._record = record;
@@ -2351,7 +2351,7 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
             }
         }
 
-        super.assign(r);
+        super.assign(v);
     }
 
     /**
