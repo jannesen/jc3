@@ -700,18 +700,15 @@ export function datetimeToString(v: number|Date|null|undefined): string
     if (typeof v === "number")
         v = new Date(<number>v);
 
-    var r = intToA((<Date>v).getUTCFullYear(), 4) + "-" +
-            intToA((<Date>v).getUTCMonth()+1,  2) + "-" +
-            intToA((<Date>v).getUTCDate(),     2) + "T" +
-            intToA((<Date>v).getUTCHours(),    2) + ":" +
-            intToA((<Date>v).getUTCMinutes(),  2);
+    var r = intToA(v.getUTCFullYear(), 4) + "-" +
+            intToA(v.getUTCMonth()+1,  2) + "-" +
+            intToA(v.getUTCDate(),     2) + "T" +
+            intToA(v.getUTCHours(),    2) + ":" +
+            intToA(v.getUTCMinutes(),  2) + ":" +
+            intToA(v.getUTCSeconds(),  2);
 
-    if ((<Date>v).getUTCSeconds() !== 0 || (<Date>v).getUTCMilliseconds() !== 0) {
-        r += ":" + intToA((<Date>v).getUTCSeconds(),  2);
-
-        if ((<Date>v).getUTCMilliseconds() !== 0)
-            r += "." + intToA((<Date>v).getUTCMilliseconds(),  3);
-    }
+    if (v.getUTCMilliseconds() !== 0)
+        r += "." + intToA(v.getUTCMilliseconds(),  3);
 
     return r;
 }
