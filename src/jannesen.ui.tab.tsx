@@ -82,6 +82,19 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
         super.trigger(eventName, ev);
     }
 
+    public      findTab(id:string|number): undefined|Tab
+    {
+        if (typeof id === 'string') {
+            return this._children.find((t) => t.name === id);
+        }
+        else if (typeof id === 'number') {
+            if (id>=0 && id < this._children.length) {
+                return this._children[id];
+            }
+        }
+
+        return undefined;
+    }
     public      addTabAt(at:number|undefined, tab:Tab)
     {
         if (typeof at === 'number' && at < 0) at = 0;
@@ -99,13 +112,8 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
         }
     }
     public      selectTab(tab: string|number|Tab|undefined): void|$JA.Task<void> {
-        if (typeof tab === 'string') {
-            tab = this._children.find((t) => t.name === tab);
-        }
-        else if (typeof tab === 'number') {
-            if (tab>=0 && tab < this._children.length) {
-                tab = this._children[tab];
-            }
+        if (typeof tab === 'string' || typeof tab === 'number') {
+            tab = this.findTab(tab);
         }
 
         if (tab instanceof Tab && this._selectedTab !== tab) {
