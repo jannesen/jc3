@@ -84,19 +84,20 @@ div.jannesen-datatable {
     }
     >div.-filter-btn {
         position:       absolute;
-        display:        inline-block;
-        width:          16px;
         top:            0;
         right:          0;
+        display:        inline-block;
+        width:          16px;
         padding:        0;
         background:     #d8d8d8;
         color:          #9f9f9f;
-        font-size:      1.333em;
+        font-size:      1em;
         transition:     color ease-in-out .2s;
 
         &:before {
             position:           absolute;
-            top:                0.0883em;
+            top:                .25em;
+            right:              .1667em;
             font-family:        'Font Awesome 5 Pro';
             font-weight:        $font-awesome-solid;
             font-style:         normal;
