@@ -32,6 +32,9 @@ $jc-line-icon-btn-width:             1.5em !default;
         background-color:   #d7faff;
         color:              #0000a0;
     }
+    &:disabled {
+        opacity:            .2;
+    }
 
     &.btn-cancel,&.btn-ok,&.btn-no,&.btn-yes,&.btn-save,&.btn-remove,&.btn-add,&.btn-search,&.btn-next,&.btn-prev {
         padding-left: 2.25em;
