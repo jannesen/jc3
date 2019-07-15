@@ -11,6 +11,7 @@ export interface IDataTableOpts<TRec extends $JT.Record>
     tableClass?:    string;
     rowClass?:      string | ((rec:TRec, idx:number)=>string);
     rowClick?:      (rec:TRec)=>void;
+    rowDblClick?:   (rec:TRec)=>void;
     columns:        IDataTableOptsColumn<TRec>[];
     buttons?:       IDataTableOptsButton<TRec>[];
     sort?:          (a:TRec, b:TRec) => number;
@@ -209,9 +210,18 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
                                                                 }
                                                             }
                                                         }}
+                                                    ondblclick={(ev) => {
+                                                            if (typeof this._opts.rowDblClick === "function") {
+                                                                ev.stopPropagation();
+                                                                let idx = helper_getrecordId(ev.target);
+                                                                if (typeof idx === 'number') {
+                                                                    this._opts.rowDblClick(this._filter_rset[idx]);
+                                                                }
+                                                            }
+                                                        }}
                                              />;
 
-        if (!(opts.rowClick))
+        if (!(opts.rowClick || opts.rowDblClick))
             this._body.addClass("-no-select");
 
         this._table =   <table class={ opts.tableClass || "datatable" }>
@@ -283,6 +293,9 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
             case "Enter":
                 if (typeof this._selectedRow === 'number' && typeof this._opts.rowClick === "function") {
                     this._opts.rowClick(this._filter_rset[this._selectedRow]);
+                }
+                if (typeof this._selectedRow === 'number' && typeof this._opts.rowDblClick === "function") {
+                    this._opts.rowDblClick(this._filter_rset[this._selectedRow]);
                 }
                 return true;
 
