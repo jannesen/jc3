@@ -85,6 +85,7 @@ div.jannesen-ui-content {
             display:            inline-block;
             background-color:   rgba(220,220,220,.25);
             cursor:             wait;
+            animation:          jannesen-ui-content-fadein-loading 1s ease-in .1s 1 normal both;
         }
     }
     &.-loading {
@@ -94,7 +95,6 @@ div.jannesen-ui-content {
         > div.-overlay {
             font-size:          48px;
             color:              #0000a0;
-            animation:          jannesen-ui-content-fadein-loading 1s ease-in .1s 1 normal both;
 
             &::after {
                 display:        inline-block;
