@@ -20,7 +20,7 @@ $jc-line-icon-btn-width:             1.5em !default;
     touch-action:       manipulation;
     cursor:             pointer;
     @include user-select(none);
-    transition:         background-color ease-in-out .2s,color ease-in-out .2s, border-color ease-in-out .2s;
+    transition:         background-color ease-in-out .2s,color ease-in-out .2s, border-color ease-in-out .2s, opacity .2s;
 
     &:not(:disabled):hover {
         @include            input-btn-hover();
