@@ -721,11 +721,8 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
 export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<TArgs>, TArgs> implements IMoreMenu
 {
     /*@internal*/       _formstate:     IFormState<TState>|undefined;
-    private            _size:          $JD.ISize|undefined;
+    private             _size:          $JD.ISize|undefined;
 
-    public  get         contentsize() {
-        return this._size;
-    }
     public  get         content()
     {
         return this._content;

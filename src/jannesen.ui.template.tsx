@@ -475,7 +475,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
                                 datatable
                             };
             this.content.appendChild(container);
-            this.onresize(this.contentsize);
+            this.onresize(this.formSize);
         } else {
             let callargs: $JA.AjaxCallRequestType<TCall>|null = null;
             const formargs = this._formargs;
@@ -511,7 +511,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
 
                                 this._result = { callargs, resultdata, container, datatable };
                                 this.content.appendChild(container);
-                                this.onresize(this.contentsize);
+                                this.onresize(this.formSize);
                             },
                             (err) => {
                                 this.clearResult();
