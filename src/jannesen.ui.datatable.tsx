@@ -19,7 +19,7 @@ export interface IDataTableOpts<TRec extends $JT.Record>
 export interface IDataTableOptsColumn<TRec extends $JT.Record>
 {
     title?:         string;
-    data?:          $JT.RecordFieldNames<TRec> | ((rec: TRec)=>string);
+    data?:          $JT.RecordFieldNames<TRec> | ((rec: TRec)=>string|$JD.AddNode);
     dataExt?:       (rec: TRec)=>$JD.AddNode;
     dataFilter?:    (rec: TRec)=>string;
     format?:        string;
@@ -362,7 +362,7 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
             if (filterArray) {
                 if (!this._filter_sset) {
                     this._filter_sset = this._recordset.map((rec, idx) => this._opts.columns.map((c) => {
-                                                                                let t:string|undefined;
+                                                                                let t:string|$JD.AddNode|undefined;
                                                                                 if (typeof c.data === "string") {
                                                                                     t = rec.field(c.data).toText(c.format);
                                                                                 }
