@@ -563,6 +563,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
                                                     } else {
                                                         done[index] = true;
                                                         rtn[index]  = task;
+                                                        checkDone();
                                                     }
                                                 });
 
@@ -636,6 +637,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
                                                      } else {
                                                          done[index] = true;
                                                          rtn[index]  = task;
+                                                         checkDone(index);
                                                      }
                                                  });
 
