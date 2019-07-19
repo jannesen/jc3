@@ -24,9 +24,8 @@
             }
             &[disabled] {
                 opacity:            .3;
-                text-decoration:    line-through;
             }
-            &:not(.-active):hover {
+            &:not([disabled]):not(.-active):hover {
                 cursor: pointer;
                 background-color:   hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 25%) );
             }

@@ -199,7 +199,7 @@ export interface ITabAttr
 {
     name?:              string;
     title:              string;
-    enabled?:           boolean;
+    disabled?:          boolean;
     onclick?:           () => void;
     loadcontent?:       () => $JD.AddNode;
     moremenu?:          () => $JUM.IDataSourceResult;
@@ -210,7 +210,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
 {
     private     _name?:             string;
     private     _titleElement:      $JD.DOMHTMLElement;
-    private     _enabled:           boolean;
+    private     _disabled:          boolean;
     private     _moremenu?:         (ct:$JA.Context) => $JUM.IDataSourceResult;
     private     _loadcontent?:      () => $JD.AddNode;
     private     _loadform?:         (loader:$JUC.FormLoader) => $JA.Task<void>;
@@ -239,13 +239,13 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
     public set  title(text:string) {
         this._titleElement.text(text);
     }
-    public get  enabled() {
-        return this._enabled;
+    public get  disabled() {
+        return this._disabled;
     }
-    public set  enabled(enabled:boolean) {
-        if (this._enabled !== enabled) {
-            this._enabled = enabled;
-            this._titleElement.disabled = !enabled;
+    public set  disabled(disabled:boolean) {
+        if (this._disabled !== disabled) {
+            this._disabled = disabled;
+            this._titleElement.disabled = disabled;
         }
     }
     public get  tabContent()
@@ -258,12 +258,12 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
         super(container);
         this._name          = attr.name;
         this._titleElement  = <span>{ attr.title }</span>;
-        this._enabled       = attr.enabled === undefined ? true : !!attr.enabled;
+        this._disabled      = attr.disabled === undefined ? false : !!attr.disabled;
         this._loaded        = children.length > 0;
         this._active        = false;
         this._moremenu      = attr.moremenu;
 
-        if (!this._enabled) {
+        if (this._disabled) {
             this._titleElement.disabled = true;
         }
         if (!this._loaded) {
@@ -310,7 +310,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
     }
 
     private     _ontitleclick() {
-        if (this._enabled && !this._active) {
+        if (!this._disabled && !this._active) {
             const tabs = this.Tabs;
             if (tabs) {
                 tabs.selectTab(this);

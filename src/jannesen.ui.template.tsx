@@ -290,7 +290,7 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
                                                         }
                                                         else if (tab.title) {
                                                             if (tab.form) {
-                                                                if (tab.enabled = hasPermission(tab.form!)) {
+                                                                if (tab.disabled = !hasPermission(tab.form!)) {
                                                                     tab.loadform=(loader) => loader.open(tab!.form!, this.args);
                                                                 }
                                                             }
