@@ -281,7 +281,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
     protected           _open(contentNameClass:string|(new (context:$JA.Context)=>TContentBody), args:TArgs, formstate:IFormState|undefined, executeContext:$JA.Context, allowReUse:boolean): $JA.Task<void>
     {
         let active:     IActiveTask;
-        let newContent: TContentBody;
+        let newContent: TContentBody|undefined;
         this._overlay.css("z-index", (this._container.css("z-index") || 0) + 999);
         this._container.addClass("-loading");
         (this._loading_cnt)++;
@@ -328,7 +328,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                         if (loadTask instanceof $JA.Task) {
                                             return loadTask.then(() => {
                                                                     executeContext.throwIfStopped();
-                                                                    this._setcontentBody(newContent);
+                                                                    this._setcontentBody(newContent!);
                                                                  });
                                         } else {
                                             this._setcontentBody(newContent);
@@ -339,9 +339,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                     return this._contentBody!._openContent(args, formstate, executeContext);
                              })
                        .then(() => {
-                                    if (newContent) {
-                                        this._showContent(newContent);
-                                    }
+                                    this._showContent(newContent);
                              })
                        .catch((e) => {
                                     if (this._contentBody && newContent === this._contentBody) {
@@ -363,7 +361,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
         this._setActiveTask(active = { task, ct:executeContext });
         return task;
     }
-    protected abstract  _showContent(contentBody:TContentBody):void;
+    protected abstract  _showContent(newContentBody:TContentBody | undefined):void;
     protected           _setActiveTask(task:IActiveTask|null) {
         this._activeTask = task;
         this._isbusy = !!task;
@@ -612,7 +610,6 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
     protected           _size?:             $JD.ISize;
 
     protected get       getRequesttedContentType()  { return Form as any /* Work around Typescript problem #5843 */;  }
-
     public get          size()
     {
         return this._size;
@@ -700,18 +697,21 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
             this._contentBody.formChanged(task ? FormChangedReason.Busy : FormChangedReason.Idle);
         }
     }
-    protected           _showContent(content:Form<TArgs> | FormError)
+    protected           _showContent(newContentBody:Form<TArgs> | FormError | undefined)
     {
-        this._cleanupContent();
-        content._content.removeClass("-loading");
-        this._container.removeClass("-loading");
+        if (newContentBody) {
+            this._cleanupContent();
+            newContentBody._content.removeClass("-loading");
+            this._container.removeClass("-loading");
 
-        this._showcalled = true;
+            this._showcalled = true;
 
-        if (this._display) {
-            content._trigger_show(true);
-            content._trigger_resize(this._size);
+            if (this._display) {
+                newContentBody._trigger_show(this._display);
+            }
         }
+
+        this._contentBody!._trigger_resize(this._size);
     }
 }
 
@@ -731,6 +731,7 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
     {
         return this._size;
     }
+
 
     public              constructor(context:$JA.Context)
     {
@@ -811,6 +812,7 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
     {
         this._args      = args;
         this._formstate = formstate;
+        this._size      = undefined;
         return this.onopen(args, (formstate ? formstate.state : undefined), ct);
     }
     /*@internal*/       _saveFormState()
@@ -938,38 +940,40 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
             }
         }
     }
-    protected           _showContent(contentBody:DialogBase<TArgs, TRtn>)
+    protected           _showContent(newContentBody:DialogBase<TArgs, TRtn>|undefined)
     {
-        const container = this._container;
-        this._cleanupContent();
-        contentBody._content.removeClass("-loading");
-        container.removeClass("-loading")
-                 .css({ position:"absolute", top:0, left:0 })
-                 .addClass("-init");
+        if (newContentBody) {
+            const container = this._container;
+            this._cleanupContent();
+            newContentBody._content.removeClass("-loading");
+            container.removeClass("-loading")
+                     .css({ position:"absolute", top:0, left:0 })
+                     .addClass("-init");
 
-        contentBody._trigger_show(true);
+            newContentBody._trigger_show(true);
 
-        this._initDlgSize = this.container.size;
-        contentBody.dialogFlags = this._calcDialogFlags();
+            this._initDlgSize = this.container.size;
+            newContentBody.dialogFlags = this._calcDialogFlags();
 
-        if (contentBody.dialogFlags & DialogFlags.FullScreen) {
-            this._resizeFullScreen();
-        } else {
-            this._centerDialog();
+            if (newContentBody.dialogFlags & DialogFlags.FullScreen) {
+                this._resizeFullScreen();
+            } else {
+                this._centerDialog();
+            }
+
+            container.bind("mousedown",  this._onMove, this);
+            container.bind("touchstart", this._onMove, this);
+            container.removeClass("-init")
+                     .addClass("-loaded");
+            $JD.window.bind("resize",  this._onWindowResize,  this);
+
+            $JD.onAnimationTransitionEnd(container, 1000, () => {
+                                              this._container.bind("click", this._onclick, this);
+                                              if (this._contentBody && this._onTop)  {
+                                                  this._focusFirst();
+                                              }
+                                          });
         }
-
-        container.bind("mousedown",  this._onMove, this);
-        container.bind("touchstart", this._onMove, this);
-        container.removeClass("-init")
-                 .addClass("-loaded");
-        $JD.window.bind("resize",  this._onWindowResize,  this);
-
-        $JD.onAnimationTransitionEnd(container, 1000, () => {
-                                          this._container.bind("click", this._onclick, this);
-                                          if (this._contentBody && this._onTop)  {
-                                              this._focusFirst();
-                                          }
-                                      });
     }
 
     private             _cleanup()
