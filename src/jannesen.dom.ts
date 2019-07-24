@@ -114,7 +114,7 @@ export interface HTMLAttributes {
     allowTransparency?:     boolean;
     alt?:                   string;
     async?:                 boolean;
-    autoComplete?:          boolean;
+    autoComplete?:          string;
     autoFocus?:             boolean;
     autoPlay?:              boolean;
     cellPadding?:           number | string;
