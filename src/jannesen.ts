@@ -1,7 +1,7 @@
 ﻿/// <reference path="lib-ext.d.ts"/>
 var tick_per_day            = (24*60*60*1000);
 var rounderror              = (1.005 * 100) - 100.5;
-var global_uniqueidcounter  = 1;
+var global_uniqueidcounter  = Math.floor(Math.random() * 100000);
 
 //=============================================== Enums ===========================================
 /**
