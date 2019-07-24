@@ -672,6 +672,9 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
                 this._container.show(this._display = display);
                 if (this._contentBody) {
                     this._contentBody._trigger_show(display);
+                    if (display) {
+                        this._contentBody._trigger_resize(this._size);
+                    }
                 }
             }
         }
@@ -711,7 +714,9 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
             }
         }
 
-        this._contentBody!._trigger_resize(this._size);
+        if (this._display) {
+            this._contentBody!._trigger_resize(this._size);
+        }
     }
 }
 
