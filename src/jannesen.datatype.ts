@@ -2577,7 +2577,7 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
     public get fields(): IRecord|null {
         return <any>(this._fields);
     }
-    public set fields(r:IRecord|null) {
+    public set fields(r: IRecord|null) {
         throw new $J.NotImplentedError("$JT.Record.set_fields");
     }
 
@@ -2631,7 +2631,7 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
      *!!DOC
      */
     public field<K extends keyof TRec>(name: K): InstanceType<TRec[K]>;
-    public field<T extends BaseType>(name: string): (T extends SimpleType<any>|Record<any>|Set<any> ? T : void);
+    public field<T extends BaseType>(name:string): (T extends SimpleType<any>|Record<any>|Set<any> ? T : unknown);
     public field<T extends BaseType>(name:string): T
     {
         if (!this.contains(name))
@@ -2706,7 +2706,7 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
     /**
      *!!DOC
      */
-    public sortCompare(other:this, ...fields:string[])
+    public sortCompare<K extends keyof TRec>(other:this, ...fields:K[])
     {
         for(let i = 0 ; i < fields.length ; ++i) {
             let c  = this.field(fields[i]).sortCompare(other.field(fields[i]));
