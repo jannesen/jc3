@@ -946,7 +946,7 @@ export abstract class SimpleType<TNative> extends BaseType
             value = this._normalizeValue(value);
         }
 
-        if (this._value !== value) {
+        if (this._value !== value || reason === ChangeReason.UI) {
             this._value = value;
 
             if (this._control)
@@ -2256,7 +2256,7 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
             this._value  = null;
 
             if (this._control) {
-                this._control.setError($JL.input_incomplete);
+                this._control.valueChanged(ChangeReason.Invalidate, false);
             }
 
             if (this._eventHandlers) {

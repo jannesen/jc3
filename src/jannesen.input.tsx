@@ -227,7 +227,7 @@ export abstract class InputTextControl<TNativeValue,
                                             implements $JPOPUP.IControlDropdown<TNativeValue|null>
 {
     protected   _input:             $JD.DOMHTMLElement;
-    protected   _text:              string;
+    protected   _text:              string | undefined;
     protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TInput, TCalldata, TNativeValue|null, TDropdown>|undefined;
 
                             constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown: boolean)
@@ -236,7 +236,7 @@ export abstract class InputTextControl<TNativeValue,
 
 
         let container:$JD.DOMHTMLElement;
-        let input = <input type={type} spellCheck={false} />;
+        let input = <input type={type} spellCheck={false} autoComplete="no-autocomplete" />;
 
         input.bind("focus",   this.input_onfocus, this);
         input.bind("blur",    this.input_onblur,  this);
@@ -295,6 +295,11 @@ export abstract class InputTextControl<TNativeValue,
     public                  valueChanged(reason:$JT.ChangeReason, changed:boolean): void
     {
         this.closeDropdown(true);
+
+        if (reason === $JT.ChangeReason.Invalidate) {
+            this._text = undefined;
+            return;
+        }
 
         if (this._value && (changed || this.isDirty())) {
             let vvalue = this._value.internalvalue;
@@ -738,6 +743,11 @@ export class StringMultiLine extends SimpleControl<$JT.StringMultiLine, IStringM
     }
 
     public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
+        if (reason === $JT.ChangeReason.Invalidate) {
+            this._text = undefined;
+            return;
+        }
+
         if (this._value && (changed || this._container.prop("value") !== this._text)) {
             let vvalue = this._value.internalvalue;
             this._text = vvalue !== null ? this._value!.cnvValueToText(vvalue) : "";
@@ -1266,6 +1276,11 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
 
     public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
         this._activelookup = undefined;
+
+        if (reason === $JT.ChangeReason.Invalidate) {
+            this._text = undefined;
+            return;
+        }
 
         if (this._value) {
             const vvalue = this._value.internalvalue;
