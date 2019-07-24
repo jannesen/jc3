@@ -48,6 +48,7 @@ div.jannesen-ui-content {
     overflow:           hidden;
 
     > div.-scrollbox {
+        position:           relative;
         box-sizing:         border-box;
         > div.-content {
             box-sizing:         border-box;
