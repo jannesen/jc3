@@ -1481,7 +1481,17 @@ export function createElement(tagName:intrinsicNames, attrs?:HTMLAttributes, ...
                     }
                     else
                     if (typeof attrValue === "boolean") {
-                        elm.attr(attrName, <boolean>attrValue);
+                        switch (attrName) {
+                        case "disabled":
+                            if (attrValue) {
+                                elm.attr(attrName, "1");
+                            }
+                            break;
+
+                        default:
+                            elm.attr(attrName, <boolean>attrValue);
+                            break;
+                        }
                     }
                 }
             }
