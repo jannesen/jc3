@@ -1181,7 +1181,7 @@ export abstract class DialogBase<TArgs, TRtn> extends ContentBody<DialogLoader<T
 
     protected abstract  onopen(args:TArgs, ct:$JA.Context):$JA.Task<void>|void;
 
-    protected           closeForm(rtn:TRtn|Error|string|undefined):void
+    protected           closeForm(rtn:TRtn|Error):void
     {
         if (!this._onclose) {
             throw new $J.InvalidStateError("Dialog not running.");
@@ -1293,7 +1293,7 @@ export abstract class DialogBase<TArgs, TRtn> extends ContentBody<DialogLoader<T
 /**
  * !!DOC
  */
-export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn>
+export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|undefined>
 {
     protected           onopen(args: TArgs, ct: $JA.Context)
     {
