@@ -45,6 +45,7 @@ export const btn_cancel                         = "Cancel";
 export const btn_ok                             = "OK";
 export const btn_close                          = "Close";
 export const btn_save                           = "Save";
+export const btn_submit                         = "Submit";
 export const btn_remove                         = "Remove";
 export const btn_next                           = "Next";
 export const btn_prev                           = "Previous";

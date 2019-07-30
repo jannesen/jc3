@@ -46,6 +46,7 @@ export const btn_cancel                         = /*Cancel*/ "Annuleren";
 export const btn_ok                             = /*OK*/ "OK";
 export const btn_close                          = /*Close*/ "Sluiten";
 export const btn_save                           = /*Save*/ "Opslaan";
+export const btn_submit                         = /*Submit*/ "voorleggen";
 export const btn_remove                         = /*Remove*/ "Verwijderen";
 export const btn_next                           = /*Next*/ "Volgende";
 export const btn_prev                           = /*Previous*/ "Vorige";

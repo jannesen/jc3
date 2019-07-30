@@ -46,6 +46,7 @@ export const btn_cancel                         = /*Cancel*/ "Peruuta";
 export const btn_ok                             = /*OK*/ "OK";
 export const btn_close                          = /*Close*/ "Sulje";
 export const btn_save                           = /*Save*/ "Tallenna";
+export const btn_submit                         = /*Submit*/ "voorleggen";
 export const btn_remove                         = /*Remove*/ "Poista";
 export const btn_next                           = /*Next*/ "volgende";
 export const btn_prev                           = /*Previous*/ "voorgaand";

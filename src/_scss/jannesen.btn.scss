@@ -36,7 +36,7 @@ $jc-line-icon-btn-width:             1.5em !default;
         opacity:            .2;
     }
 
-    &.btn-cancel,&.btn-ok,&.btn-no,&.btn-yes,&.btn-save,&.btn-remove,&.btn-add,&.btn-search,&.btn-next,&.btn-prev {
+    &.btn-cancel,&.btn-ok,&.btn-no,&.btn-yes,&.btn-save,&.btn-submit,&.btn-remove,&.btn-add,&.btn-search,&.btn-next,&.btn-prev {
         padding-left: 2.25em;
 
         &:before {
@@ -89,11 +89,11 @@ $jc-line-icon-btn-width:             1.5em !default;
             color:      #00c000;
         }
     }
-    &.btn-save {
+    &.btn-save,&.btn-submit {
         &:before {
             font-weight:$font-awesome-solid;
             content:    fa-content($fa-var-save);
-            color:      #00c000;
+            color:      #00a000;
         }
     }
     &.btn-remove {
