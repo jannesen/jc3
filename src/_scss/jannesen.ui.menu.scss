@@ -50,6 +50,10 @@ div.jannesen-ui-menu.-popup {
         transition:     width ease-in-out $jc-main-transition-time;
     }
 
+    &.-transition-height {
+        transition:     height ease-in-out $jc-main-transition-time;
+    }
+
     > div.-items {
         font-size:      1.2em;
         > div.-item {
