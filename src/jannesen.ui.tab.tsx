@@ -111,6 +111,16 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
             this._container.appendChild(tab);
         }
     }
+    public      removeTab(tab:Tab)
+    {
+        const i = this._children.indexOf(tab);
+
+        if (i >= 0) {
+            this._children.splice(i, 1);
+            this._tabHeader.removeChild(tab.titleElement);
+            this._container.removeChild(tab);
+        }
+    }
     public      selectTab(tab: string|number|Tab|undefined): void|$JA.Task<void> {
         if (typeof tab === 'string' || typeof tab === 'number') {
             tab = this.findTab(tab);
