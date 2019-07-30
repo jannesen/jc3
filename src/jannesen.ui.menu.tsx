@@ -11,8 +11,10 @@ export type IDataSourceResult = IMenuItem[] | $JA.Task<IMenuItem[]>;
 
 export const enum MenuPosition
 {
-    Left        = 0,
-    Right       = 1
+    Left        = 0x00,
+    Right       = 0x01,
+    Center      = 0x02,
+    Top         = 0x04
 }
 
 export interface IMenuButtonAttr
@@ -287,14 +289,21 @@ class Menu extends $JUP.Popup
 
     public      PositionPopup(container:$JD.DOMHTMLElement, poselmOuterRect:$JD.IRect,)
     {
-        switch (this._root.attr.menupos) {
-        case MenuPosition.Right:
-            super.PositionPopup(container, poselmOuterRect, this._parent instanceof MenuButton ? $JUP.PositionFlags.AlignRight | $JUP.PositionFlags.Bottom : $JUP.PositionFlags.Left | $JUP.PositionFlags.AlignTop);
-            break;
-        default:
-            super.PositionPopup(container, poselmOuterRect, this._parent instanceof MenuButton ? $JUP.PositionFlags.AlignLeft | $JUP.PositionFlags.Bottom : $JUP.PositionFlags.Right | $JUP.PositionFlags.AlignTop);
-            break;
-        }
+        const menupos = this._root.attr.menupos || 0;
+
+        super.PositionPopup(container,
+                            poselmOuterRect,
+                            ((menupos & MenuPosition.Right) !== 0)
+                                ? (
+                                    (this._parent instanceof MenuButton)
+                                        ? ((menupos & MenuPosition.Center) !== 0 ? $JUP.PositionFlags.Center : $JUP.PositionFlags.AlignRight) | ((menupos & MenuPosition.Top) !== 0 ? $JUP.PositionFlags.Top : $JUP.PositionFlags.Bottom)
+                                        : $JUP.PositionFlags.Left | $JUP.PositionFlags.AlignTop
+                                  )
+                                : (
+                                    (this._parent instanceof MenuButton)
+                                        ? ((menupos & MenuPosition.Center) !== 0 ? $JUP.PositionFlags.Center : $JUP.PositionFlags.AlignLeft) | ((menupos & MenuPosition.Top) !== 0 ? $JUP.PositionFlags.Top : $JUP.PositionFlags.Bottom)
+                                        : $JUP.PositionFlags.Right | $JUP.PositionFlags.AlignTop
+                                  ));
     }
 
     protected   Remove()
