@@ -761,7 +761,7 @@ export class StringMultiLine extends SimpleControl<$JT.StringMultiLine, IStringM
 
     public          parseInput(validate:boolean): void {
         if (this._value) {
-            let text = this._container.prop("value");
+            const text = this._container.prop("value");
 
             if (this._text !== text) {
                 this._value.setValue((text === "" ? null : this._value.cnvTextToValue(text)), $JT.ChangeReason.UI);
@@ -1321,8 +1321,17 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
     }
 
     public          parseInput(validate:boolean): void {
-        if (this._text !== this._input.prop("value") || (validate && !(this._inputContext===undefined || $J.isEqual(this._inputContext, this._getContext())))) {
-            throw new $J.FormatError($JL.input_incomplete);
+        if (this._value) {
+            const text = this._input.prop("value");
+
+            if (this._text !== text || (validate && !(this._inputContext===undefined || $J.isEqual(this._inputContext, this._getContext())))) {
+                if (text === "") {
+                    this._value.setValue(null, $JT.ChangeReason.UI);
+                }
+                else {
+                    throw new $J.FormatError($JL.input_incomplete);
+                }
+            }
         }
     }
 
