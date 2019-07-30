@@ -21,6 +21,7 @@ export interface IMenuButtonAttr
 {
     context?:           $JA.Context;
     class?:             string;
+    disabled?:          boolean;
     style?:             string;
     tabIndex?:          number;
     title?:             string;
@@ -55,7 +56,7 @@ export class MenuButton extends $JD.Container
         if (children && children.length > 0)    attr.dataSource = () => children;
         if (attr.menupos === undefined)         attr.menupos = MenuPosition.Left;
 
-        super(<button class={attr.class} style={attr.style} title={attr.title} tabIndex={attr.tabIndex}>{ attr.content }</button>);
+        super(<button class={attr.class} style={attr.style} title={attr.title} disabled={attr.disabled} tabIndex={attr.tabIndex}>{ attr.content }</button>);
 
         this._applyAttr(attr, 'onclick');
         this._attr       = attr;
@@ -63,7 +64,7 @@ export class MenuButton extends $JD.Container
         this._context    = new $JA.Context({ parent:attr.context, component:this, dom:this.container });
 
         this._container.bind("blur",    this.closeMenu,   this);
-        this._container.bind("click",   this._toggleMenu, this);
+        this._container.bind("click",   this._onClick,    this);
         this._container.bind("keydown", this._onKeyDown,  this);
     }
 
@@ -87,10 +88,12 @@ export class MenuButton extends $JD.Container
         }
     }
 
-    private     _toggleMenu(): void
+    private     _onClick(): void
     {
         if (!this._activeMenu) {
-            this.openMenu();
+            if (!this.disabled) {
+                this.openMenu();
+            }
         } else {
             this.closeMenu();
         }
@@ -114,8 +117,9 @@ export class MenuButton extends $JD.Container
             if (!ev.altKey && !ev.ctrlKey && !ev.metaKey) {
                 switch(ev.key) {
                 case "ArrowDown":
-                    this.openMenu();
-                    ev.preventDefault();
+                    if (!this.disabled) {
+                        this.openMenu();
+                    }
                 }
             }
         }
@@ -174,12 +178,21 @@ export interface IMenuEntryAttr {
     content?:       $JD.AddNode;
     dataSource?:    (cancellationToken:$JA.Context)=>IDataSourceResult;
     data?:          any;
+    disabled?:      boolean;
     onclick?:       (data:any)=>void;
 }
 export class MenuEntry extends MenuItem<IMenuEntryAttr>
 {
     private     _activeSubMenu:     Menu|null;
 
+    public get  disabled()
+    {
+        return this.container.disabled;
+    }
+    public set  disabled(disabled:boolean)
+    {
+        this.container.disabled = disabled;
+    }
     public get  hasSubMenu()
     {
         return typeof this._attr.dataSource === 'function';
@@ -197,7 +210,7 @@ export class MenuEntry extends MenuItem<IMenuEntryAttr>
         }
         if (!(attr instanceof Object)) attr = {};
 
-        super(<div class={attr.class ? "-item " + attr.class : "-item"}>
+        super(<div class={attr.class ? "-item " + attr.class : "-item"} disabled={attr.disabled} >
                 <div class="-content">{ attr.content }</div>
               </div>,
               attr);
@@ -412,7 +425,7 @@ class Menu extends $JUP.Popup
     }
     private     _click(item: MenuEntry|null|undefined)
     {
-        if (item) {
+        if (item && !item.disabled) {
             if (item.hasSubMenu) {
                 this._selectItem(item, true);
             } else {

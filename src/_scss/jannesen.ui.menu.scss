@@ -64,8 +64,12 @@ div.jannesen-ui-menu.-popup {
                 background: rgba(0, 0, 0, .1);
             }
 
-            &:hover {
+            &:not([disabled]):hover {
                 background: rgba(0, 0, 0, .1);
+            }
+
+            &[disabled] {
+                opacity:        .3;
             }
 
             > .-content {
