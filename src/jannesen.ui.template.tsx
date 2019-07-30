@@ -924,6 +924,112 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     }
 }
 
+/**
+ *!!DOC
+ */
+export abstract class SubmitDialog<TCall extends $JA.IAjaxCallDefinition<any,any,any>, TArgs = $JT.AssignType<$JA.AjaxCallArgsType<TCall>>, TRtn=$JA.AjaxCallResponseType<TCall>> extends $JCONTENT.DialogBase<TArgs,TRtn>
+{
+    protected               callargs:           $JA.AjaxCallArgsType<TCall>;
+    protected               data:               $JA.AjaxCallRequestType<TCall>;
+
+    protected get           interface():    TCall
+    {
+        throw new $J.InvalidStateError("Interface not defined.");
+    }
+    protected get           contentClass()      { return "jannesen-ui-template-standard-dialog"; }
+
+    public                  constructor(context:$JA.Context)
+    {
+        super(context);
+        let interfaceSave = this.interface;
+        this.callargs = (interfaceSave.callargs_type) ? (new interfaceSave.callargs_type()) : undefined;
+        this.data     = (interfaceSave.request_type)  ? (new interfaceSave.request_type()) as any : undefined;
+    }
+
+    protected               onload()
+    {
+    }
+    protected               onopen(args: TArgs, ct: $JA.Context)
+    {
+        this.initData(this.args, this.callargs, this.data);
+
+        let title   = this.formTitle();
+        let body    = this.formBody  (this.callargs, this.data);
+        let footer  = this.formFooter();
+
+        this.content.appendChild(<div class="-header -dialog-move-target"><span class="-title">{ title }</span></div>,
+                                 <div class="-body"                      >{ body   }</div>,
+                                 <div class="-footer"                    >{ footer }</div>);
+    }
+
+    protected               initData(dlgargs:TArgs, callargs:$JA.AjaxCallArgsType<TCall>, data:$JA.AjaxCallRequestType<TCall>)
+    {
+        const _callargs = callargs as any;
+        if (_callargs instanceof $JT.Record || _callargs instanceof $JT.Set) {
+            _callargs.assign(dlgargs);
+        }
+
+        const _data = data as any;
+        if (_data instanceof $JT.Record || _data instanceof $JT.Set) {
+            _data.setDefault();
+        }
+    }
+    protected abstract      formTitle(): string;
+    protected abstract      formBody(callargs:$JA.AjaxCallArgsType<TCall>, data:$JA.AjaxCallRequestType<TCall>): $JD.AddNode;
+    protected               formFooter()
+    {
+        const btnCancel = <button class={ $JCONTENT.std_button_cancel.class }>{ $JCONTENT.std_button_cancel.text }</button>;
+        btnCancel.bind('click', this.cmdCancel, this);
+        const btnSubmit = <button class={ $JCONTENT.std_button_submit.class   }>{ $JCONTENT.std_button_submit.text   }</button>;
+        btnSubmit.bind('click', this.cmdSubmit, this);
+
+        return  <div class="-buttons">
+                    { btnCancel }
+                    { btnSubmit   }
+                </div>;
+    }
+    protected               validate(ct:$JA.Context): $JA.Task<$JT.ValidateResult> {
+        return this.data as unknown instanceof $JT.BaseType ? (this.data as unknown as $JT.BaseType).validateAsync({ context:ct }) : $JA.Task.resolve($JT.ValidateResult.OK);
+    }
+    protected               cmdCancel()
+    {
+        this.closeForm(new $JA.OperationCanceledError("Cancelled by user."));
+    }
+    protected               cmdSubmit()
+    {
+        this.execute((context) => this.onSubmit(context))
+            .then((r) => this.closeForm(r));
+    }
+    protected               onSubmit(context:$JA.Context): $JA.Task<TRtn>
+    {
+        return this.validate(context)
+                   .then(() => {
+                             return $JA.Ajax(this.interface,
+                                             {
+                                                 callargs: this.callargs,
+                                                 data:     this.data
+                                             },
+                                              context)
+                                       .then((r) => this.onSubmitted(r));
+                         });
+    }
+    protected               onSubmitted(r:$JA.AjaxCallResponseType<TCall>): TRtn
+    {
+        return r;
+    }
+
+    public                  body_onkeydown(ev: KeyboardEvent) {
+        if (ev.key === 'Escape' && !ev.altKey && !ev.ctrlKey && !ev.shiftKey && !ev.metaKey) {
+            ev.stopPropagation();
+            this.cmdCancel();
+        }
+        if (ev.key === 'Enter' && !ev.altKey && !ev.ctrlKey && ev.shiftKey && !ev.metaKey) {
+            ev.stopPropagation();
+            this.cmdSubmit();
+        }
+    }
+}
+
 //-------------------------------------------------------------------------------------------------
 /**
  *!!DOC
