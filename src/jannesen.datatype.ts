@@ -79,21 +79,20 @@ export type SelectValue = number|string;
  */
 export type RecordSet<TRec extends IFieldDef = IFieldDef> = Set<Record<TRec>>;
 
-/* assign mapping
-type AssignSympleType  <T extends { new (...args: any[]): SimpleType<any> }>                        = string|InstanceType<T>["value"]|InstanceType<T>;
-type AssignRecord      <T extends { 'FieldDef': IFieldDef, new (...args: any[]): Record<any> }>     = AssignRecordMapper<T["FieldDef"]>;
-type AssignRecordMapper<T extends IFieldDef>                                                        = { [K in keyof T]?: AssignType<T[K]> };
-type AssignSet         <T extends { new (...args: any[]): Set<any> }>                               = T extends {ItemDef': { 'FieldDef': IFieldDef, new (...args: any[]): Record<any> } } ? AssignRecord<T["ItemDef"]>[]
-                                                                                                    : T extends { 'ItemDef': new (...args: any[]) => SimpleType<any> } ? AssignSympleType<T["ItemDef"]>[]
-                                                                                                    : never;
-type AssignSetMapper   <T>                               = T extends { 'FieldDef': IFieldDef, new (...args: any[]): Record<any> } ? AssignRecord<T>[]
-                                                         : T extends new (...args: any[]) => SimpleType<any>                      ? AssignSympleType<T>[]
-                                                         : never;
-type AssignType       <T> = T extends { new (...args: any[]): SimpleType<any> } ? AssignSympleType<T>
-                          : T extends { new (...args: any[]): Record<any>, 'FieldDef': IFieldDef      } ? AssignRecord<T>
-                          : T extends { new (...args: any[]): Set<any>,    'ItemDef': any             } ? AssignSet<T>
-                          : never;
-*/
+/**
+ * Assign type
+ */
+type NativeTypeOf      <T extends SimpleType<any>> = T extends SimpleType<infer V> ? V : unknown;
+type AssignSympleType  <T extends SimpleType<any>> = T|NativeTypeOf<T>|null|string;
+type AssignRecord      <T extends Record<any>>     = T extends Record<infer V> ? AssignRecordMapper<V> : unknown;
+type AssignRecordMapper<T extends IFieldDef>       = { [K in keyof T]?: AssignType<InstanceType<T[K]>> };
+type AssignSet         <T extends Set<any>>        = T extends Set<infer V> ? null|T|V[] : unknown;
+
+export type AssignType <T> = T extends SimpleType<any> ? AssignSympleType<T>
+                           : T extends Record<any> ? AssignRecord<T>
+                           : T extends Set<any> ? AssignSet<T>
+                           : unknown;
+
 
 //===================================== Interfaces ================================================
 /**
