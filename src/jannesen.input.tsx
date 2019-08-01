@@ -1326,6 +1326,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
 
             if (this._text !== text || (validate && !(this._inputContext===undefined || $J.isEqual(this._inputContext, this._getContext())))) {
                 if (text === "") {
+                    this._inputContext = undefined;
                     this._value.setValue(null, $JT.ChangeReason.UI);
                 }
                 else {
