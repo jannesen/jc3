@@ -106,18 +106,18 @@ export var  dialogfullscreenflags = DialogFlags.Window;     // Allowed DialogFla
 /**
  * !!DOC
  */
-export const std_button_cancel:IDialogButton       = { "class": "btn btn-cancel", "text": $JL.btn_cancel,     "value": "CANCEL"    };
-export const std_button_cancel_error:IDialogButton = { "class": "btn btn-cancel", "text": $JL.btn_cancel,     "value": new $JA.OperationCanceledError("Cancelled by user") };
-export const std_button_ok:IDialogButton           = { "class": "btn btn-ok",     "text": $JL.btn_ok,         "value": "OK"        };
-export const std_button_close:IDialogButton        = { "class": "btn btn-close",  "text": $JL.btn_close,      "value": "CLOSE"    };
-export const std_button_no:IDialogButton           = { "class": "btn btn-no",     "text": $JL.no,             "value": "NO"       };
-export const std_button_no_error:IDialogButton     = { "class": "btn btn-no",     "text": $JL.no,             "value": new $JA.OperationCanceledError("Cancelled by user") };
-export const std_button_yes:IDialogButton          = { "class": "btn btn-yes",    "text": $JL.yes,            "value": "YES"      };
-export const std_button_save:IDialogButton         = { "class": "btn btn-save",   "text": $JL.btn_save,       "value": "SAVE"     };
-export const std_button_submit:IDialogButton       = { "class": "btn btn-submit", "text": $JL.btn_submit,     "value": "SUBMIT"   };
-export const std_button_remove:IDialogButton       = { "class": "btn btn-remove", "text": $JL.btn_remove,     "value": "REMOVE"   };
-export const std_button_next:IDialogButton         = { "class": "btn btn-next",   "text": $JL.btn_next,       "value": "NEXT"     };
-export const std_button_prev:IDialogButton         = { "class": "btn btn-prev",   "text": $JL.btn_prev,       "value": "PREVIOUS" };
+export const std_button_cancel       = { "class": "btn btn-cancel", "text": $JL.btn_cancel,     "value": "CANCEL"    };
+export const std_button_cancel_error = { "class": "btn btn-cancel", "text": $JL.btn_cancel,     "value": new $JA.OperationCanceledError("Cancelled by user") };
+export const std_button_ok           = { "class": "btn btn-ok",     "text": $JL.btn_ok,         "value": "OK"        };
+export const std_button_close        = { "class": "btn btn-close",  "text": $JL.btn_close,      "value": "CLOSE"    };
+export const std_button_no           = { "class": "btn btn-no",     "text": $JL.no,             "value": "NO"       };
+export const std_button_no_error     = { "class": "btn btn-no",     "text": $JL.no,             "value": new $JA.OperationCanceledError("Cancelled by user") };
+export const std_button_yes          = { "class": "btn btn-yes",    "text": $JL.yes,            "value": "YES"      };
+export const std_button_save         = { "class": "btn btn-save",   "text": $JL.btn_save,       "value": "SAVE"     };
+export const std_button_submit       = { "class": "btn btn-submit", "text": $JL.btn_submit,     "value": "SUBMIT"   };
+export const std_button_remove       = { "class": "btn btn-remove", "text": $JL.btn_remove,     "value": "REMOVE"   };
+export const std_button_next         = { "class": "btn btn-next",   "text": $JL.btn_next,       "value": "NEXT"     };
+export const std_button_prev         = { "class": "btn btn-prev",   "text": $JL.btn_prev,       "value": "PREVIOUS" };
 
 //-------------------------------------------------------------------------------------------------
 const nativeFocus = HTMLElement.prototype.focus;
@@ -1367,7 +1367,7 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
 export interface IDialogMessageArgs
 {
     title?:         string;
-    message:        string|$JD.DOMHTMLElement;
+    message:        string|$JD.AddNode;
     buttons?:       IDialogButton[];
 }
 
@@ -1386,7 +1386,7 @@ export class DialogMessage extends Dialog<IDialogMessageArgs, string>
     {
         return this.args.title || $JL.message_default_title;
     }
-    protected           formBody(): $JD.DOMHTMLElement
+    protected           formBody()
     {
         const args = this.args;
         if (typeof args.message === "string") {
