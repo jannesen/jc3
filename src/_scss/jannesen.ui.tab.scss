@@ -7,12 +7,13 @@
         padding-top:        (2em / 12);
 
         > span {
+            position:                   relative;
             display:                    inline-block;
-            color:                      white;
-            background-color:           hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 40%) );
-            padding:                    .5em 1em 0 1em;
             box-sizing:                 border-box;
             height:                     (26em / 12);
+            padding:                    .4167em 1em 0 1em;
+            color:                      #fff;
+            background-color:           hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 40%) );
             border:                     1px solid #e2e2e2;
             border-bottom:              0 none;
             transition:                 ease-in-out background-color .25s;
@@ -26,8 +27,46 @@
                 opacity:            .3;
             }
             &:not([disabled]):not(.-active):hover {
-                cursor: pointer;
+                cursor:             pointer;
                 background-color:   hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 25%) );
+            }
+
+            >span.-text {
+            }
+
+            &.-closeable {
+                padding-right:  2.333em;
+                > span.-close {
+                    position:       absolute;
+                    top:            .25em;
+                    right:          .25em;
+                    width:          1.333em;
+                    height:         1.333em;
+                    color:          #fff;
+                    opacity:        .3;
+                    border:         1px solid rgba(0,0,0,0);
+                    transition:     all ease-in-out .2s;
+
+                    &:hover {
+                        color:              #fff;
+                        background-color:   #000;
+                        border-color:       #fff;
+                        opacity:            1;
+                    }
+
+                    &:before {
+                        position:           absolute;
+                        top:                .0833em;
+                        right:              .25em;
+                        display:            inline-block;
+                        font-family:        'Font Awesome 5 Pro';
+                        font-weight:        normal;
+                        font-style:         normal;
+                        text-decoration:    none;
+                        font-size:          1.25em;
+                        content:            fa-content($fa-var-times);
+                    }
+                }
             }
         }
     }

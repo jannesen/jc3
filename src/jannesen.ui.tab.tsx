@@ -210,6 +210,7 @@ export interface ITabAttr
     name?:              string;
     title:              string;
     disabled?:          boolean;
+    closeable?:         boolean;
     onclick?:           () => void;
     loadcontent?:       () => $JD.AddNode;
     moremenu?:          () => $JUM.IDataSourceResult;
@@ -266,8 +267,21 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
     public      constructor(attr: ITabAttr, ...children: $JD.AddNode[]) {
         const container = <div class="jannesen-ui-tab">{ children }</div>;
         super(container);
+
+        const titleElement = <span class="-tab">
+                                 <span class="-text">
+                                     { attr.title }
+                                 </span>
+                             </span>;
+
+        if (attr.closeable) {
+            const btn = <span class="-close"/>
+            btn.bind('click', this.close, this);
+            titleElement.addClass("-closeable").appendChild(btn);
+        }
+
         this._name          = attr.name;
-        this._titleElement  = <span>{ attr.title }</span>;
+        this._titleElement  = titleElement; 
         this._disabled      = attr.disabled === undefined ? false : !!attr.disabled;
         this._loaded        = children.length > 0;
         this._active        = false;
@@ -318,7 +332,13 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
 
         return [];
     }
-
+    public      close()
+    {
+        const tab = this.Tabs;
+        if (tab) {
+            tab.removeTab(this);
+        }
+    }
     private     _ontitleclick() {
         if (!this._disabled && !this._active) {
             const tabs = this.Tabs;
