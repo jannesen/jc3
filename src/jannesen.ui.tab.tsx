@@ -275,13 +275,13 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
                              </span>;
 
         if (attr.closeable) {
-            const btn = <span class="-close"/>
+            const btn = <span class="-close"/>;
             btn.bind('click', this.close, this);
             titleElement.addClass("-closeable").appendChild(btn);
         }
 
         this._name          = attr.name;
-        this._titleElement  = titleElement; 
+        this._titleElement  = titleElement;
         this._disabled      = attr.disabled === undefined ? false : !!attr.disabled;
         this._loaded        = children.length > 0;
         this._active        = false;

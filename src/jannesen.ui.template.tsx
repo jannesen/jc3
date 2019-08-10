@@ -1066,4 +1066,3 @@ export class DataPopup extends $JPOPUP.Popup {
         }
     }
 }
-
