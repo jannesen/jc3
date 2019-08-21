@@ -221,7 +221,7 @@ export abstract class SimpleForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
 
         const formargs = this._formargs;
         if (formargs instanceof $JT.Record) {
-            formargs.assign(args);
+            formargs.parseUrlArgs(args);
             callargs = formargs.clone();
         }
 
@@ -458,7 +458,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
         this.showDataPopup();
         if (state) {
             if (this._formargs as unknown instanceof $JT.Record) {
-                (this._formargs as $JT.Record).assign(state.callargs);
+                (this._formargs as $JT.Record).parseUrlArgs(state.callargs);
             }
 
             this.clearResult();
@@ -481,7 +481,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
             const formargs = this._formargs;
 
             if (formargs instanceof $JT.Record) {
-                formargs.assign(args);
+                formargs.parseUrlArgs(args);
 
                 if (this._hasquery) {
                     if (!args || Object.getOwnPropertyNames(args).length === 0) {
@@ -641,7 +641,7 @@ export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
         const formargs = this._formargs;
 
         if (formargs instanceof $JT.Record) {
-            formargs.assign(args);
+            formargs.parseUrlArgs(args);
 
             if (!args || formargs.FieldNames.findIndex((n) => args.hasOwnProperty(n)) < 0) {
                 return;

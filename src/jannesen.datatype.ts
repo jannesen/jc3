@@ -480,20 +480,6 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
     /**
      *!!DOC
      */
-    public toUrlArgs():$J.IUrlArgsInvariant {
-        throw new $J.NotImplentedError("$JT.BaseType.toUrlArgs");
-    }
-
-    /**
-     *!!DOC
-     */
-    public parseUrlArgs(v: $J.ICallArgs|string):void {
-        throw new $J.NotImplentedError("$JT.BaseType.parseUrlArgs");
-    }
-
-    /**
-     *!!DOC
-     */
     public toDom(format?:string):$JD.AddNode {
         return this.toText(format);
     }
@@ -524,6 +510,13 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
      */
     public parseInvariant(s:string|null):void {
         throw new $J.NotImplentedError("$JT.BaseType.parseInvariant");
+    }
+
+    /**
+     *!!DOC
+     */
+    public parseUrlValue(s:string|number|boolean|null|undefined|$J.IUrlValue):void {
+        throw new $J.NotImplentedError("$JT.BaseType.parseUrlValue");
     }
 
     /**
@@ -885,6 +878,28 @@ export abstract class SimpleType<TNative> extends BaseType
     public parseJSON(vjson:$J.JsonValue):void {
         this.setValue(this.cnvJSONToValue(vjson), ChangeReason.Parse);
     }
+
+    /**
+     *!!DOC
+     */
+    public parseUrlValue(s:string|number|boolean|null|undefined|$J.IUrlValue):void {
+        if (s instanceof Object && $J.isIUrlValue(s)) {
+            s = s.toUrlValue();
+        }
+
+        switch (typeof s) {
+        case 'undefined':
+            this.setValue(this.Default, ChangeReason.Parse);
+            return;
+
+        case 'string':
+            this.setValue(this.cnvInvariantToValue(s), ChangeReason.Parse);
+            return;
+        }
+
+        this.setValue(this.convertAnyToValue(s), ChangeReason.Parse);
+    }
+
 
     /**
      *!!DOC
@@ -2694,8 +2709,28 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
         return rtn;
     }
 
-    public parseUrlArgs(urlargs: $J.IUrlArgsInvariant|string):void {
-        this.parseJSON($J.parseUrlArgs(urlargs));
+    public parseUrlArgs(urlargs: $J.IUrlArgs|string):void {
+        if (typeof urlargs === 'string') {
+            urlargs = $J.parseUrlArgs(urlargs);
+        }
+        else if (urlargs instanceof Object && $J.isIUrlArgsFunc(urlargs)) {
+            urlargs = urlargs.toUrlArgs();
+        }
+
+        if (urlargs instanceof Object) {
+            if (this._fields === null) {
+                this._fields = this._createFields();
+            }
+
+            for(let name of Object.getOwnPropertyNames(this._fields)) {
+                try {
+                    this._fields[name].parseUrlValue(urlargs[name]);
+                }
+                catch(e) {
+                    throw new $J.InvalidStateError("Error in '" + name + "'.parseJSON. " + e.message);
+                }
+            }
+        }
     }
 
     /**

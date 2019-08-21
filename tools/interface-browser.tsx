@@ -77,13 +77,13 @@ class Content implements $JD.IDOMContainer
         if (callDefinitions.callargs_type) {
             args.callargs = new callDefinitions.callargs_type();
 
-            if (this._argv.length > 1) {
-                (args.callargs as $JT.BaseType).parseUrlArgs(this._argv[1]);
+            if (this._argv.length > 1 && args.callargs instanceof $JT.Record) {
+                args.callargs.parseUrlArgs(this._argv[1]);
             }
 
             callcontent.appendChild(<div>
                                         <h1>CALL ARGUMENTS</h1>
-                                        { this._createInput(args.callargs as $JT.BaseType) }
+                                        { this._createInput(args.callargs as any as $JT.BaseType) }
                                     </div>);
         }
 
