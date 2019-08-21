@@ -83,10 +83,10 @@ export type RecordSet<TRec extends IFieldDef = IFieldDef> = Set<Record<TRec>>;
  * Assign type
  */
 type NativeTypeOf      <T extends SimpleType<any>> = T extends SimpleType<infer V> ? V : unknown;
-type AssignSympleType  <T extends SimpleType<any>> = T|NativeTypeOf<T>|null|string;
+type AssignSympleType  <T extends SimpleType<any>> = T|NativeTypeOf<T>|null;
 type AssignRecord      <T extends Record<any>>     = T extends Record<infer V> ? AssignRecordMapper<V> : unknown;
 type AssignRecordMapper<T extends IFieldDef>       = { [K in keyof T]?: AssignType<InstanceType<T[K]>> };
-type AssignSet         <T extends Set<any>>        = T extends Set<infer V> ? null|T|V[] : unknown;
+type AssignSet         <T extends Set<any>>        = T extends Set<infer V> ? T|V[]|null : unknown;
 
 export type AssignType <T> = T extends SimpleType<any> ? AssignSympleType<T>
                            : T extends Record<any> ? AssignRecord<T>
@@ -340,7 +340,7 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
     /**
      *!!DOC
      */
-    public assign(r:any):void {
+    public assign(r:unknown):void {
         throw new $J.NotImplentedError("$JT.BaseType.assign");
     }
 
@@ -803,8 +803,8 @@ export abstract class SimpleType<TNative> extends BaseType
     /**
      *!!DOC
      */
-    public assign(v:string|null|TNative|this) {
-        this.setValue(this.convertAnyToValue(v), ChangeReason.Assign);
+    public assign(v:TNative|SimpleType<TNative>|null|undefined) {
+        this.setValue(v, ChangeReason.Assign);
     }
 
     /**
@@ -933,11 +933,15 @@ export abstract class SimpleType<TNative> extends BaseType
     /**
      *!!DOC
      */
-    public setValue(value:TNative|null|undefined, reason:ChangeReason=ChangeReason.Assign): void {
+    public setValue(value:TNative|SimpleType<TNative>|null|undefined, reason:ChangeReason): void {
+        if (value instanceof SimpleType) {
+            value = value.value;
+        }
+
         if (value === undefined) {
             value = null;
         }
-        if (value !== null && typeof value !== (this.constructor as any).NativeType) {
+        else if (value !== null && typeof value !== (this.constructor as any).NativeType) {
             throw new $J.InvalidStateError("setValue invalid value type got '" + (typeof value) + "' expect '" + (this.constructor as any).NativeType + "'.");
         }
 
@@ -2202,7 +2206,7 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
     /**
      *!!DOC
      */
-    public  setValue(value:TNative|TDatasource_Record<TDatasource>|null|undefined|this, reason:ChangeReason = ChangeReason.Assign): void {
+    public  setValue(value:TNative|SimpleType<TNative>|SelectType<TNative, TDatasource>|TDatasource_Record<TDatasource>|null|undefined, reason:ChangeReason): void {
         if (value instanceof Object) {
             const datasource = this.Datasource;
 
@@ -2340,21 +2344,13 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
     /**
      *!!DOC
      */
-    public  assign(v:string|null|TNative|this):void {
-        if (v instanceof SelectType) {
-            const datasource = this.Datasource;
-
-            if (datasource instanceof RemoteSelectDatasource && datasource === v.Datasource ) {
-                const value  = v.value as TNative;
-                const record = v._record as any;
-
-                if (record && record[datasource.keyfieldname] === value) {
-                    this._record = record;
-                }
-            }
+    public  assign(value:TNative|SimpleType<TNative>|SelectType<TNative, TDatasource>|TDatasource_Record<TDatasource>|null|undefined):void {
+        if (value instanceof Object) {
+            this.setValue(value, ChangeReason.Assign);
         }
-
-        super.assign(v);
+        else {
+            super.assign(value);
+        }
     }
 
     /**
@@ -2599,7 +2595,7 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
     /**
      *!!DOC
      */
-    public assign(r:any):void {
+    public assign(r:any):void { //TODO typing
         if (r === null || r === undefined) {
             this.FieldNames.forEach((name) => this.field(name).assign(null));
             return;
@@ -2893,7 +2889,7 @@ export class Set<TSet extends Record|SimpleType<any>> extends BaseType
     /**
      *!!DOC
      */
-    public assign(r:any):void {
+    public assign(r:any):void { //TODO typing
         if (this._items.length !== 0)
             throw new $J.InvalidStateError("Set.assign only possible on a empty set");
 
