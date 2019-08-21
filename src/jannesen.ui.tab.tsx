@@ -95,7 +95,7 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
 
         return undefined;
     }
-    public      addTabAt(at:number|undefined, tab:Tab)
+    public      addTabAt(at:number|undefined, tab:Tab, select?:boolean)
     {
         if (typeof at === 'number' && at < 0) at = 0;
 
@@ -109,6 +109,15 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
             this._children.push(tab);
             this._tabHeader.appendChild(tab.titleElement);
             this._container.appendChild(tab);
+        }
+
+        if (select) {
+            var loadtask = this.selectTab(tab);
+
+            if (loadtask) {
+                tab.titleElement.show(false);
+                return loadtask.then(() => { tab.titleElement.show(true); });
+            }
         }
     }
     public      removeTab(tab:Tab)
