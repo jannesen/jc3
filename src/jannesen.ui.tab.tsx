@@ -116,7 +116,7 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
 
             if (loadtask) {
                 tab.titleElement.show(false);
-                return loadtask.then(() => { tab.titleElement.show(true); });
+                return loadtask.finally(() => { tab.titleElement.show(true); });
             }
         }
     }
