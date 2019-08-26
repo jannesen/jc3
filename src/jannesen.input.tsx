@@ -311,7 +311,7 @@ export abstract class InputTextControl<TNativeValue,
 
         this.setError(null);
     }
-    public                  dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined)
+    public                  dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined, cbset?:()=>void)
     {
         if (this._activeDropdown && this._input) {
             this.closeDropdown(true);
@@ -319,6 +319,9 @@ export abstract class InputTextControl<TNativeValue,
             if (value !== undefined) {
                 const v = this.value;
                 if (v) {
+                    if (cbset) {
+                        cbset();
+                    }
                     v.setValue(value, $JT.ChangeReason.UI);
                 }
             }
@@ -1377,12 +1380,10 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
 
     public          dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined)
     {
-        const activeDropdown = this._activeDropdown;
-        if (activeDropdown && this._input) {
-            super.dropdownClose(value, ev);
-            if (value !== undefined) {
-                this._inputContext = value !== null ? activeDropdown.Calldata : null;
-            }
+        if (this._activeDropdown && this._input) {
+            const dropdown = this._activeDropdown;
+            super.dropdownClose(value, ev,
+                                () => { this._inputContext = (value !== null ? dropdown.Calldata : null) });
         }
     }
 
