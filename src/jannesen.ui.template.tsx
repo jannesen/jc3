@@ -927,23 +927,13 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
 /**
  *!!DOC
  */
-export abstract class SubmitDialog<TCall extends $JA.IAjaxCallDefinition<any,any,any>, TArgs = $JT.AssignType<$JA.AjaxCallArgsType<TCall>>, TRtn=$JA.AjaxCallResponseType<TCall>> extends $JCONTENT.DialogBase<TArgs,TRtn>
+export abstract class SubmitDialog<TArgs, TRtn=void> extends $JCONTENT.DialogBase<TArgs,TRtn>
 {
-    protected               callargs:           $JA.AjaxCallArgsType<TCall>;
-    protected               data:               $JA.AjaxCallRequestType<TCall>;
-
-    protected get           interface():    TCall
-    {
-        throw new $J.InvalidStateError("Interface not defined.");
-    }
     protected get           contentClass()      { return "jannesen-ui-template-standard-dialog"; }
 
     public                  constructor(context:$JA.Context)
     {
         super(context);
-        let interfaceSave = this.interface;
-        this.callargs = (interfaceSave.callargs_type) ? (new interfaceSave.callargs_type()) : undefined;
-        this.data     = (interfaceSave.request_type)  ? (new interfaceSave.request_type()) as any : undefined;
     }
 
     protected               onload()
@@ -951,31 +941,21 @@ export abstract class SubmitDialog<TCall extends $JA.IAjaxCallDefinition<any,any
     }
     protected               onopen(args: TArgs, ct: $JA.Context)
     {
-        this.initData(this.args, this.callargs, this.data);
+        const t = this.initData(this.args);
 
-        let title   = this.formTitle();
-        let body    = this.formBody  (this.callargs, this.data);
-        let footer  = this.formFooter();
-
-        this.content.appendChild(<div class="-header -dialog-move-target"><span class="-title">{ title }</span></div>,
-                                 <div class="-body"                      >{ body   }</div>,
-                                 <div class="-footer"                    >{ footer }</div>);
+        if (t) {
+            return t.then(() => this._createcontent());
+        }
+        else {
+            this._createcontent();
+        }
     }
 
-    protected               initData(dlgargs:TArgs, callargs:$JA.AjaxCallArgsType<TCall>, data:$JA.AjaxCallRequestType<TCall>)
+    protected               initData(dlgargs:TArgs): $JA.Task<unknown>|void
     {
-        const _callargs = callargs as any;
-        if (_callargs instanceof $JT.Record || _callargs instanceof $JT.Set) {
-            _callargs.assign(dlgargs);
-        }
-
-        const _data = data as any;
-        if (_data instanceof $JT.Record || _data instanceof $JT.Set) {
-            _data.setDefault();
-        }
     }
     protected abstract      formTitle(): string;
-    protected abstract      formBody(callargs:$JA.AjaxCallArgsType<TCall>, data:$JA.AjaxCallRequestType<TCall>): $JD.AddNode;
+    protected abstract      formBody(): $JD.AddNode;
     protected               formFooter()
     {
         const btnCancel = <button class={ $JCONTENT.std_button_cancel.class }>{ $JCONTENT.std_button_cancel.text }</button>;
@@ -988,9 +968,6 @@ export abstract class SubmitDialog<TCall extends $JA.IAjaxCallDefinition<any,any
                     { btnSubmit   }
                 </div>;
     }
-    protected               validate(ct:$JA.Context): $JA.Task<$JT.ValidateResult> {
-        return this.data as unknown instanceof $JT.BaseType ? (this.data as unknown as $JT.BaseType).validateAsync({ context:ct }) : $JA.Task.resolve($JT.ValidateResult.OK);
-    }
     protected               cmdCancel()
     {
         this.closeForm(new $JA.OperationCanceledError("Cancelled by user."));
@@ -999,6 +976,66 @@ export abstract class SubmitDialog<TCall extends $JA.IAjaxCallDefinition<any,any
     {
         this.execute((context) => this.onSubmit(context))
             .then((r) => this.closeForm(r));
+    }
+    protected abstract      onSubmit(context:$JA.Context): $JA.Task<TRtn>;
+
+    public                  body_onkeydown(ev: KeyboardEvent) {
+        if (ev.key === 'Escape' && !ev.altKey && !ev.ctrlKey && !ev.shiftKey && !ev.metaKey) {
+            ev.stopPropagation();
+            this.cmdCancel();
+        }
+        if (ev.key === 'Enter' && !ev.altKey && !ev.ctrlKey && ev.shiftKey && !ev.metaKey) {
+            ev.stopPropagation();
+            this.cmdSubmit();
+        }
+    }
+
+    private                 _createcontent()
+    {
+        let title   = this.formTitle();
+        let body    = this.formBody();
+        let footer  = this.formFooter();
+
+        this.content.appendChild(<div class="-header -dialog-move-target"><span class="-title">{ title }</span></div>,
+                                 <div class="-body"                      >{ body   }</div>,
+                                 <div class="-footer"                    >{ footer }</div>);
+    }
+}
+/**
+ *!!DOC
+ */
+export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition<any,any,any>, TArgs = $JT.AssignType<$JA.AjaxCallArgsType<TCall>>, TRtn=$JA.AjaxCallResponseType<TCall>> extends SubmitDialog<TArgs,TRtn>
+{
+    protected               callargs:           $JA.AjaxCallArgsType<TCall>;
+    protected               data:               $JA.AjaxCallRequestType<TCall>;
+
+    protected get           interface():        TCall
+    {
+        throw new $J.InvalidStateError("Interface not defined.");
+    }
+
+    public                  constructor(context:$JA.Context)
+    {
+        super(context);
+        let interfaceSave = this.interface;
+        this.callargs = (interfaceSave.callargs_type) ? (new interfaceSave.callargs_type()) : undefined;
+        this.data     = (interfaceSave.request_type)  ? (new interfaceSave.request_type()) as any : undefined;
+    }
+
+    protected               initData(dlgargs:TArgs): $JA.Task<void>|void
+    {
+        const _callargs = this.callargs as any;
+        if (_callargs instanceof $JT.Record || _callargs instanceof $JT.Set) {
+            _callargs.assign(dlgargs);
+        }
+
+        const _data = this.data as any;
+        if (_data instanceof $JT.Record || _data instanceof $JT.Set) {
+            _data.setDefault();
+        }
+    }
+    protected               validate(ct:$JA.Context): $JA.Task<$JT.ValidateResult> {
+        return this.data as unknown instanceof $JT.BaseType ? (this.data as unknown as $JT.BaseType).validateAsync({ context:ct }) : $JA.Task.resolve($JT.ValidateResult.OK);
     }
     protected               onSubmit(context:$JA.Context): $JA.Task<TRtn>
     {
@@ -1016,17 +1053,6 @@ export abstract class SubmitDialog<TCall extends $JA.IAjaxCallDefinition<any,any
     protected               onSubmitted(r:$JA.AjaxCallResponseType<TCall>): TRtn
     {
         return r;
-    }
-
-    public                  body_onkeydown(ev: KeyboardEvent) {
-        if (ev.key === 'Escape' && !ev.altKey && !ev.ctrlKey && !ev.shiftKey && !ev.metaKey) {
-            ev.stopPropagation();
-            this.cmdCancel();
-        }
-        if (ev.key === 'Enter' && !ev.altKey && !ev.ctrlKey && ev.shiftKey && !ev.metaKey) {
-            ev.stopPropagation();
-            this.cmdSubmit();
-        }
     }
 }
 
