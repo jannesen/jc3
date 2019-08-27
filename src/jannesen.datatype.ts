@@ -1928,22 +1928,22 @@ export class Time extends SimpleNumberType
 
         switch(f) {
         case TimeFormat.HM:
-            n = divModulo(Math.round(value / 60000), 60);
+            n = $J.divModulo(Math.round(value / 60000), 60);
             return (sign ? "-":"") + $J.intToA(n.result, 2) + ":" + $J.intToA(n.remainder, 2);
 
         case TimeFormat.HMS:
-            n = divModulo(Math.round(value / 1000), 60);  seconds  = n.remainder;
-            n = divModulo(n.result,                 60);
+            n = $J.divModulo(Math.round(value / 1000), 60);  seconds  = n.remainder;
+            n = $J.divModulo(n.result,                 60);
             return (sign ? "-":"") + $J.intToA(n.result, 1) + ":" + $J.intToA(n.remainder, 2) + ":" + $J.intToA(seconds, 2);
 
         case TimeFormat.MS:
-            n = divModulo(Math.round(value / 1000), 60);  seconds  = n.remainder;
+            n = $J.divModulo(Math.round(value / 1000), 60);  seconds  = n.remainder;
             return (sign ? "-":"") + $J.intToA(n.result, 1) + ":" + $J.intToA(n.remainder, 2);
 
         case TimeFormat.HMSF:
-            n = divModulo(Math.round(value), 1000);  fraction = Math.round(n.remainder * 1000);
-            n = divModulo(n.result,            60);  seconds  = n.remainder;
-            n = divModulo(n.result,            60);
+            n = $J.divModulo(Math.round(value), 1000);  fraction = Math.round(n.remainder * 1000);
+            n = $J.divModulo(n.result,            60);  seconds  = n.remainder;
+            n = $J.divModulo(n.result,            60);
 
             return (sign ? "-":"") + $J.intToA(n.result, 1) + ":" + $J.intToA(n.remainder, 2) + ":" + $J.intToA(seconds, 2) + "." + $J.intToA(fraction, 3);
 
@@ -3436,18 +3436,6 @@ function encode_key(key: SelectValue): string {
     }
 
     throw new $J.InvalidStateError("RemoteSelectDatasource invalid key type '" + typeof key + "'.");
-}
-
-function divModulo(v: number, divisor: number) {
-    if (v === null || v === undefined)
-        return null;
-
-    let r = Math.floor(v / divisor + rounderror);
-
-    return {
-        result:     r,
-        remainder:  v - (r * divisor)
-    };
 }
 
 function mergeValidateResult(r1:ValidateResult, r2:ValidateResult): ValidateResult

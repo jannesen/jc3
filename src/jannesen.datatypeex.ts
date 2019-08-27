@@ -5,8 +5,6 @@ import * as $JR  from "jc3/jannesen.regional";
 import * as $JL  from "jc3/jannesen.language";
 import * as $JIE from "jc3/jannesen.inputex";
 
-var rounderror = 100.5 - (1.005 * 100);
-
 //===================================== RangeValue ==================================================
 /**
  *!!DOC
@@ -229,20 +227,6 @@ export class DateTimeRange extends RangeValue {
 
 //===================================== helpers ===================================================
 
-function divModulo(v: number,      divisor: number): { result:number, remainder:number };
-function divModulo(v: number|null, divisor: number): { result:number, remainder:number }|null;
-function divModulo(v: number|null, divisor: number): { result:number, remainder:number }|null {
-    if (v === null)
-        return null;
-
-    let r = Math.floor(v / divisor + rounderror);
-
-    return {
-        result:     r,
-        remainder:  v - (r * divisor)
-    };
-}
-
 const regexTime              = /^([0-2]?[0-9]):([0-5][0-9])(?::([0-5][0-9])(?:\.([0-9]{1,3}))?)?$/;
 const sregexDate             = regexToString($JR.regexDate);
 const sregexTime             = regexToString(regexTime);
@@ -283,8 +267,8 @@ function dateRangeToString(dateRange: IRangeValue):string
            (typeof dateRange.End   === "number" ? $JR.dateToString(dateRange.End)   : "" );
 }
 function dateTimeRangeToString(dateRange: IRangeValue):string {
-    const begin = divModulo(dateRange.Begin, 86400000);
-    const end   = divModulo(dateRange.End,   86400000);
+    const begin = $J.divModulo(dateRange.Begin, 86400000);
+    const end   = $J.divModulo(dateRange.End,   86400000);
 
     if (end && end.remainder === 0) {
         end.remainder = 86400000;
@@ -402,15 +386,15 @@ function stringToDateTimeRange(text:string):IRangeValue|null {
     throw new $J.FormatError($JL.invalid_datetimerange);
 }
 function timeToString(value:number, timeformat:number):string {
-    let   n        = divModulo(Math.round(value), 3600000);
+    let   n        = $J.divModulo(Math.round(value), 3600000);
     const hour     = n.result;
-          n        = divModulo(n.remainder,         60000);
+          n        = $J.divModulo(n.remainder,         60000);
     const min      = n.result;
 
     let s = $J.intToA(hour, 1) + ":" + $J.intToA(min, 2);
 
     if (timeformat >= 1) {
-        n = divModulo(n.remainder,         1000);
+        n = $J.divModulo(n.remainder,         1000);
 
         s += ":" + $J.intToA(n.result, 2);
 

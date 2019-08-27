@@ -1,6 +1,6 @@
 ﻿/// <reference path="lib-ext.d.ts"/>
 var tick_per_day            = (24*60*60*1000);
-var rounderror              = (1.005 * 100) - 100.5;
+var rounderror              = 100.5 - (1.005 * 100);
 var global_uniqueidcounter  = Math.floor(Math.random() * 100000);
 
 //=============================================== Enums ===========================================
@@ -789,8 +789,25 @@ export function round(v: number, p: number): number
     }
 
     v = v * pow;
-    v = (v > 0) ? v + rounderror : v - rounderror;
+    v = (v > 0) ? v - rounderror : v + rounderror;
     return Math.round(v) / pow;
+}
+
+/**
+ * Divide and return result and remainder
+ */
+export function divModulo(v: number,      divisor: number): { result:number, remainder:number };
+export function divModulo(v: number|null, divisor: number): { result:number, remainder:number }|null;
+export function divModulo(v: number|null, divisor: number): { result:number, remainder:number }|null {
+    if (v === null)
+        return null;
+
+    let r = Math.floor(v / divisor + rounderror);
+
+    return {
+        result:     r,
+        remainder:  v - (r * divisor)
+    };
 }
 
 /**
