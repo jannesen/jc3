@@ -107,57 +107,12 @@ export function stringToDate(s: string): number
     throw new $J.FormatError($JL.invalid_date);
 }
 
-export function dateToString(v: number | Date, f?: string): string
+export function dateToString(v: number | Date): string
 {
     var d: Date = !(v instanceof Date) ? new Date(v * (24 * 60 * 60 * 1000)) : <Date>v;
-
-    if (typeof f === "string" && f !== "") {
-        var rtn: string = "";
-        var p: number = 0;
-
-        while (p < f.length) {
-            var c = f.substr(p, 1);
-            var n = 0;
-
-            while (p < f.length && f[p] === c) { ++n; ++p; }
-
-            switch (c) {
-                case "d":
-                    switch (n) {
-                        case 2: rtn += $JL.dayNamesShort[d.getUTCDay()]; break;
-                        case 3: rtn += $JL.dayNames[d.getUTCDay()]; break;
-                        default: rtn += $JL.dayNamesMin[d.getUTCDay()]; break;
-                    }
-                    break;
-
-                case "D": rtn += $J.intToA(d.getUTCDate(), n); break;
-
-                case "M":
-                    switch (n) {
-                        case 3: rtn += $JL.monthNamesShort[d.getUTCMonth()]; break;
-                        case 4: rtn += $JL.monthNames[d.getUTCMonth()]; break;
-                        default: rtn += $J.intToA(d.getUTCMonth() + 1, n); break;
-                    }
-                    break;
-
-                case "Y": rtn += $J.intToA(d.getUTCFullYear(), n); break;
-                case "\\":
-                    rtn += f.substr(p + 1, 1);
-                    n = 2;
-                    break;
-
-                default:
-                    rtn += c.repeat(n);
-                    break;
-            }
-        }
-        return rtn;
-    }
-    else {
-        return $J.intToA(d.getUTCDate(), 1) + " " +
-            $JL.monthNamesShort[d.getUTCMonth()] + " " +
-            $J.intToA(d.getUTCFullYear(), 4);
-    }
+    return $J.intToA(d.getUTCDate(), 1) + " " +
+           $JL.monthNamesShort[d.getUTCMonth()] + " " +
+           $J.intToA(d.getUTCFullYear(), 4);
 }
 
 export function stringToTime(text:string, timeformat?:$J.TimeFormat):number

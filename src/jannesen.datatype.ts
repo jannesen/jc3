@@ -1697,7 +1697,54 @@ export class Date extends SimpleNumberType
     }
 
     public cnvValueToText(value: number): string {
-        return $JR.dateToString(value, this.Format);
+        const format = this.Format;
+
+        if (typeof format === "string" && format !== "") {
+            let date = new $global.Date(value * (24 * 60 * 60 * 1000));
+            let rtn  = "";
+            let p    = 0;
+
+            while (p < format.length) {
+                let c = format.substr(p, 1);
+                let n = 0;
+
+                while (p < format.length && format[p] === c) { ++n; ++p; }
+
+                switch (c) {
+                case "d":
+                    switch (n) {
+                        case 2:  rtn += $JL.dayNamesShort[date.getUTCDay()]; break;
+                        case 3:  rtn += $JL.dayNames[date.getUTCDay()];      break;
+                        default: rtn += $JL.dayNamesMin[date.getUTCDay()];   break;
+                    }
+                    break;
+
+                case "D": rtn += $J.intToA(date.getUTCDate(), n); break;
+
+                case "M":
+                    switch (n) {
+                        case 3:  rtn += $JL.monthNamesShort[date.getUTCMonth()]; break;
+                        case 4:  rtn += $JL.monthNames[date.getUTCMonth()];      break;
+                        default: rtn += $J.intToA(date.getUTCMonth() + 1, n);    break;
+                    }
+                    break;
+
+                case "Y": rtn += $J.intToA(date.getUTCFullYear(), n); break;
+                case "\\":
+                    rtn += format.substr(p + 1, 1);
+                    n = 2;
+                    break;
+
+                default:
+                    rtn += c.repeat(n);
+                    break;
+                }
+            }
+            return rtn;
+        }
+        else {
+            return $JR.dateToString(value);
+        }
     }
 
     public cnvTextToValue(text: string): number|null {
