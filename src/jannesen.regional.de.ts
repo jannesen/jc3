@@ -56,7 +56,7 @@ export function booleanToString(v: boolean, f?: string): string
 
 export function stringToNumber(s: string): number
 {
-    var r = parseFloat(s.trim());
+    var r = parseFloat(s.trim().replace(/\./g, "").replace(/,/, "."));
 
     if (!isNaN(r))
         return r;
@@ -67,9 +67,9 @@ export function stringToNumber(s: string): number
 export function numberToString(v: number, f?: string): string
 {
     if (f && /^F[0-9]/.test(f))
-        return v.toFixed(parseInt(f.substr(1), 10));
+        return v.toFixed(parseInt(f.substr(1), 10)).replace(".", ",");
 
-    return v.toPrecision();
+    return v.toPrecision().replace(".", ",");
 }
 
 export function stringToDate(s: string): number
