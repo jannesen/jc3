@@ -1383,7 +1383,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
         if (this._activeDropdown && this._input) {
             const dropdown = this._activeDropdown;
             super.dropdownClose(value, ev,
-                                () => { this._inputContext = (value !== null ? dropdown.Calldata : null) });
+                                () => { this._inputContext = (value !== null ? dropdown.Calldata : null); });
         }
     }
 
