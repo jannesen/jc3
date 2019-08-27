@@ -998,7 +998,7 @@ export class Time extends InputTextValueDropdownControl<number, $JT.Time, Time, 
             case ".": {
                     const timeformat = this._value.getTimeFormat();
                     return (typeof timeformat === "string")    ? $JR.decimalPoint :
-                           (timeformat === $JT.TimeFormat.HMSF) ? "." : ":";
+                           (timeformat === $J.TimeFormat.HMSF) ? "." : ":";
                 }
             case ":": {
                     const timeformat = this._value.getTimeFormat();

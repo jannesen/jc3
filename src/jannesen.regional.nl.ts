@@ -7,14 +7,14 @@ export const decimalPoint        = ",";
 export const firstDay            = 1;
 export const regexDate           = /^([0-9]+)[\-\/. ]([0-9]+|[A-Za-z]+)[\-\/. ]([0-9]+)$/;
 
-export function timePlaceHolder(format: string|number): string|undefined
+export function timePlaceHolder(format: string|$J.TimeFormat): string|undefined
 {
     switch(format) {
-    case 1 /*$JT.TimeFormat.HM*/:       return "uu:mm";
-    case 2 /*$JT.TimeFormat.HMS*/:      return "uu:mm:ss";
-    case 3 /*$JT.TimeFormat.MS*/:       return "mm:ss";
-    case 4 /*$JT.TimeFormat.HMSF*/:     return "uu:mm:ss.fff";
-    default:                            return undefined;
+    case $J.TimeFormat.HM:       return "uu:mm";
+    case $J.TimeFormat.HMS:      return "uu:mm:ss";
+    case $J.TimeFormat.HMSF:     return "uu:mm:ss.fff";
+    case $J.TimeFormat.MS:       return "mm:ss";
+    default:                     return undefined;
     }
 }
 

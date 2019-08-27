@@ -18,6 +18,18 @@ export const enum DayOfWeek
     saturday    = 6
 }
 
+/**
+ * !!DOC
+ */
+export const enum TimeFormat
+{
+    HM      =  1,    // HH:MM
+    HMS     =  2,    // HH:MM:SS
+    HMSF    =  3,    // HH:MM:SS.FFF
+    MS      = 10     // MM:SS (mm can be bigger then 60)
+}
+
+
 //=============================================== Interface =======================================
 /**
  * A wrapper for executing an event handler in a try-catch.
