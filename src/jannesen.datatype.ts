@@ -9,7 +9,7 @@ import * as $JI  from "jc3/jannesen.input";
 
 var rounderror = 100.5 - (1.005 * 100);
 var emptyOpts  = {};
-const regexDateTime = new RegExp("^(" + regexToString($JR.regexDate) + ") (" + regexToString($JR.regexTime) + ")$");
+const regexDateTime = new RegExp("^(" + regexToString($JR.regexDate) + ") *[ .] *(" + regexToString($JR.regexTime) + ")$");
 
 //===================================== Enums =====================================================
 /**
