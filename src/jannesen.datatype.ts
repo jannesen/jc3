@@ -9,6 +9,7 @@ import * as $JI  from "jc3/jannesen.input";
 
 var rounderror = 100.5 - (1.005 * 100);
 var emptyOpts  = {};
+const regexDateTime = new RegExp("^(" + regexToString($JR.regexDate) + ") (" + regexToString($JR.regexTime) + ")$");
 
 //===================================== Enums =====================================================
 /**
@@ -1780,11 +1781,89 @@ export class DateTime extends SimpleNumberType
     }
 
     public cnvValueToText(value: number, format?: string): string {
-        return $JR.datetimeToString(this.valueToUI(value), format);
+        value = this.valueToUI(value);
+
+        if (typeof format === "string" && format !== "") {
+            let date = new $global.Date(value);
+
+            var rtn:string = "";
+            var p:number   = 0;
+            var h:number   = 0;
+
+            if (format.substr(0, 1) === "~") {
+                ++p;
+
+                if (date.getTime() % (24*60*60*1000) === 0) {
+                    date = new $global.Date(date.getTime() - (24*60*60*1000));
+                    h = 24;
+                }
+            }
+
+            while (p < format.length) {
+                var c = format.substr(p, 1);
+                var n = 0;
+
+                while (p < format.length && format[p] === c)
+                    { ++n; ++p; }
+
+                switch(c) {
+                case "d":
+                    switch(n) {
+                    case 2:     rtn += $JL.dayNamesShort[date.getUTCDay()];        break;
+                    case 3:     rtn += $JL.dayNames[date.getUTCDay()];             break;
+                    default:    rtn += $JL.dayNamesMin[date.getUTCDay()];          break;
+                    }
+                    break;
+
+                case "D":   rtn += $J.intToA(date.getUTCDate(), n);                break;
+
+                case "M":
+                    switch(n) {
+                    case 3:     rtn += $JL.monthNamesShort[date.getUTCMonth()];    break;
+                    case 4:     rtn += $JL.monthNames[date.getUTCMonth()];         break;
+                    default:    rtn += $J.intToA(date.getUTCMonth() + 1, n);       break;
+                    }
+                    break;
+
+                case "Y":   rtn += $J.intToA(date.getUTCFullYear() , n);           break;
+                case "h":   rtn += $J.intToA(date.getUTCHours() + h, n);           break;
+                case "m":   rtn += $J.intToA(date.getUTCMinutes()  , n);           break;
+                case "s":   rtn += $J.intToA(date.getUTCSeconds()  , n);           break;
+                case "f":
+                    switch(n) {
+                    case 1:     rtn += $J.intToA($J.round(date.getUTCMilliseconds() / 100, 0), 1);  break;
+                    case 2:     rtn += $J.intToA($J.round(date.getUTCMilliseconds()  / 10, 0), 2);  break;
+                    default:    rtn += $J.intToA(date.getUTCMilliseconds()                   , 3);  break;
+                    }
+                    break;
+
+                case "\\":
+                    rtn += format.substr(p + 1, 1);
+                    n = 2;
+                    break;
+
+                default:
+                    rtn += c.repeat(n);
+                    break;
+                }
+            }
+            return rtn;
+        }
+
+        {
+            const n = $J.divModulo(value, 86400000);
+            return $JR.dateToString(n.result) + " " + $JR.timeToString(n.remainder);
+        }
     }
 
-    public cnvTextToValue(text: string): number|null {
-        return this.uiToValue($JR.stringToDatetime(text));
+    public cnvTextToValue(text: string): number {
+        const m = regexDateTime.exec(text);
+
+        if (m && typeof m[1] === 'string' && typeof m[2] === 'string') {
+            return this.uiToValue($JR.stringToDate(m[1]) * 86400000 + $JR.stringToTime(m[2]));
+        }
+
+        throw new $J.FormatError($JL.invalid_datetime);
     }
 
     public cnvValueToInvariant(val: number): string {
@@ -3332,4 +3411,8 @@ function stringErrorToMessage(e:null|string|Error): string|null
     if (e instanceof Error)     return e.message;
 
     return "Invalid argument 'message'.";
+}
+
+function regexToString(r: RegExp) {
+    return r.source.replace(/\((?![?])/g, '(?:').replace(/[\^\$]/g, '');
 }

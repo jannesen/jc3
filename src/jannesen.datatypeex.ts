@@ -232,7 +232,7 @@ const sregexDate             = regexToString($JR.regexDate);
 const sregexTime             = regexToString(regexTime);
 const regexDataRangeFull     = new RegExp("^(" + sregexDate + ") ?-? ?(" + sregexDate + ")$");
 const regexDateAndTimeRange  = new RegExp("^(" + sregexDate + ") (" + sregexTime + ") ?-? ?(" + sregexTime + ")$");
-const regexDataTimeRangeFull = new RegExp("^(" + sregexDate + " " + sregexTime + ") ?-? ?(" + sregexDate + " " + sregexTime + ")$");
+const regexDataTimeRangeFull = new RegExp("^(" + sregexDate + ") (" + sregexTime + ") ?-? ?(" + sregexDate + ") (" + sregexTime + ")$");
 
 function dateRangeToString(dateRange: IRangeValue):string
 {
@@ -355,8 +355,9 @@ function stringToDateTimeRange(text:string):IRangeValue|null {
 
     try {
         if (match = regexDataTimeRangeFull.exec(text)) {
-            if (typeof match[1] === "string" && typeof match[2] === "string") {
-                return { Begin: $JR.stringToDatetime(match[1]!), End:$JR.stringToDatetime(match[2]!) };
+            if (typeof match[1] === "string" && typeof match[2] === "string" && match[3] === "string" && typeof match[4] === "string") {
+                return { Begin: $JR.stringToDate(match[1]) * 86400000 + $JR.stringToTime(match[2]),
+                         End:   $JR.stringToDate(match[3]) * 86400000 + $JR.stringToTime(match[4]) };
             }
         }
         else if (match = regexDateAndTimeRange.exec(text)) {
@@ -379,15 +380,5 @@ function stringToDateTimeRange(text:string):IRangeValue|null {
     throw new $J.FormatError($JL.invalid_datetimerange);
 }
 function regexToString(r: RegExp): string {
-    let s = r.source;
-    let i = 0;
-
-    while ((i = s.indexOf('(', i)) >= 0) {
-        i = i + 1;
-
-        if (s[i] !== '?')
-            s = s.substr(0, i) + '?:' + s.substr(i);
-    }
-
-    return s.substr(1, s.length - 2);
+    return r.source.replace(/\((?![?])/g, '(?:').replace(/[\^\$]/g, '');
 }
