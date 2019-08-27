@@ -4,7 +4,7 @@ import * as $JL from "jc3/jannesen.language";
 
 export const decimalPoint        = ".";
 export const firstDay            = 1;
-export const regexDate           = /^([0-9]{1,4})[\-\/. ]([01]?[0-9]|[A-Za-z]+)(?:[\-\/. ]([0-9]{1,4}))?$/;
+export const regexDate           = /^([0-3]?[0-9][0-2][0-9])$|^([0-9]{1,4})[\-\/. ]([01]?[0-9]|[A-Za-z]+)(?:[\-\/. ]([0-9]{1,4}))?$/;
 export const regexTime           = /^([0-2]?[0-9]{3})$|^([0-2]?[0-9]):([0-5][0-9])(?::([0-5][0-9])(?:\.([0-9]{1,3}))?)?$/;
 export const regexTimeMS         = /^([0-9]+):([0-5][0-9])(?:\.([0-9]{1,3}))?$/;
 
@@ -77,44 +77,36 @@ export function stringToDate(s: string): number
         const parts = regexDate.exec(s.trim());
 
         if (parts !== null) {
-            var d: number;
-            var m: number;
-            var y: number;
+            if (typeof parts[1] === "string") {
+                const r = dayMonthToData(parts[1].substr(0, parts[1].length-2), parts[1].substr(parts[1].length-2, 2));
+                if (r !== undefined) {
+                    return r;
+                }
+            }
+            else if (typeof parts[2] === "string" && typeof parts[3] === "string") {
+                if (typeof parts[4] === "string") {
+                    let d: number;
+                    let m: number;
+                    let y: number;
 
-            if (typeof parts[1] === "string" && typeof parts[2] === "string") {
-                if (typeof parts[3] === "string") {
-                    if (parts[1]!.length === 4) {
-                        y = stringToYear(parts[1]!);
-                        m = stringToMonth(parts[2]!);
-                        d = stringToDay(parts[3]!);
+                    if (parts[2]!.length === 4) {
+                        y = stringToYear(parts[2]!);
+                        m = stringToMonth(parts[3]!);
+                        d = stringToDay(parts[4]!);
                     }
                     else {
-                        d = stringToDay(parts[1]!);
-                        m = stringToMonth(parts[2]!);
-                        y = stringToYear(parts[3]!);
+                        d = stringToDay(parts[2]!);
+                        m = stringToMonth(parts[4]!);
+                        y = stringToYear(parts[5]!);
                     }
                     if (y>=1900 && y<=2099 && m>= 1 && m<=12 && d>=1 && d<=31) {
                         return $J.newDate(y, m, d);
                     }
                 }
                 else {
-                    d = stringToDay(parts[1]!);
-                    m = stringToMonth(parts[2]!);
-
-                    if (m>= 1 && m<=12 && d>=1 && d<=31) {
-                        const curdate = $J.curDate();
-                        y = $J.dateParts(curdate).Year;
-                        let date = $J.newDate(y, m, d);
-
-                        if (date < curdate) {
-                            date = $J.newDate(++y, m, d);
-                        }
-
-                        if ((date - curdate) > 270) {
-                            date = $J.newDate(y - 1, m, d);
-                        }
-
-                        return date;
+                    const r = dayMonthToData(parts[2], parts[3]);
+                    if (r !== undefined) {
+                        return r;
                     }
                 }
             }
@@ -125,6 +117,27 @@ export function stringToDate(s: string): number
     }
 
     throw new $J.FormatError($JL.invalid_date);
+
+    function dayMonthToData(sd:string, sm:string) {
+        const d = stringToDay(sd);
+        const m = stringToMonth(sm);
+
+        if (m>= 1 && m<=12 && d>=1 && d<=31) {
+            const curdate = $J.curDate();
+            let y = $J.dateParts(curdate).Year;
+            let date = $J.newDate(y, m, d);
+
+            if (date < curdate) {
+                date = $J.newDate(++y, m, d);
+            }
+
+            if ((date - curdate) > 270) {
+                date = $J.newDate(y - 1, m, d);
+            }
+
+            return date;
+        }
+    }
 }
 
 export function dateToString(v: number | Date): string
