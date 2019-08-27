@@ -12,6 +12,6 @@ export function main()
         let dr = new daterange();
 
         $JD.body.appendChild(<div> {dr.getControl()} </div>);
-        $JD.body.appendChild(<div> <button onclick={() => { dr.validateSync({}); }}>Validate</button></div>);
+        $JD.body.appendChild(<div> <button onclick={() => { dr.validateNow({}); }}>Validate</button></div>);
     });
 }

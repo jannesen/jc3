@@ -494,7 +494,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
                     }
                 }
 
-                if (!(formargs.validateSync({ seterror:false }) === $JT.ValidateResult.OK && this.validateQuery() === $JT.ValidateResult.OK)) {
+                if (!(formargs.validateNow({ seterror:false }) === $JT.ValidateResult.OK && this.validateQuery() === $JT.ValidateResult.OK)) {
                     return;
                 }
 
@@ -647,7 +647,7 @@ export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
                 return;
             }
 
-            if (!(formargs.validateSync({ seterror:false }) === $JT.ValidateResult.OK && this.validateQuery() === $JT.ValidateResult.OK)) {
+            if (!(formargs.validateNow({ seterror:false }) === $JT.ValidateResult.OK && this.validateQuery() === $JT.ValidateResult.OK)) {
                 return;
             }
 

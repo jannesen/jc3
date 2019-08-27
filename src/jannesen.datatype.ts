@@ -93,7 +93,6 @@ export type AssignType <T> = T extends SimpleType<any> ? AssignSympleType<T>
                            : T extends Set<any> ? AssignSet<T>
                            : unknown;
 
-
 //===================================== Interfaces ================================================
 /**
  * !!DOC
@@ -173,7 +172,7 @@ export interface IValidateOptions
 {
     seterror?:       boolean;
     partial?:       $JD.DOMHTMLElement;
-    preValidates?:  () => ($JA.Task<unknown>|null)[];
+    preValidates?:  () => ($JA.Task<unknown>|Error|null)[]|null;
 }
 
 /**
@@ -210,17 +209,28 @@ export class ValidateErrors extends __Error
         return this._errors;
     }
 
-                constructor(error:string|Error, value?:BaseType, control?:IControl<BaseType>, path?:string)
+                constructor(error?:string|Error, value?:BaseType, control?:IControl<BaseType>, path?:string)
     {
         super("ValidateErrors");
-        this.message = stringErrorToMessage(error);
-        this._errors = [ { error, value, control, path } ];
+        this.message = "Empty ValidateErrors";
+        this._errors = [];
+
+        if (error) {
+            this.addError(error, value, control, path);
+        }
     }
 
     public      addError(error:string|Error, value?:BaseType, control?:IControl<BaseType>, path?:string): void
     {
-        this.message += "\n" + stringErrorToMessage(error);
-        this._errors.push({ error, value, control, path });
+        if (error instanceof ValidateErrors) {
+            for (const e of error._errors) {
+                this.addError(e.error, e.value, e.control, e.path);
+            }
+        }
+        else {
+            this.message = (this._errors.length > 0) ? this.message + "\n" + stringErrorToMessage(error) : stringErrorToMessage(error);
+            this._errors.push({ error, value, control, path });
+        }
     }
     public      getFirstControl()
     {
@@ -253,6 +263,118 @@ export class ValidateErrors extends __Error
     }
 }
 
+interface IValidatable
+{
+    preValidateAsync():                  ($JA.Task<unknown>|Error)[]|$JA.Task<unknown>|Error|null;
+    validateNow(opts:IValidateOptions):  ValidateResult|Error;
+}
+
+export function validateAsync(opts:IValidateOptionsAsync, ...validatables:IValidatable[]): $JA.Task<ValidateResult>
+{
+    return new $JA.Task((resolved:(result:ValidateResult)=>void, reject:(err:Error)=>void, oncancel:(handler:(reason:Error)=>void)=>void) => {
+               const errors = new ValidateErrors();
+               let runningTasks:number;
+
+               oncancel((reason) => {
+                               runningTasks = -1;
+                               reject(reason);
+                           });
+
+               waitTasks();
+
+               function waitTasks() {
+                   let waitTasks = [] as $JA.Task<unknown>[];
+
+                   try {
+                       if (typeof opts.preValidates === 'function') {
+                           addPreValidate(opts.preValidates());
+                       }
+
+                       for (const v of validatables) {
+                           addPreValidate(v.preValidateAsync());
+                       }
+                   }
+                   catch (e) {
+                       reject(e);
+                       return;
+                   }
+
+                   if (errors.errors.length > 0) {
+                       reject(errors);
+                   }
+                   else if ((runningTasks = waitTasks.length) > 0) {
+                       for (let r of waitTasks) {
+                           r.then(() => {
+                                      taskDone();
+                                  },
+                                  (e) => {
+                                      errors.addError(e);
+                                      taskDone();
+                                });
+                       }
+                   }
+                   else {
+                       validate();
+                   }
+
+                   function addPreValidate(r:($JA.Task<unknown>|Error|null)[]|$JA.Task<unknown>|Error|null)
+                   {
+                        if (Array.isArray(r)) {
+                            r.forEach(addPreValidate);
+                        }
+                        else if (r instanceof $JA.Task) {
+                            if (r.isPending) {
+                                waitTasks.push(r);
+                            }
+                            else if (r.isRejected) {
+                                errors.addError(r.reason);
+                            }
+                        }
+                        else if (r instanceof Error) {
+                            errors.addError(r);
+                        }
+                        else if (r !== null) {
+                            errors.addError(new $J.InvalidStateError("argument error addPreValidate(r)."));
+                        }
+                   }
+               }
+               function taskDone() {
+                   if (--runningTasks === 0) {
+                       if (errors.errors.length > 0) {
+                           reject(errors);
+                       }
+                       else {
+                           waitTasks();
+                       }
+                   }
+               }
+               function validate() {
+                    let result = ValidateResult.OK;
+                    for (const v of validatables) {
+                         try {
+                             const r = v.validateNow(opts);
+                             if (r instanceof Error) {
+                                 errors.addError(r);
+                             }
+                             else {
+                                 result = mergeValidateResult(result, r);
+                             }
+                         }
+                         catch (e) {
+                             errors.addError(e);
+                         }
+                    }
+
+                    if (errors.errors.length > 0) {
+                        reject(errors);
+                    }
+                    else {
+                        resolved(result);
+                    }
+               }
+           }, opts.context);
+}
+
 //===================================== BaseType ==================================================
 /**
  *!!DOC
@@ -266,7 +388,7 @@ export interface IBaseTypeAttributes
 /**
  *!!DOC
  */
-export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlValue
+export abstract class BaseType implements IValidatable, $J.EventHandling, $JD.IToDom, $J.IUrlValue
 {
     public static   Name = "BaseType";
     public static   Attributes:IBaseTypeAttributes = {};
@@ -358,20 +480,78 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
     }
 
     /**
-     * Validate data.
-     * Throw a error is inputs are busy.
+     * Returns all busy tasks before the data can be validated
      */
-    public validateSync(opts:IValidateOptions): ValidateResult|Error
+    public preValidateAsync()
     {
-        const r = this._preValidate(opts);
-        if (r instanceof Error) {
-            throw r;
-        }
-        if (r.length > 0) {
-            throw new $JA.BusyError("Input busy");
-        }
+        let rtn = [] as ($JA.Task<unknown>|Error)[];
 
-        return this._validateTree(opts);
+        this.validateTreeWalker((item, path, result) => {
+                                    if (result === ValidateResult.OK && item._control) {
+                                        try {
+                                            if (item._control.preValidate) {
+                                                const r = item._control.preValidate();
+
+                                                if (r) {
+                                                    if (r.isPending) {
+                                                        rtn.push(r.catch((err) => {
+                                                                            throw new ValidateErrors(err, item, item._control, path);
+                                                                         }));
+                                                    }
+                                                    else if (r.isRejected) {
+                                                        rtn.push(new ValidateErrors(r.reason, item, item._control, path));
+                                                        return ValidateResult.Error;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        catch(err) {
+                                            rtn.push(new ValidateErrors(err, item, item._control, path));
+                                            return ValidateResult.Error;
+                                        }
+                                    }
+
+                                    return result;
+                                }, '$');
+
+        return rtn;
+    }
+
+    /**
+     * Validate the data. It is up to the developer to make sure the data is stable (no active async tasks),
+     */
+    public validateNow(opts:IValidateOptions)
+    {
+        let errors:ValidateErrors|undefined;
+        let rtn = this.validateTreeWalker((item, path, result) => {
+                                                let err:ValidateValueResult = null;
+
+                                                if (result === ValidateResult.OK) {
+                                                    try {
+                                                        err = item.validateValue();
+                                                    }
+                                                    catch(e) {
+                                                        err = e;
+                                                    }
+                                                }
+
+                                                if (opts.seterror !== false && item._control) {
+                                                    item._control.setError(stringErrorToMessage(err));
+                                                }
+
+                                                if (err) {
+                                                    if (!errors) {
+                                                        errors = new ValidateErrors();
+                                                    }
+
+                                                    errors.addError(err, item, (opts.seterror !== false ? item._control : undefined), path);
+
+                                                    result = ValidateResult.Error;
+                                                }
+
+                                                return result;
+                                            }, '$');
+        return errors ? errors : rtn;
     }
 
     /**
@@ -379,66 +559,7 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
      * Before validate wait until al input are ready.
      */
     public validateAsync(opts:IValidateOptionsAsync): $JA.Task<ValidateResult> {
-        const self = this;
-
-        return new $JA.Task((resolved:(result:ValidateResult)=>void, reject:(err:Error)=>void, oncancel:(handler:(reason:Error)=>void)=>void) => {
-                                let errors:ValidateErrors|undefined;
-                                let runningTasks:number;
-
-                                oncancel((reason) => {
-                                             runningTasks = -1;
-                                             reject(reason);
-                                         });
-
-                                waitTasks();
-
-                                function waitTasks() {
-                                    const preResult = self._preValidate(opts);
-
-                                    if (preResult instanceof Error) {
-                                        reject(preResult);
-                                        return;
-                                    }
-
-                                    runningTasks = preResult.length;
-                                    if (runningTasks > 0) {
-                                        for (let r of preResult) {
-                                            r.task.then(() => {
-                                                            taskDone();
-                                                        },
-                                                        (err) => {
-                                                            if (!errors) {
-                                                                errors = new ValidateErrors(err, r.value, undefined, r.path);
-                                                            }
-                                                            else {
-                                                                errors.addError(err, r.value, undefined, r.path);
-                                                            }
-                                                            taskDone();
-                                                        });
-                                        }
-                                    }
-                                    else {
-                                        const r = self._validateTree(opts);
-
-                                        if (r instanceof Error) {
-                                            reject(r);
-                                        }
-                                        else {
-                                            resolved(r);
-                                        }
-                                    }
-                                }
-                                function taskDone() {
-                                    if (--runningTasks === 0) {
-                                        if (errors) {
-                                            reject(errors);
-                                        }
-                                        else {
-                                            waitTasks();
-                                        }
-                                    }
-                                }
-                            }, opts.context);
+        return validateAsync(opts, this);
     }
 
     /**
@@ -621,103 +742,6 @@ export abstract class BaseType implements $J.EventHandling, $JD.IToDom, $J.IUrlV
         }
 
         return ctl;
-    }
-
-    private _preValidate(opts:IValidateOptions)
-    {
-        let errors:ValidateErrors|undefined;
-        let rtn:{ task:$JA.Task<unknown>, value?:BaseType, path?:string }[] = [];
-
-        if (typeof opts.preValidates === 'function') {
-            for (let r of opts.preValidates()) {
-                try {
-                    if (r instanceof $JA.Task) {
-                        if (r.isPending) {
-                            rtn.push({ task:r });
-                        }
-                        if (r.isRejected) {
-                            throw r.reason;
-                        }
-                    }
-                }
-                catch (err) {
-                    if (!errors) {
-                        errors = new ValidateErrors(err);
-                    }
-                    else {
-                        errors.addError(err);
-                    }
-                }
-            }
-        }
-
-        this.validateTreeWalker((item, path, result) => {
-                                    if (result === ValidateResult.OK && item._control) {
-                                        try {
-                                            if (item._control.preValidate) {
-                                                const r = item._control.preValidate();
-
-                                                if (r) {
-                                                    if (r.isPending) {
-                                                        rtn.push({ task:r, value:item, path:path });
-                                                    }
-                                                    if (r.isRejected) {
-                                                        throw r.reason;
-                                                    }
-                                                    return ValidateResult.OK;
-                                                }
-                                            }
-                                        }
-                                        catch(err) {
-                                            if (!errors) {
-                                                errors = new ValidateErrors(err, item, item._control, path);
-                                            }
-                                            else {
-                                                errors.addError(err, item, item._control, path);
-                                            }
-
-                                            return ValidateResult.Error;
-                                        }
-                                    }
-
-                                    return result;
-                                }, '$');
-
-        return errors ? errors : rtn;
-    }
-
-    private _validateTree(opts:IValidateOptions) {
-        let errors:ValidateErrors|undefined;
-        let rtn = this.validateTreeWalker((item, path, result) => {
-                                                let err:ValidateValueResult = null;
-
-                                                if (result === ValidateResult.OK) {
-                                                    try {
-                                                        err = item.validateValue();
-                                                    }
-                                                    catch(e) {
-                                                        err = e;
-                                                    }
-                                                }
-
-                                                if (opts.seterror !== false && item._control) {
-                                                    item._control.setError(stringErrorToMessage(err));
-                                                }
-
-                                                if (err) {
-                                                    if (!errors) {
-                                                        errors = new ValidateErrors(err, item, (opts.seterror !== false ? item._control : undefined), path);
-                                                    }
-                                                    else {
-                                                        errors.addError(err, item, (opts.seterror !== false ? item._control : undefined), path);
-                                                    }
-
-                                                    result = ValidateResult.Error;
-                                                }
-
-                                                return result;
-                                            }, '$');
-        return errors ? errors : rtn;
     }
 }
 $J.applyMixins(BaseType, [$J.EventHandling]);
