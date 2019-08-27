@@ -5,7 +5,7 @@ import * as $JL from "jc3/jannesen.language";
 
 export const decimalPoint = ",";
 export const firstDay = 1;
-export const regexDate = /^([0-9]+)[\-\/. ]([0-9]+|[A-Za-z]+)[\-\/. ]([0-9]+)$/;
+export const regexDate           = /^([0-9]+)[\-\/. ]([0-9]+|[A-Za-z]+)[\-\/. ]([0-9]+)$/;
 export const regexTime           = /^([0-2]?[0-9]{3})$|^([0-2]?[0-9]):([0-5][0-9])(?::([0-5][0-9])(?:\.([0-9]{1,3}))?)?$/;
 export const regexTimeMS         = /^([0-9]+):([0-5][0-9])(?:\.([0-9]{1,3}))?$/;
 
@@ -20,7 +20,8 @@ export function timePlaceHolder(format: string | $J.TimeFormat): string | undefi
     }
 }
 
-export function stringToInt(s: string): number {
+export function stringToInt(s: string): number
+{
     var r = parseInt(s.trim().replace(/\./g, ""), 10);
 
     if (!isNaN(r))
@@ -29,11 +30,13 @@ export function stringToInt(s: string): number {
     throw new $J.FormatError($JL.incorrect_integer_value(s));
 }
 
-export function intToString(v: number): string {
+export function intToString(v: number): string
+{
     return v.toString();
 }
 
-export function stringToBoolean(s: string): boolean {
+export function stringToBoolean(s: string): boolean
+{
     switch (s.trim().toLowerCase()) {
         case "0": return false;
         case "1": return true;
@@ -46,11 +49,13 @@ export function stringToBoolean(s: string): boolean {
     throw new $J.FormatError($JL.incorrect_boolean_value(s));
 }
 
-export function booleanToString(v: boolean, f?: string): string {
+export function booleanToString(v: boolean, f?: string): string
+{
     return (v) ? $JL.yes : $JL.no;
 }
 
-export function stringToNumber(s: string): number {
+export function stringToNumber(s: string): number
+{
     var r = parseFloat(s.trim().replace(/\./g, "").replace(/,/, "."));
 
     if (!isNaN(r))
@@ -59,14 +64,16 @@ export function stringToNumber(s: string): number {
     throw new $J.FormatError($JL.incorrect_numeric_value(s));
 }
 
-export function numberToString(v: number, f?: string): string {
+export function numberToString(v: number, f?: string): string
+{
     if (f && /^F[0-9]/.test(f))
         return v.toFixed(parseInt(f.substr(1), 10)).replace(".", ",");
 
     return v.toPrecision().replace(".", ",");
 }
 
-export function stringToDate(s: string): number {
+export function stringToDate(s: string): number
+{
     try {
         var parts = /^([0-9]+)[\-\/. ]([0-9]+|[A-Za-z]+)[\-\/. ]([0-9]+)$/.exec(s.trim());
 
@@ -100,7 +107,8 @@ export function stringToDate(s: string): number {
     throw new $J.FormatError($JL.invalid_date);
 }
 
-export function dateToString(v: number | Date, f?: string): string {
+export function dateToString(v: number | Date, f?: string): string
+{
     var d: Date = !(v instanceof Date) ? new Date(v * (24 * 60 * 60 * 1000)) : <Date>v;
 
     if (typeof f === "string" && f !== "") {
@@ -152,7 +160,8 @@ export function dateToString(v: number | Date, f?: string): string {
     }
 }
 
-export function stringToTime(text:string, timeformat?:$J.TimeFormat):number {
+export function stringToTime(text:string, timeformat?:$J.TimeFormat):number
+{
     let m:RegExpExecArray|null;
 
     switch (timeformat) {
@@ -215,14 +224,16 @@ export function timeToString(value:number, timeformat?:$J.TimeFormat):string {
     }
 }
 
-export function stringToDay(s: string): number {
+export function stringToDay(s: string): number
+{
     if (/^[0-9]+$/.test(s))
         return parseInt(s, 10);
 
     return NaN;
 }
 
-export function stringToMonth(s: string): number {
+export function stringToMonth(s: string): number
+{
     if (/^[0-9]+$/.test(s))
         return parseInt(s, 10);
 
@@ -234,7 +245,8 @@ export function stringToMonth(s: string): number {
     return NaN;
 }
 
-export function stringToYear(s: string): number {
+export function stringToYear(s: string): number
+{
     if (/^[0-9]+$/.test(s)) {
         var m = parseInt(s, 10);
 
@@ -247,7 +259,8 @@ export function stringToYear(s: string): number {
     return NaN;
 }
 
-export function yearToShortYear(y: number): number {
+export function yearToShortYear(y: number): number
+{
     if (y >= 2000 && y < 2030) return y - 2000;
     if (y >= 1930 && y < 2000) return y - 1900;
 
