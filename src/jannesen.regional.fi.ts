@@ -6,6 +6,8 @@ import * as $JL from "jc3/jannesen.language";
 export const decimalPoint = ",";
 export const firstDay = 1;
 export const regexDate = /^([0-9]+)[\-\/. ]([0-9]+|[A-Za-z]+)[\-\/. ]([0-9]+)$/;
+export const regexTime           = /^([0-2]?[0-9]{3})$|^([0-2]?[0-9]):([0-5][0-9])(?::([0-5][0-9])(?:\.([0-9]{1,3}))?)?$/;
+export const regexTimeMS         = /^([0-9]+):([0-5][0-9])(?:\.([0-9]{1,3}))?$/;
 
 export function timePlaceHolder(format: string | $J.TimeFormat): string | undefined
 {
@@ -147,6 +149,69 @@ export function dateToString(v: number | Date, f?: string): string {
         return $J.intToA(d.getUTCDate(), 1) + " " +
             $JL.monthNamesShort[d.getUTCMonth()] + " " +
             $J.intToA(d.getUTCFullYear(), 4);
+    }
+}
+
+export function stringToTime(text:string, timeformat?:$J.TimeFormat):number {
+    let m:RegExpExecArray|null;
+
+    switch (timeformat) {
+    case $J.TimeFormat.MS:
+        if (m = regexTimeMS.exec(text)) {
+            if (typeof m[1] === "string" && typeof m[2] === "string") {
+                return $J.parseIntExact(m[1]!) * 60000 +
+                       $J.parseIntExact(m[2])   * 1000 +
+                       (typeof m[3] === "string" ? $J.parseIntExact(m[3]) : 0);
+            }
+        }
+
+    default:
+        if (m = regexTime.exec(text)) {
+            if (typeof m[1] === "string") {
+                return $J.parseIntExact(m[1].substr(0, m[1].length-2)) * 3600000 +
+                        $J.parseIntExact(m[1].substr(m[1].length-2, 2))   * 60000;
+            }
+            else if (typeof m[2] === "string" && typeof m[3] === "string") {
+                return $J.parseIntExact(m[2]!) * 3600000 +
+                       $J.parseIntExact(m[3]!)   * 60000 +
+                       (typeof m[4] === "string" ? $J.parseIntExact(m[4]) * 1000 : 0) +
+                       (typeof m[5] === "string" ? $J.parseIntExact(m[5])        : 0);
+            }
+        }
+    }
+
+    throw new $J.FormatError("Invalid time");
+}
+
+export function timeToString(value:number, timeformat?:$J.TimeFormat):string {
+    let sign = (value < 0);
+    if (sign) value = -value;
+
+    let n:{ result:number, remainder:number };
+    let fraction:number;
+    let seconds:number;
+
+    switch(timeformat) {
+    case $J.TimeFormat.HM:
+        n = $J.divModulo(Math.round(value / 60000), 60);
+        return (sign ? "-":"") + $J.intToA(n.result, 2) + ":" + $J.intToA(n.remainder, 2);
+
+    case $J.TimeFormat.HMS:
+        n = $J.divModulo(Math.round(value / 1000), 60);  seconds  = n.remainder;
+        n = $J.divModulo(n.result,                 60);
+        return (sign ? "-":"") + $J.intToA(n.result, 1) + ":" + $J.intToA(n.remainder, 2) + ":" + $J.intToA(seconds, 2);
+
+    default:
+    case $J.TimeFormat.HMSF:
+        n = $J.divModulo(Math.round(value), 1000);  fraction = Math.round(n.remainder * 1000);
+        n = $J.divModulo(n.result,            60);  seconds  = n.remainder;
+        n = $J.divModulo(n.result,            60);
+
+        return (sign ? "-":"") + $J.intToA(n.result, 1) + ":" + $J.intToA(n.remainder, 2) + ":" + $J.intToA(seconds, 2) + "." + $J.intToA(fraction, 3);
+
+    case $J.TimeFormat.MS:
+        n = $J.divModulo(Math.round(value / 1000), 60);  seconds  = n.remainder;
+        return (sign ? "-":"") + $J.intToA(n.result, 1) + ":" + $J.intToA(n.remainder, 2);
     }
 }
 

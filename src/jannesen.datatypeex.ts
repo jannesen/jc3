@@ -279,27 +279,20 @@ function dateTimeRangeToString(dateRange: IRangeValue):string {
         return dateRangeToString({ Begin: begin.result, End: end.result });
     }
 
-    var timeformat = 0;
+    var timeformat = $J.TimeFormat.HM;
 
-    if (begin && begin.remainder % 1000 !== 0)
-        timeformat = 2;
-    else
-    if (end   && end.remainder % 1000 !== 0)
-        timeformat = 2;
-    else
-    if (begin && begin.remainder % 60000 !== 0)
-        timeformat = 1;
-    else
-    if (end   && end.remainder % 60000 !== 0)
-        timeformat = 1;
+    if ((begin && begin.remainder % 1000 !== 0) || (end  && end.remainder % 1000 !== 0))
+        timeformat = $J.TimeFormat.HMSF;
+    else if ((begin && begin.remainder % 60000 !== 0) || (end   && end.remainder % 60000 !== 0))
+        timeformat = $J.TimeFormat.HMS;
 
     if (begin && end && begin.result === end.result) {
-        return $JR.dateToString(begin.result) + " " + timeToString(begin.remainder, timeformat) + "-" + timeToString(end.remainder, timeformat);
+        return $JR.dateToString(begin.result) + " " + $JR.timeToString(begin.remainder, timeformat) + "-" + $JR.timeToString(end.remainder, timeformat);
     }
 
-    return (begin ? $JR.dateToString(begin.result) + " " + timeToString(begin.remainder, timeformat) : "") +
+    return (begin ? $JR.dateToString(begin.result) + " " + $JR.timeToString(begin.remainder, timeformat) : "") +
            " - " +
-           (end   ? $JR.dateToString(end.result)   + " " + timeToString(end.remainder, timeformat)   : "");
+           (end   ? $JR.dateToString(end.result)   + " " + $JR.timeToString(end.remainder, timeformat)   : "");
 }
 function stringToDateRange(text:string):IRangeValue|null
 {
@@ -368,8 +361,8 @@ function stringToDateTimeRange(text:string):IRangeValue|null {
         }
         else if (match = regexDateAndTimeRange.exec(text)) {
             if (typeof match[1] === "string" && typeof match[2] === "string" && typeof match[3] === "string") {
-                const d = $JR.stringToDate(match[1]!) * 86400000;
-                return { Begin: d + stringToTime(match[2]!), End: d + stringToTime(match[3]!) };
+                const d = $JR.stringToDate(match[1]) * 86400000;
+                return { Begin: d + $JR.stringToTime(match[2]), End: d + $JR.stringToTime(match[3]) };
             }
         }
 
@@ -384,35 +377,6 @@ function stringToDateTimeRange(text:string):IRangeValue|null {
     }
 
     throw new $J.FormatError($JL.invalid_datetimerange);
-}
-function timeToString(value:number, timeformat:number):string {
-    let   n        = $J.divModulo(Math.round(value), 3600000);
-    const hour     = n.result;
-          n        = $J.divModulo(n.remainder,         60000);
-    const min      = n.result;
-
-    let s = $J.intToA(hour, 1) + ":" + $J.intToA(min, 2);
-
-    if (timeformat >= 1) {
-        n = $J.divModulo(n.remainder,         1000);
-
-        s += ":" + $J.intToA(n.result, 2);
-
-        if (timeformat >= 2)
-            s += "." + $J.intToA(n.remainder, 3);
-    }
-
-    return s;
-}
-function stringToTime(text:string):number {
-    const m = regexTime.exec(text);
-    if (!(m && typeof m[1] === "string" && typeof m[2] === "string"))
-        throw new $J.FormatError("Invalid time");
-
-    return $J.parseIntExact(m[1]!) * 3600000 +
-           $J.parseIntExact(m[2]!)   * 60000 +
-           (typeof m[3] === "string" ? $J.parseIntExact(m[3]!) * 1000 : 0) +
-           (typeof m[4] === "string" ? $J.parseIntExact(m[4]!)        : 0);
 }
 function regexToString(r: RegExp): string {
     let s = r.source;

@@ -1909,37 +1909,7 @@ export class Time extends SimpleNumberType
             return $JR.numberToString(value, format);
         }
 
-        let sign = (value < 0);
-        if (sign) value = -value;
-
-        var n:any;
-        var fraction:number;
-        var seconds:number;
-
-        switch(f) {
-        case $J.TimeFormat.HM:
-            n = $J.divModulo(Math.round(value / 60000), 60);
-            return (sign ? "-":"") + $J.intToA(n.result, 2) + ":" + $J.intToA(n.remainder, 2);
-
-        case $J.TimeFormat.HMS:
-            n = $J.divModulo(Math.round(value / 1000), 60);  seconds  = n.remainder;
-            n = $J.divModulo(n.result,                 60);
-            return (sign ? "-":"") + $J.intToA(n.result, 1) + ":" + $J.intToA(n.remainder, 2) + ":" + $J.intToA(seconds, 2);
-
-        case $J.TimeFormat.MS:
-            n = $J.divModulo(Math.round(value / 1000), 60);  seconds  = n.remainder;
-            return (sign ? "-":"") + $J.intToA(n.result, 1) + ":" + $J.intToA(n.remainder, 2);
-
-        case $J.TimeFormat.HMSF:
-            n = $J.divModulo(Math.round(value), 1000);  fraction = Math.round(n.remainder * 1000);
-            n = $J.divModulo(n.result,            60);  seconds  = n.remainder;
-            n = $J.divModulo(n.result,            60);
-
-            return (sign ? "-":"") + $J.intToA(n.result, 1) + ":" + $J.intToA(n.remainder, 2) + ":" + $J.intToA(seconds, 2) + "." + $J.intToA(fraction, 3);
-
-        default:
-            throw new $J.InvalidStateError("Invalid TimeFormat.");
-        }
+        return $JR.timeToString(value, f);
     }
 
     public cnvTextToValue(text: string): number|null {
@@ -1954,78 +1924,7 @@ export class Time extends SimpleNumberType
             return Math.round($J.round($JR.stringToNumber(text), this.Precision) * this.Factor);
         }
 
-        var parts:string[] = [];
-
-        for (;;) {
-            var m = /^([0-9]+)(?:([:.])(.+))?$/.exec(text);
-            if (m === null)
-                throw new $J.FormatError($JL.invalid_time_syntax);
-
-            if (typeof m[1] !== "string")
-                throw new $J.FormatError($JL.invalid_time_syntax);
-
-            parts.push(m[1]!);
-
-            if (typeof m[2] !== "string")
-                break;
-
-            parts.push(m[2]!);
-
-            if (typeof m[3] !== "string")
-                throw new $J.FormatError($JL.invalid_time_syntax);
-
-            text = m[3]!;
-        }
-
-        if (parts.length < 3) {
-            if (f === $J.TimeFormat.HM && text.length >=3 && text.length <= 4) {
-                parts = [ text.substr(0, text.length - 2), ":", text.substr(text.length - 2) ];
-            }
-            else
-                throw new $J.FormatError($JL.invalid_time);
-        }
-
-        let pos    = parts.length - 1;
-        let factor = this.Factor;
-        let value  = 0;
-
-        switch(f) {
-        case $J.TimeFormat.HM:
-            factor = TimeFactor.Min;
-            break;
-
-        case $J.TimeFormat.MS:
-        case $J.TimeFormat.HMS:
-            factor = TimeFactor.Sec;
-            break;
-
-        case $J.TimeFormat.HMSF:
-            if (parts[pos-1] === "." || parts[pos-1] === ",") {
-                value += time_parse_helper(parts[pos], 1);
-                pos -= 2;
-            }
-
-            factor = TimeFactor.Sec;
-            break;
-        }
-
-        while (pos >= 0) {
-            if (pos === 0 && parts[pos] === "-") {
-                value = -value;
-                break;
-            }
-
-            value += time_parse_helper(parts[pos--], factor);
-
-            if (pos >= 0) {
-                if (parts[pos--] !== ":" || factor >= TimeFactor.Hour)
-                    throw new $J.FormatError($JL.invalid_time);
-
-                factor *= 60;
-            }
-        }
-
-        return value;
+        return $JR.stringToTime(text, f);
     }
 
     public cnvValueToInvariant(v: number): string {
@@ -3390,25 +3289,6 @@ function getModuleClass(modulename:string, classname:string) {
        throw new $J.InvalidStateError("'" + classname + "' does not exist in '" + modulename + "' not load.");
 
     return cls;
-}
-
-function time_parse_helper(s: string, f: number): number
-{
-    let v =  $J.parseIntExact(s);
-
-    let maxValue: number|undefined;
-
-    switch(f) {
-    case TimeFactor.Ms:     maxValue = 999;     break;
-    case TimeFactor.Sec:    maxValue =  59;     break;
-    case TimeFactor.Min:    maxValue =  59;     break;
-    case TimeFactor.Hour:   maxValue = 999;     break;
-    }
-
-    if (v < 0 || (maxValue && v > maxValue))
-        throw new RangeError($JL.invalid_value_time(s));
-
-    return v * f;
 }
 
 function encode_key(key: SelectValue): string {
