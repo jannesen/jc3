@@ -127,7 +127,12 @@ export interface IBaseConstructor<TValue,TAttr>
 /**
  * !!DOC
  */
-export interface IControl<T extends BaseType>
+export interface IControlBase
+{
+                focus(): void;
+}
+
+export interface IControl<T> extends IControlBase
 {
     readonly    value: T|undefined;
     readonly    isVisible: boolean;
@@ -137,7 +142,6 @@ export interface IControl<T extends BaseType>
                 attrChanged(attrName: string): void;
                 preValidate(): $JA.Task<unknown>|null;
                 setError(message: string|null): void;
-                focus(): void;
 }
 
 /**
@@ -187,7 +191,7 @@ export interface IValidateErrorErrors
 {
     error:      string | Error;
     value?:     BaseType;
-    control?:   IControl<BaseType>;
+    control?:   IControlBase;
     path?:      string;
 }
 
@@ -200,7 +204,7 @@ export class ValidateErrors extends __Error
         return this._errors;
     }
 
-                constructor(error?:string|Error, value?:BaseType, control?:IControl<BaseType>, path?:string)
+                constructor(error?:string|Error, value?:BaseType, control?:IControlBase, path?:string)
     {
         super("ValidateErrors");
         this.message = "Empty ValidateErrors";
@@ -211,7 +215,7 @@ export class ValidateErrors extends __Error
         }
     }
 
-    public      addError(error:string|Error, value?:BaseType, control?:IControl<BaseType>, path?:string): void
+    public      addError(error:string|Error, value?:BaseType, control?:IControlBase, path?:string): void
     {
         if (error instanceof ValidateErrors) {
             for (const e of error._errors) {
@@ -254,7 +258,7 @@ export class ValidateErrors extends __Error
     }
 }
 
-interface IValidatable
+export interface IValidatable
 {
     preValidateAsync():                  ($JA.Task<unknown>|Error)[]|$JA.Task<unknown>|Error|null;
     validateNow(opts:IValidateOptions):  ValidateResult|Error;
