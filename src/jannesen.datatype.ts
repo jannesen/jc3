@@ -1903,7 +1903,7 @@ export class DateTime extends SimpleNumberType
 
         {
             const n = $J.divModulo(value, 86400000);
-            return $JR.dateToString(n.result) + " " + $JR.timeToString(n.remainder);
+            return $JR.dateToString(n.result) + " " + $JR.timeToString(n.remainder, $J.TimeFormat.HMS);
         }
     }
 
@@ -1911,7 +1911,7 @@ export class DateTime extends SimpleNumberType
         const m = regexDateTime.exec(text);
 
         if (m && typeof m[1] === 'string' && typeof m[2] === 'string') {
-            return this.uiToValue($JR.stringToDate(m[1]) * 86400000 + $JR.stringToTime(m[2]));
+            return this.uiToValue($JR.stringToDate(m[1]) * 86400000 + $JR.stringToTime(m[2], $J.TimeFormat.HMS));
         }
 
         throw new $J.FormatError($JL.invalid_datetime);

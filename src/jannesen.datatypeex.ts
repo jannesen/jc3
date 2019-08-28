@@ -356,14 +356,14 @@ function stringToDateTimeRange(text:string):IRangeValue|null {
     try {
         if (match = regexDataTimeRangeFull.exec(text)) {
             if (typeof match[1] === "string" && typeof match[2] === "string" && match[3] === "string" && typeof match[4] === "string") {
-                return { Begin: $JR.stringToDate(match[1]) * 86400000 + $JR.stringToTime(match[2]),
-                         End:   $JR.stringToDate(match[3]) * 86400000 + $JR.stringToTime(match[4]) };
+                return { Begin: $JR.stringToDate(match[1]) * 86400000 + $JR.stringToTime(match[2], $J.TimeFormat.HMS),
+                         End:   $JR.stringToDate(match[3]) * 86400000 + $JR.stringToTime(match[4], $J.TimeFormat.HMS) };
             }
         }
         else if (match = regexDateAndTimeRange.exec(text)) {
             if (typeof match[1] === "string" && typeof match[2] === "string" && typeof match[3] === "string") {
                 const d = $JR.stringToDate(match[1]) * 86400000;
-                return { Begin: d + $JR.stringToTime(match[2]), End: d + $JR.stringToTime(match[3]) };
+                return { Begin: d + $JR.stringToTime(match[2], $J.TimeFormat.HMS), End: d + $JR.stringToTime(match[3], $J.TimeFormat.HMS) };
             }
         }
 

@@ -149,7 +149,7 @@ export function dateToString(v: number | Date): string
            $J.intToA(d.getUTCFullYear(), 4);
 }
 
-export function stringToTime(text:string, timeformat?:$J.TimeFormat):number {
+export function stringToTime(text:string, timeformat:$J.TimeFormat):number {
     let m:RegExpExecArray|null;
 
     switch (timeformat) {
@@ -180,7 +180,7 @@ export function stringToTime(text:string, timeformat?:$J.TimeFormat):number {
     throw new $J.FormatError("Invalid time");
 }
 
-export function timeToString(value:number, timeformat?:$J.TimeFormat):string {
+export function timeToString(value:number, timeformat:$J.TimeFormat):string {
     let sign = (value < 0);
     if (sign) value = -value;
 

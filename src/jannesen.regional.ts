@@ -148,7 +148,7 @@ export function dateToString(v: number | Date): string
            $J.intToA(d.getUTCFullYear(), 4);
 }
 
-export function stringToTime(text:string, timeformat?:$J.TimeFormat):number {
+export function stringToTime(text:string, timeformat:$J.TimeFormat):number {
     let m:RegExpExecArray|null;
 
     switch (timeformat) {
@@ -179,7 +179,7 @@ export function stringToTime(text:string, timeformat?:$J.TimeFormat):number {
     throw new $J.FormatError("Invalid time");
 }
 
-export function timeToString(value:number, timeformat?:$J.TimeFormat):string {
+export function timeToString(value:number, timeformat:$J.TimeFormat):string {
     let sign = (value < 0);
     if (sign) value = -value;
 
@@ -192,12 +192,12 @@ export function timeToString(value:number, timeformat?:$J.TimeFormat):string {
         n = $J.divModulo(Math.round(value / 60000), 60);
         return (sign ? "-":"") + $J.intToA(n.result, 2) + ":" + $J.intToA(n.remainder, 2);
 
+    default:
     case $J.TimeFormat.HMS:
         n = $J.divModulo(Math.round(value / 1000), 60);  seconds  = n.remainder;
         n = $J.divModulo(n.result,                 60);
         return (sign ? "-":"") + $J.intToA(n.result, 1) + ":" + $J.intToA(n.remainder, 2) + ":" + $J.intToA(seconds, 2);
 
-    default:
     case $J.TimeFormat.HMSF:
         n = $J.divModulo(Math.round(value), 1000);  fraction = Math.round(n.remainder * 1000);
         n = $J.divModulo(n.result,            60);  seconds  = n.remainder;
