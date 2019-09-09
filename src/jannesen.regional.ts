@@ -96,8 +96,8 @@ export function stringToDate(s: string): number
                     }
                     else {
                         d = stringToDay(parts[2]!);
-                        m = stringToMonth(parts[4]!);
-                        y = stringToYear(parts[5]!);
+                        m = stringToMonth(parts[3]!);
+                        y = stringToYear(parts[4]!);
                     }
                     if (y>=1900 && y<=2099 && m>= 1 && m<=12 && d>=1 && d<=31) {
                         return $J.newDate(y, m, d);
