@@ -11,9 +11,9 @@ import * as $JTAB       from "jc3/jannesen.ui.tab";
 import * as $JMENU      from "jc3/jannesen.ui.menu";
 import * as $JDATATABLE from "jc3/jannesen.ui.datatable";
 
-function normalizeArgs(args:$J.IUrlArgsColl|$JT.Record|null|void):$J.IUrlArgsColl;
-function normalizeArgs(args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record|null|void):$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet;
-function normalizeArgs(args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record|null|void):$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet {
+function normalizeArgs(args:$J.IUrlArgsColl|$JT.Record<$JT.IFieldDef>|null|void):$J.IUrlArgsColl;
+function normalizeArgs(args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record<$JT.IFieldDef>|null|void):$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet;
+function normalizeArgs(args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record<$JT.IFieldDef>|null|void):$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet {
     if (args === null || args === undefined) {
         return {};
     }
@@ -58,7 +58,7 @@ export class UrlArgSet implements $JCONTENT.IUrlArgsSet
         this._curr = curr;
     }
 
-    public static   RecordsetMap<T extends $JT.Record>(recordset: $JT.Set<T>|T[], currecord: T, mapper:(c:T)=>$J.IUrlArgsColl)
+    public static   RecordsetMap<T extends $JT.Record<$JT.IFieldDef>>(recordset: $JT.Set<T>|T[], currecord: T, mapper:(c:T)=>$J.IUrlArgsColl)
     {
         let set:$J.IUrlArgsColl[]  = [];
         let curr:number|null       = null;
@@ -114,7 +114,7 @@ export class UrlArgSet implements $JCONTENT.IUrlArgsSet
 /**
  *!!DOC
  */
-export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|void,void,$JT.Record|$JT.RecordSet>, TState> extends $JCONTENT.Form<$J.IUrlArgsColl, TState>
+export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record<$JT.IFieldDef>|void,void,$JT.Record<$JT.IFieldDef>|$JT.RecordSet<$JT.IFieldDef>>, TState> extends $JCONTENT.Form<$J.IUrlArgsColl, TState>
 {
     protected               _formargs:              $JA.AjaxCallArgsType<TCall>;
     private                 _datapopup?:            DataPopup|null;
@@ -175,7 +175,7 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|
         this.execute((context) => $JCONTENT.dialogShow(form, args, context)
                                            .then((rtn) => { if (rtn==="OK" || rtn==="DELETE") this.refresh(); }));
     }
-    protected               openform(formName:string, args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record|null|void, historyReplace?:boolean)
+    protected               openform(formName:string, args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record<$JT.IFieldDef>|null|void, historyReplace?:boolean)
     {
         return super.openform(formName, normalizeArgs(args), historyReplace);
     }
@@ -194,7 +194,7 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|
 /**
  *!!DOC
  */
-export abstract class SimpleForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|void,void,$JT.Record|$JT.RecordSet>> extends BaseForm<TCall, void>
+export abstract class SimpleForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record<$JT.IFieldDef>|void,void,$JT.Record<$JT.IFieldDef>|$JT.RecordSet<$JT.IFieldDef>>> extends BaseForm<TCall, void>
 {
     private                 _resultdata:            $JA.AjaxCallResponseType<TCall>|undefined;
 
@@ -217,7 +217,7 @@ export abstract class SimpleForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
     protected               onopen(args:$J.IUrlArgsColl, state:void, ct:$JA.Context):$JA.Task<void>|void
     {
         this.showDataPopup();
-        let callargs:$JT.Record|undefined;
+        let callargs:$JT.Record<$JT.IFieldDef>|undefined;
 
         const formargs = this._formargs;
         if (formargs instanceof $JT.Record) {
@@ -346,7 +346,7 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
 /**
  *!!DOC
  */
-export abstract class QueryForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|void,void,$JT.RecordSet>> extends BaseForm<TCall, ISearchFormState<TCall>>
+export abstract class QueryForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record<$JT.IFieldDef>|void,void,$JT.RecordSet<$JT.IFieldDef>>> extends BaseForm<TCall, ISearchFormState<TCall>>
 {
     protected get           interfaceGet():         TCall   { throw new $J.InvalidStateError("interfaceGet not implemented."); }
     public    get           canReOpen():boolean     { return true;                             }
@@ -390,7 +390,7 @@ export abstract class QueryForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record
 /**
  *!!DOC
  */
-export interface ISearchFormState<TCall extends $JA.IAjaxCallDefinition<$JT.Record|void,void,$JT.RecordSet>>
+export interface ISearchFormState<TCall extends $JA.IAjaxCallDefinition<$JT.Record<$JT.IFieldDef>|void,void,$JT.RecordSet<$JT.IFieldDef>>>
 {
     callargs:       $JA.AjaxCallRequestType<TCall>|null;
     resultdata:     $JA.AjaxCallResponseType<TCall>;
@@ -399,7 +399,7 @@ export interface ISearchFormState<TCall extends $JA.IAjaxCallDefinition<$JT.Reco
 /**
  *!!DOC
  */
-interface ISearchFormResult<TCall extends $JA.IAjaxCallDefinition<$JT.Record|void,void,$JT.RecordSet>>
+interface ISearchFormResult<TCall extends $JA.IAjaxCallDefinition<$JT.Record<$JT.IFieldDef>|void,void,$JT.RecordSet<$JT.IFieldDef>>>
 {
     callargs:       $JA.AjaxCallRequestType<TCall>|null;
     container:      $JD.DOMHTMLElement;
@@ -409,11 +409,11 @@ interface ISearchFormResult<TCall extends $JA.IAjaxCallDefinition<$JT.Record|voi
 /**
  *!!DOC
  */
-export type SearchFormDataTableOpts<TCall extends $JA.IAjaxCallDefinition<any,void,$JT.RecordSet>> = $JDATATABLE.IDataTableOpts<$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>>;
+export type SearchFormDataTableOpts<TCall extends $JA.IAjaxCallDefinition<any,void,$JT.RecordSet<$JT.IFieldDef>>> = $JDATATABLE.IDataTableOpts<$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>>;
 /**
  *!!DOC
  */
-export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|void,void,$JT.RecordSet>> extends QueryForm<TCall>
+export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record<$JT.IFieldDef>|void,void,$JT.RecordSet<$JT.IFieldDef>>> extends QueryForm<TCall>
 {
     private                 _hasquery:              boolean;
     private                 _result:                ISearchFormResult<TCall>|undefined;
@@ -458,7 +458,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
         this.showDataPopup();
         if (state) {
             if (this._formargs as unknown instanceof $JT.Record) {
-                (this._formargs as $JT.Record).parseUrlArgs(state.callargs);
+                (this._formargs as $JT.Record<$JT.IFieldDef>).parseUrlArgs(state.callargs);
             }
 
             this.clearResult();
@@ -598,7 +598,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
 /**
  *!!DOC
  */
-export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record|void,void,$JT.RecordSet>> extends QueryForm<TCall>
+export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record<$JT.IFieldDef>|void,void,$JT.RecordSet<$JT.IFieldDef>>> extends QueryForm<TCall>
 {
     private                 _resultdata:            $JA.AjaxCallResponseType<TCall>|undefined;
     private                 _resultcontainer:       $JD.DOMHTMLElement|undefined;
@@ -616,7 +616,7 @@ export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
     protected               onload(ct:$JA.Context):void
     {
         if (this._formargs as unknown instanceof $JT.Record) {
-            const formargs = this._formargs as $JT.Record;
+            const formargs = this._formargs as $JT.Record<$JT.IFieldDef>;
             const elmqueryform = <div class="-query">
                                     <div class="-form">{ this.queryform(this._formargs) }</div>
                                     <div class="-buttons"><button class="btn btn-execute" onclick={() => this.onExecuteQuery() }>{ $JL.queryexecute }</button></div>
@@ -637,7 +637,7 @@ export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
     {
         this.showDataPopup();
 
-        let callargs: $JT.Record|null = null;
+        let callargs: $JT.Record<$JT.IFieldDef>|null = null;
         const formargs = this._formargs;
 
         if (formargs instanceof $JT.Record) {
@@ -701,9 +701,9 @@ export const enum StandardDialogMode
 export interface IStandardDialogCallData
 {
     dlgmode?:               StandardDialogMode;
-    callargs?:              $JT.Record | $JT.IRecord | $J.IUrlArgs ;
+    callargs?:              $JT.Record<$JT.IFieldDef> | $JT.IRecord | $J.IUrlArgs ;
     callargsext?:           $JT.IRecord;
-    data?:                  $JT.Record | $JT.IRecord | $JT.RecordSet;
+    data?:                  $JT.Record<$JT.IFieldDef> | $JT.IRecord | $JT.RecordSet<$JT.IFieldDef>;
     dataext?:               $JT.IRecord;
     [key: string]:          any;
 }

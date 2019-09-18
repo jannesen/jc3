@@ -68,7 +68,7 @@ export type SelectValue = number|string;
 /**
  *!!DOC
  */
-export type RecordSet<TRec extends IFieldDef = IFieldDef> = Set<Record<TRec>>;
+export type RecordSet<TRec extends IFieldDef> = Set<Record<TRec>>;
 
 /**
  * Assign type
@@ -2533,7 +2533,7 @@ export class StringSelect<TDatasource extends SelectDatasource<string,ISelectRec
  */
 export interface IRecordAttributes extends ISimpleTypeAttributes<Object>
 {
-    validate?: (rec:Record) => ValidateValueResult;
+    validate?: (rec:Record<IFieldDef>) => ValidateValueResult;
 }
 
 /**
@@ -2572,7 +2572,7 @@ export type RecordFieldNames<T> = T extends Record<infer U> ? { [K in keyof U] :
 /**
  *!!DOC
  */
-export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType implements $J.IUrlArgsFunc
+export class Record<TRec extends IFieldDef> extends BaseType implements $J.IUrlArgsFunc
 {
     public static   Name                = "Record";
     public static   Attributes          = $J.extend<IRecordAttributes>({ null_response_error:true }, BaseType.Attributes);
@@ -2660,7 +2660,7 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
         }
 
         if (r instanceof Record) {
-            this.FieldNames.forEach((name) => this.field(name).assign((<Record>r).contains(name) ? (<Record>r).field(name) : null));
+            this.FieldNames.forEach((name) => this.field(name).assign((<Record<IFieldDef>>r).contains(name) ? (<Record<IFieldDef>>r).field(name) : null));
             return;
         }
 
@@ -2681,11 +2681,11 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
     }
 
     /**
-     *!!DOC
+     *!!DOCx
      */
     public field<K extends keyof TRec>(name: K): InstanceType<TRec[K]>;
     public field<T extends BaseType>(name:string): (T extends SimpleType<any>|Record<any>|Set<any> ? T : unknown);
-    public field<T extends BaseType>(name:string): T
+    public field(name:string): unknown
     {
         if (!this.contains(name))
             throw new $J.InvalidStateError("field '" + name + "' is not part of the record.");
@@ -2694,7 +2694,7 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
             this._fields = this._createFields();
         }
 
-        return this._fields[name] as T;
+        return this._fields[name];
     }
 
     public toJSON(): $J.JsonValue {
@@ -2793,7 +2793,7 @@ export class Record<TRec extends IFieldDef = IFieldDef> extends BaseType impleme
      *!!DOC
      */
     public validateValue(): ValidateValueResult {
-        let validate = this.getAttr("validate") as ((rec:Record) => ValidateValueResult)|undefined;
+        let validate = this.getAttr("validate") as ((rec:this) => ValidateValueResult)|undefined;
 
         return typeof validate === 'function' ? validate(this) : null;
     }
@@ -2833,26 +2833,26 @@ export interface ISetAttributes extends ISimpleTypeAttributes<Array<any>> // TOD
 {
     minOccurs?: number;
     maxOccurs?: number;
-    validate?:  (rec:Set<Record|SimpleType<any>>) => ValidateValueResult;
+    validate?:  (rec:Set<Record<IFieldDef>|SimpleType<any>>) => ValidateValueResult;
 }
 
 /**
  *!!DOC
  */
-export type ISetItemDefConstructor<TSet extends Record|SimpleType<any>> =
-    TSet extends Record ?   {
+export type ISetItemDefConstructor<TSet extends Record<IFieldDef>|SimpleType<any>> =
+    TSet extends Record<RecordIFieldDef<TSet>> ?   {
                                 Name:           "Record";
                                 Attributes:     IRecordAttributes;
                                 FieldDef:       RecordIFieldDef<TSet>;
-                                new():          Record<RecordIFieldDef<TSet>>; //TSLIMIT: new(): TSet create wrong typing in 3.4
+                                new():          TSet;
                             } : {
                                 Name:           "SimpleType";
                                 Attributes:     ISimpleTypeAttributes<any>;
                                 NativeType:     string;
-                                new():          TSet
+                                new():          TSet;
                             };
 
-export interface ISetConstructor<TSet extends Record|SimpleType<any>>
+export interface ISetConstructor<TSet extends Record<IFieldDef>|SimpleType<any>>
 {
     Name:           "Set";
     Attributes:     ISetAttributes;
@@ -2860,12 +2860,12 @@ export interface ISetConstructor<TSet extends Record|SimpleType<any>>
     new():          Set<TSet>;
 }
 
-export type RecordOfSet<TSet extends RecordSet> = TSet extends Set<infer U> ? U : never;
+export type RecordOfSet<TSet extends RecordSet<IFieldDef>> = TSet extends Set<infer U> ? U : never;
 
 /**
  *!!DOC
  */
-export class Set<TSet extends Record|SimpleType<any>> extends BaseType
+export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseType
 {
     public static   Name                                                            = "Set";
     public static   Attributes                                                      = $J.extend<ISetAttributes>({ }, BaseType.Attributes);
@@ -2873,7 +2873,7 @@ export class Set<TSet extends Record|SimpleType<any>> extends BaseType
 
     protected       _items!:TSet[];
 
-    public static   define<TSet extends Record|SimpleType<any>>(itemdef:IBaseConstructor<TSet, IBaseTypeAttributes>, attr?:ISetAttributes): ISetConstructor<TSet> {
+    public static   define<TSet extends Record<IFieldDef>|SimpleType<any>>(itemdef:IBaseConstructor<TSet, IBaseTypeAttributes>, attr?:ISetAttributes): ISetConstructor<TSet> {
         var newClass:any = new Function("this._initialize();");
 
         newClass.prototype   = Object.create(Set.prototype);

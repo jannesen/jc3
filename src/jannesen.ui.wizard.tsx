@@ -10,9 +10,9 @@ import * as $JCONTENT   from "jc3/jannesen.ui.content";
 
 export interface IWizardDialogCallData
 {
-    callargs?:              $JT.Record | $JT.IRecord | $J.IUrlArgs ;
+    callargs?:              $JT.Record<$JT.IFieldDef> | $JT.IRecord | $J.IUrlArgs ;
     callargsext?:           $JT.IRecord;
-    data?:                  $JT.Record | $JT.IRecord | $JT.RecordSet;
+    data?:                  $JT.Record<$JT.IFieldDef> | $JT.IRecord | $JT.RecordSet<$JT.IFieldDef>;
     dataext?:               $JT.IRecord;
     [key: string]:          any;
 }

@@ -1601,7 +1601,7 @@ function genericAttr(container:$JD.DOMHTMLElement, node: $JD.DOMHTMLElement, opt
 
 
 //===================================== Set =======================================================
-export interface ISetOptions<TSet extends $JT.Record|$JT.SimpleType<any>=$JT.Record>
+export interface ISetOptions<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleType<any>=$JT.Record<$JT.IFieldDef>>
 {
     data:               $JT.Set<TSet>;
     container:          $JD.DOMHTMLElement;
@@ -1610,7 +1610,7 @@ export interface ISetOptions<TSet extends $JT.Record|$JT.SimpleType<any>=$JT.Rec
     itemConstructor?:   (rec:TSet, setItem:SetItem<TSet>) => $JD.DOMHTMLElement;
 }
 
-export class SetInput<TSet extends $JT.Record|$JT.SimpleType<any>> extends $JD.Container
+export class SetInput<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleType<any>> extends $JD.Container
 {
     private             _data:          $JT.Set<TSet>;
     private             _autoAddDel:    boolean;
@@ -1729,7 +1729,7 @@ export class SetInput<TSet extends $JT.Record|$JT.SimpleType<any>> extends $JD.C
     }
 }
 
-export abstract class SetItem<TSet extends $JT.Record|$JT.SimpleType<any>>
+export abstract class SetItem<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleType<any>>
 {
     private             _set:           SetInput<TSet>;
     private             _data:          TSet;

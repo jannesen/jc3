@@ -6,7 +6,7 @@ import * as $JD       from "jc3/jannesen.dom";
 import * as $JT       from "jc3/jannesen.datatype";
 import * as $JCONTENT from "jc3/jannesen.ui.content";
 
-export interface IDataTableOpts<TRec extends $JT.Record>
+export interface IDataTableOpts<TRec extends $JT.Record<$JT.IFieldDef>>
 {
     tableClass?:    string;
     rowClass?:      string | ((rec:TRec, idx:number)=>string);
@@ -17,7 +17,7 @@ export interface IDataTableOpts<TRec extends $JT.Record>
     sort?:          (a:TRec, b:TRec) => number;
 }
 
-export interface IDataTableOptsColumn<TRec extends $JT.Record>
+export interface IDataTableOptsColumn<TRec extends $JT.Record<$JT.IFieldDef>>
 {
     title?:         string;
     data?:          $JT.RecordFieldNames<TRec> | ((rec: TRec)=>string|$JD.AddNode);
@@ -28,7 +28,7 @@ export interface IDataTableOptsColumn<TRec extends $JT.Record>
     width?:         string|number;
 }
 
-export interface IDataTableOptsButton<TRec extends $JT.Record>
+export interface IDataTableOptsButton<TRec extends $JT.Record<$JT.IFieldDef>>
 {
     className:      string;
     title?:         string;
@@ -51,7 +51,7 @@ const enum DelayReason {
     Scroll      = 1,
     Filter      = 2
 }
-export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
+export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD.IDOMContainer
 {
     private     _opts:          IDataTableOpts<TRecord>;
     private     _recordset:     TRecord[];
@@ -658,7 +658,7 @@ export class DataTable<TRecord extends $JT.Record> implements $JD.IDOMContainer
             }
 
             if (typeof this._opts.rowClass === "function")
-                row.addClass((this._opts.rowClass as (rec:$JT.Record, idx:number)=>string)(rec, idx));
+                row.addClass((this._opts.rowClass as (rec:$JT.Record<$JT.IFieldDef>, idx:number)=>string)(rec, idx));
             else
             if (typeof this._opts.rowClass === "string")
                 row.addClass(this._opts.rowClass as string);
@@ -871,7 +871,7 @@ function helper_getrecordId(e:any): number|null
 
     return null;
 }
-function helper_getbutton<TRec extends $JT.Record>(buttons:IDataTableOptsButton<TRec>[], e:any): IDataTableOptsButton<TRec>|undefined
+function helper_getbutton<TRec extends $JT.Record<$JT.IFieldDef>>(buttons:IDataTableOptsButton<TRec>[], e:any): IDataTableOptsButton<TRec>|undefined
 {
     if (e.tagName === "SPAN") {
         let className = e.getAttribute("class");

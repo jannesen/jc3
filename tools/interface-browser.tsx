@@ -127,7 +127,7 @@ class Content implements $JD.IDOMContainer
     private     _createInput(data: $JT.BaseType): $JD.AddNode {
         try {
             if (data instanceof $JT.Record) {
-                return this._createInputRecord(data as $JT.Record);
+                return this._createInputRecord(data as $JT.Record<$JT.IFieldDef>);
             }
             if (data instanceof $JT.Set) {
                 return "Set Niet geimplementeerd";
@@ -140,15 +140,15 @@ class Content implements $JD.IDOMContainer
             return $JUC.errorToContent(e);
         }
     }
-    private     _createInputRecord(data: $JT.Record): $JD.AddNode {
+    private     _createInputRecord(data: $JT.Record<$JT.IFieldDef>): $JD.AddNode {
         return <table>
                 {
-                    (data as $JT.Record).FieldNames.map((name) =>
-                                                            <tr>
-                                                                <td>{ name }</td>
-                                                                <td>{ this._createInput((data as $JT.Record).field(name)) }</td>
-                                                            </tr>
-                                                        )
+                    (data as $JT.Record<$JT.IFieldDef>).FieldNames.map((name) =>
+                                                                           <tr>
+                                                                               <td>{ name }</td>
+                                                                               <td>{ this._createInput((data as $JT.Record<$JT.IFieldDef>).field(name)) }</td>
+                                                                           </tr>
+                                                                       )
                 }
                 </table>;
     }
@@ -169,16 +169,16 @@ class Content implements $JD.IDOMContainer
             return $JUC.errorToContent(e);
         }
     }
-    private     _createResponseRecord(data: $JT.Record): $JD.AddNode {
+    private     _createResponseRecord(data: $JT.Record<$JT.IFieldDef>): $JD.AddNode {
         if (data.fields !== null) {
             return <table class="response">
                    {
-                        (data as $JT.Record).FieldNames.map((name) =>
-                                                                <tr>
-                                                                    <td class="name">{ name }</td>
-                                                                    <td>{ this._createResponse((data as $JT.Record).field(name)) }</td>
-                                                                </tr>
-                                                            )
+                        (data as $JT.Record<$JT.IFieldDef>).FieldNames.map((name) =>
+                                                                               <tr>
+                                                                                   <td class="name">{ name }</td>
+                                                                                   <td>{ this._createResponse((data as $JT.Record<$JT.IFieldDef>).field(name)) }</td>
+                                                                               </tr>
+                                                                           )
                    }
                    </table>;
         } else {
