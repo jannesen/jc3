@@ -310,11 +310,6 @@ function stringToDateRange(text:string):IRangeValue|null
             }
         }
 
-        if ($JR.regexDate.test(text)) {
-            const day = $JR.stringToDate(text);
-            return { Begin: day , End: day };
-        }
-
         if (match = /^^([1[0-2]|0?[1-9]|[a-z]+) ?-? ?([12][0-9]{3})$/.exec(text)) {
             if (typeof match[1] === "string" && typeof match[2] === "string") {
                 const m    = $JR.stringToMonth(match[1]!);
@@ -339,6 +334,11 @@ function stringToDateRange(text:string):IRangeValue|null
         if (/^[12][0-9]{3}$/.test(text)) {
             const year = $J.parseIntExact(text);
             return { Begin: $J.newDate(year, 1, 1), End: $J.newDate(year, 12, 31) };
+        }
+
+        if ($JR.regexDate.test(text)) {
+            const day = $JR.stringToDate(text);
+            return { Begin: day , End: day };
         }
     } catch(e) {
     }
