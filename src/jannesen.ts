@@ -858,7 +858,7 @@ function MathHelper(func:number, values:(number|null|undefined)[]): number|null|
     for (var i = 1; i < values.length; ++i) {
         var v = values[i];
         if (typeof v !== 'number')
-            return r;
+            return v;
 
         switch(func) {
         case 1:     r += v; break;
