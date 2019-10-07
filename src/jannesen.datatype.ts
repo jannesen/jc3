@@ -2839,8 +2839,8 @@ export interface ISetAttributes extends ISimpleTypeAttributes<Array<any>> // TOD
 /**
  *!!DOC
  */
-export type ISetItemDefConstructor<TSet extends Record<IFieldDef>|SimpleType<any>> =
-    TSet extends Record<RecordIFieldDef<TSet>> ?   {
+export type ISetItemDefConstructor<TSet extends Record<any>|SimpleType<any>> =
+    TSet extends Record<any> ?   {
                                 Name:           "Record";
                                 Attributes:     IRecordAttributes;
                                 FieldDef:       RecordIFieldDef<TSet>;

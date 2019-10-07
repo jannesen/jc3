@@ -300,7 +300,7 @@ export function testContructorOf<T extends new ()=>Object>(constructor:any, type
  */
 export function extend(target:any, ...sources: any[]): Object;
 export function extend<T extends { [key: string]: any }>(target: T, ...sources: any[]): T;
-export function extend<T extends { [key: string]: any }>(target: T, ...sources: any[]): T
+export function extend(target:any, ...sources: any[]): Object
 {
     sources.forEach(obj =>
     {

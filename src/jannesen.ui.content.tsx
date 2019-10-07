@@ -1129,7 +1129,7 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
 /**
  * !!DOC
  */
-export function dialogShow<TArgs,TRtn>(form:string|(new (context:$JA.Context)=>DialogBase<TArgs, TRtn>), args: TArgs, context:$JA.Context|null): $JA.Task<TRtn|string|undefined>
+export function dialogShow<TArgs,TRtn>(form:string|(new (context:$JA.Context)=>DialogBase<TArgs, TRtn>), args: TArgs, context:$JA.Context|null): $JA.Task<TRtn>
 {
     return (new DialogLoader<TArgs, TRtn>(context)).runAsync(form, args);
 }
@@ -1140,7 +1140,7 @@ export function dialogShow<TArgs,TRtn>(form:string|(new (context:$JA.Context)=>D
 export abstract class DialogBase<TArgs, TRtn> extends ContentBody<DialogLoader<TArgs, TRtn>, TArgs>
 {
     protected           _dialogFlags:   DialogFlags;
-    private             _onclose:       ((rtn:TRtn|string|Error|undefined)=>void)|null;
+    private             _onclose:       ((rtn:TRtn|Error)=>void)|null;
 
     public get          dialogFlags():DialogFlags {
         return this._dialogFlags;
@@ -1191,18 +1191,18 @@ export abstract class DialogBase<TArgs, TRtn> extends ContentBody<DialogLoader<T
 
     /*@internal*/       _runDialogAsync(ct:$JA.Context)
     {
-        return new $JA.Task<TRtn|string|undefined>((resolver, reject, oncancel) => {
-                                            oncancel((reason) => reject(reason));
-                                            this._onclose = (rtn) => {
-                                                                        this._onclose = null;
+        return new $JA.Task<TRtn>((resolver, reject, oncancel) => {
+                                      oncancel((reason) => reject(reason));
+                                      this._onclose = (rtn) => {
+                                                          this._onclose = null;
 
-                                                                        if (rtn instanceof Error) {
-                                                                            reject(rtn);
-                                                                        } else {
-                                                                            resolver(rtn);
-                                                                        }
-                                                                    };
-                                        }, ct);
+                                                          if (rtn instanceof Error) {
+                                                              reject(rtn);
+                                                          } else {
+                                                              resolver(rtn);
+                                                          }
+                                                      };
+                                  }, ct);
     }
     /*@internal*/       _layoutDialog(pos:$JD.IPosition)
     {
@@ -1454,7 +1454,7 @@ export class DialogConfirm extends Dialog<{title:string, message:string|$JD.DOMH
 /**
  * !!DOC
  */
-export class DialogError extends Dialog<string|Error|Error[]|$JD.DOMHTMLElement, void>
+export class DialogError extends Dialog<string|Error|Error[]|$JD.DOMHTMLElement, string>
 {
     public static       show(err: string|Error|Error[]|$JD.DOMHTMLElement, ct:$JA.Context|null)
     {

@@ -800,7 +800,7 @@ export abstract class ViewBase implements $JD.IDOMContainer
             const maxValue = Math.max(this._value.Value, this._range);
 
             cells.forEach(cell => {
-                const value = cell.data('value');
+                const value = cell.data<number>('value');
                 cell.toggleClass('-range-selected', minValue <= value && value <= maxValue);
             });
         }
