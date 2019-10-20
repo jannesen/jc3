@@ -1,23 +1,5 @@
 ﻿@import "fontawesome.scss";
 
-@font-face {
-    font-family: 'Font Awesome 5 Pro';
-    font-style: normal;
-    font-weight: 900;
-    font-display: auto;
-    src: url("lib/font/fa-solid-900.eot");
-    src: url("lib/font/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("lib/font/fa-solid-900.woff2") format("woff2");
-}
-
-@font-face {
-    font-family: 'Font Awesome 5 Pro';
-    font-style: normal;
-    font-weight: 400;
-    font-display: auto;
-    src: url("lib/font/fa-regular-400.eot");
-    src: url("lib/font/fa-regular-400.eot?#iefix") format("embedded-opentype"), url("lib/font/fa-regular-400.woff2") format("woff2");
-}
-
 @mixin user-select($arg) {
   -webkit-user-select: $arg;
   -moz-user-select: $arg;
