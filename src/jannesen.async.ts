@@ -79,6 +79,16 @@ export class OperationCanceledError extends __Error
 /**
  *!!DOC
  */
+export class XMLHttpRequestFailed extends __Error
+{
+    constructor(message:string) {
+        super("XMLHttpRequestFailed", message);
+    }
+}
+
+/**
+ *!!DOC
+ */
 export class TimeoutError extends __Error
 {
     constructor(message?:string) {
@@ -1074,7 +1084,7 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
                     if (xhr.readyState === 4 && !xhr_done) {
                         xhr_done = true;
                         if (xhr.status === 0)
-                            on_timeout();
+                            reject(new XMLHttpRequestFailed("XMLHttpRequest failed."));
                         else
                             on_datareceived();
                     }
@@ -1086,7 +1096,7 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
                 try {
                     if (!xhr_done) {
                         xhr_done = true;
-                        on_timeout();
+                        reject(new TimeoutError("Timeout"));
                     }
                 } catch(e) {
                     $J.globalError("xhr.ontimeout handler failed.", e);
@@ -1096,9 +1106,6 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
                 xhr_done = true;
                 xhr.abort();
                 reject(reason);
-            }
-            function on_timeout() {
-                reject(new TimeoutError("Timeout"));
             }
             function on_datareceived() {
                 let rtn:any;
