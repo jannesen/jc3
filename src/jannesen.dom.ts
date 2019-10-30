@@ -2027,8 +2027,12 @@ function insertHelper(child:any):NodeFragment|null
                 return insertHelperArray(child);
 
             if (child instanceof Object) {
-                if (child.container instanceof Object)
-                    return insertHelper(child.container);
+                const c = child.container;
+                if (c instanceof Object)
+                    return insertHelper(c);
+
+                if (typeof c === 'string')
+                    return $global.document.createTextNode(c);
 
                 if (typeof child.toDom === "function")
                     return insertHelper(child.toDom());
