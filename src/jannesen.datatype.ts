@@ -681,6 +681,10 @@ export abstract class BaseType implements IValidatable, $J.EventHandling, $JD.IT
         return false;
     }
 
+    public setErrorAndReturnValidateError(msg:string|Error)
+    {
+        return new ValidateErrors(msg, this, this.setError(stringErrorToMessage(msg)) ? this._control : undefined);
+    }
     /**
      *!!DOC
      */
