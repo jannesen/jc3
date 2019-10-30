@@ -941,7 +941,7 @@ export abstract class SubmitDialog<TArgs, TRtn=void> extends $JCONTENT.DialogBas
     }
     protected               onopen(args: TArgs, ct: $JA.Context)
     {
-        const t = this.initData(this.args);
+        const t = this.initData(this.args, ct);
 
         if (t) {
             return t.then(() => this._createcontent());
@@ -951,7 +951,7 @@ export abstract class SubmitDialog<TArgs, TRtn=void> extends $JCONTENT.DialogBas
         }
     }
 
-    protected               initData(dlgargs:TArgs): $JA.Task<unknown>|void
+    protected               initData(dlgargs:TArgs, ct: $JA.Context): $JA.Task<unknown>|void
     {
     }
     protected abstract      formTitle(): string;
@@ -1034,7 +1034,8 @@ export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition
             _data.setDefault();
         }
     }
-    protected               validate(ct:$JA.Context): $JA.Task<$JT.ValidateResult> {
+    protected               validate(ct:$JA.Context): $JA.Task<$JT.ValidateResult>
+    {
         return this.data as unknown instanceof $JT.BaseType ? (this.data as unknown as $JT.BaseType).validateAsync({ context:ct }) : $JA.Task.resolve($JT.ValidateResult.OK);
     }
     protected               onSubmit(context:$JA.Context): $JA.Task<TRtn>
