@@ -11,8 +11,9 @@ export type AddTab    = Tab|undefined|false|AddTabArray;
 
 export interface ITabsAttr
 {
-    context?:       $JA.Context;
-    selectfirst?:   boolean;
+    containerClass?:    string;
+    context?:           $JA.Context;
+    selectfirst?:       boolean;
 }
 
 export class Tabs extends $JD.Container implements $JD.ISetSize
@@ -50,6 +51,10 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
     {
         const tabheader = <div class="-tab-header"/>;
         const container = <div class="jannesen-ui-tabs" tabIndex="0" >{ tabheader }</div>;
+
+        if (attr && attr.containerClass) {
+            container.addClass(attr.containerClass);
+        }
 
         super(container);
 
