@@ -2465,6 +2465,7 @@ export interface INumberSelectConstructor<TDatasource extends SelectDatasource<n
     readonly    Attributes:     ISelectTypeAttributes<number,TDatasource>;
                 subClass(attr:ISelectTypeAttributes<number,TDatasource>): INumberSelectConstructor<TDatasource>;
                 subClass(attr:ISimpleTypeAttributes<string>): INumberSelectConstructor<TDatasource>;
+                castFrom(v:any): NumberSelect<TDatasource>;
                 new():          NumberSelect<TDatasource>;
 }
 
@@ -2476,15 +2477,18 @@ export class NumberSelect<TDatasource extends SelectDatasource<number,ISelectRec
     public static   Name        = "NumberSelect";
     public static   NativeType  = "number";
 
-    public static   subClass<TDatasource extends SelectDatasource<number,ISelectRecord>>(attr:ISelectTypeAttributes<number,TDatasource>): INumberSelectConstructor<TDatasource> {
+    public static   subClass<TDatasource extends SelectDatasource<number,ISelectRecord>>(attr:ISelectTypeAttributes<number,TDatasource>): INumberSelectConstructor<TDatasource>
+    {
         return subClassHelper(NumberSelect, attr);
     }
 
-    public cnvValueToInvariant(v: number):string {
+    public cnvValueToInvariant(v: number):string
+    {
         return v.toString();
     }
 
-    public cnvInvariantToValue(invariant: string): number {
+    public cnvInvariantToValue(invariant: string): number
+    {
         return $J.parseIntExact(invariant);
     }
 
