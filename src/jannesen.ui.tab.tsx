@@ -304,7 +304,10 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
         if (this._disabled) {
             this._titleElement.disabled = true;
         }
-        if (!this._loaded) {
+        if (this._loaded) {
+            this._tabContent = children.length === 1 ? children[0] : children;
+        }
+        else {
             if (!(this._loadcontent = attr.loadcontent)) {
                 this._loadform    = attr.loadform;
             }
