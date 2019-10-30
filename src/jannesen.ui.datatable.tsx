@@ -8,6 +8,7 @@ import * as $JCONTENT from "jc3/jannesen.ui.content";
 
 export interface IDataTableOpts<TRec extends $JT.Record<$JT.IFieldDef>>
 {
+    containerClass?:string;
     tableClass?:    string;
     rowClass?:      string | ((rec:TRec, idx:number)=>string);
     rowClick?:      (rec:TRec)=>void;
@@ -139,6 +140,9 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
                                         }
                                     }}>
                             </div>;
+        if (opts.containerClass) {
+            this._container.addClass(opts.containerClass);
+        }
 
         let colgroup = <colgroup/>;
         let theadtr = <tr/>;
