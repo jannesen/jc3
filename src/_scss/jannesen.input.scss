@@ -222,6 +222,10 @@ div.jannesen-input {
             border-color:       $jc-input-border-disabled-color     !important;
         }
 
+        > span.-label {
+            opacity:            .3;
+        }
+
         > span.-dropdown-button {
             display: none;
         }
