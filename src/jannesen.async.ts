@@ -1016,8 +1016,9 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
     let opts = $J.extend({}, args, callDefinitions, AjaxDefaults) as IAjaxOpts;
 
     return new Task<AjaxCallResponseType<TCall>>((resolve, reject, oncancel) => {
-            var xhr:XMLHttpRequest;
-            var xhr_done = false;
+            let xhr:XMLHttpRequest;
+            let xhr_done = false;
+            let task_start = performance.now();
 
             oncancel(on_cancel);
             start();
@@ -1083,8 +1084,9 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
                 try {
                     if (xhr.readyState === 4 && !xhr_done) {
                         xhr_done = true;
-                        if (xhr.status === 0)
-                            reject(new XMLHttpRequestFailed("XMLHttpRequest failed."));
+                        if (xhr.status === 0) {
+                            reject((task_start + xhr.timeout - 100 < performance.now()) ? new TimeoutError() : new XMLHttpRequestFailed("XMLHttpRequest failed."));
+                        }
                         else
                             on_datareceived();
                     }
@@ -1096,7 +1098,7 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
                 try {
                     if (!xhr_done) {
                         xhr_done = true;
-                        reject(new TimeoutError("Timeout"));
+                        reject(new TimeoutError());
                     }
                 } catch(e) {
                     $J.globalError("xhr.ontimeout handler failed.", e);
