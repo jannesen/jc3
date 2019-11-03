@@ -20,14 +20,14 @@
     <File Remove="jc3.sln" />
   </ItemGroup>
   <Import Project="$(NBuildProjectBuild)NBuildProject.targets" />
-  <Target Name="Cleanup">
+  <Target Name="Clean">
     <CleanTargetTree ProjectDirectory="$(MSBuildProjectDirectory)" TargetDirectory="www" />
   </Target>
   <Target Name="Build">
     <CallTarget Targets="BuildJSBuild" />
   </Target>
   <Target Name="Rebuild">
-    <CallTarget Targets="Cleanup" />
+    <CallTarget Targets="Clean" />
     <CallTarget Targets="Build" />
   </Target>
 </Project>
