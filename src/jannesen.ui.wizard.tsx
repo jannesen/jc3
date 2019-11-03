@@ -7,6 +7,7 @@ import * as $JT         from "jc3/jannesen.datatype";
 import * as $JA         from "jc3/jannesen.async";
 import * as $JD         from "jc3/jannesen.dom";
 import * as $JCONTENT   from "jc3/jannesen.ui.content";
+import * as $JR         from "jc3/jannesen.language";
 
 export interface IWizardDialogCallData
 {
@@ -26,6 +27,7 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
     protected               saveButton:         $JD.DOMHTMLElement;
     protected               nextButton:         $JD.DOMHTMLElement;
     protected               prevButton:         $JD.DOMHTMLElement;
+    protected               stepCounter:        $JD.DOMHTMLElement;
 
     protected get           interfaceSave():    TCall
     {
@@ -34,16 +36,31 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
 
     protected get           contentClass()      { return "jannesen-ui-template-wizard-dialog"; }
 
+    protected get           totalSteps() {
+        return this.steps.length;
+    }
+
+    protected get           currentStep() {
+        let current = this.getCurrentStep();
+        let currentIndex = this.steps.indexOf(current[0], undefined);
+        return currentIndex + 1;
+    }
+
     public constructor(context:$JA.Context) {
         super(context);
 
         this.saveButton = <button class={$JCONTENT.std_button_save.class} onclick={() => this.cmdSave()}>{$JCONTENT.std_button_save.text}</button>;
         this.prevButton = <button class={$JCONTENT.std_button_prev.class} onclick={() => this.switch(false)}>{$JCONTENT.std_button_prev.text}</button>;
         this.nextButton = <button class={$JCONTENT.std_button_next.class} onclick={() => this.switch(true)}>{$JCONTENT.std_button_next.text}</button>;
+        this.stepCounter = <span class="wizard-steps"></span>;
 
         let interfaceSave = this.interfaceSave;
         this.callargs = (interfaceSave.callargs_type) ? (new interfaceSave.callargs_type()) : undefined;
         this.data = (interfaceSave.request_type) ? (new interfaceSave.request_type()) as any : undefined;
+    }
+
+    public                  recalculateSteps() {
+        this.stepCounter.text($JR.wizard_steps(this.currentStep, this.totalSteps.toString()));
     }
 
     protected               onload() {
@@ -62,7 +79,7 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
 
         this.nextButton.show(true);
 
-        this.content.appendChild(<div class="-header -dialog-move-target"><span class="-title">{title}</span></div>,
+        this.content.appendChild(<div class="-header -dialog-move-target"><span class="-title">{title}</span>{this.stepCounter}</div>,
             <div class="-body"                      >{body}</div>,
             <div class="-footer"                    >{footer}</div>);
     }
@@ -151,36 +168,37 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
         let currentIndex = this.steps.indexOf(current[0], undefined);
         let nextIndex = next ? currentIndex + 1 : currentIndex - 1;
 
-        // set next step active
+        // set next/previous step active if there are any
         if (nextIndex !== this.steps.length) {
             this.steps[nextIndex].setActive();
             this.steps[nextIndex].container.show(true);
             this.steps[currentIndex].setInactive();
             this.steps[currentIndex].container.show(false);
 
-            this.center();
-        }
+            if (nextIndex === this.steps.length - 1) {
+                this.saveButton.show(true);
+            } else {
+                this.saveButton.show(false);
+            }
 
-        if (nextIndex === this.steps.length - 1 ) {
-            this.saveButton.show(true);
-        } else {
-            this.saveButton.show(false);
-        }
+            if (nextIndex < this.steps.length - 1) {
+                this.nextButton.show(true);
+            } else {
+                this.nextButton.show(false);
+            }
 
-        if (nextIndex < this.steps.length - 1 ) {
-            this.nextButton.show(true);
-        } else {
-            this.nextButton.show(false);
-        }
+            if (nextIndex > 0) {
+                this.prevButton.show(true);
+            } else {
+                this.prevButton.show(false);
+            }
 
-        if (nextIndex > 0) {
-            this.prevButton.show(true);
-        } else {
-            this.prevButton.show(false);
-        }
+            this.nextButton.element.blur();
+            this.prevButton.element.blur();
 
-        this.nextButton.element.blur();
-        this.prevButton.element.blur();
+            //refresh display text with new values
+            this.stepCounter.text($JR.wizard_steps(this.currentStep, this.totalSteps.toString()));
+        }
     }
 
     protected               getCurrentStep(): Step[] {
@@ -224,12 +242,22 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
     }
 }
 
+export interface IStepAttr {
+    width?: string;
+    height?: string;
+}
+
 export class Step extends $JD.Container {
 
     private _active: boolean;
 
-    public constructor(attr: {}, ...children: $JD.AddNode[]) {
+    public constructor(attr: IStepAttr, ...children: $JD.AddNode[]) {
         const container = <div class="jannesen-ui-step">{children}</div>;
+        if (attr) {
+            container.css("width", attr.width);
+            container.css("height", attr.height);
+        }
+
         super(container);
 
         this._active = false;

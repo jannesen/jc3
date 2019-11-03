@@ -89,3 +89,4 @@ export const querysearch                        = /*Search*/ "Hae";
 export const queryexecute                       = /*Execute*/ "Suorita";
 export const invalid_daterange                  = /*Invalid daterange*/ "Väärä päivämäärä";
 export const invalid_datetimerange              = /*Invalid datetimerange*/ "Väärä kellonaika";
+export const wizard_steps                       = (step: number, total: string): string => "Vaihe " + step + " alkean " + total + "";

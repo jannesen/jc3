@@ -88,3 +88,4 @@ export const querysearch                        = "Search";
 export const queryexecute                       = "Execute";
 export const invalid_daterange                  = "Invalid daterange";
 export const invalid_datetimerange              = "Invalid datetimerange";
+export const wizard_steps                       = (step: number, total: string): string => "Step " + step + " of " + total + "";

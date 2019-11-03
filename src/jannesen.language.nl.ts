@@ -89,3 +89,4 @@ export const querysearch                        = /*Search*/ "Zoeken";
 export const queryexecute                       = /*Execute*/ "uitvoeren";
 export const invalid_daterange                  = /*Invalid daterange*/ "Ongeldige datumbereik";
 export const invalid_datetimerange              = /*Invalid datetimerange*/ "Ongeldige datetimerange";
+export const wizard_steps                       = (step: number, total: string): string => "Stap " + step + " van " + total + "";
