@@ -1001,10 +1001,20 @@ export abstract class SubmitDialog<TArgs, TRtn=void> extends $JCONTENT.DialogBas
                                  <div class="-footer"                    >{ footer }</div>);
     }
 }
+
 /**
  *!!DOC
  */
-export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition<any,any,any>, TArgs = $JT.AssignType<$JA.AjaxCallArgsType<TCall>>, TRtn=$JA.AjaxCallResponseType<TCall>> extends SubmitDialog<TArgs,TRtn>
+export interface SubmitDialogAjaxCallArgs<TCall extends $JA.IAjaxCallDefinition<any,any,any>>
+{
+    callargs?:  $JT.AssignType<$JA.AjaxCallArgsType<TCall>>;
+    data?:      $JT.AssignType<$JA.AjaxCallResponseType<TCall>>;
+}
+
+/**
+ *!!DOC
+ */
+export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition<any,any,any>, TArgs = SubmitDialogAjaxCallArgs<TCall>, TRtn=$JA.AjaxCallResponseType<TCall>> extends SubmitDialog<TArgs,TRtn> implements $JT.IValidatable
 {
     protected               callargs:           $JA.AjaxCallArgsType<TCall>;
     protected               data:               $JA.AjaxCallRequestType<TCall>;
@@ -1026,21 +1036,30 @@ export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition
     {
         const _callargs = this.callargs as any;
         if (_callargs instanceof $JT.Record || _callargs instanceof $JT.Set) {
-            _callargs.assign(dlgargs);
+            if (dlgargs instanceof Object && (dlgargs as any).callargs instanceof Object) {
+                _callargs.assign((dlgargs as any).callargs);
+            }
         }
 
         const _data = this.data as any;
         if (_data instanceof $JT.Record || _data instanceof $JT.Set) {
             _data.setDefault();
+            if (dlgargs instanceof Object && (dlgargs as any).data instanceof Object) {
+                _data.assign((dlgargs as any).data);
+            }
         }
     }
-    protected               validate(ct:$JA.Context): $JA.Task<$JT.ValidateResult>
+    protected               validateAsync(context:$JA.Context): $JA.Task<$JT.ValidateResult>
     {
-        return this.data as unknown instanceof $JT.BaseType ? (this.data as unknown as $JT.BaseType).validateAsync({ context:ct }) : $JA.Task.resolve($JT.ValidateResult.OK);
+        return $JT.validateAsync({ context }, (this.data as unknown instanceof $JT.BaseType) ? (this.data as unknown as $JT.BaseType) : undefined, this);
+    }
+    public                 validateNow():$JT.ValidateResult|Error
+    {
+        return $JT.ValidateResult.OK;
     }
     protected               onSubmit(context:$JA.Context): $JA.Task<TRtn>
     {
-        return this.validate(context)
+        return this.validateAsync(context)
                    .then(() => {
                              return $JA.Ajax(this.interface,
                                              {
