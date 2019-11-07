@@ -114,7 +114,7 @@ export interface ISelectRecord
 /**
  *!!DOC
  */
-export interface IBaseConstructor<TValue,TAttr>
+export interface IBaseConstructor<TValue, TAttr>
 {
     Name:           string;
     Attributes:     TAttr;
@@ -165,9 +165,8 @@ export interface IConstructControl<TValue extends BaseType, TInput extends ICont
  */
 export interface IValidateOptions
 {
-    seterror?:       boolean;
+    seterror?:      boolean;
     partial?:       $JD.DOMHTMLElement;
-    preValidates?:  () => ($JA.Task<unknown>|Error|null)[]|null;
 }
 
 /**
@@ -176,6 +175,7 @@ export interface IValidateOptions
 export interface IValidateOptionsAsync extends IValidateOptions
 {
     context:        $JA.Context|null;
+    preValidates?:  (context:$JA.Context|null) => ($JA.Task<unknown>|Error|null)[]|null;
 }
 
 export const enum ValidateResult
@@ -260,11 +260,11 @@ export class ValidateErrors extends __Error
 
 export interface IValidatable
 {
-    preValidateAsync():                  ($JA.Task<unknown>|Error)[]|$JA.Task<unknown>|Error|null;
+    preValidateAsync?:                   (context:$JA.Context|null)=>($JA.Task<unknown>|Error)[]|$JA.Task<unknown>|Error|null;
     validateNow(opts:IValidateOptions):  ValidateResult|Error;
 }
 
-export function validateAsync(opts:IValidateOptionsAsync, ...validatables:IValidatable[]): $JA.Task<ValidateResult>
+export function validateAsync(opts:IValidateOptionsAsync, ...validatables:(IValidatable|null|undefined)[]): $JA.Task<ValidateResult>
 {
     return new $JA.Task((resolved:(result:ValidateResult)=>void, reject:(err:Error)=>void, oncancel:(handler:(reason:Error)=>void)=>void) => {
                const errors = new ValidateErrors();
@@ -282,11 +282,13 @@ export function validateAsync(opts:IValidateOptionsAsync, ...validatables:IValid
 
                    try {
                        if (typeof opts.preValidates === 'function') {
-                           addPreValidate(opts.preValidates());
+                           addPreValidate(opts.preValidates(opts.context));
                        }
 
                        for (const v of validatables) {
-                           addPreValidate(v.preValidateAsync());
+                           if (v instanceof Object && typeof v.preValidateAsync === 'function') {
+                               addPreValidate(v.preValidateAsync(opts.context));
+                           }
                        }
                    }
                    catch (e) {
@@ -346,17 +348,19 @@ export function validateAsync(opts:IValidateOptionsAsync, ...validatables:IValid
                function validate() {
                     let result = ValidateResult.OK;
                     for (const v of validatables) {
-                         try {
-                             const r = v.validateNow(opts);
-                             if (r instanceof Error) {
-                                 errors.addError(r);
+                         if (v) {
+                             try {
+                                 const r = v.validateNow(opts);
+                                 if (r instanceof Error) {
+                                     errors.addError(r);
+                                 }
+                                 else {
+                                     result = mergeValidateResult(result, r);
+                                 }
                              }
-                             else {
-                                 result = mergeValidateResult(result, r);
+                             catch (e) {
+                                 errors.addError(e);
                              }
-                         }
-                         catch (e) {
-                             errors.addError(e);
                          }
                     }
 
@@ -477,7 +481,7 @@ export abstract class BaseType implements IValidatable, $J.EventHandling, $JD.IT
     /**
      * Returns all busy tasks before the data can be validated
      */
-    public preValidateAsync()
+    public preValidateAsync(context:$JA.Context|null)
     {
         let rtn = [] as ($JA.Task<unknown>|Error)[];
 
