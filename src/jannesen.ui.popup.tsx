@@ -110,7 +110,7 @@ export abstract class Popup
             this._context.stop();
             this._eventCollection.unbindAll();
 
-            if (this._transitionProperty) {
+            if (this._transitionProperty && container.isLive) {
                 container.bind("transitionend", removed);
                 timeout = setTimeout(removed, 1000);
                 setTimeout(() => {
@@ -128,7 +128,9 @@ export abstract class Popup
                 if (timeout) {
                     clearTimeout(timeout);
                 }
-                $JD.body.removeChild(container);
+                if (container.isLive) {
+                    $JD.body.removeChild(container);
+                }
                 container.empty();
                 container = null;
             }
