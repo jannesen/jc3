@@ -207,7 +207,7 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
 
     protected               center() {
         if (this.loader) {
-            this.loader._centerDialog();
+            this.loader._positionDialog();
         }
     }
 

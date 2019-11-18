@@ -868,8 +868,20 @@ export class FormError extends Form<Error>
 /**
  * !!DOC
  */
+export interface IDialogOptions
+{
+    flags?:     DialogFlags;
+    top?:       number;
+    left?:      number;
+    height?:    number;
+    width?:     number;
+}
+/**
+ * !!DOC
+ */
 export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<TArgs, TRtn>, TArgs>
 {
+    private             _options:           IDialogOptions;
     private             _initDlgSize:       $JD.ISize|undefined;
     private             _onTop:             boolean;
 
@@ -884,10 +896,11 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
         return this._onTop;
     }
 
-    public              constructor(context:$JA.Context|null)
+    public              constructor(context:$JA.Context|null, options?:IDialogOptions)
     {
         super("jannesen-ui-content -dialog -window", context);
         this._container.css("position", "absolute");
+        this._options         = options || {};
         this._initDlgSize     = undefined;
         this._onTop           = false;
     }
@@ -896,7 +909,7 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
     {
         $JD.body.appendChild(this);
         setDialogOnTop(this);
-        this._centerDialog();
+        this._positionDialog();
 
         return this._open(form, args, undefined, this._context, false)
                    .then(() => this._contentBody!._runDialogAsync(this._context))
@@ -964,7 +977,7 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
             if (newContentBody.dialogFlags & DialogFlags.FullScreen) {
                 this._resizeFullScreen();
             } else {
-                this._centerDialog();
+                this._positionDialog();
             }
 
             container.bind("mousedown",  this._onMove, this);
@@ -1026,7 +1039,7 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
                                 this._resizeFullScreen();
                             } else {
                                 resetWindowFullscreen();
-                                this._centerDialog();
+                                this._positionDialog();
                             }
                         } else {
                             if (contentBody.dialogFlags & DialogFlags.FullScreen) {
@@ -1049,6 +1062,10 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
         }
     }
     private             _calcDialogFlags() {
+        if (typeof this._options.flags === 'number') {
+            return this._options.flags;
+        }
+
         if (dialogfullscreenflags & DialogFlags.FullScreen) {
             let dlgSize           = this._initDlgSize!;
             let winSize           = $JD.window.size;
@@ -1066,40 +1083,56 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
 
         return DialogFlags.Window;
     }
-    public              _centerDialog() {
-        let winSize = $JD.window.size;
-        let pos:$JD.IPosition|undefined;
+    public              _positionDialog() {
+        const options = this._options;
+        const winSize = $JD.window.size;
+        let top    = options.top;
+        let left   = options.left;
+        let height = options.height;
+        let width  = options.width;
 
-        const parent = this.parent;
-        if (parent) {
-            try {
-                const rect = parent.container.outerRect;
-                pos = { top: rect.top + rect.height / 2, left: rect.left + rect.width / 2 };
-            } catch (e) {
+        if (typeof height !== 'number' || typeof width !== 'number') {
+            if (this._contentBody) {
+                this._container.css({ position:"absolute", top: 0, left: 0, width: undefined, height: undefined });
+                this._contentBody._layoutDialog({ top:0, left:0 });
             }
+
+            let size = this._container.size;
+            if (typeof height !== 'number') height = size.height;
+            if (typeof width  !== 'number') width  = size.width;
         }
 
-        if (!pos) {
-            pos = { top: winSize.height / 2, left: winSize.width / 2 };
+        if (typeof top !== 'number' || typeof left !== 'number') {
+            const parent = this.parent;
+            let centertop:number|undefined;
+            let centerleft:number|undefined;
+
+            if (parent) {
+                try {
+                    const rect = parent.container.outerRect;
+                    centertop  = rect.top + rect.height / 2;
+                    centerleft = rect.left + rect.width / 2;
+                } catch (e) {
+                }
+            }
+
+            if (centertop === undefined || centerleft === undefined) {
+                centertop  = winSize.height / 2;
+                centerleft = winSize.width / 2;
+            }
+
+            if (typeof top  !== 'number') top  = centertop  - (height / 2);
+            if (typeof left !== 'number') left = centerleft - (width / 2);
         }
 
+        if (top  > winSize.height - height) top  = winSize.height - height;
+        if (left > winSize.width  - width)  left = winSize.width  - width;
+        if (top < 0)  top  = 0;
+        if (left < 0) left = 0;
+
+        this._container.css({ top, left, heigth:options.height, width:options.width });
         if (this._contentBody) {
-            this._container.css({ position:"absolute", top: 0, left: 0, width: undefined, height: undefined });
-            this._contentBody._layoutDialog({ top:0, left:0 });
-        }
-
-        let dlgSize = this._container.size;
-        pos.top  = Math.round(pos.top  - (dlgSize.height / 2));
-        pos.left = Math.round(pos.left - (dlgSize.width  / 2));
-
-        if (pos.top  > winSize.height - dlgSize.height) pos.top  = winSize.height - dlgSize.height;
-        if (pos.left > winSize.width  - dlgSize.width)  pos.left = winSize.width  - dlgSize.width;
-        if (pos.top < 0)  pos.top  = 0;
-        if (pos.left < 0) pos.left = 0;
-
-        this._container.css(pos);
-        if (this._contentBody) {
-            this._contentBody._layoutDialog(pos);
+            this._contentBody._layoutDialog({ top, left });
         }
     }
     public              _resizeFullScreen()
@@ -1129,9 +1162,9 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
 /**
  * !!DOC
  */
-export function dialogShow<TArgs,TRtn>(form:string|(new (context:$JA.Context)=>DialogBase<TArgs, TRtn>), args: TArgs, context:$JA.Context|null): $JA.Task<TRtn>
+export function dialogShow<TArgs,TRtn>(form:string|(new (context:$JA.Context)=>DialogBase<TArgs, TRtn>), args: TArgs, context:$JA.Context|null, options?:IDialogOptions): $JA.Task<TRtn>
 {
-    return (new DialogLoader<TArgs, TRtn>(context)).runAsync(form, args);
+    return (new DialogLoader<TArgs, TRtn>(context, options)).runAsync(form, args);
 }
 
 /**
