@@ -2287,6 +2287,10 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
                     this._record = setvalue._record;
                 }
                 else
+                if (value instanceof BaseType) {
+                    value = value.value;
+                }
+                else
                 {
                     const key = (value as any)[datasource.keyfieldname] as TNative;
 
