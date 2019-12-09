@@ -236,6 +236,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
 {
     private     _name?:             string;
     private     _titleElement:      $JD.DOMHTMLElement;
+    private     _closeable:         boolean;
     private     _disabled:          boolean;
     private     _moremenu?:         (ct:$JA.Context) => $JUM.IDataSourceResult;
     private     _loadcontent?:      () => $JD.AddNode;
@@ -274,6 +275,10 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
             this._titleElement.disabled = disabled;
         }
     }
+    public get  closeable()
+    {
+        return this._closeable;
+    }
     public get  tabContent()
     {
         return this._tabContent;
@@ -297,6 +302,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
 
         this._name          = attr.name;
         this._titleElement  = titleElement;
+        this._closeable     = attr.closeable === undefined ? false : !!attr.closeable;
         this._disabled      = attr.disabled === undefined ? false : !!attr.disabled;
         this._loaded        = children.length > 0;
         this._active        = false;
