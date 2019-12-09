@@ -1331,6 +1331,11 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
 {
     protected           onopen(args: TArgs, ct: $JA.Context)
     {
+        this.formContent();
+    }
+
+    protected           formContent()
+    {
         let header  = this.formHeader();
         let body    = this.formBody  ();
         let footer  = this.formFooter();
