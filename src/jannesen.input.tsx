@@ -1270,8 +1270,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
 
                     constructor(value:$JT.SelectType<TNativeValue,TDatasource>, opts:ISelectInputControlOptions<TNativeValue,TDatasource>) {
         super(value, "text", "-select", opts, (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) === 0 || (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0);
-        this.getinputelm().bind("paste",   this.input_textchange, this);
-        this.getinputelm().bind("cut",     this.input_textchange, this);
+        this.getinputelm().bind("input", this.input_textchange, this);
         this._activelookup = undefined;
         this._inputContext = undefined;
         this._inputTimer   = undefined;
