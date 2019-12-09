@@ -187,6 +187,8 @@ div.jannesen-input {
         &.-null:before,
         &.-true:before    { @include fa-input-button($fa-var-times, 0.786em, 1, -0.005em); }
         &.-checked:before { @include fa-input-button($fa-var-check, 1.000em, 1);          }
+
+        &[disabled].-null:before { opacity: 0.2 }
     }
     &:not([disabled]):hover {
         &.-button, span.-button {
