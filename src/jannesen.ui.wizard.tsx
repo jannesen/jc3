@@ -34,8 +34,6 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
         throw new $J.InvalidStateError("interfaceSave not implemented.");
     }
 
-    protected get           contentClass()      { return "jannesen-ui-template-wizard-dialog"; }
-
     protected get           totalSteps() {
         return this.steps.length;
     }
@@ -79,6 +77,7 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
 
         this.nextButton.show(true);
 
+        this.content.addClass("jannesen-ui-template-wizard-dialog");
         this.content.appendChild(<div class="-header -dialog-move-target"><span class="-title">{title}</span>{this.stepCounter}</div>,
             <div class="-body"                      >{body}</div>,
             <div class="-footer"                    >{footer}</div>);
@@ -252,7 +251,7 @@ export class Step extends $JD.Container {
     private _active: boolean;
 
     public constructor(attr: IStepAttr, ...children: $JD.AddNode[]) {
-        const container = <div class="jannesen-ui-step">{children}</div>;
+        const container = <div class="jannesen-ui-step" style="width:100%;height:100%;">{children}</div>;
         if (attr) {
             container.css("width", attr.width);
             container.css("height", attr.height);
