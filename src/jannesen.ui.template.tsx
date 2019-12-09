@@ -1008,7 +1008,7 @@ export abstract class SubmitDialog<TArgs, TRtn=void> extends $JCONTENT.DialogBas
 export interface SubmitDialogAjaxCallArgs<TCall extends $JA.IAjaxCallDefinition<any,any,any>>
 {
     callargs?:  $JT.AssignType<$JA.AjaxCallArgsType<TCall>>;
-    data?:      $JT.AssignType<$JA.AjaxCallResponseType<TCall>>;
+    data?:      $JT.AssignType<$JA.AjaxCallRequestType<TCall>>;
 }
 
 /**
@@ -1053,7 +1053,7 @@ export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition
     {
         return $JT.validateAsync({ context }, (this.data as unknown instanceof $JT.BaseType) ? (this.data as unknown as $JT.BaseType) : undefined, this);
     }
-    public                 validateNow():$JT.ValidateResult|Error
+    public                  validateNow():$JT.ValidateResult|Error
     {
         return $JT.ValidateResult.OK;
     }
