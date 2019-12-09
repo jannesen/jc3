@@ -143,8 +143,12 @@ div.jannesen-ui-content.-dialog {
             }
         }
         > div.-content {
-            > div.-body.-scroll {
-                overflow:           auto;
+            > div.-body {
+                background-color:   #f0f0f0;
+
+                &.-scroll {
+                    overflow:           auto;
+                }
             }
         }
     }
@@ -169,6 +173,7 @@ div.jannesen-ui-content.-dialog {
             animation:          jannesen-ui-content-fadeout-dialog $jc-dialog-animation-time linear 0s 1 normal both;
         }
     }
+
 }
 
 div.jannesen-ui-content-dialog {
