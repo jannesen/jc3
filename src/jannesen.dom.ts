@@ -434,14 +434,6 @@ export class DOMHTMLDocument implements $J.IEventSource
     /**
      * !!DOC
      */
-    public select(selector: string) //!! Remove this method.
-    {
-        return select(this._document, selector);
-    }
-
-    /**
-     * !!DOC
-     */
     public selectAll(selector: string): DOMNodeList
     {
         return selectAll(this._document, selector);
