@@ -94,7 +94,7 @@ export function isIUrlValue(v: Object): v is IUrlValue {
 /**
  * !!DOC
  */
-export interface ICallArgs //!!TODO
+export interface ICallArgs // TODO
 {
     [key: string]: string|number|boolean|Object|null;
 }
