@@ -1520,14 +1520,20 @@ export class DialogError extends Dialog<string|Error|Error[]|$JD.DOMHTMLElement,
  * !!DOC
  */
 
+export interface IAsyncContainerAttrs extends $JD.HTMLAttributes
+{
+    onloaded?:      ()=>void;
+}
+
 export abstract class AsyncContainer<TArgs> extends $JD.Container
 {
     private             _activeTask:    IActiveTask|null;
 
-    public              constructor(attrs?:$JD.HTMLAttributes)
+    public              constructor(attrs?:IAsyncContainerAttrs)
     {
         super($JD.createElement("div", attrs));
         this._activeTask = null;
+        this._applyAttr(attrs, 'onloaded');
     }
 
     public              cancel(): $JA.Task<void>
@@ -1557,6 +1563,7 @@ export abstract class AsyncContainer<TArgs> extends $JD.Container
                                     if (content !== undefined) {
                                         this._container.empty().appendChild(content as $JD.AddNode);
                                     }
+                                    this.trigger('loaded');
                                },
                                (err) => {
                                     if (!(err instanceof $JA.OperationCanceledError)) {
@@ -1565,6 +1572,7 @@ export abstract class AsyncContainer<TArgs> extends $JD.Container
                                                        .removeClass("-loading")
                                                        .appendChild(errorToContent(err));
                                     }
+                                    this.trigger('loaded');
                                     throw err;
                                });
 
