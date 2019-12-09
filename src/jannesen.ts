@@ -1144,6 +1144,41 @@ export function globalError(msg:string, e:Object):void
     alert(m);
 }
 
+/**
+ * !!DOC
+ */
+export function logError(err:Error):void
+{
+    let log:boolean = false;
+    let e:Error;
+
+    for (e = err; e instanceof Error; e = (e as any).innerError) {
+        switch (e.name) {
+        case "MessageError":
+        case "ValidateErrors":
+            break;
+        default:
+            log = true;
+            break;
+        }
+    }
+
+    if (log) {
+        let firsterr:Error|undefined;
+
+        var m = "=== ERROR ===";
+
+        for (e = err; e instanceof Error; e = ((firsterr = e) as any).innerError) {
+            m += "\n" + e.toString();
+        }
+
+        if (firsterr && (firsterr as any).stack) {
+            m += "\n\n=== STACKTRACE ===\n" + (<any>firsterr).stack;
+        }
+
+        console.error(m);
+    }
+}
 //=============================================== EventHandling mixin =============================
 /**
  * A mixin class to provide event handling.

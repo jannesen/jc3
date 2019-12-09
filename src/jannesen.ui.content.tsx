@@ -855,6 +855,7 @@ export class FormError extends Form<Error>
 
     protected           onopen(err:Error, state:void, ct:$JA.Context)
     {
+        $J.logError(err);
         this.setContent(errorToContent(err));
     }
 
@@ -1491,6 +1492,10 @@ export class DialogError extends Dialog<string|Error|Error[]|$JD.DOMHTMLElement,
 {
     public static       show(err: string|Error|Error[]|$JD.DOMHTMLElement, ct:$JA.Context|null)
     {
+        if (err instanceof Error) {
+            $J.logError(err);
+        }
+
         return dialogShow(DialogError, err, ct) as $JA.Task<void>;
     }
 
@@ -1560,6 +1565,7 @@ export abstract class AsyncContainer<TArgs> extends $JD.Container
                                },
                                (err) => {
                                     if (!(err instanceof $JA.OperationCanceledError)) {
+                                        $J.logError(err);
                                         this._container.empty()
                                                        .removeClass("-loading")
                                                        .appendChild(errorToContent(err));

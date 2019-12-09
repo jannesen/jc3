@@ -392,6 +392,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
                 }
             } catch (e) {
                 this._tabContent = undefined;
+                $J.logError(e);
                 this._container.appendChild($JUC.errorToContent(e));
                 return;
             }
