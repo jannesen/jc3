@@ -6,8 +6,8 @@ import * as $JUM     from "jc3/jannesen.ui.menu";
 export function main()
 {
     $JD.ondomready(()  => {
-        $JD.body.appendChild(<div style="width:2000px;height:2000px">
-                <div style="text-align: left;position:absolute;top:100px;left:400px">
+        $JD.body.appendChild(<div style="width:1000px;height:600px">
+                <div style="text-align: left;position:absolute;top:0px;left:400px">
                     <$JUM.MenuButton class="jannesen-ui-menu -button -more-menu" menupos={$JUM.MenuPosition.Right}>
                         <$JUM.MenuEntry content="Peugeot"    onclick={ someCallback } />
                         <$JUM.MenuEntry content="Toyota"    >
