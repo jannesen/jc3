@@ -228,7 +228,7 @@ export interface ITabAttr
     closeable?:         boolean;
     onclick?:           () => void;
     loadcontent?:       () => $JD.AddNode;
-    moremenu?:          () => $JUM.IDataSourceResult;
+    moremenu?:          () => $JUM.DataSourceResult;
     loadform?:          (loader:$JUC.FormLoader) => $JA.Task<void>;
 }
 
@@ -238,7 +238,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
     private     _titleElement:      $JD.DOMHTMLElement;
     private     _closeable:         boolean;
     private     _disabled:          boolean;
-    private     _moremenu?:         (ct:$JA.Context) => $JUM.IDataSourceResult;
+    private     _moremenu?:         (ct:$JA.Context) => $JUM.DataSourceResult;
     private     _loadcontent?:      () => $JD.AddNode;
     private     _loadform?:         (loader:$JUC.FormLoader) => $JA.Task<void>;
     private     _active:            boolean;
@@ -344,7 +344,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
 
         return !!this._moremenu;
     }
-    public      moreMenuDatasource(ct:$JA.Context):$JUM.IDataSourceResult
+    public      moreMenuDatasource(ct:$JA.Context):$JUM.DataSourceResult
     {
         if ($JUC.ImplementsMoreMenu(this._tabContent)) {
             return this._tabContent.moreMenuDatasource(ct);

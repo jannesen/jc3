@@ -1,26 +1,22 @@
 ﻿/* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
+import * as $JA      from "jc3/jannesen.async";
 import * as $JD      from "jc3/jannesen.dom";
 import * as $JUM     from "jc3/jannesen.ui.menu";
 
 export function main()
 {
     $JD.ondomready(()  => {
-        $JD.body.appendChild(<div style="width:1000px;height:600px">
+        $JD.body.appendChild(<div style="width:1000px;height:600px" ondblclick={ floatingMenu }>
                 <div style="text-align: left;position:absolute;top:0px;left:400px">
-                    <$JUM.MenuButton class="jannesen-ui-menu -button -more-menu" menupos={$JUM.MenuPosition.Right}>
-                        <$JUM.MenuEntry content="Peugeot"    onclick={ someCallback } />
-                        <$JUM.MenuEntry content="Toyota"    >
-                            <$JUM.MenuEntry content="Aygo"  dataSource={ ()=>yearMenu }/>
-                            <$JUM.MenuEntry content="Yaris" onclick={ someCallback    }/>
-                            <$JUM.MenuEntry content="Auris" dataSource={ ()=>yearMenu }/>
-                            <$JUM.MenuEntry content="Prius" dataSource={ ()=>yearMenu }/>
-                        </$JUM.MenuEntry>
+                    <$JUM.MenuButton class="jannesen-ui-menu -button -more-menu" menupos={$JUM.MenuPosition.Right} onclick={ someCallback }>
+                        <$JUM.MenuEntry content="Peugeot"   onclick={ someCallback } />
+                        <$JUM.MenuEntry content="Toyota"    dataSource={ dataSourceToyota }/>
                         <$JUM.MenuSeperator />
                         <$JUM.MenuEntry content="Volkswagen" >
-                            <$JUM.MenuEntry content="Up"   dataSource={ ()=>yearMenu } />
+                            <$JUM.MenuEntry content="Up"   dataSource={ dataSourceYear } />
                             <$JUM.MenuEntry content="Polo" onclick={someCallback }     />
-                            <$JUM.MenuEntry content="Golf" dataSource={ ()=>yearMenu } />
+                            <$JUM.MenuEntry content="Golf" dataSource={ dataSourceYear } />
                         </$JUM.MenuEntry>
                         <$JUM.MenuEntry content="Porsche"    onclick={ someCallback } />
                         <$JUM.MenuEntry content="Volvo"      onclick={ someCallback } />
@@ -30,13 +26,39 @@ export function main()
     });
 }
 
-const someCallback = () => console.log('callback registered');
+const someCallback = (d:any) => console.log('callback', d);
 
-const yearMenu: $JUM.MenuEntry[] = [
-    new $JUM.MenuEntry({ content: "2015", onclick: someCallback }),
-    new $JUM.MenuEntry({ content: "2016", onclick: someCallback }),
-    new $JUM.MenuEntry({ content: "2017", onclick: someCallback }),
-];
+function dataSourceToyota(ct:$JA.Context)
+{
+    return $JA.Task.resolve(<>
+                                <$JUM.MenuEntry content="Aygo"  dataSource={ dataSourceYear }/>
+                                <$JUM.MenuEntry content="Yaris" onclick={ someCallback    }/>
+                                <$JUM.MenuEntry content="Auris" dataSource={ dataSourceYear }/>
+                                <$JUM.MenuEntry content="Prius" dataSource={ dataSourceYear }/>
+                            </>);
+
+}
+
+function dataSourceYear(ct:$JA.Context)
+{
+    return $JA.Delay(1000, ct)
+              .then(() => [
+                        new $JUM.MenuEntry({ content: "2015", data: "2015" }),
+                        new $JUM.MenuEntry({ content: "2016", data: "2016" }),
+                        new $JUM.MenuEntry({ content: "2017", data: "2017" }),
+                    ]);
+}
+
+function floatingMenu(ev:MouseEvent)
+{
+    const m = <$JUM.FloatingMenu menupos={ $JUM.MenuPosition.Center } firstmenuclass="-transition-height">
+                  <$JUM.MenuEntry content="Up"   dataSource={ dataSourceYear } />
+                  <$JUM.MenuEntry content="Polo" data="Polo"     />
+                  <$JUM.MenuEntry content="Golf" dataSource={ dataSourceYear } />
+              </$JUM.FloatingMenu>;
+    m.runAsync({left: ev.clientX, top:ev.clientY }, new $JA.Context({ timeout: 5000 }))
+     .then((r) => console.log(r));
+}
 
 /*
 const toyCallback = () => {

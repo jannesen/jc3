@@ -115,7 +115,7 @@ export class Welkom extends $JCONTENT.Form
     {
         return true;
     }
-    public          moreMenuDatasource(ct:$JA.Context):$JMENU.IDataSourceResult
+    public          moreMenuDatasource(ct:$JA.Context):$JMENU.DataSourceResult
     {
         return [
                     <$JMENU.MenuEntry content="item 1" onclick={() => this.execute((context) => $JCONTENT.DialogMessage.show({
