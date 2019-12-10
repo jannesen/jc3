@@ -36,7 +36,7 @@ $dialog-padding:                        15px;
 }
 
 //!!TODO
-@import "../../../FontAwesome/font-awesome-5.8.2/scss/fontawesome";
+$fa-font-path:                "../lib/font";
 @import "../../../FontAwesome/font-awesome-5.8.2/scss/_variables.scss";
 @import "../../../FontAwesome/font-awesome-5.8.2/scss/regular.scss";
 @import "../../../FontAwesome/font-awesome-5.8.2/scss/solid.scss";

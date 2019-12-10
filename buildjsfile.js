@@ -82,8 +82,8 @@ $build.build(
                 }],
     copy:       [{
                     src:        [
-                                  { base: ".",                                          pattern: [ "@(sample|test|tools)/**/*@(.html|.json)", "!tsconfig.json", "!tslint.json" ]},
-                                  { base: "$contrib/FontAwesome/font-awesome-4.4.0",    pattern: "*@(.woff)", target: "lib/font" }
+                                  { base: ".",                                                   pattern: [ "@(sample|test|tools)/**/*@(.html|.json)", "!tsconfig.json", "!tslint.json" ]},
+                                  { base: "$contrib/FontAwesome/font-awesome-5.8.2/webfonts",    pattern: "*@(.woff|.woff2)", target: "lib/font" }
                                 ]
                 }]
 });
