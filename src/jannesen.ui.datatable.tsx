@@ -12,7 +12,7 @@ export interface IDataTableOpts<TRec extends $JT.Record<$JT.IFieldDef>>
     tableClass?:    string;
     rowClass?:      string | ((rec:TRec, idx:number)=>string);
     rowClick?:      (rec:TRec)=>void;
-    rowDblClick?:   (rec:TRec)=>void;
+    rowDblClick?:   (rec:TRec, ev:MouseEvent)=>void;
     columns:        IDataTableOptsColumn<TRec>[];
     buttons?:       IDataTableOptsButton<TRec>[];
     sort?:          (a:TRec, b:TRec) => number;
@@ -219,7 +219,7 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
                                                                 ev.stopPropagation();
                                                                 let idx = helper_getrecordId(ev.target);
                                                                 if (typeof idx === 'number') {
-                                                                    this._opts.rowDblClick(this._filter_rset[idx]);
+                                                                    this._opts.rowDblClick(this._filter_rset[idx], ev);
                                                                 }
                                                             }
                                                         }}
@@ -297,9 +297,6 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
             case "Enter":
                 if (typeof this._selectedRow === 'number' && typeof this._opts.rowClick === "function") {
                     this._opts.rowClick(this._filter_rset[this._selectedRow]);
-                }
-                if (typeof this._selectedRow === 'number' && typeof this._opts.rowDblClick === "function") {
-                    this._opts.rowDblClick(this._filter_rset[this._selectedRow]);
                 }
                 return true;
 
