@@ -171,33 +171,33 @@ export abstract class Popup
             this._container.addClass(extclass);
         }
 
-        if (starttransition) {
-            let transition = this._container.css([ "transition-duration", "transition-property" ]);
+        try {
+            this.PositionPopup(this._container, this._poselmOuterRect = this._parentelm.outerRect);
 
-            if (typeof transition["transition-duration"] === 'string' && transition["transition-duration"] !== "0s" &&
-                (transition["transition-property"] === "height" || transition["transition-property"] === "width")) {
-                const transitionproperty = transition["transition-property"] as string;
-                const container = this._container;
+            if (starttransition) {
+                let transition = this._container.css([ "transition-duration", "transition-property" ]);
 
-                if (content instanceof $JD.DOMHTMLElement) {
-                    content.css(transitionproperty, Math.ceil(content.css(transitionproperty) as number));
+                if (typeof transition["transition-duration"] === 'string' && transition["transition-duration"] !== "0s" &&
+                    (transition["transition-property"] === "height" || transition["transition-property"] === "width")) {
+                    const transitionproperty = transition["transition-property"] as string;
+                    const container = this._container;
+
+                    if (content instanceof $JD.DOMHTMLElement) {
+                        content.css(transitionproperty, Math.ceil(content.css(transitionproperty) as number));
+                    }
+
+                    const value = Math.ceil(container.css(transitionproperty) as number);
+                    container.css(transitionproperty, 4);
+                    container.css("transition-duration", 0);
+                    this._transitionProperty = transitionproperty;
+                    setTimeout(() => {
+                                    container.css("transition-duration", undefined);
+                                    container.css(transitionproperty, value);
+                                }, 0);
                 }
-
-                const value = Math.ceil(container.css(transitionproperty) as number);
-                container.css(transitionproperty, 4);
-                container.css("transition-duration", 0);
-                this._transitionProperty = transitionproperty;
-                setTimeout(() => {
-                                container.css("transition-duration", undefined);
-                                container.css(transitionproperty, value);
-                            }, 0);
-            }
         }
 
         this._container.css("visibility", undefined);
-
-        try {
-            this.PositionPopup(this._container, this._poselmOuterRect = this._parentelm.outerRect);
         }
         catch (e) {
             $JD.body.removeChild(this._container);
@@ -229,47 +229,67 @@ export abstract class Popup
         let windowHeight = window.innerHeight - screen_height_correction;
         let correctWidth = false;
         let correctBottom = false;
+        let actuelRect = container.outerRect;
 
         switch (flags & PositionFlags.Horizontal) {
         case PositionFlags.AlignLeft:       cssset.left  = posLeft;                                                                                                     break;
         case PositionFlags.AlignRight:      cssset.right = windowWidth - (posLeft + poselmOuterRect.width);                                     correctWidth = true;    break;
         case PositionFlags.Left:            cssset.right = windowWidth - posLeft;                                                               correctWidth = true;    break;
         case PositionFlags.Right:           cssset.left  = posLeft + poselmOuterRect.width;                                                                             break;
-        case PositionFlags.Center:          cssset.left  = posLeft + (poselmOuterRect.width - container.outerRect.width) / 2;                                           break;
+        case PositionFlags.Center:          cssset.left  = posLeft + (poselmOuterRect.width - actuelRect.width) / 2;                                                    break;
         case PositionFlags.WindowLeft:      cssset.left  = 0;                                                                                                           break;
         case PositionFlags.WindowRight:     cssset.right = 0;                                                                                                           break;
-        case PositionFlags.WindowCenter:    cssset.left  = Math.max(0, (window.innerWidth - container.outerRect.width) / 2);                                            break;
+        case PositionFlags.WindowCenter:    cssset.left  = Math.max(0, (window.innerWidth - actuelRect.width) / 2);                                                     break;
         }
         switch (flags & PositionFlags.Vertical) {
         case PositionFlags.AlignTop:        cssset.top    = posTop;                                                                                                     break;
         case PositionFlags.AlignBottom:     cssset.bottom = windowHeight - (posTop + poselmOuterRect.height);                                   correctBottom = true;   break;
         case PositionFlags.Top:             cssset.bottom = windowHeight - posTop;                                                              correctBottom = true;   break;
         case PositionFlags.Bottom:          cssset.top    = posTop + poselmOuterRect.height;                                                                            break;
-        case PositionFlags.Middle:          cssset.top    = posTop  + (poselmOuterRect.height - container.outerRect.height) / 2;                                        break;
+        case PositionFlags.Middle:          cssset.top    = posTop  + (poselmOuterRect.height - actuelRect.height) / 2;                                                 break;
         case PositionFlags.WindowTop:       cssset.top    = 0;                                                                                                          break;
         case PositionFlags.WindowBottom:    cssset.bottom = 0;                                                                                                          break;
-        case PositionFlags.WindowMiddle:    cssset.top    = Math.max(0, (screen.height - container.outerRect.height) / 2);                                              break;
+        case PositionFlags.WindowMiddle:    cssset.top    = Math.max(0, (screen.height - actuelRect.height) / 2);                                                       break;
+        }
+
+        if (typeof cssset.left    === 'number') {
+            if (cssset.left > windowWidth-actuelRect.width)
+                cssset.left = windowWidth-actuelRect.width
+            if (cssset.left < 0)
+                cssset.left = 0;
+        }
+        if (typeof cssset.top     === 'number') {
+            if (cssset.top > windowHeight-actuelRect.height)
+                cssset.top = windowHeight-actuelRect.height
+            if (cssset.top < 0)
+                cssset.top = 0;
+        }
+
+        if (typeof cssset.right   === 'number') {
+            if (cssset.right  > windowWidth )
+                cssset.right = windowWidth;
+        }
+        if (typeof cssset.bottom  === 'number') {
+            if (cssset.bottom > windowHeight)
+                cssset.bottom = windowHeight;
         }
 
         container.css(cssset);
 
-        if (correctWidth || correctBottom) {
-            let actuelRect = container.outerRect;
-            if (correctWidth) {
-                const d = (windowWidth - cssset.right!) - (actuelRect.right + (!fixed ? window.pageXOffset : 0));
-                screen_width_correction += d;
+        if (correctWidth) {
+            const d = (windowWidth - cssset.right!) - (actuelRect.right + (!fixed ? window.pageXOffset : 0));
+            screen_width_correction += d;
 
-                if (-.5 > d || d > .5) {
-                    container.css("right", cssset.right! - d);
-                }
+            if (-.5 > d || d > .5) {
+                container.css("right", cssset.right! - d);
             }
-            if (correctBottom) {
-                const d = (windowHeight - cssset.bottom!) - (actuelRect.bottom + (!fixed ? window.pageYOffset : 0));
-                screen_height_correction += d;
+        }
+        if (correctBottom) {
+            const d = (windowHeight - cssset.bottom!) - (actuelRect.bottom + (!fixed ? window.pageYOffset : 0));
+            screen_height_correction += d;
 
-                if (-.5 > d || d > .5) {
-                    container.css("bottom", cssset.bottom! - d);
-                }
+            if (-.5 > d || d > .5) {
+                container.css("bottom", cssset.bottom! - d);
             }
         }
     }
