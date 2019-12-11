@@ -254,13 +254,13 @@ export abstract class Popup
 
         if (typeof cssset.left    === 'number') {
             if (cssset.left > windowWidth-actuelRect.width)
-                cssset.left = windowWidth-actuelRect.width
+                cssset.left = windowWidth-actuelRect.width;
             if (cssset.left < 0)
                 cssset.left = 0;
         }
         if (typeof cssset.top     === 'number') {
             if (cssset.top > windowHeight-actuelRect.height)
-                cssset.top = windowHeight-actuelRect.height
+                cssset.top = windowHeight-actuelRect.height;
             if (cssset.top < 0)
                 cssset.top = 0;
         }

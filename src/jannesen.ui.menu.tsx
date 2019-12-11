@@ -107,7 +107,7 @@ export class MenuButton extends $JD.Container implements IMenuBase,IMenuParent
         const menupos = this._attr.menupos || 0;
 
         return ((menupos & MenuPosition.Center) !== 0 ? $JUP.PositionFlags.Center : (menupos & MenuPosition.Right) !== 0 ? $JUP.PositionFlags.AlignRight : $JUP.PositionFlags.AlignLeft) |
-               ((menupos & MenuPosition.Top) !== 0 ? $JUP.PositionFlags.Top : $JUP.PositionFlags.Bottom)
+               ((menupos & MenuPosition.Top) !== 0 ? $JUP.PositionFlags.Top : $JUP.PositionFlags.Bottom);
     }
     public      menu_itemClick(item:MenuEntry)
     {
@@ -165,7 +165,7 @@ export class FloatingMenu implements IMenuBase,IMenuParent
 {
     private     _attr:          IFloatingMenuAttr;
     private     _pos:           $JD.IPosition;
-    private     _resolver:      ((value:any) => void)|null
+    private     _resolver:      ((value:any) => void)|null;
     private     _activeMenu:    PopupMenu|null;
 
     public get  attr()
@@ -178,7 +178,7 @@ export class FloatingMenu implements IMenuBase,IMenuParent
         attr = $J.extend<IFloatingMenuAttr>({} as IFloatingMenuAttr, attr);
         if (children && children.length > 0)    attr.dataSource = () => children;
         if (attr.menupos === undefined)         attr.menupos = MenuPosition.Left;
-        
+
         this._attr       = attr;
         this._pos        = { top:0, left:0 };
         this._resolver   = null;
@@ -198,7 +198,7 @@ export class FloatingMenu implements IMenuBase,IMenuParent
                        oncancel(() => {
                                     this._activeMenu = null;
                                     this._resolver   = null;
-                                })                 
+                                });
 
                        this._pos        = pos;
                        this._resolver   = resolver;
@@ -240,7 +240,7 @@ export class FloatingMenu implements IMenuBase,IMenuParent
                             },
                     flags:  ((menupos & MenuPosition.Center) !== 0 ? $JUP.PositionFlags.Center : (menupos & MenuPosition.Right) !== 0 ? $JUP.PositionFlags.AlignRight : $JUP.PositionFlags.AlignLeft) |
                             ((menupos & MenuPosition.Top) !== 0 ? $JUP.PositionFlags.Top : $JUP.PositionFlags.Bottom)
-               }
+               };
     }
     public      menu_onblur(ev:FocusEvent)
     {
