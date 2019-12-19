@@ -1425,17 +1425,19 @@ export abstract class Container extends $J.EventHandling implements IDOMContaine
         this._container = container;
     }
 
-    protected   _applyAttr(attrs:any, ...attrNames:string[]) {
-        for (let attrName of attrNames) {
-            if (attrs.hasOwnProperty(attrName)) {
-                let attrValue = (attrs as any)[attrName];
+    protected   _applyAttr(attrs?:any, ...attrNames:string[]) {
+        if (attrs instanceof Object) {
+            for (let attrName of attrNames) {
+                if (attrs.hasOwnProperty(attrName)) {
+                    let attrValue = (attrs as any)[attrName];
 
-                if (attrName.startsWith("on")) {
-                    if (typeof attrValue === "function") {
-                        this.bind(attrName.substr(2), attrValue);
+                    if (attrName.startsWith("on")) {
+                        if (typeof attrValue === "function") {
+                            this.bind(attrName.substr(2), attrValue);
+                        }
+                    } else {
+                        (this as any)[attrName] = attrValue;
                     }
-                } else {
-                    (this as any)[attrName] = attrValue;
                 }
             }
         }
