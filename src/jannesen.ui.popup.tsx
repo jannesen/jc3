@@ -215,6 +215,7 @@ export abstract class Popup
             flags = PositionFlags.AlignLeft | PositionFlags.Bottom;
         }
 
+        container.css({ top:0, left:0 });
         const fixed     = flags & (PositionFlags._fixed) ? true : false;
         let   posLeft   = poselmOuterRect.left;
         let   posTop    = poselmOuterRect.top;
@@ -274,10 +275,13 @@ export abstract class Popup
                 cssset.bottom = windowHeight;
         }
 
+        if (typeof cssset.top !== 'number')  cssset.top = undefined;
+        if (typeof cssset.left !== 'number') cssset.left = undefined;
+
         container.css(cssset);
 
         if (correctWidth) {
-            const d = (windowWidth - cssset.right!) - (actuelRect.right + (!fixed ? window.pageXOffset : 0));
+            const d = (windowWidth - cssset.right!) - (container.outerRect.right + (!fixed ? window.pageXOffset : 0));
             screen_width_correction += d;
 
             if (-.5 > d || d > .5) {
@@ -285,7 +289,7 @@ export abstract class Popup
             }
         }
         if (correctBottom) {
-            const d = (windowHeight - cssset.bottom!) - (actuelRect.bottom + (!fixed ? window.pageYOffset : 0));
+            const d = (windowHeight - cssset.bottom!) - (container.outerRect.bottom + (!fixed ? window.pageYOffset : 0));
             screen_height_correction += d;
 
             if (-.5 > d || d > .5) {
