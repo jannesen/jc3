@@ -954,7 +954,7 @@ export abstract class SubmitDialog<TArgs, TRtn=void> extends $JCONTENT.DialogBas
     protected               initData(dlgargs:TArgs, ct: $JA.Context): $JA.Task<unknown>|void
     {
     }
-    protected abstract      formTitle(): string;
+    protected abstract      formTitle(): $JD.AddNode;
     protected abstract      formBody(): $JD.AddNode;
     protected               formFooter()
     {
@@ -1032,7 +1032,7 @@ export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition
         this.data     = (interfaceSave.request_type)  ? (new interfaceSave.request_type()) as any : undefined;
     }
 
-    protected               initData(dlgargs:TArgs): $JA.Task<void>|void
+    protected               initData(dlgargs:TArgs, ct:$JA.Context): $JA.Task<void>|void
     {
         const _callargs = this.callargs as any;
         if (_callargs instanceof $JT.Record || _callargs instanceof $JT.Set) {
