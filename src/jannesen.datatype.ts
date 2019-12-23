@@ -3085,6 +3085,15 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
     /**
      *!!DOC
      */
+    public clear()
+    {
+        while (this.count > 0) {
+            this.removeItem(this.item(0));
+        }
+    }
+    /**
+     *!!DOC
+     */
     public forEach(callback: (item: TSet, index:number) => void, thisArg?:any):void {
         this._items.forEach((value, index) => callback.call(thisArg, value, index) );
     }
