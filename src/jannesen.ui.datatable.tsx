@@ -642,7 +642,7 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
             var rec = this._filter_rset[idx];
             var row = <tr/>;
 
-            this._opts.columns.forEach((c, i) => row.appendChild(<td class={"-col" + i} style={c.style}>
+            this._opts.columns.forEach((c, i) => row.appendChild(<td class={"-col" + (i+1)} style={c.style}>
                                                                 {
                                                                       (typeof c.data    === "string")   ? rec.field(c.data).toDom(c.format)
                                                                     : (typeof c.data    === "function") ? c.data(rec)
