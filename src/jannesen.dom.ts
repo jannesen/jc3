@@ -738,7 +738,16 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public addClass(className:string): DOMHTMLElement
     {
-        this._element.classList.add(className);
+        if (className.indexOf(" ") >= 0) {
+            for (let cn of className.split(' ')) {
+                if (cn.length > 0) {
+                    this._element.classList.add(cn);
+                }
+            }
+        }
+        else {
+            this._element.classList.add(className);
+        }
         return this;
     }
 
