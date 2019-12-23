@@ -48,7 +48,8 @@ export interface IDataTableState
     filter_text:    string;
 }
 
-const enum DelayReason {
+const enum DelayReason
+{
     Scroll      = 1,
     Filter      = 2
 }
@@ -658,11 +659,15 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
                                 </td>);
             }
 
-            if (typeof this._opts.rowClass === "function")
-                row.addClass((this._opts.rowClass as (rec:$JT.Record<$JT.IFieldDef>, idx:number)=>string)(rec, idx));
-            else
-            if (typeof this._opts.rowClass === "string")
-                row.addClass(this._opts.rowClass as string);
+            const rowClass = this._opts.rowClass;
+            if (rowClass) {
+                if (typeof rowClass === "function") {
+                    row.addClass(rowClass(rec, idx));
+                }
+                else {
+                    row.addClass(rowClass);
+                }
+            }
 
             rows.push(row);
             --n;
