@@ -10,7 +10,7 @@ export interface IDataTableOpts<TRec extends $JT.Record<$JT.IFieldDef>>
 {
     containerClass?:string;
     tableClass?:    string;
-    rowClass?:      string | ((rec:TRec, idx:number)=>string);
+    rowClass?:      string | ((rec:TRec, idx:number)=>string|undefined);
     rowClick?:      (rec:TRec)=>void;
     rowDblClick?:   (rec:TRec, ev:MouseEvent)=>void;
     columns:        IDataTableOptsColumn<TRec>[];
@@ -659,12 +659,13 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
                                 </td>);
             }
 
-            const rowClass = this._opts.rowClass;
+            let rowClass = this._opts.rowClass;
             if (rowClass) {
                 if (typeof rowClass === "function") {
-                    row.addClass(rowClass(rec, idx));
+                    rowClass = rowClass(rec, idx);
                 }
-                else {
+
+                if (typeof rowClass === 'string') {
                     row.addClass(rowClass);
                 }
             }
