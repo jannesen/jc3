@@ -276,6 +276,8 @@ export abstract class InputTextControl<TNativeValue,
             container.css("width", opts.width);
         }
 
+        this._input = input;
+
         if (dropdown) {
             if ($JD.body.hasClass("jannesen-ui-mobile")) {
                 this.getinputelm().bind("click", this.dropdown_click, this);
@@ -286,7 +288,6 @@ export abstract class InputTextControl<TNativeValue,
             }
         }
 
-        this._input          = input;
         this._text           = "";
         this._activeDropdown = undefined;
         this.setcontainer(container);
