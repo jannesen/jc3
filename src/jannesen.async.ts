@@ -954,11 +954,21 @@ export interface IAjaxEncoderDecoders
 /**
  * !!DOC
  */
+export interface IHttpHeaderNameValue
+{
+    name:           string;
+    value:          string;
+}
+
+/**
+ * !!DOC
+ */
 export interface IAjaxOpts extends IAjaxArgs, IAjaxCallDefinition<any,any,any>
 {
     method:         string;
     callname:       string;
     timeout:        number;
+    headers?:       IHttpHeaderNameValue[];
 }
 
 /**
@@ -1068,6 +1078,12 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
                 xhr.timeout             = opts.timeout;
                 xhr.onreadystatechange  = xhr_onreadystatechange;
                 xhr.ontimeout           = xhr_ontimeout;
+
+                if (opts.headers) {
+                    for (const vn of opts.headers) {
+                        xhr.setRequestHeader(vn.name, vn.value);
+                    }
+                }
 
                 xhr.open(opts.method, opts.url, true);
 
