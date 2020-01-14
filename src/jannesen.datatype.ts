@@ -2588,8 +2588,9 @@ export interface IRecordConstructor<TRecord extends IFieldDef>
 /**
  *!!DOC
  */
-export type RecordIFieldDef<T> = T extends Record<infer U> ? U : never;
-export type RecordFieldNames<T> = T extends Record<infer U> ? { [K in keyof U] : K }[keyof U] : string;
+export type RecordIFieldDef<T>    = T extends Record<infer U> ? U : never;
+export type FieldDefFieldNames<T> = T extends IFieldDef ? { [K in keyof T] : K }[keyof T] : string;
+export type RecordFieldNames<T>   = T extends Record<infer U> ? { [K in keyof U] : K }[keyof U] : string;
 
 /**
  *!!DOC
