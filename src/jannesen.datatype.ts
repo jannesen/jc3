@@ -412,19 +412,25 @@ export abstract class BaseType implements IValidatable, $J.EventHandling, $JD.IT
     // #endregion
 
     /**
-     *!!DOC
+     * Return if input-control is bound.
      */
     public get hasControl() {
         return this._control instanceof Object;
     }
     /**
-     *!!DOC
+     * Get bound input-control. Throw error is no control is linked
      */
     public get control() {
         if (!this._control) {
             throw new $J.InvalidStateError("Not control defined.");
 
         }
+        return this._control;
+    }
+    /**
+     * Get bound input-control. if no control is bound return undefined.
+     */
+    public get boundControl() {
         return this._control;
     }
 
