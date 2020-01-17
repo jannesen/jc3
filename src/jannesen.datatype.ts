@@ -217,6 +217,10 @@ export class ValidateErrors extends __Error
 
     public      addError(error:string|Error, value?:BaseType, control?:IControlBase, path?:string): void
     {
+        if (control === undefined && value) {
+            control = value.boundControl;
+        }
+
         if (error instanceof ValidateErrors) {
             for (const e of error._errors) {
                 this.addError(e.error, e.value, e.control, e.path);
