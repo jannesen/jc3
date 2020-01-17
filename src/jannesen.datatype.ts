@@ -485,8 +485,8 @@ export abstract class BaseType implements IValidatable, $J.EventHandling, $JD.IT
     {
         let c = new (this.constructor as any)();
 
-        c._attributes = this._attributes;
-        c._uniqueid   = this._uniqueid;
+        if (this._attributes !== undefined) c._attributes = this._attributes;
+        if (this._uniqueid   !== undefined) c._uniqueid   = this._uniqueid;
 
         return c;
     }
