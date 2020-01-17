@@ -506,6 +506,14 @@ export abstract class BaseType implements IValidatable, $J.EventHandling, $JD.IT
                                                     return ValidateResult.Error;
                                                 }
                                             }
+
+                                            if (item instanceof Record) {
+                                                if (item._validators) {
+                                                    for (const v of item._validators) {
+                                                        addTask(item, path, v.preValidateAsync(context));
+                                                    }
+                                                }
+                                            }
                                         }
                                         catch(err) {
                                             addTask(item, path, err);
@@ -518,7 +526,7 @@ export abstract class BaseType implements IValidatable, $J.EventHandling, $JD.IT
 
         return rtn;
 
-        function addTask(item:BaseType, path:string, tr:$JA.Task<unknown>|Error|null) {
+        function addTask(item:BaseType, path:string, tr:$JA.Task<unknown>|Error|null|($JA.Task<unknown>|Error)[]) {
             if (tr instanceof $JA.Task) {
                 if (tr.isPending) {
                     rtn.push(tr.catch((err) => $JA.Task.reject(new ValidateErrors(err, item, item._control, path))));
@@ -534,6 +542,14 @@ export abstract class BaseType implements IValidatable, $J.EventHandling, $JD.IT
             if (tr instanceof Error) {
                 rtn.push(new ValidateErrors(tr, item, item._control, path));
                 return true;
+            }
+
+            if (Array.isArray(tr)) {
+                for (const t of tr) {
+                    if (addTask(item, path, t)) {
+                        return true;
+                    }
+                }
             }
 
             return false;
@@ -564,6 +580,17 @@ export abstract class BaseType implements IValidatable, $J.EventHandling, $JD.IT
 
                                                 if (err) {
                                                     result = addError(item, path, err);
+                                                }
+
+                                                if (result === ValidateResult.OK && item instanceof Record) {
+                                                    if (item._validators) {
+                                                        for(const v of item._validators) {
+                                                            const x = v.validateNow(opts);
+                                                            if (x instanceof Error) {
+                                                                result = addError(item, path, x);
+                                                            }
+                                                        }
+                                                    }
                                                 }
 
                                                 return result;
@@ -2612,6 +2639,9 @@ export interface IRecordConstructor<TRecord extends IFieldDef>
 export type RecordIFieldDef<T>    = T extends Record<infer U> ? U : never;
 export type FieldDefFieldNames<T> = T extends IFieldDef ? { [K in keyof T] : K }[keyof T] : string;
 export type RecordFieldNames<T>   = T extends Record<infer U> ? { [K in keyof U] : K }[keyof U] : string;
+type UnboxArray<T> = T extends Array<infer U> ? U:never;
+export type RecordObject<TRec extends IFieldDef, TNames extends string[]> = { [K in (keyof TRec) & UnboxArray<TNames>]: TRec[K] } ;
+
 
 /**
  *!!DOC
@@ -2623,6 +2653,7 @@ export class Record<TRec extends IFieldDef> extends BaseType implements $J.IUrlA
     public static   FieldDef:IFieldDef  = {};
 
     protected       _fields!:IRecord|null;
+    /*@internal*/   _validators?:RecordValidator<this>[];
 
     public static   define<T extends IFieldDef>(recdef:T, attr?:IRecordAttributes): IRecordConstructor<T> {
         var newClass:any = new Function("this._initialize();");
@@ -2846,12 +2877,14 @@ export class Record<TRec extends IFieldDef> extends BaseType implements $J.IUrlA
     }
 
     /**
-     *!!DOC
+     * register a record (async) validator
      */
-    public validateValue(): ValidateValueResult {
-        let validate = this.getAttr("validate") as ((rec:this) => ValidateValueResult)|undefined;
-
-        return typeof validate === 'function' ? validate(this) : null;
+    public registerValidator<TFieldNames extends FieldDefFieldNames<TRec>[], TContext extends ObjectFieldValue>(fieldNames:TFieldNames, dataContext:TContext, softvalidate:boolean, validator:RecordValidatorValidator<{ [K in (keyof TRec) & UnboxArray<TFieldNames>]: InstanceType<TRec[K]> }, TContext>, thisArg?:any)
+    {
+        if (!this._validators) {
+            this._validators = [];
+        }
+        this._validators.push(new RecordValidator(this, fieldNames, dataContext, softvalidate, validator as RecordValidatorValidator<ObjectFields,ObjectFields>, thisArg));
     }
 
     /**
@@ -3531,4 +3564,220 @@ function stringErrorToMessage(e:null|string|Error): string|null
 
 function regexToString(r: RegExp) {
     return r.source.replace(/\((?![?])/g, '(?:').replace(/[\^\$]/g, '');
+}
+
+type ObjectFields = { [key:string]: BaseType };
+type ObjectFieldValue = { [key:string]: BaseType };
+type RecordValidatorValidator<TFields, TContext> = (fields:TFields, contextFields:TContext, ct:$JA.Context)=>ValidateResult|Error|$JA.Task<ValidateResult|Error>;
+
+class RecordValidator<TRec extends Record<IFieldDef>> implements IValidatable
+{
+    private     _fields:        ObjectFields;
+    private     _dataContext:   ObjectFieldValue;
+    private     _allfields:     BaseType[];
+    private     _validator:     RecordValidatorValidator<ObjectFields,ObjectFieldValue>;
+    private     _thisArg:       any;
+    private     _initstate:     undefined|$J.JsonValue[];
+    private     _delaytimer:    number|null;
+    private     _result:        undefined|ValidateResult|Error|$JA.Task<ValidateResult|Error>;
+    private     _context:       $JA.Context|null;
+
+    constructor(rec:TRec, fieldNames:string[], dataContext:ObjectFieldValue, softvalidate:boolean, validator:RecordValidatorValidator<ObjectFields,ObjectFields>, thisArg:any)
+    {
+        this._fields      = rec.toObject(fieldNames);
+        this._dataContext = dataContext;
+        this._allfields   = RecordValidator._getFields(this._fields, this._dataContext);
+        this._validator   = validator;
+        this._thisArg     = thisArg;
+        this._initstate   = softvalidate ? this._getState() : undefined;
+        this._delaytimer  = null;
+        this._result      = undefined;
+        this._context     = null;
+
+        this._allfields.forEach((f) => f.bind('changed', this._fieldChanged, this));
+    }
+
+    public  preValidateAsync(context:$JA.Context|null):($JA.Task<unknown>|Error)[]|$JA.Task<unknown>|Error|null
+    {
+        const waiton = [] as $JA.Task<unknown>[];
+
+        for (const v of this._allfields) {
+            const control = v.boundControl;
+            if (control) {
+                const r = control.preValidate();
+                if (r && !r.isFulfilled) {
+                    if (r.isPending) {
+                        waiton.push(r);
+                    }
+                    else {
+                        this._result = undefined;
+                        return null;
+                    }
+                }
+            }
+        }
+
+        if (waiton.length > 0) {
+            return $JA.Task.all(waiton)
+                           .then(() => this._preValidateAsync(),
+                                 (e) => undefined);
+        }
+        else {
+            return this._preValidateAsync();
+        }
+    }
+    public  validateNow(opts:IValidateOptions): ValidateResult|Error
+    {
+        let result = this._result;
+
+        if (result instanceof $JA.Task) {
+            result = new $J.InvalidStateError("Validation is busy.");
+        }
+
+        if (result === undefined) {
+            result = new $J.InvalidStateError("Validation not yet done.");
+        }
+
+        return result;
+    }
+
+    private _fieldChanged(reason:ChangeReason)
+    {
+        if (this._context) {
+            this._context.stop();
+            this._context = null;
+        }
+        if (this._delaytimer) {
+            clearTimeout(this._delaytimer);
+        }
+
+        this._delaytimer = setTimeout(() => {
+                                          this._delaytimer = null;
+                                          this._startValidate(reason === ChangeReason.UI);
+                                      }, 25);
+    }
+    private _startValidate(seterror:boolean)
+    {
+        if (this._delaytimer) {
+            clearTimeout(this._delaytimer);
+            this._delaytimer = null;
+        }
+
+        if (this._testFieldValid()) {
+            if (this._initstate !== undefined && $J.isEqual(this._initstate, this._getState())) {
+                this._setError(this._result = ValidateResult.OK);
+            }
+            else {
+                const self = this;
+                const context = new $JA.Context({});
+
+                try {
+                    this._context = context;
+                    this._result  = this._validator.call(this._thisArg, this._fields, this._dataContext, this._context);
+
+                    if (this._result instanceof $JA.Task) {
+                        this._result.then(setResult, setResult);
+                    }
+                    else {
+                        setResult(this._result);
+                    }
+                }
+                catch (e) {
+                    setResult(e);
+                }
+
+                function setResult(result: ValidateResult|Error) {
+                if (self._context === context) {
+                    self._context = null;
+                    self._result = result;
+                    self._setError(result);
+                }
+            }
+            }
+        }
+        else {
+            this._setError(this._result = undefined);
+        }
+
+        return this._result;
+
+    }
+    private _setError(result:undefined|ValidateResult|Error)
+    {
+        let fields = RecordValidator._getFields(this._fields);
+
+        if (result instanceof ValidateErrors) {
+            const errors = result.errors;
+            if (errors) {
+                for (const err of errors) {
+                    const value = err.value;
+                    if (value) {
+                        const i     = fields.indexOf(value);
+                        if (i !== -1) {
+                            value.setError(err.error instanceof Error ? err.error.message : err.error);
+                            fields.splice(i, 1);
+                        }
+                    }
+                }
+            }
+        }
+
+        for(const f of fields) {
+            f.setError();
+        }
+    }
+    private _preValidateAsync()
+    {
+        if (this._result === undefined) {
+            this._startValidate(false);
+        }
+
+        return (this._result instanceof $JA.Task) ? this._result : null;
+    }
+    private _testFieldValid()
+    {
+        for (const v of this._allfields) {
+            const control = v.boundControl;
+            if (control) {
+                try {
+                    const r = control.preValidate();
+                    if (r && !r.isFulfilled) {
+                        return false;
+                    }
+                }
+                catch (e) {
+                    return false;
+                }
+            }
+        }
+
+        for (const v of this._allfields) {
+            try {
+                if (v.validateValue()) {
+                    return false;
+                }
+            }
+            catch (e) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    private _getState()
+    {
+        return this._allfields.map((f) => f.toJSON());
+    }
+    private static _getFields(...objectFields: ObjectFieldValue[])
+    {
+        const rtn = [] as BaseType[];
+        for (const objf of objectFields) {
+            for (const n of Object.getOwnPropertyNames(objf)) {
+                if (objf[n] instanceof BaseType) {
+                    rtn.push(objf[n]);
+                }
+            }
+        }
+        return rtn;
+    }
 }
