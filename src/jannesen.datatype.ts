@@ -2821,6 +2821,18 @@ export class Record<TRec extends IFieldDef> extends BaseType implements $J.IUrlA
     }
 
     /**
+     * Create object with field[fieldnames] as properties.
+     */
+    public toObject<TNames extends Array<keyof TRec>>(fieldNames: TNames): { [K in (keyof TRec) & UnboxArray<TNames>]: InstanceType<TRec[K]> }
+    {
+        let rtn = {} as any;
+        for (const fn of fieldNames) {
+            rtn[fn] = this.field(fn);
+        }
+        return rtn;
+    }
+
+    /**
      *!!DOC
      */
     public sortCompare<K extends keyof TRec>(other:this, ...fields:K[])
