@@ -2344,8 +2344,7 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
                 if (value instanceof BaseType) {
                     value = value.value;
                 }
-                else
-                {
+                else {
                     const key = (value as any)[datasource.keyfieldname] as TNative;
 
                     if (typeof key !== (this.constructor as any).NativeType) {
@@ -3266,6 +3265,12 @@ export abstract class SelectDatasource<TNative extends SelectValue, TRecord exte
     public filter_searchtext(searchtext:string|string[]): string|string[] {
         return searchtext;
     }
+    /**
+     *!!DOC
+     */
+    public normalize_searchtext(searchtext: string) : string | string[] {
+        return searchtext.split(" ");
+    }
 }
 
 /**
@@ -3321,6 +3326,7 @@ export interface RemoteSelectDatasourceOpts
     cache_timeout?:         number;
     keyfieldname:           string;
     fetch_filter?:          string[];               // List with words (in uppercase) which are not index by the server.
+    searchtext_normalize?:  (text:string) => string;
 }
 /**
  *!!DOC
@@ -3459,6 +3465,14 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
         }
 
         return searchtext;
+    }
+
+    public normalize_searchtext(searchtext: string): string | string[] {
+        if (this._opts.searchtext_normalize) {
+            return this._opts.searchtext_normalize(searchtext);
+        }
+
+        return super.normalize_searchtext(searchtext);
     }
 
     private _entrytimeout()

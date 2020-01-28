@@ -1812,8 +1812,7 @@ function transitionSchedule()
     requestAnimationFrame(() => {
         const now = performance.now();
 
-        for (let i = 0; i < g_activeTransitions.length; ++i)
-        {
+        for (let i = 0; i < g_activeTransitions.length; ++i) {
             const t = g_activeTransitions[i];
             const d = (now - t.start) / t.time;
             let f:boolean|void;

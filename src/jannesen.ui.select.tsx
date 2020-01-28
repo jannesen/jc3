@@ -79,6 +79,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     private     _columns:                   $JT.ISelectTypeAttributeDropdownColumn[];
     private     _context:                   $JI.SelectInputContext;
     private     _searchtext:                string|string[];
+    private     _strippedsearchtext:        string;
     private     _currectfetch:              ICurrentFetch<$JT.TDatasource_Record<TDatasource>>|undefined;
     private     _tbodydata:                 ($JT.TDatasource_Record<TDatasource>|null)[]|undefined;
 
@@ -94,13 +95,14 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
         this._columns     = input.get_opts().dropdown_columns || value.getAttr("dropdown_columns") as $JT.ISelectTypeAttributeDropdownColumn[];
         this._context     = context;
         this._searchtext  = "";
+        this._strippedsearchtext = "";
     }
 
     public      LocalSearch(text:string)
     {
         if (this._currectfetch && this._currectfetch.task.isFulfilled) {
             if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
-                return hassearchdata(this._currectfetch.searchtext, normalizeSearchText(text));
+                return hassearchdata(this._currectfetch.searchtext, this._normalizeSearchText(text));
             }
             else {
                 return true;
@@ -114,7 +116,8 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     {
         try {
             this.selectRow(undefined);
-            this._searchtext = normalizeSearchText(text);
+            this._strippedsearchtext = $JSTRING.removeDiacritics(text.trim()).toUpperCase();
+            this._searchtext = this._normalizeSearchText(this._strippedsearchtext);
 
             if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
                 if (this._currectfetch && this._currectfetch.task.isFulfilled && hassearchdata(this._currectfetch.searchtext, this._searchtext)) {
@@ -323,9 +326,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
         if (Array.isArray(this._searchtext)) {
             const value = this.control!.value!;
 
-            for(let i = 0 ; i < this._searchtext.length ; ++i) {
-                let key = this._searchtext[i];
-
+            for(let key of this._strippedsearchtext.split(" ")) {
                 if (this._columns) {
                     if (!this._columns.some((col) => containskey((rec as ({readonly [key:string]:any}))[col.fieldname] as string, key)))
                         return false;
@@ -342,25 +343,24 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
             if (typeof text !== 'string')
                 return false;
 
-            let s = $JSTRING.removeDiacritics(text).toUpperCase().replace(/[^A-Z0-9]/g, " ");
-            let p = s.indexOf(key);
+            let p = text.indexOf(key);
 
-            return p === 0 || (p > 0 && !/[A-Z-0-9]/.test(s[p-1]));
+            return p === 0 || (p > 0 && text.charAt(p-1) === " ");
         }
     }
+
+    private _normalizeSearchText(text: string): string | string[] {
+        const keywords = this._datasource.normalize_searchtext(text);
+
+        if(Array.isArray(keywords)) {
+            return keywords.filter((k) => !keywords.some((r) => r.length > k.length && r.startsWith(k)));
+        }
+
+        return keywords;
+    }
+
 }
 
-function normalizeSearchText(text: string): string|string[]
-{
-    text = $JSTRING.removeDiacritics(text.trim()).toUpperCase();
-
-    if (/^#[0-9A-Z.\-]+$/.test(text))
-        return text;
-
-    let keywords = text.replace(/[^A-Z0-9]/g, " ").split(" ").filter((r) => r.length >= 2);
-
-    return keywords.filter((k) => !keywords.some((r) => r.length > k.length && r.startsWith(k)));
-}
 function hassearchdata(fd_searchtext:string|string[]|undefined, searchtext:string|string[])
 {
     if (typeof searchtext === 'string' && typeof fd_searchtext === 'string') {
