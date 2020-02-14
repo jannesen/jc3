@@ -816,8 +816,13 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
 
         return btns;
     }
-    protected               validate(mode:StandardDialogMode, ct:$JA.Context): $JA.Task<$JT.ValidateResult> {
-        return this.data as unknown instanceof $JT.BaseType ? (this.data as unknown as $JT.BaseType).validateAsync({ context:ct }) : $JA.Task.resolve($JT.ValidateResult.OK);
+    protected               validateAsync(context:$JA.Context): $JA.Task<$JT.ValidateResult>
+    {
+        return $JT.validateAsync({ context }, (this.data as unknown instanceof $JT.BaseType) ? (this.data as unknown as $JT.BaseType) : undefined, this);
+    }
+    public                  validateNow():$JT.ValidateResult|Error
+    {
+        return $JT.ValidateResult.OK;
     }
     protected               cmdCancel()
     {
@@ -878,7 +883,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     {
         const dlgmode = this.dlgmode;
 
-        return this.validate(dlgmode, context)
+        return this.validateAsync(context)
                    .then(() => {
                              let opts = {
                                              callargs: this.callargs,
