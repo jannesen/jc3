@@ -102,7 +102,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     {
         if (this._currectfetch && this._currectfetch.task.isFulfilled) {
             if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
-                return hassearchdata(this._currectfetch.searchtext, this._normalizeSearchText(text));
+                return hassearchdata(this._currectfetch.searchtext, this._normalizeSearchText($JSTRING.removeDiacritics(text.trim()).toUpperCase()));
             }
             else {
                 return true;
@@ -327,12 +327,14 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
             const value = this.control!.value!;
 
             for(let key of this._strippedsearchtext.split(" ")) {
-                if (this._columns) {
-                    if (!this._columns.some((col) => containskey((rec as ({readonly [key:string]:any}))[col.fieldname] as string, key)))
-                        return false;
-                } else {
-                    if (!containskey(value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec), key))
-                        return false;
+                if (key.length > 0) {
+                    if (this._columns) {
+                        if (!this._columns.some((col) => containskey((rec as ({readonly [key:string]:any}))[col.fieldname] as string, key)))
+                            return false;
+                    } else {
+                        if (!containskey(value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec), key))
+                            return false;
+                    }
                 }
             }
         }
@@ -343,9 +345,22 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
             if (typeof text !== 'string')
                 return false;
 
-            let p = text.indexOf(key);
+            text = $JSTRING.removeDiacritics(text.trim()).toUpperCase();
 
-            return p === 0 || (p > 0 && text.charAt(p-1) === " ");
+            let p = text.indexOf(key);
+            if (p >= 0) {
+                if (p === 0) {
+                    return true;
+                }
+
+                if (/[A-Z0-9]/.test(key.charAt(0))) {
+                    return /[^A-Z0-9]/.test(text.charAt(p-1));
+                }
+                else {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 

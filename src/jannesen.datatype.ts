@@ -3269,7 +3269,7 @@ export abstract class SelectDatasource<TNative extends SelectValue, TRecord exte
      *!!DOC
      */
     public normalize_searchtext(searchtext: string) : string | string[] {
-        return searchtext.split(" ");
+        return searchtext.split(" ").filter((s) => s.length > 0);
     }
 }
 
@@ -3326,7 +3326,7 @@ export interface RemoteSelectDatasourceOpts
     cache_timeout?:         number;
     keyfieldname:           string;
     fetch_filter?:          string[];               // List with words (in uppercase) which are not index by the server.
-    searchtext_normalize?:  (text:string) => string;
+    searchtext_normalize?:  (text:string) => string|string[];
 }
 /**
  *!!DOC
