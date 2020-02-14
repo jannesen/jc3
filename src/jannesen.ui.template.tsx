@@ -792,6 +792,9 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
             if (_data instanceof $JT.Record || _data instanceof $JT.Set) {
                 _data.setDefault();
             }
+        }
+
+        if (onopen && (initdata || this.dlgmode === StandardDialogMode.Create)) {
             this.initNewData(_data as $JA.AjaxCallRequestType<TCall>);
         }
     }
