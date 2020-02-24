@@ -1840,22 +1840,22 @@ function transitionSchedule()
 /**
  * !!DOC
  */
-export function onAnimationTransitionEnd(elm: DOMHTMLElement, timeout:number, cb: ()=>void)
+export function onAnimationTransitionEnd(elm: DOMHTMLElement, cb: ()=>void)
 {
     let timeoutid:number|null;
-    let s:string;
+    let s:number;
     let evts = new $J.EventCollection();
 
-    if ((s = elm.css("animation")) && !s.startsWith("none ")) {
+    if ((s = parseCssTimer(elm.css("animation-duration"))) > 0) {
         evts.bind(elm, "animationstart", start);
         evts.bind(elm, "animationend",   done);
-        timeoutid = $J.setTimeout(ontimeout, 500);
+        timeoutid = $J.setTimeout(ontimeout, s + 50);
         return true;
     }
     else
-    if ((s = elm.css("transition")) && !s.startsWith("none ")) {
+    if ((s = parseCssTimer(elm.css("transition-duration"))) > 0) {
         evts.bind(elm, "transitionend",   done);
-        timeoutid = $J.setTimeout(ontimeout, timeout);
+        timeoutid = $J.setTimeout(ontimeout, s + 50);
         return true;
     }
     else {
@@ -1866,7 +1866,7 @@ export function onAnimationTransitionEnd(elm: DOMHTMLElement, timeout:number, cb
     function start() {
         if (timeoutid) {
             clearTimeout(timeoutid);
-            timeoutid = $J.setTimeout(ontimeout, timeout);
+            timeoutid = $J.setTimeout(ontimeout, s + 1000);
         }
     }
     function done() {
@@ -1875,15 +1875,24 @@ export function onAnimationTransitionEnd(elm: DOMHTMLElement, timeout:number, cb
         if (timeoutid) {
             clearTimeout(timeoutid);
             timeoutid = null;
-            cb();
         }
+        cb();
     }
     function ontimeout() {
         timeoutid = null;
         done();
     }
-}
 
+    function parseCssTimer(s:string) {
+        let r:number = 0;
+        for (let t of s.split(',')) {
+            t = t.trim();
+            r = Math.max(r, t.endsWith("ms") ? parseFloat(t.substr(0, s.length - 2)) : t.endsWith("s") ? parseFloat(t.substr(0, s.length - 1)) * 1000 : 0);
+        }
+
+        return r;
+    }
+}
 
 //-------------------------------------------------------------------------------------------------
 // DOM event handlers

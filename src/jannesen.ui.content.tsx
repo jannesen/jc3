@@ -918,7 +918,7 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
                              this._isbusy = true;
                              this._container.addClass("-unloading");
                              this._overlay.focus();
-                             return waitAnimationAsync(this._container, 1000, r);
+                             return waitAnimationAsync(this._container, r);
                          },
                          (e) => {
                              if (this._context.isStopped) {
@@ -928,7 +928,7 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
                              this._isbusy = true;
                              this._container.addClass("-unloading");
                              this._overlay.focus();
-                             return waitAnimationAsync(this._container, 1000, undefined)
+                             return waitAnimationAsync(this._container, undefined)
                                     .then(() => { throw e; });
                          })
                    .finally(() => {
@@ -987,7 +987,7 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
                      .addClass("-loaded");
             $JD.window.bind("resize",  this._onWindowResize,  this);
 
-            $JD.onAnimationTransitionEnd(container, 1000, () => {
+            $JD.onAnimationTransitionEnd(container, () => {
                                               this._container.bind("click", this._onclick, this);
                                               if (this._contentBody && this._onTop)  {
                                                   this._focusFirst();
@@ -1621,10 +1621,10 @@ export function normalizeUrlArgs(args:$J.IUrlArgs)
 /**
  * !!DOC
  */
-export function waitAnimationAsync<T>(elm: $JD.DOMHTMLElement, timeout:number, rtn:T)
+export function waitAnimationAsync<T>(elm: $JD.DOMHTMLElement, rtn:T)
 {
     return new $JA.Task<T>((resolve, reject, oncancel) => {
-                              $JD.onAnimationTransitionEnd(elm, timeout, () => resolve(rtn));
+                              $JD.onAnimationTransitionEnd(elm, () => resolve(rtn));
                            }, null);
 }
 
