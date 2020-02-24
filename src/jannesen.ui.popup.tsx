@@ -639,15 +639,24 @@ export class DropdownPopup<TNativeValue,
         if (left <= rest)
             left = Math.min(poselmOuterRect.left, rest);
 
+        let top = poselmOuterRect.top;
+
+        if ((poselmOuterRect.top + poselmOuterRect.height - 1) + size.height < winSize.height) { // Fit below poselm
+            top = poselmOuterRect.top + poselmOuterRect.height - 1;
+        }
+        else if (poselmOuterRect.top - size.height > 0) { // Fit above poselm
+            top = poselmOuterRect.top - size.height;
+        }
+        else { // align bottom op window
+            top = Math.max(winSize.height - size.height, 0);
+        }
+
         container.css({
-                "top":      (((poselmOuterRect.top + poselmOuterRect.height - 1) + size.height < winSize.height)
-                                ? (poselmOuterRect.top + poselmOuterRect.height - 1)
-                                : poselmOuterRect.top - size.height
-                            ),
+                "top":      top,
                 "left":     left,
                 "height":   size.height,
                 "width":    size.width
-            });
+        });
 
         if (this._popupcontainer) {
             this._popupcontainer.css("overflow-y", this._popupcontainer.prop("scrollHeight") === this._popupcontainer.prop("offsetHeight")  ? "hidden" : undefined);
