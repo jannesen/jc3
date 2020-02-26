@@ -26,7 +26,14 @@ $jc-confirm-box-shadow:                     4px 4px 4px rgba($jc-confirm-color, 
     0% { opacity: 0; }
   100% { opacity: 1; }
 }
-
+@keyframes jannesen-ui-content-fadein-overlay {
+    0% { background-color: rgba(220,220,220,0); }
+  100% { background-color: rgba(220,220,220,.25); }
+}
+@keyframes jannesen-ui-content-fadein-waitspinner {
+    0% { color:   rgba(0,0,0,0); }
+  100% { color:   rgba(0,0,0,1); }
+}
 @keyframes jannesen-ui-content-fadein-dialog {
     0% { opacity: 0.2; transform: scale(0.9); }
   100% { opacity: 1;   transform: scale(1.0); }
@@ -86,7 +93,7 @@ div.jannesen-ui-content {
             display:            inline-block;
             background-color:   rgba(220,220,220,.25);
             cursor:             wait;
-            animation:          jannesen-ui-content-fadein-loading 1s ease-in .1s 1 normal both;
+            animation:          jannesen-ui-content-fadein-overlay $jc-dialog-animation-time ease-in 0s 1 normal both;
         }
     }
     &.-loading {
@@ -95,7 +102,6 @@ div.jannesen-ui-content {
         overflow:       visible;
         > div.-overlay {
             font-size:          48px;
-            color:              #0000a0;
 
             &::after {
                 display:        inline-block;
@@ -105,8 +111,7 @@ div.jannesen-ui-content {
                 width:          1em;
                 height:         1em;
                 line-height:    1em;
-                color:          #000000;
-                animation:      jannesen-ui-content-spin 1s infinite linear;
+                animation:      jannesen-ui-content-fadein-waitspinner 2s ease-in .5s 1 normal both, jannesen-ui-content-spin 1s infinite linear;
                 @include        fa-icon($fa-var-spinner, $font-awesome-solid);
             }
         }
