@@ -137,7 +137,7 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
     /**
      * !!DOC
      */
-    public      preValidate()
+    public      preValidate(): $JA.Task<unknown>|null
     {
         this.parseInput(true);
         return null;
@@ -936,7 +936,6 @@ export class Date extends InputTextValueDropdownControl<number, $JT.Date, Date, 
     protected   defaultPlaceHolder(value:$JT.Date):string {
         return $JL.datePlaceHolder;
     }
-
     protected   keyRemap(key: string) {
         if ((key >= "0" && key <= "9") ||
             (key >= "A" && key <= "Z") ||
@@ -955,7 +954,6 @@ export class Date extends InputTextValueDropdownControl<number, $JT.Date, Date, 
 
         return null;
     }
-
     protected   getDropdownStd()
     {
         this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-date", true);
@@ -1005,7 +1003,6 @@ export class Time extends InputTextValueDropdownControl<number, $JT.Time, Time, 
     protected   defaultPlaceHolder(value:$JT.Time):string|undefined {
         return $JR.timePlaceHolder(value.getTimeFormat());
     }
-
     protected   keyRemap(key: string) {
         if (this._value) {
             if (key >= "0" && key <= "9")
@@ -1031,7 +1028,6 @@ export class Time extends InputTextValueDropdownControl<number, $JT.Time, Time, 
 
         return null;
     }
-
     protected   getDropdownStd()
     {
         this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-time", true);
@@ -1123,7 +1119,7 @@ export class SelectRadio<TNativeValue extends $JT.SelectValue, TDatasource exten
     /**
      * !!DOC
      */
-    public      preValidate() {
+    public      preValidate(): $JA.Task<unknown>|null {
         return null;
     }
 
@@ -1290,7 +1286,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
                                         $JT.TDatasource_Record<TDatasource>,
                                         $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>
 {
-    private     _activetask:        $JA.Task<any>|undefined;
+    private     _activetask:        $JA.Task<unknown>|undefined;
     private     _inputContext:      SelectInputContext|undefined;
     private     _inputTimer:        number|undefined;
     private     _inputChanged:      boolean;
@@ -1352,7 +1348,6 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
 
         this.setError(null);
     }
-
     public          parseInput(validate:boolean): void {
         if (this._value) {
             const text = this._input.prop("value");
@@ -1368,10 +1363,21 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
             }
         }
     }
-
     public          get_opts()
     {
         return this._opts;
+    }
+    /**
+     * !!DOC
+     */
+    public          preValidate(): $JA.Task<unknown>|null
+    {
+        if (this._activetask) {
+            return this._activetask;
+        }
+
+        this.parseInput(true);
+        return null;
     }
 
     /* @internal */ dropdownKeyDown(ev:KeyboardEvent) {
@@ -1480,7 +1486,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
                             }
 
                             if (dataset) {
-                                const task = dataset.Fetch(text, 1)
+                                const task = dataset.Fetch(text, 1);
                                 this._setactivetask(task);
                                 task.thenD((result) => {
                                                if (this._isactivetask(task)) {
@@ -1617,7 +1623,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
     private         _setactivetask(task?:$JA.Task<unknown>)
     {
         this._activetask = task;
-        this.container.toggleClass("-busy", task instanceof $JA.Task)
+        this.container.toggleClass("-busy", task instanceof $JA.Task);
     }
 }
 
