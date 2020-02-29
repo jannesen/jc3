@@ -2364,7 +2364,13 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
                     value = value.value;
                 }
                 else {
-                    throw new $J.InvalidStateError("SelectType.setValue value invalid value type.");
+                    const keyfieldname = datasource.keyfieldname;
+                    if ((value as Object).hasOwnProperty(keyfieldname)) {
+                        value = (value as ({readonly [key:string]:any}))[keyfieldname] as TNative;
+                    }
+                    else {
+                        throw new $J.InvalidStateError("SelectType.setValue invalid value.");
+                    }
                 }
             }
         }
@@ -3258,17 +3264,17 @@ export abstract class SelectDatasource<TNative extends SelectValue, TRecord exte
     /**
      *!!DOC
      */
-    public abstract fetchdataAsync(context:$JA.Context, inputContext:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]|string>;
+    public abstract fetchdataAsync(context:$JA.Context, inputContext:$JI.SelectInputContext, searchkeys?:string|string[], max?:number): $JA.Task<TRecord[]|string>;
     /**
      *!!DOC
      */
-    public filter_searchtext(searchtext:string|string[]): string|string[] {
-        return searchtext;
+    public filter_searchtext(searchkeys:string[]): string[] {
+        return searchkeys;
     }
     /**
      *!!DOC
      */
-    public normalize_searchtext(searchtext: string) : string | string[] {
+    public normalize_searchtext(searchtext: string) : string|string[] {
         return searchtext.split(" ").filter((s) => s.length > 0);
     }
 }
@@ -3307,8 +3313,8 @@ export class EnumSelectDatasource<TNative extends SelectValue, TRecord extends I
     public  getrecordAsync(key:TNative): TRecord|undefined {
         return this.getrecord(key);
     }
-    public  fetchdataAsync(context:$JA.Context, inputContext:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]> {
-        if (searchtext !== undefined)
+    public  fetchdataAsync(context:$JA.Context, inputContext:$JI.SelectInputContext, searchkeys?:string|string[], max?:number): $JA.Task<TRecord[]> {
+        if (searchkeys !== undefined)
             throw new $J.InvalidStateError("EnumSelectDatasource.search not implemented.");
 
         return $JA.Task.resolve(this._enumset);
@@ -3326,6 +3332,7 @@ export interface RemoteSelectDatasourceOpts
     cache_timeout?:         number;
     keyfieldname:           string;
     fetch_filter?:          string[];               // List with words (in uppercase) which are not index by the server.
+    minkeylength?:          number;
     searchtext_normalize?:  (text:string) => string|string[];
 }
 /**
@@ -3425,7 +3432,7 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
 
         return task;
     }
-    public  fetchdataAsync(context:$JA.Context, inputContext:$JI.SelectInputContext, searchtext?:string|string[], max?:number): $JA.Task<TRecord[]|string> {
+    public  fetchdataAsync(context:$JA.Context, inputContext:$JI.SelectInputContext, searchkeys?:string|string[], max?:number): $JA.Task<TRecord[]|string> {
         if (!this.opts.callname_fetchdata) {
             throw new $J.InvalidStateError("RemoteSelectDatasource.fetch not defined.");
         }
@@ -3443,8 +3450,8 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
             }
         }
 
-        if (searchtext) {
-            callargs["searchtext"] = (Array.isArray(searchtext) ? (searchtext as string[]).join(" ") : searchtext);
+        if (searchkeys) {
+            callargs["searchtext"] = (Array.isArray(searchkeys) ? (searchkeys as string[]).join(" ") : searchkeys);
             callargs["max"]        = max!.toString();
         }
 
@@ -3457,17 +3464,13 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
                                                                                   url
                                                                              }, context);
     }
-    public  filter_searchtext(searchtext:string|string[]): string|string[] {
+    public  filter_searchtext(searchtext:string[]): string[] {
         const fetch_filter = this._opts.fetch_filter;
+        const minkeylength = this._opts.minkeylength || 2;
 
-        if (Array.isArray(searchtext) && Array.isArray(fetch_filter)) {
-            searchtext = (searchtext).filter((v) => (fetch_filter.indexOf(v) < 0));
-        }
-
-        return searchtext;
+        return searchtext.filter((v) => (v.length >= minkeylength && !(fetch_filter instanceof Array && fetch_filter.indexOf(v) >= 0)));
     }
-
-    public normalize_searchtext(searchtext: string): string | string[] {
+    public  normalize_searchtext(searchtext: string): string | string[] {
         if (this._opts.searchtext_normalize) {
             return this._opts.searchtext_normalize(searchtext);
         }

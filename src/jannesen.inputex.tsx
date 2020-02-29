@@ -1,5 +1,6 @@
 ﻿/// <reference path="lib-ext.d.ts"/>
 import * as $JD        from "jc3/jannesen.dom";
+import * as $JT        from "jc3/jannesen.datatype";
 import * as $JTE       from "jc3/jannesen.datatypeex";
 import * as $JI        from "jc3/jannesen.input";
 import * as $JL        from "jc3/jannesen.language";
@@ -13,13 +14,19 @@ import * as $JDTPICKER from "jc3/jannesen.ui.datetimepicker";
 export interface IDateRangeControlOptions extends $JI.IInputControlOptions {
 }
 
-export class DateRange extends $JI.InputTextControl<$JTE.IRangeValue, $JTE.DateRange, DateRange, IDateRangeControlOptions, void, $JDTPICKER.DateRangeInputDropdown> implements $JD.IDOMContainer {
+export class DateRange extends $JI.InputTextControl<$JTE.IRangeValue,
+                                                    $JTE.DateRange,
+                                                    DateRange,
+                                                    IDateRangeControlOptions,
+                                                    void,
+                                                    $JTE.IRangeValue|null,
+                                                    $JDTPICKER.DateRangeInputDropdown> implements $JD.IDOMContainer {
 
     constructor(range: $JTE.DateRange, opts: IDateRangeControlOptions) {
         super(range, "text", "-daterange", opts, true);
     }
 
-    protected openDropdown(): void {
+    protected   openDropdown(): void {
         if (this._value) {
             try {
                 this.focus();
@@ -31,9 +38,12 @@ export class DateRange extends $JI.InputTextControl<$JTE.IRangeValue, $JTE.DateR
             }
         }
     }
-
-    protected defaultPlaceHolder(value: $JTE.DateRange): string {
+    protected   defaultPlaceHolder(value: $JTE.DateRange): string {
         return $JL.dateRangePlaceHolder;
+    }
+    protected   dropdownValueSet(datavalue:$JTE.DateRange, value:$JTE.IRangeValue|null)
+    {
+        datavalue.setValue(value, $JT.ChangeReason.UI);
     }
 }
 
@@ -45,13 +55,19 @@ export class DateRange extends $JI.InputTextControl<$JTE.IRangeValue, $JTE.DateR
 export interface IDateTimeRangeControlOptions extends $JI.IInputControlOptions {
 }
 
-export class DateTimeRange extends $JI.InputTextControl<$JTE.IRangeValue, $JTE.DateTimeRange, DateTimeRange, IDateTimeRangeControlOptions, void, $JDTPICKER.DateTimeRangeInputDropdown> implements $JD.IDOMContainer {
+export class DateTimeRange extends $JI.InputTextControl<$JTE.IRangeValue,
+                                                        $JTE.DateTimeRange,
+                                                        DateTimeRange,
+                                                        IDateTimeRangeControlOptions,
+                                                        void,
+                                                        $JTE.IRangeValue|null,
+                                                        $JDTPICKER.DateTimeRangeInputDropdown> implements $JD.IDOMContainer {
 
     constructor(range: $JTE.DateTimeRange, opts: IDateTimeRangeControlOptions) {
         super(range, "text", "-datetimerange", opts, true);
     }
 
-    protected openDropdown(): void {
+    protected   openDropdown(): void {
         if (this._value) {
             try {
                 this.focus();
@@ -63,8 +79,11 @@ export class DateTimeRange extends $JI.InputTextControl<$JTE.IRangeValue, $JTE.D
             }
         }
     }
-
-    protected defaultPlaceHolder(value: $JTE.DateTimeRange): string {
+    protected   defaultPlaceHolder(value: $JTE.DateTimeRange): string {
         return $JL.dateRangePlaceHolder;
+    }
+    protected   dropdownValueSet(datavalue:$JTE.DateTimeRange, value:$JTE.IRangeValue|null)
+    {
+        datavalue.setValue(value, $JT.ChangeReason.UI);
     }
 }

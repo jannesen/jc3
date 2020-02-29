@@ -667,8 +667,8 @@ export class DropdownPopup<TNativeValue,
 
 export abstract class DropdownContent<TNativeValue,
                                       TControl extends IControlDropdown<TDropdownRtn>,
-                                      TCalldata    = void,
-                                      TDropdownRtn = TNativeValue|null>
+                                      TCalldata,
+                                      TDropdownRtn>
 {
     protected           _popup:         DropdownPopup<TNativeValue, TControl, TCalldata, TDropdownRtn>;
 
@@ -750,7 +750,7 @@ export abstract class DropdownContent<TNativeValue,
 export abstract class TableDropdown<TNativeValue,
                                     TControl extends IControlDropdown<TDropdownRtn>,
                                     TCalldata,
-                                    TDropdownRtn = TNativeValue|null>
+                                    TDropdownRtn>
                           extends DropdownContent<TNativeValue, TControl, TCalldata, TDropdownRtn>
 {
     private         _tbody:                     $JD.DOMHTMLElement|undefined;

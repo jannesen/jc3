@@ -6,6 +6,7 @@ import * as $JA        from "jc3/jannesen.async";
 import * as $JD        from "jc3/jannesen.dom";
 import * as $JT        from "jc3/jannesen.datatype";
 import * as $JR        from "jc3/jannesen.regional";
+import * as $JSTRING   from "jc3/jannesen.string";
 import * as $JL        from "jc3/jannesen.language";
 import * as $JPOPUP    from "jc3/jannesen.ui.popup";
 import * as $JSELECT   from "jc3/jannesen.ui.select";
@@ -219,18 +220,19 @@ export interface IInputControlOptions extends IControlOptions
  */
 export abstract class InputTextControl<TNativeValue,
                                        TValue extends $JT.SimpleType<TNativeValue>,
-                                       TInput extends InputTextControl<TNativeValue, TValue, TInput, TOpts, TCalldata, TDropdown>,
+                                       TInput extends InputTextControl<TNativeValue, TValue, TInput, TOpts, TCalldata, TDropdownRtn, TDropdown>,
                                        TOpts extends IInputControlOptions,
                                        TCalldata = void,
-                                       TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TInput, TCalldata> = $JPOPUP.DropdownContent<TNativeValue, TInput, TCalldata>>
+                                       TDropdownRtn = TNativeValue|null,
+                                       TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TInput, TCalldata, TDropdownRtn> = $JPOPUP.DropdownContent<TNativeValue, TInput, TCalldata, TDropdownRtn>>
                                             extends SimpleControl<TValue, TOpts>
-                                            implements $JPOPUP.IControlDropdown<TNativeValue|null>
+                                            implements $JPOPUP.IControlDropdown<TDropdownRtn|null>
 {
     protected   _input:             $JD.DOMHTMLElement;
     protected   _text:              string | undefined;
-    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TInput, TCalldata, TNativeValue|null, TDropdown>|undefined;
+    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TInput, TCalldata, TDropdownRtn, TDropdown>|undefined;
 
-                            constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown: boolean)
+                            constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown:boolean, forcecontainer?:boolean)
     {
         super(opts);
 
@@ -251,13 +253,19 @@ export abstract class InputTextControl<TNativeValue,
             dropdownctl.bind("click", this.dropdown_click, this);
             container = <div>{ input }{ dropdownctl }</div>;
         }
+        else if (forcecontainer) {
+            container = <div>{ input }</div>;
+        }
         else {
             container = input;
         }
 
         container.addClass("jannesen-input").addClass(typeClass);
-        if (dropdown) {
-            container.addClass("-dropdown");
+        if (dropdown || forcecontainer) {
+            container.addClass("-container");
+            if (dropdown) {
+                container.addClass("-dropdown");
+            }
         }
 
         genericAttr(container, input, opts, value);
@@ -312,18 +320,16 @@ export abstract class InputTextControl<TNativeValue,
 
         this.setError(null);
     }
-    public                  dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined, cbset?:()=>void)
+    public                  dropdownClose(value:TDropdownRtn|undefined, ev:Event|undefined)
     {
         if (this._activeDropdown && this._input) {
+            const dropdown = this._activeDropdown;
             this.closeDropdown(true);
 
             if (value !== undefined) {
                 const v = this.value;
                 if (v) {
-                    if (cbset) {
-                        cbset();
-                    }
-                    v.setValue(value, $JT.ChangeReason.UI);
+                    this.dropdownValueSet(v, value, dropdown);
                 }
             }
 
@@ -386,7 +392,7 @@ export abstract class InputTextControl<TNativeValue,
             elm.selectionEnd   = elm.value.length;
         }
     }
-    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TInput, TCalldata, TNativeValue|null, TDropdown>, className:string, focus:boolean, calldata:TCalldata, onready?:(content:TDropdown)=>void)
+    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TInput, TCalldata, TDropdownRtn, TDropdown>, className:string, focus:boolean, calldata:TCalldata, onready?:(content:TDropdown)=>void)
     {
         if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass && $J.isEqual(this._activeDropdown.Calldata, calldata))) {
             this.closeDropdown(false);
@@ -418,6 +424,10 @@ export abstract class InputTextControl<TNativeValue,
 
             activeDropdown.Stop();
         }
+    }
+    protected               dropdownValueSet(datavalue:TValue, value:TDropdownRtn, dropdown:$JPOPUP.DropdownPopup<TNativeValue, TInput, TCalldata, TDropdownRtn, TDropdown>)
+    {
+        throw new $J.InvalidStateError("dropdownValueSet not implented");
     }
 
     protected               dropdown_click()
@@ -573,6 +583,10 @@ export abstract class InputTextValueDropdownControl<TNativeValue,
             }
         }
     }
+    protected   dropdownValueSet(datavalue:TValue, value:TNativeValue)
+    {
+        datavalue.setValue(value, $JT.ChangeReason.UI);
+    }
 
     protected abstract getDropdownStd():void;
 }
@@ -601,6 +615,11 @@ export abstract class InputTextValuesDropdownControl<TNativeValue,
             }
         }
     }
+    protected   dropdownValueSet(datavalue:TValue, value:TNativeValue)
+    {
+        datavalue.setValue(value, $JT.ChangeReason.UI);
+    }
+
 }
 
 //===================================== InputTextControl ==========================================
@@ -1263,24 +1282,33 @@ export interface ISelectInputControlOptions<TNativeValue extends $JT.SelectValue
  */
 export class SelectInput<TNativeValue extends $JT.SelectValue,
                          TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>>
-                extends InputTextControl<TNativeValue, $JT.SelectType<TNativeValue,TDatasource>, SelectInput<TNativeValue,TDatasource>, ISelectInputControlOptions<TNativeValue,TDatasource>, SelectInputContext, $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>
+                extends InputTextControl<TNativeValue,
+                                        $JT.SelectType<TNativeValue,TDatasource>,
+                                        SelectInput<TNativeValue,TDatasource>,
+                                        ISelectInputControlOptions<TNativeValue,TDatasource>,
+                                        SelectDataSet<TNativeValue, TDatasource>,
+                                        $JT.TDatasource_Record<TDatasource>,
+                                        $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>
 {
-    private     _activelookup:      $JA.Task<any>|undefined;
+    private     _activetask:        $JA.Task<any>|undefined;
     private     _inputContext:      SelectInputContext|undefined;
     private     _inputTimer:        number|undefined;
+    private     _inputChanged:      boolean;
 
                     constructor(value:$JT.SelectType<TNativeValue,TDatasource>, opts:ISelectInputControlOptions<TNativeValue,TDatasource>) {
-        super(value, "text", "-select", opts, (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) === 0 || (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0);
+        super(value, "text", "-select", opts, (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) === 0 || (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0, true);
         this.getinputelm().bind("input", this.input_textchange, this);
-        this._activelookup = undefined;
+        this._activetask   = undefined;
         this._inputContext = undefined;
         this._inputTimer   = undefined;
+        this._inputChanged = false;
     }
 
     public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
-        this._activelookup = undefined;
+        this._setactivetask();
 
         if (reason === $JT.ChangeReason.Invalidate) {
+            this._inputChanged = false;
             this._text = undefined;
             return;
         }
@@ -1290,28 +1318,30 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
             const rec    = this._value.getrecordAsync(vvalue, true);
 
             if (rec instanceof $JA.Task) {
-                this._activelookup = rec;
-                rec.then((data) => {
-                             if (rec === this._activelookup) {
-                                 this._activelookup = undefined;
-                                 if (this._value && vvalue === this._value.internalvalue) {
-                                     this._input.prop("value", this._text = this._value.toDisplayText(vvalue, data));
-                                 }
-                             }
-                         },
-                         (err) => {
-                             if (rec === this._activelookup) {
-                                 this._activelookup = undefined;
-                                 if (this._value && vvalue === this._value.internalvalue) {
-                                     this._input.prop("value", this._text = this._value.toDisplayText(vvalue, err));
-                                 }
-                             }
-                         });
+                this._setactivetask(rec);
+                rec.thenD((data) => {
+                              if (this._isactivetask(rec)) {
+                                  if (this._value && vvalue === this._value.internalvalue) {
+                                      this._inputChanged = false;
+                                      this._input.prop("value", this._text = this._value.toDisplayText(vvalue, data));
+                                  }
+                              }
+                          },
+                          (err) => {
+                              if (this._isactivetask(rec)) {
+                                  if (this._value && vvalue === this._value.internalvalue) {
+                                      this._inputChanged = false;
+                                      this._input.prop("value", this._text = this._value.toDisplayText(vvalue, err));
+                                  }
+                              }
+                          });
             }
             else {
+                this._inputChanged = false;
                 this._input.prop("value", this._text = this._value.toDisplayText(vvalue, rec));
             }
         } else {
+            this._inputChanged = false;
             this._input.prop("value", this._text = "");
         }
 
@@ -1378,15 +1408,6 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
         return false;
     }
 
-    public          dropdownClose(value:TNativeValue|null|undefined, ev:Event|undefined)
-    {
-        if (this._activeDropdown && this._input) {
-            const dropdown = this._activeDropdown;
-            super.dropdownClose(value, ev,
-                                () => { this._inputContext = (value !== null ? dropdown.Calldata : null); });
-        }
-    }
-
     public          disableKeyboard()
     {
         return !!this._opts.simpleDropdown && super.disableKeyboard();
@@ -1404,10 +1425,23 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
             }
 
             if ((this._value.Datasource.flags & ($JT.SelectDatasourceFlags.StaticEnum|$JT.SelectDatasourceFlags.SearchAll)) !== 0) {
-                this._getDropdown(true, (content) => content.Refresh(""));
+                this._getDropdown(true, (content) => content.RefrechAll());
             }
         }
     }
+    protected       dropdownValueSet(datavalue:$JT.SelectType<TNativeValue,TDatasource>, rec:$JT.TDatasource_Record<TDatasource>, dropdown:$JPOPUP.DropdownPopup<TNativeValue, SelectInput<TNativeValue, TDatasource>, SelectDataSet<TNativeValue, TDatasource>, $JT.TDatasource_Record<TDatasource>, $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>)
+    {
+        const dataset    = dropdown.Calldata;
+        const datasource = dataset.Datasource;
+
+        if (rec && datasource instanceof $JT.RemoteSelectDatasource) {
+            datasource.addrecord(rec);
+        }
+
+        this._inputContext = (rec !== null ? dataset.InputContext : null);
+        datavalue.setValue(rec, $JT.ChangeReason.UI);
+    }
+
     protected       input_onblur(ev:FocusEvent) {
         this._inputTimerStop();
 
@@ -1416,22 +1450,59 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
         }
 
         if (!(ev && this.hasFocus(ev.relatedTarget as Element))) {
+            let dataset:SelectDataSet<TNativeValue,TDatasource>|undefined;
+
             if (this._activeDropdown) {
+                dataset = this._activeDropdown.Calldata;
                 this.closeDropdown(false);
             }
 
-            if (this._value) {
+            if (this._value && this._inputChanged) {
+                this._inputChanged = false;
                 const text = this.getinputelm().prop("value") as string;
 
                 if (this._text !== text) {
                     if (text.trim() === "") {
+                        this._inputContext = undefined;
+                        this.setError(null);
+
                         if (this._value.internalvalue !== null) {
                             this._value.setValue(null, $JT.ChangeReason.UI);
                         }
                     }
+                    else {
+                        if (ev) {
+                            if (!dataset) {
+                                const context = this._getContext();
+                                if (typeof context === 'object') {
+                                    dataset = new SelectDataSet<TNativeValue, TDatasource>(this, context);
+                                }
+                            }
 
-                    if (ev) {
-                        this.onblurparse();
+                            if (dataset) {
+                                const task = dataset.Fetch(text, 1)
+                                this._setactivetask(task);
+                                task.thenD((result) => {
+                                               if (this._isactivetask(task)) {
+                                                   if (result instanceof Array && result.length === 1 && this._value) {
+                                                       this._inputContext = dataset!.InputContext;
+                                                       this._value.setValue(result[0], $JT.ChangeReason.UI);
+                                                   }
+                                                   else {
+                                                       this.setError($JL.input_incomplete);
+                                                   }
+                                               }
+                                           },
+                                           (err) => {
+                                               if (this._isactivetask(task)) {
+                                                   this.setError(err.message);
+                                               }
+                                           });
+                            }
+                            else {
+                                this.setError($JL.input_incomplete);
+                            }
+                        }
                     }
                 }
             }
@@ -1463,6 +1534,8 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
         }
     }
     protected       input_textchange() {
+        this._inputChanged = true;
+        this._setactivetask();
         this._inputTimerStop();
         this._inputTimer = $J.setTimeout(() => {
                                             this._inputTimer = undefined;
@@ -1501,7 +1574,11 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
         const context = this._getContext();
 
         if (typeof context === 'object') {
-            this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown", "-tablelist -select", focus, context, onready);
+            let dataset = this._activeDropdown && this._activeDropdown.Calldata;
+            if (!(dataset && $J.isEqual(dataset.InputContext, context))) {
+                dataset = new SelectDataSet(this, context);
+            }
+            this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown", "-tablelist -select", focus, dataset, onready);
         }
         else {
             this.closeDropdown(true);
@@ -1526,6 +1603,268 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
         if (this._inputTimer) {
             clearTimeout(this._inputTimer);
             this._inputTimer = undefined;
+        }
+    }
+    private         _isactivetask(task:$JA.Task<unknown>)
+    {
+        if (this._activetask === task) {
+            this._setactivetask();
+            return true;
+        }
+
+        return false;
+    }
+    private         _setactivetask(task?:$JA.Task<unknown>)
+    {
+        this._activetask = task;
+        this.container.toggleClass("-busy", task instanceof $JA.Task)
+    }
+}
+
+interface ISelectDataSetFetch<TRecord>
+{
+    ct:             $JA.Context|null;
+    task:           $JA.Task<TRecord[]|string>;
+    searchkeys?:    string|string[];
+}
+
+export class SelectDataSet<TNativeValue extends $JT.SelectValue,
+                           TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>>
+{
+    private     _value:                     $JT.SelectType<TNativeValue, TDatasource>;
+    private     _datasource:                TDatasource;
+    private     _inputContext:              SelectInputContext;
+    private     _inputOpts:                 ISelectInputControlOptions<TNativeValue, TDatasource>;
+    private     _columns:                   $JT.ISelectTypeAttributeDropdownColumn[];
+    private     _currectfetch:              ISelectDataSetFetch<$JT.TDatasource_Record<TDatasource>>|undefined;
+
+    public get  Value()
+    {
+        return this._value;
+    }
+    public get  Datasource()
+    {
+        return this._datasource;
+    }
+    public get  InputContext()
+    {
+        return this._inputContext;
+    }
+    public get  Columns()
+    {
+        return this._columns;
+    }
+
+                constructor(input:SelectInput<TNativeValue, TDatasource>, inputContext:SelectInputContext)
+    {
+        if (!(input && input.value)) {
+            throw new $J.InvalidStateError("Input/value not available.");
+        }
+        this._value        = input.value;
+        this._datasource   = this._value.Datasource;
+        this._inputContext = inputContext;
+        this._inputOpts    = input.get_opts();
+        this._columns      = input.get_opts().dropdown_columns || this._value.getAttr("dropdown_columns") as $JT.ISelectTypeAttributeDropdownColumn[];
+        this._currectfetch = undefined;
+    }
+
+    public      Fetch(text:string, maxrec?:number): $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>
+    {
+        try {
+            text = $JSTRING.removeDiacritics(text.trim()).toUpperCase();
+
+            if (!maxrec) {
+                maxrec = this._inputOpts.fetchmax || 250;
+            }
+
+            if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
+                let searchkeys = SelectDataSet.normalizeSearchKeys(this._datasource.normalize_searchtext(text));
+
+                if (searchkeys instanceof Array) {
+                    if (this._currectfetch && SelectDataSet.hassearchdata(this._currectfetch.searchkeys, searchkeys) &&
+                        ((this._currectfetch.task.isFulfilled && this._currectfetch.task.value instanceof Array) ||
+                         $J.isEqual(this._currectfetch.searchkeys, searchkeys) )) {
+                        return this._currectfetch.task.thenD((data) => this._filterData(data, text, maxrec!));
+                    }
+
+                    this._fetchDataStop();
+
+                    searchkeys   = this._datasource.filter_searchtext(searchkeys);
+
+                    if (searchkeys.length > 0 || (this._datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0) {
+                        return this._fetchDataAsync(searchkeys, maxrec).thenD((data) => this._filterData(data, text, maxrec!));
+                    } else {
+                        return $JA.Task.resolve("NEEDS-MORE-KEYS");
+                    }
+                }
+                else {
+                    if (this._currectfetch && this._currectfetch.searchkeys === searchkeys) {
+                        return this._currectfetch.task;
+                    } else {
+                        return this._fetchDataAsync(searchkeys, maxrec);
+                    }
+                }
+            }
+            else {
+                return ((this._currectfetch) ? this._currectfetch.task : this._fetchDataAsync()).thenD((data) => this._filterData(data, text, maxrec!));
+            }
+        }
+        catch (err) {
+            return $JA.Task.reject(err);
+        }
+    }
+    public      FetchAll(): $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>
+    {
+        return (this._currectfetch && this._currectfetch.searchkeys === undefined)
+                    ? this._currectfetch.task
+                    : this._fetchDataAsync();
+    }
+    public      LocalSearch(text:string)
+    {
+        if (this._currectfetch && this._currectfetch.task.isFulfilled) {
+            if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
+                const keywords = this._datasource.normalize_searchtext($JSTRING.removeDiacritics(text.trim()).toUpperCase());
+                return SelectDataSet.hassearchdata(this._currectfetch.searchkeys, SelectDataSet.normalizeSearchKeys(keywords));
+            }
+            else {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private     _fetchDataAsync(searchkeys?:string|string[], max?:number)
+    {
+        this._fetchDataStop();
+        const ct   = new $JA.Context({ });
+        const task = (this._datasource.fetchdataAsync(ct, this._inputContext, searchkeys, max) as (/*TS Limit*/ $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>))
+                          .thenD((data) => {
+                                     if (data instanceof Array) {
+                                         if (typeof this._inputOpts.filter === "function") {
+                                             data = data.filter(this._inputOpts.filter);
+                                         }
+
+                                         if (typeof this._inputOpts.sort === "function") {
+                                             data = data.sort(this._inputOpts.sort);
+                                         }
+                                     }
+                                     return data;
+                                 });
+
+
+        this._currectfetch = { ct, task, searchkeys };
+
+        return task;
+    }
+    private     _fetchDataStop()
+    {
+        if (this._currectfetch) {
+            if (this._currectfetch.ct) {
+                this._currectfetch.ct.stop();
+            }
+            this._currectfetch = undefined;
+        }
+    }
+    private     _filterData(data:string|$JT.TDatasource_Record<TDatasource>[], text:string, maxrec:number)
+    {
+        if (typeof data === 'string') {
+            return data;
+        }
+
+        const keys = SelectDataSet.normalizeSearchKeys(text.split(' '));
+
+        const rtn = [] as $JT.TDatasource_Record<TDatasource>[];
+
+        for (const rec of data) {
+            if (this._recFilter(rec, keys)) {
+                if (rtn.length >= maxrec) {
+                    return "TOMANY-RESULTS";
+                }
+
+                rtn.push(rec);
+            }
+        }
+
+        return rtn;
+    }
+    private     _recFilter(rec:$JT.TDatasource_Record<TDatasource>, keys:string[])
+    {
+        for(let key of keys) {
+            if (this._columns) {
+                if (!this._columns.some((col) => SelectDataSet.containskey((rec as ({readonly [key:string]:any}))[col.fieldname] as string, key)))
+                    return false;
+            } else {
+                if (!SelectDataSet.containskey(this._value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec), key))
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static  normalizeSearchKeys(keys:string[]):string[];
+    private static  normalizeSearchKeys(keys:string|string[]):string|string[];
+    private static  normalizeSearchKeys(keys:string|string[]) {
+        if (typeof keys === 'string') {
+            return keys;
+        }
+
+        return keys.filter((k) => k.length > 0 && !keys.some((r) => r.length > k.length && r.startsWith(k)));
+    }
+    private static  hassearchdata(fd_searchtext:string|string[]|undefined, searchtext:string|string[])
+    {
+        if (typeof searchtext === 'string' && typeof fd_searchtext === 'string') {
+            return fd_searchtext === searchtext;
+        }
+
+        if (searchtext instanceof Array && fd_searchtext instanceof Array) {
+            for (let i = 0 ; i < fd_searchtext.length ; ++i) {
+                let k = fd_searchtext[i];
+
+                if (!(searchtext as string[]).some((s) => s.startsWith(k)))
+                    return false;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+    private static  containskey(value:any, key:string)
+    {
+        const vt = SelectDataSet.valueText(value);
+
+        if (typeof vt === 'string') {
+            const text = $JSTRING.removeDiacritics(vt).toUpperCase();
+
+            let p = text.indexOf(key);
+            if (p >= 0) {
+                if (p === 0) {
+                    return true;
+                }
+
+                if (/[A-Z0-9]/.test(key.charAt(0))) {
+                    return /[^A-Z0-9]/.test(text.charAt(p-1));
+                }
+                else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    public  static  valueText(v:any): string|null
+    {
+        switch (typeof v) {
+        case "string":      return v as string;
+        case "number":      return v.toString();
+        case "boolean":     return v ? "true":"false";
+        default:
+            if (v === null)
+                return null;
+
+            return "???";
         }
     }
 }
@@ -1578,27 +1917,6 @@ export class ErrorMessage
         }
     }
 }
-
-//===================================== Helpers ===================================================
-function genericAttr(container:$JD.DOMHTMLElement, node: $JD.DOMHTMLElement, opts: IControlOptions, value: $JT.BaseType) {
-    if (opts.id) {
-        node.attr("id", opts.id);
-    }
-
-    if (opts.name) {
-        node.attr("name", opts.id);
-    }
-
-    if (opts.extClass) {
-        container.addClass(opts.extClass);
-    }
-
-    let uiClass = value.UIClass;
-    if (uiClass) {
-        container.addClass(uiClass);
-    }
-}
-
 
 //===================================== Set =======================================================
 export interface ISetOptions<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleType<any>=$JT.Record<$JT.IFieldDef>>
@@ -1842,5 +2160,25 @@ export abstract class SetItem<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleT
         }
 
         return false;
+    }
+}
+
+//===================================== Helpers ===================================================
+function genericAttr(container:$JD.DOMHTMLElement, node: $JD.DOMHTMLElement, opts: IControlOptions, value: $JT.BaseType) {
+    if (opts.id) {
+        node.attr("id", opts.id);
+    }
+
+    if (opts.name) {
+        node.attr("name", opts.id);
+    }
+
+    if (opts.extClass) {
+        container.addClass(opts.extClass);
+    }
+
+    let uiClass = value.UIClass;
+    if (uiClass) {
+        container.addClass(uiClass);
     }
 }

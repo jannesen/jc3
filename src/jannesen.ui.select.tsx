@@ -1,32 +1,22 @@
 ﻿/// <reference path="lib-ext.d.ts"/>
 /* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
-import * as $J       from "jc3/jannesen";
 import * as $JA      from "jc3/jannesen.async";
 import * as $JD      from "jc3/jannesen.dom";
 import * as $JT      from "jc3/jannesen.datatype";
 import * as $JI      from "jc3/jannesen.input";
-import * as $JSTRING from "jc3/jannesen.string";
 import * as $JPOPUP  from "jc3/jannesen.ui.popup";
 import * as $JL      from "jc3/jannesen.language";
 
-interface ICurrentFetch<TRecord>
-{
-    ct:             $JA.Context|null;
-    task:           $JA.Task<TRecord[]|string>;
-    searchtext?:    string|string[];
-    data?:          TRecord[]|null;
-}
-
 export class ValuesDropdown<TNativeValue,
                             TValue extends $JT.SimpleType<TNativeValue>,
-                            TInput extends $JI.InputTextControl<TNativeValue, TValue, TInput, TOpts, void, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>,
+                            TInput extends $JI.InputTextControl<TNativeValue, TValue, TInput, TOpts, void, TNativeValue, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>,
                             TOpts extends $JI.IInputControlDropdownValuesOptions<TNativeValue>>
-                        extends $JPOPUP.TableDropdown<TNativeValue, TInput, void>
+                        extends $JPOPUP.TableDropdown<TNativeValue, TInput, void, TNativeValue|null>
 {
     private     _values?:   TNativeValue[];
 
-    public              OnLoad(calldata:void, ct:$JA.Context): $JA.Task<void>|void
+    public      OnLoad(calldata:void, ct:$JA.Context): $JA.Task<void>|void
     {
         const input           = this.control;
 
@@ -73,92 +63,46 @@ export class ValuesDropdown<TNativeValue,
 
 export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
                                  TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>>
-                extends $JPOPUP.TableDropdown<TNativeValue, $JI.SelectInput<TNativeValue,TDatasource>, $JI.SelectInputContext, TNativeValue|null>
+                extends $JPOPUP.TableDropdown<TNativeValue,
+                                             $JI.SelectInput<TNativeValue,TDatasource>,
+                                             $JI.SelectDataSet<TNativeValue, TDatasource>,
+                                             $JT.TDatasource_Record<TDatasource>|null>
 {
-    private     _datasource:                TDatasource;
-    private     _columns:                   $JT.ISelectTypeAttributeDropdownColumn[];
-    private     _context:                   $JI.SelectInputContext;
-    private     _searchtext:                string|string[];
-    private     _strippedsearchtext:        string;
-    private     _currectfetch:              ICurrentFetch<$JT.TDatasource_Record<TDatasource>>|undefined;
+    private     _dataset:                   $JI.SelectDataSet<TNativeValue, TDatasource>;
     private     _tbodydata:                 ($JT.TDatasource_Record<TDatasource>|null)[]|undefined;
+    private     _currentActionId:           number;
 
-    constructor(popup: $JPOPUP.DropdownPopup<TNativeValue, $JI.SelectInput<TNativeValue,TDatasource>, $JI.SelectInputContext>, context: $JI.SelectInputContext)
+    constructor(popup: $JPOPUP.DropdownPopup<TNativeValue,$JI.SelectInput<TNativeValue,TDatasource>,$JI.SelectDataSet<TNativeValue, TDatasource>,$JT.TDatasource_Record<TDatasource>|null>,
+                                             dataset: $JI.SelectDataSet<TNativeValue, TDatasource>)
     {
         super(popup);
-        const input   = popup._control!;
-        const value = (input ? input.value : undefined);
-        if (!value) {
-            throw new $J.InvalidStateError("Input/value not available.");
-        }
-        this._datasource  = value.Datasource;
-        this._columns     = input.get_opts().dropdown_columns || value.getAttr("dropdown_columns") as $JT.ISelectTypeAttributeDropdownColumn[];
-        this._context     = context;
-        this._searchtext  = "";
-        this._strippedsearchtext = "";
+        this._dataset = dataset;
+        this._currentActionId = 0;
     }
 
     public      LocalSearch(text:string)
     {
-        if (this._currectfetch && this._currectfetch.task.isFulfilled) {
-            if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
-                return hassearchdata(this._currectfetch.searchtext, this._normalizeSearchText($JSTRING.removeDiacritics(text.trim()).toUpperCase()));
-            }
-            else {
-                return true;
-            }
-        }
-
-        return false;
+        return this._dataset.LocalSearch(text);
     }
 
     public      Refresh(text:string)
     {
         try {
             this.selectRow(undefined);
-            this._strippedsearchtext = $JSTRING.removeDiacritics(text.trim()).toUpperCase();
-            this._searchtext = this._normalizeSearchText(this._strippedsearchtext);
-
-            if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
-                if (this._currectfetch && this._currectfetch.task.isFulfilled && hassearchdata(this._currectfetch.searchtext, this._searchtext)) {
-                    this._filltable();
-                } else {
-                    if (this._currectfetch && this._currectfetch.ct) {
-                        this._currectfetch.ct.stop();
-                    }
-
-                    this._currectfetch = undefined;
-
-                    let searchtext   = this._datasource.filter_searchtext(this._searchtext);
-
-                    if (searchtext.length > 0 || (this._datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0) {
-                        this._fetchdata(searchtext, this.control!.get_opts().fetchmax || 250);
-                    } else {
-                        this._currectfetch = undefined;
-                        this.setMessage($JL.more_input_necessary, true);
-                    }
-                }
-            } else {
-                if (this._currectfetch) {
-                    if (this._currectfetch.task.isFulfilled) {
-                        this._filltable();
-                    }
-                } else {
-                    this._fetchdata(undefined, undefined);
-                }
-            }
-        } catch(err) {
-            this._currectfetch = undefined;
+            this._fillcontentTask(this._dataset.Fetch(text), ++this._currentActionId);
+        }
+        catch (err) {
             this.setMessage(err, true);
         }
     }
-    public      OnRemove()
+    public      RefrechAll()
     {
-        if (this._currectfetch && this._currectfetch.ct) {
-            this._currectfetch.ct.stop();
+        try {
+            this._fillcontentTask(this._dataset.FetchAll(), ++this._currentActionId, this._dataset.Value.internalvalue);
         }
-
-        this._currectfetch = undefined;
+        catch (err) {
+            this.setMessage(err, true);
+        }
     }
 
     protected   clickrow(row:number|undefined, ev:Event|undefined)
@@ -166,16 +110,8 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
         if (this._tbodydata && row !== undefined) {
             let rec = this._tbodydata[row];
             if (rec !== null) {
-                const datasource = this._datasource;
-                let v = (rec as ({readonly [key:string]:any}))[datasource.keyfieldname];
-                if (v !== undefined) {
-                    if (datasource instanceof $JT.RemoteSelectDatasource) {
-                        datasource.addrecord(rec);
-                        v = rec;
-                    }
-                    this.Close(v, ev);
-                    return;
-                }
+                this.Close(rec, ev);
+                return;
             }
         }
 
@@ -185,16 +121,18 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     }
     protected   tableColgroup()
     {
-        return this._columns && this._columns.map((f) => {
-                                                            const col = <col/>;
-                                                            if (f.width) {
-                                                                col.css('width', f.width);
-                                                            }
-                                                            return col;
-                                                  });
+        const columns = this._dataset.Columns;
+        return columns && columns.map((f) => {
+                                         const col = <col/>;
+                                          if (f.width) {
+                                              col.css('width', f.width);
+                                          }
+                                          return col;
+                                      });
     }
     protected   setMessage(msg:string|Error, resetfocus?: boolean)
     {
+        ++this._currentActionId;
         this._tbodydata        = undefined;
         super.setMessage(msg, resetfocus);
     }
@@ -214,196 +152,72 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
         return false;
     }
 
-    private     _fetchdata(searchtext?:string|string[], max?:number)
+    private     _fillcontentTask(datatask:$JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>, actionid:number, rowvalue?:TNativeValue|null)
     {
-        const ct   = new $JA.Context({ parent:this._popup.context });
-        const task = this._datasource.fetchdataAsync(ct, this._context, searchtext, max) as (/*TS Limit*/ $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>);
-        this._currectfetch = { ct, task, searchtext };
-
-        this.setBusy();
-
-        task.then((data) => {
-                        if (this._currectfetch && this._currectfetch.task === task) {
-                            this._currectfetch.ct = null;
-                            if (this.container) {
-                                this.container.removeClass("-busy");
-
-                                try {
-                                    if (typeof data === 'string' && data === "TOMANY-RESULTS") {
-                                        this._currectfetch = undefined;
-                                        this.setMessage($JL.more_input_necessary, true);
-                                        return;
-                                    }
-                                    else if (Array.isArray(data)) {
-                                        let opts = this.control!.get_opts();
-
-                                        if (typeof opts.filter === "function") {
-                                            data = data.filter(opts.filter);
-                                        }
-
-                                        if (typeof opts.sort === "function") {
-                                            data = data.sort(opts.sort);
-                                        }
-
-                                        this._currectfetch.data = data;
-                                    } else {
-                                        this._currectfetch.data = null;
-                                    }
-
-                                    this._filltable();
-                                } catch(err) {
-                                    this._currectfetch = undefined;
-                                    this.setMessage(err, true);
-                                }
-                            }
-                        }
-                    },
-                    (err) => {
-                        if (this._currectfetch && this._currectfetch.task === task) {
-                            this._currectfetch.ct = null;
-                            this._currectfetch = undefined;
-
-                            if (this.container) {
-                                this.container.removeClass("-busy");
-                                this.setMessage(err, true);
-                            }
-                        }
-                    });
+        datatask.thenD((data) => {
+                           if (actionid === this._currentActionId) {
+                               this._fillcontent(data, rowvalue);
+                           }
+                       },
+                        (err) => {
+                           if (actionid === this._currentActionId) {
+                               this.setMessage(err, true);
+                           }
+                       });
     }
-    private     _filltable()
+    private     _fillcontent(data:string|$JT.TDatasource_Record<TDatasource>[], rowvalue?:TNativeValue|null)
     {
         try {
-            const input = this.control!;
-            const value = input.value!;
-            const data  = this._currectfetch && this._currectfetch.data;
+            if (Array.isArray(data)) {
+                const input        = this.control!;
+                const value        = this._dataset.Value;
+                const keyfieldname = this._dataset.Datasource.keyfieldname;
+                const columns      = this._dataset.Columns;
 
-            let tb:$JD.DOMHTMLElement[]                             = [];
-            let tbdata:($JT.TDatasource_Record<TDatasource>|null)[] = [];
+                let tb:$JD.DOMHTMLElement[]                             = [];
+                let tbdata:($JT.TDatasource_Record<TDatasource>|null)[] = [];
 
-            if (data) {
                 if (input.get_opts().simpleDropdown && !value.Required) {
-                    tb.push(<tr><td colSpan={this._columns ? this._columns.length : 1}>{ input.get_opts().simpleNulltext || "\xA0" }</td></tr>);
+                    tb.push(<tr><td colSpan={columns ? columns.length : 1}>{ input.get_opts().simpleNulltext || "\xA0" }</td></tr>);
                     tbdata.push(null);
                 }
 
-                data.forEach((rec) => {
-                                 if ((this._datasource.flags & $JT.SelectDatasourceFlags.StaticEnum && input.get_opts().simpleDropdown && !input.isDirty()) ||  this._datafilter(rec)) {
-                                     tb.push(<tr> {
-                                                 (this._columns) ? this._columns.map((f) => <td>{ valueText((rec as ({readonly [key:string]:any}))[f.fieldname]) }</td>)
-                                                                 : <td>{ value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec) }</td>
-                                             } </tr>);
-                                     tbdata.push(rec);
-                                 }
-                             });
-            }
-
-            if (tbdata.length === 0) {
-                this.setMessage($JL.no_result, true);
-                return;
-            }
-
-            this.setTBody(tb);
-            this._tbodydata = tbdata;
-
-            if (this.hasFocus()) {
-                let row:number = 0;
-
-                if (!input.isDirty()) {
-                    const keyfieldname = this._datasource.keyfieldname;
-                    const v            = value.internalvalue;
-                    row = tbdata.findIndex((rec) => (rec !== null ? (rec as ({readonly [key:string]:any}))[keyfieldname] : null) === v);
+                for(const rec of data) {
+                    tb.push(<tr>
+                            {
+                                (columns) ? columns.map((f) => <td>{ $JI.SelectDataSet.valueText((rec as ({readonly [key:string]:any}))[f.fieldname]) }</td>)
+                                            : <td>{ value.toDisplayText((rec as ({readonly [key:string]:any}))[keyfieldname] as (TNativeValue|null|undefined), rec) }</td>
+                            }
+                            </tr>);
+                    tbdata.push(rec);
                 }
 
-                this.selectRow(row);
+                if (tbdata.length === 0) {
+                    this.setMessage($JL.no_result, true);
+                    return;
+                }
+
+                this.setTBody(tb);
+                this._tbodydata = tbdata;
+
+                if (this.hasFocus() || rowvalue !== undefined) {
+                    this.selectRow((rowvalue !== undefined) ? tbdata.findIndex((rec) => (rec !== null ? (rec as ({readonly [key:string]:any}))[keyfieldname] : null) === rowvalue) : 0);
+                }
+
+                this.PositionPopup();
             }
-            this.PositionPopup();
+            else {
+                switch (data) {
+                case "TOMANY-RESULTS":
+                case "NEEDS-MORE-KEYS":
+                    data = $JL.more_input_necessary;
+                    break;
+                }
+
+                this.setMessage(data, true);
+            }
         } catch(err) {
             this.setMessage(err, true);
         }
-    }
-    private     _datafilter(rec:$JT.TDatasource_Record<TDatasource>): boolean
-    {
-        if (Array.isArray(this._searchtext)) {
-            const value = this.control!.value!;
-
-            for(let key of this._strippedsearchtext.split(" ")) {
-                if (key.length > 0) {
-                    if (this._columns) {
-                        if (!this._columns.some((col) => containskey((rec as ({readonly [key:string]:any}))[col.fieldname] as string, key)))
-                            return false;
-                    } else {
-                        if (!containskey(value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec), key))
-                            return false;
-                    }
-                }
-            }
-        }
-
-        return true;
-
-        function containskey(text:string, key:string) {
-            if (typeof text !== 'string')
-                return false;
-
-            text = $JSTRING.removeDiacritics(text.trim()).toUpperCase();
-
-            let p = text.indexOf(key);
-            if (p >= 0) {
-                if (p === 0) {
-                    return true;
-                }
-
-                if (/[A-Z0-9]/.test(key.charAt(0))) {
-                    return /[^A-Z0-9]/.test(text.charAt(p-1));
-                }
-                else {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    private _normalizeSearchText(text: string): string | string[] {
-        const keywords = this._datasource.normalize_searchtext(text);
-
-        if(Array.isArray(keywords)) {
-            return keywords.filter((k) => !keywords.some((r) => r.length > k.length && r.startsWith(k)));
-        }
-
-        return keywords;
-    }
-
-}
-
-function hassearchdata(fd_searchtext:string|string[]|undefined, searchtext:string|string[])
-{
-    if (typeof searchtext === 'string' && typeof fd_searchtext === 'string') {
-        return fd_searchtext === searchtext;
-    }
-
-    if (Array.isArray(searchtext) && Array.isArray(fd_searchtext)) {
-        for (let i = 0 ; i < fd_searchtext.length ; ++i) {
-            let k = fd_searchtext[i];
-
-            if (!(searchtext as string[]).some((s) => s.startsWith(k)))
-                return false;
-        }
-
-        return true;
-    }
-
-    return false;
-}
-function valueText(v:any): string|null {
-    switch (typeof v) {
-    case "string":      return v as string;
-    case "number":      return v.toString();
-    case "boolean":     return v ? "true":"false";
-    default:
-        if (v === null)
-            return null;
-
-        return "???";
     }
 }
