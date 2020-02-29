@@ -1,6 +1,6 @@
 ﻿/// <reference path="lib-ext.d.ts"/>
-var tick_per_day            = (24*60*60*1000);
-var rounderror              = 100.5 - (1.005 * 100);
+const tick_per_day            = (24*60*60*1000);
+const rounderror              = 100.5 - (1.005 * 100);
 var global_uniqueidcounter  = Math.floor(Math.random() * 100000);
 
 //=============================================== Enums ===========================================
@@ -335,7 +335,7 @@ export function isEqual(a1: any, a2: any) {
             return true;
         }
 
-        if (l instanceof Object && r instanceof Object && l.constructor === r.constructor) {
+        if (l instanceof Object && r instanceof Object && l.constructor === Object && r.constructor === Object) {
             if (leftChain) {
                 const lc = leftChain.indexOf(l);
                 const rc = leftChain.indexOf(r);
