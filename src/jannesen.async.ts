@@ -436,7 +436,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
         }
     }
 
-    // Promise interfave
+    // Promise interface
     /**
      * !!DOC
      */
@@ -464,6 +464,39 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
         }
         this._enqueue({ task:this, onfulfilled, onrejected, slave });
         return slave;
+    }
+    /**
+     * ThenD don't use the scehduler to call onfulfilled and onrejected if the Task is not pending.
+     * The result is a that when the Task is completed then returns a completed Task.
+     */
+    public              thenD<TResult1>                      (onfulfilled:  (value: T)       => (TResult1 | PromiseLike<TResult1>)): Task<TResult1>;
+    public              thenD<TResult1>                      (onfulfilled:  (value: T)       => (TResult1 | PromiseLike<TResult1>|undefined)): Task<TResult1|undefined>;
+    public              thenD<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T)      => (TResult1 | PromiseLike<TResult1>)) | undefined | null,
+                                                             onrejected?:  ((reason: Error) => (TResult2 | PromiseLike<TResult2>)) | undefined | null) : Task<TResult1 | TResult2>;
+    public              thenD<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T     ) => (TResult1 | PromiseLike<TResult1>)) | undefined | null,
+                                                             onrejected?:  ((reason: Error) => (TResult2 | PromiseLike<TResult2>)) | undefined | null): Task<TResult1 | TResult2>
+    {
+        if (this._state === TaskState.Pending) {
+            return this.then(onfulfilled, onrejected);
+        }
+
+        try {
+            if (this._state === TaskState.Fulfilled) {
+                if (typeof onfulfilled === 'function') {
+                    return Task.resolve(onfulfilled(this._result as T));
+                }
+            }
+            else {
+                if (typeof onrejected === 'function') {
+                    return Task.resolve(onrejected(this._result as Error));
+                }
+            }
+
+            return this as Task<any>;
+        }
+        catch (err) {
+            return Task.reject(err);
+        }
     }
     /**
      * !!DOC
@@ -727,6 +760,10 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
     public static       resolve<T>(value: T|PromiseLike<T>): Task<T>;
     public static       resolve<T>(value?: T|PromiseLike<T>)
     {
+        if (value instanceof Task) {
+            return value;
+        }
+
         let rtn = new Task<T>(internalResolver, null);
 
         if (isPromiseLike(value)) {
