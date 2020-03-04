@@ -3452,7 +3452,9 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
 
         if (searchkeys) {
             callargs["searchtext"] = (Array.isArray(searchkeys) ? (searchkeys as string[]).join(" ") : searchkeys);
-            callargs["max"]        = max!.toString();
+        }
+        if (max) {
+            callargs["max"] = max.toString();
         }
 
         const url = $J.objectToUrlArgs(this.opts.callname_fetchdata, callargs);

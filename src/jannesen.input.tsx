@@ -1723,7 +1723,7 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
     {
         return (this._currectfetch && this._currectfetch.searchkeys === undefined)
                     ? this._currectfetch.task
-                    : this._fetchDataAsync();
+                    : this._fetchDataAsync(undefined, (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch ? this._inputOpts.fetchmax || 250 : undefined));
     }
     public      LocalSearch(text:string)
     {
