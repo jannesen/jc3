@@ -335,62 +335,60 @@ export function isEqual(a1: any, a2: any) {
             return true;
         }
 
-        if (l instanceof Object && r instanceof Object && l.constructor === Object && r.constructor === Object) {
-            if (leftChain) {
-                const lc = leftChain.indexOf(l);
-                const rc = leftChain.indexOf(r);
+        if (l instanceof Object && r instanceof Object) {
+            if (l.constructor === Object && r.constructor === Object) {
+                if (leftChain) {
+                    const lc = leftChain.indexOf(l);
+                    const rc = leftChain.indexOf(r);
 
-                if (lc >= 0 || rc >= 0) {
-                    return lc === rc;
-                }
-            }
-            else {
-                leftChain  = [];
-                rightChain = [];
-            }
-
-            leftChain.push(l);
-            rightChain!.push(r);
-
-            const lnames = Object.getOwnPropertyNames(l);
-            const rnames = Object.getOwnPropertyNames(r);
-
-            if (lnames.length !== rnames.length) {
-                return false;
-            }
-
-            if (lnames.length > 0) {
-                const names = new Set(lnames);
-                for (let n of rnames) {
-                    if (!names.has(n)) {
-                        return false;
-                    }
-                }
-
-                for (let n of lnames) {
-                    if (!compare(l[n], r[n])) {
-                        return false;
-                    }
-                }
-            }
-            else {
-                if (typeof l.valueOf === 'function') {
-                    if (!(typeof r.valueOf === 'function' && l.valueOf() === r.valueOf())) {
-                        return false;
+                    if (lc >= 0 || rc >= 0) {
+                        return lc === rc;
                     }
                 }
                 else {
-                    if (typeof r.valueOf === 'function') {
-                        return false;
+                    leftChain  = [];
+                    rightChain = [];
+                }
+
+                leftChain.push(l);
+                rightChain!.push(r);
+
+                const lnames = Object.getOwnPropertyNames(l);
+                const rnames = Object.getOwnPropertyNames(r);
+
+                if (lnames.length !== rnames.length) {
+                    return false;
+                }
+
+                if (lnames.length > 0) {
+                    const names = new Set(lnames);
+                    for (let n of rnames) {
+                        if (!names.has(n)) {
+                            return false;
+                        }
+                    }
+
+                    for (let n of lnames) {
+                        if (!compare(l[n], r[n])) {
+                            return false;
+                        }
+                    }
+                }
+                else {
+                    if (typeof l.valueOf === 'function') {
+                        if (!(typeof r.valueOf === 'function' && l.valueOf() === r.valueOf())) {
+                            return false;
+                        }
+                    }
+                    else {
+                        if (typeof r.valueOf === 'function') {
+                            return false;
+                        }
                     }
                 }
             }
 
-            if (Array.isArray(l)) {
-                if (!Array.isArray(r)) {
-                    return false;
-                }
-
+            if (l instanceof Array && r instanceof Array) {
                 if (l.length !== r.length) {
                     return false;
                 }
