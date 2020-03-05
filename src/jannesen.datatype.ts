@@ -539,6 +539,10 @@ export abstract class BaseType implements IValidatable, $J.EventHandling, $JD.IT
                 return false;
             }
             if (tr instanceof Error) {
+                if (item._control) {
+                    item._control.setError(stringErrorToMessage(tr));
+                }
+
                 rtn.push(new ValidateErrors(tr, item, item._control, path));
                 return true;
             }
