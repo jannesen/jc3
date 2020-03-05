@@ -1257,7 +1257,7 @@ export interface ISelectInputControlOptions<TNativeValue extends $JT.SelectValue
     filter?:                    (rec:$JT.TDatasource_Record<TDatasource>)=>(boolean|null|undefined);
     sort?:                      (rec1:$JT.TDatasource_Record<TDatasource>,rec2:$JT.TDatasource_Record<TDatasource>)=>number;
     fetchmax?:                  number;
-    before_dropdown?:           (ctl:SelectInput<TNativeValue,TDatasource>)=>SelectInputContext|undefined;
+    get_context?:               (ctl:SelectInput<TNativeValue,TDatasource>)=>SelectInputContext|undefined;
     simpleDropdown?:            boolean;
     simpleNulltext?:            string;
     dropdown_height?:           number;
@@ -1292,6 +1292,20 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
         this._inputChanged = false;
     }
 
+    /**
+     * set the input context.
+     *
+     * Input context is forwarded to the datasource to only return result in this context.
+     * The context saved durring input (dropdown) and used when validating.
+     * If the context is changed between input and validation a error is generated.
+     * If the value is set from code this context === undefined and not used during validation.
+     * Calling setContext set the context after the value is (restored) from code.
+     * 
+     */
+    public          setContext()
+    {
+        this._inputContext = (typeof this._opts.get_context === "function") ? this._opts.get_context(this) : null;
+    }
     public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
         this._setactivetask();
 
@@ -1578,9 +1592,9 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     }
     private         _getContext()
     {
-        if (typeof this._opts.before_dropdown === "function") {
+        if (typeof this._opts.get_context === "function") {
             try {
-                const context = this._opts.before_dropdown(this);
+                const context = this._opts.get_context(this);
                 if (context instanceof Object) {
                     return context;
                 }
