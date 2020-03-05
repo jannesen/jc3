@@ -516,7 +516,7 @@ class PopupMenu extends $JUP.Popup
                 return true;
 
             case "Escape":
-                this._root.menu_itemClick(null);
+                this._root.menu_closeMenu();
                 ev.preventDefault();
                 return true;
 
