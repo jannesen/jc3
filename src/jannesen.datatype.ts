@@ -145,7 +145,7 @@ export interface IControl<T> extends IControlBase
 
 export interface IBaseControl extends IControl<BaseType<IBaseControl>>
 {
-};
+}
 /**
  * !!DOC
  */

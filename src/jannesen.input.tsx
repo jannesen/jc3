@@ -1300,7 +1300,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
      * If the context is changed between input and validation a error is generated.
      * If the value is set from code this context === undefined and not used during validation.
      * Calling setContext set the context after the value is (restored) from code.
-     * 
+     *
      */
     public          setContext()
     {
