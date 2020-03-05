@@ -10,30 +10,30 @@ import * as $JL      from "jc3/jannesen.language";
 
 export class ValuesDropdown<TNativeValue,
                             TValue extends $JT.SimpleType<TNativeValue>,
-                            TInput extends $JI.InputTextControl<TNativeValue, TValue, TInput, TOpts, void, TNativeValue, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>,
+                            TInput extends $JI.InputTextControl<TNativeValue, TValue, TInput, TOpts, void, TNativeValue|null, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>,
                             TOpts extends $JI.IInputControlDropdownValuesOptions<TNativeValue>>
                         extends $JPOPUP.TableDropdown<TNativeValue, TInput, void, TNativeValue|null>
 {
     private     _values?:   TNativeValue[];
 
-    public      OnLoad(calldata:void, ct:$JA.Context): $JA.Task<void>|void
+    public      OnLoad(data:void, ct:$JA.Context): $JA.Task<void>|void
     {
         const input           = this.control;
 
         if (input && input.value) {
             try {
-                const values = (input.opts.dropdown_values!)(ct);
+                const valueList = input.opts.dropdown_values!();
 
-                if (values instanceof $JA.Task) {
-                    return values.then((v) => { this._fillValues(v); })
-                                 .catch((e) => {
-                                     if (!(e instanceof $JA.OperationCanceledError)) {
-                                         this.setMessage(e);
-                                     }
-                                 });
+                if (valueList instanceof $JA.Task) {
+                    return valueList.then((v) => { this._fillValues(v); })
+                                    .catch((e) => {
+                                         if (!(e instanceof $JA.OperationCanceledError)) {
+                                            this.setMessage(e);
+                                         }
+                                    });
                  }
                 else {
-                    this._fillValues(values);
+                    this._fillValues(valueList);
                 }
             }
             catch (e) {
@@ -47,17 +47,36 @@ export class ValuesDropdown<TNativeValue,
         this.Close((this._values && typeof row === 'number' ? this._values[row] : undefined), ev);
     }
 
-    private     _fillValues(values: TNativeValue[])
+    private     _fillValues(valueList: $JI.DropdownValues<TNativeValue>[]|null|undefined)
     {
-        this._values = values;
 
         const input = this.control;
         const value = input && input.value;
 
-        if (value) {
+        if (value && valueList) {
+            const values = [] as TNativeValue[];
+            const lines  = [] as string[];
             const format = value.getAttr("format");
-            this.setTBody(values.map((v) => <tr><td>{ value.cnvValueToText(v, format) }</td></tr>));
+
+            for (const v of valueList) {
+                if (v instanceof Object) {
+                    values.push(v.value);
+                    lines.push(v.text);
+                }
+                else {
+                    values.push(v);
+                    lines.push(value.cnvValueToText(v, format));
+                }
+            }
+
+            this._values = values;
+            if (lines.length > 0) {
+                this.setTBody(lines.map((l) => <tr><td>{ l }</td></tr>));
+                return;
+            }
         }
+
+        this.setMessage($JL.no_result, true);
     }
 }
 

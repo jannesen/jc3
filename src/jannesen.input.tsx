@@ -214,17 +214,17 @@ export interface IInputControlOptions extends IControlOptions
  */
 export abstract class InputTextControl<TNativeValue,
                                        TValue extends $JT.SimpleType<TNativeValue>,
-                                       TInput extends InputTextControl<TNativeValue, TValue, TInput, TOpts, TCalldata, TDropdownRtn, TDropdown>,
+                                       TInput extends InputTextControl<TNativeValue, TValue, TInput, TOpts, TDropdownData, TDropdownRtn, TDropdown>,
                                        TOpts extends IInputControlOptions,
-                                       TCalldata = void,
+                                       TDropdownData = void,
                                        TDropdownRtn = TNativeValue|null,
-                                       TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TInput, TCalldata, TDropdownRtn> = $JPOPUP.DropdownContent<TNativeValue, TInput, TCalldata, TDropdownRtn>>
+                                       TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TInput, TDropdownData, TDropdownRtn> = $JPOPUP.DropdownContent<TNativeValue, TInput, TDropdownData, TDropdownRtn>>
                                             extends SimpleControl<TValue, TOpts>
                                             implements $JPOPUP.IControlDropdown<TDropdownRtn|null>
 {
     protected   _input:             $JD.DOMHTMLElement;
     protected   _text:              string | undefined;
-    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TInput, TCalldata, TDropdownRtn, TDropdown>|undefined;
+    protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TInput, TDropdownData, TDropdownRtn, TDropdown>|undefined;
 
                             constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown:boolean, forcecontainer?:boolean)
     {
@@ -381,7 +381,7 @@ export abstract class InputTextControl<TNativeValue,
             elm.selectionEnd   = elm.value.length;
         }
     }
-    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TInput, TCalldata, TDropdownRtn, TDropdown>, className:string, focus:boolean, calldata:TCalldata, onready?:(content:TDropdown)=>void)
+    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TInput, TDropdownData, TDropdownRtn, TDropdown>, className:string, focus:boolean, calldata:TDropdownData, onready?:(content:TDropdown)=>void)
     {
         if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass && $J.isEqual(this._activeDropdown.Calldata, calldata))) {
             this.closeDropdown(false);
@@ -414,7 +414,7 @@ export abstract class InputTextControl<TNativeValue,
             activeDropdown.Stop();
         }
     }
-    protected               dropdownValueSet(datavalue:TValue, value:TDropdownRtn, dropdown:$JPOPUP.DropdownPopup<TNativeValue, TInput, TCalldata, TDropdownRtn, TDropdown>)
+    protected               dropdownValueSet(datavalue:TValue, value:TDropdownRtn, dropdown:$JPOPUP.DropdownPopup<TNativeValue, TInput, TDropdownData, TDropdownRtn, TDropdown>)
     {
         throw new $J.InvalidStateError("dropdownValueSet not implented");
     }
@@ -538,9 +538,13 @@ export abstract class InputTextControl<TNativeValue,
 /**
  * !!DOC
  */
+
+export type DropdownValues<TNative> = TNative | { value:TNative, text:string };
+export type DropdownValuesList<TNative> = DropdownValues<TNative>[] | $JA.Task<DropdownValues<TNative>[]>;
+
 export interface IInputControlDropdownValuesOptions<TNative> extends IInputControlOptions
 {
-    dropdown_values?:   (context:$JA.Context) => TNative[] | $JA.Task<TNative[]>;
+    dropdown_values?:   () => DropdownValuesList<TNative>|null|undefined;
 }
 
 export abstract class InputTextValueDropdownControl<TNativeValue,
@@ -558,13 +562,15 @@ export abstract class InputTextValueDropdownControl<TNativeValue,
     {
         if (this._value) {
             try {
-                this.focus();
-                this.parseInput(false);
-                this.setError(null);
-                if (this.opts.dropdown_values) {
+                if (typeof this.opts.dropdown_values === 'function') {
+                    this.focus();
+                    this.setError(null);
                     this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", true);
                 }
                 else {
+                    this.focus();
+                    this.parseInput(false);
+                    this.setError(null);
                     this.getDropdownStd();
                 }
             } catch(e) {
@@ -593,10 +599,9 @@ export abstract class InputTextValuesDropdownControl<TNativeValue,
 
     protected   openDropdown()
     {
-        if (this.opts.dropdown_values && this._value) {
+        if (typeof this.opts.dropdown_values === 'function' && this._value) {
             try {
                 this.focus();
-                this.parseInput(false);
                 this.setError(null);
                 this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", true);
             } catch(e) {
@@ -608,7 +613,6 @@ export abstract class InputTextValuesDropdownControl<TNativeValue,
     {
         datavalue.setValue(value, $JT.ChangeReason.UI);
     }
-
 }
 
 //===================================== InputTextControl ==========================================
@@ -940,7 +944,7 @@ export class Date extends InputTextValueDropdownControl<number, $JT.Date, Date, 
     }
     protected   getDropdownStd()
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-date", true);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-date", true, undefined);
     }
 }
 
@@ -963,7 +967,7 @@ export class DateTime extends InputTextValueDropdownControl<number, $JT.DateTime
 
     protected   getDropdownStd()
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-datetime", true);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-datetime", true, undefined);
     }
 }
 
@@ -1014,7 +1018,7 @@ export class Time extends InputTextValueDropdownControl<number, $JT.Time, Time, 
     }
     protected   getDropdownStd()
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-time", true);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-time", true, undefined);
     }
 }
 
