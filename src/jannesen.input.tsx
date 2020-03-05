@@ -305,11 +305,6 @@ export abstract class InputTextControl<TNativeValue,
     {
         this.closeDropdown(true);
 
-        if (reason === $JT.ChangeReason.Invalidate) {
-            this._text = undefined;
-            return;
-        }
-
         if (this._value && (changed || this.isDirty())) {
             let vvalue = this._value.internalvalue;
             this._text = (vvalue !== null ? this._value.cnvValueToText(vvalue, this._value.getAttr("format")) : "");
@@ -766,11 +761,6 @@ export class StringMultiLine extends SimpleControl<$JT.StringMultiLine, IStringM
     }
 
     public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
-        if (reason === $JT.ChangeReason.Invalidate) {
-            this._text = undefined;
-            return;
-        }
-
         if (this._value && (changed || this._container.prop("value") !== this._text)) {
             let vvalue = this._value.internalvalue;
             this._text = vvalue !== null ? this._value!.cnvValueToText(vvalue) : "";
@@ -1303,12 +1293,6 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
     public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
         this._setactivetask();
 
-        if (reason === $JT.ChangeReason.Invalidate) {
-            this._inputChanged = false;
-            this._text = undefined;
-            return;
-        }
-
         if (this._value) {
             const vvalue = this._value.internalvalue;
             const rec    = this._value.getrecordAsync(vvalue, true);
@@ -1469,10 +1453,10 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
 
                 if (this._text !== text) {
                     if (text.trim() === "") {
-                        this._inputContext = undefined;
                         this.setError(null);
 
                         if (this._value.internalvalue !== null) {
+                            this._inputContext = undefined;
                             this._value.setValue(null, $JT.ChangeReason.UI);
                         }
                     }
