@@ -1690,6 +1690,8 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
                 let searchkeys = SelectDataSet.normalizeSearchKeys(this._datasource.normalize_searchtext(text));
 
                 if (searchkeys instanceof Array) {
+                    searchkeys   = this._datasource.filter_searchtext(searchkeys);
+
                     if (this._currectfetch && SelectDataSet.hassearchdata(this._currectfetch.searchkeys, searchkeys) &&
                         ((this._currectfetch.task.isFulfilled && this._currectfetch.task.value instanceof Array) ||
                          $J.isEqual(this._currectfetch.searchkeys, searchkeys) )) {
@@ -1697,8 +1699,6 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
                     }
 
                     this._fetchDataStop();
-
-                    searchkeys   = this._datasource.filter_searchtext(searchkeys);
 
                     if (searchkeys.length > 0 || (this._datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0) {
                         return this._fetchDataAsync(searchkeys, maxrec).thenD((data) => this._filterData(data, text, maxrec!));
@@ -1800,12 +1800,9 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
     private     _recFilter(rec:$JT.TDatasource_Record<TDatasource>, keys:string[])
     {
         for(let key of keys) {
-            if (this._columns) {
-                if (!this._columns.some((col) => SelectDataSet.containskey((rec as ({readonly [key:string]:any}))[col.fieldname] as string, key)))
-                    return false;
-            } else {
-                if (!SelectDataSet.containskey(this._value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec), key))
-                    return false;
+            if (!(this._columns && this._columns.some((col) => SelectDataSet.containskey((rec as ({readonly [key:string]:any}))[col.fieldname] as string, key))) &&
+                !SelectDataSet.containskey(this._value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec), key)) {
+                return false;
             }
         }
 
