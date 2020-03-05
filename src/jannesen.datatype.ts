@@ -256,6 +256,20 @@ export class ValidateErrors extends __Error
     }
 }
 
+export class ValueError extends __Error
+{
+    public      value:     BaseType;
+    public      control:   IControlBase|undefined;
+
+                constructor(value:BaseType, control:IControlBase|undefined, innerError:Error)
+    {
+        super("ValueError", "Value error");
+        this.value       = value;
+        this.control     = control;
+        this.innerError  = innerError;
+    }
+}
+
 export interface IValidatable
 {
     preValidateAsync?:                   (context:$JA.Context|null)=>($JA.Task<unknown>|Error)[]|$JA.Task<unknown>|Error|null;
@@ -850,14 +864,19 @@ export abstract class SimpleType<TNative,TControl extends IBaseControl=IBaseCont
      */
     public get value():TNative|null {
         if (this._control && this._control.preValidate) {
-            const r = this._control.preValidate();
-            if (r) {
-                if (r.isPending) {
-                    throw new $JA.BusyError("Input is busy.");
+            try {
+                const r = this._control.preValidate();
+                if (r) {
+                    if (r.isPending) {
+                        throw new $JA.BusyError("Input is busy.");
+                    }
+                    else if (r.isRejected) {
+                        throw r.reason;
+                    }
                 }
-                else if (r.isRejected) {
-                    throw r.reason;
-                }
+            }
+            catch (e) {
+                throw new ValueError(this, this._control, e);
             }
         }
 
