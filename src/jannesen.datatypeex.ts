@@ -149,7 +149,7 @@ export class DateRange extends RangeValue {
         return { Begin: $J.parseDate(parts[0]), End: $J.parseDate(parts[1]) };
     }
 
-    public  getControl(opts?: $JIE.IDateRangeControlOptions): $JT.IControlContainer<DateRange> {
+    public  getControl(opts?: $JIE.IDateRangeControlOptions):$JIE.DateRange {
         return this.getinputcontrol<$JIE.DateRange, $JIE.IDateRangeControlOptions>("jc3/jannesen.inputex", "DateRange", opts);
     }
 
@@ -209,7 +209,7 @@ export class DateTimeRange extends RangeValue {
         return { Begin: $J.parseDatetimeNumber(parts[0]), End: $J.parseDatetimeNumber(parts[1]) };
     }
 
-    public  getControl(opts?: $JIE.IDateTimeRangeControlOptions): $JT.IControlContainer<DateTimeRange> {
+    public  getControl(opts?: $JIE.IDateTimeRangeControlOptions):$JIE.DateTimeRange {
         return this.getinputcontrol<$JIE.DateTimeRange, $JIE.IDateTimeRangeControlOptions>("jc3/jannesen.inputex", "DateTimeRange", opts);
     }
 

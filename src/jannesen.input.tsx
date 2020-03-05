@@ -24,13 +24,6 @@ export interface IControlOptions
     disabled?:  boolean;
 }
 
-/**
- * !!DOC
- */
-export interface ISelectRadioControl<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>> extends $JT.IControl<$JT.SelectType<TNativeValue, TDatasource>>
-{
-    getRadioButton(key:TNativeValue, text?:string): $JD.DOMHTMLElement;
-}
 
 //===================================== SimpleControl =============================================
 /**
@@ -114,7 +107,8 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
     /**
      * !!DOC
      */
-    public      linkValue(value: TValue|undefined): void {
+    public      linkValue(value: TValue|undefined): void
+    {
         this._value = value;
         if (value) {
             this.valueChanged($JT.ChangeReason._linked, true);
@@ -550,7 +544,7 @@ export interface IInputControlDropdownValuesOptions<TNative> extends IInputContr
 }
 
 export abstract class InputTextValueDropdownControl<TNativeValue,
-                                                    TValue extends $JT.SimpleType<TNativeValue>,
+                                                    TValue extends $JT.SimpleType<TNativeValue,TInput>,
                                                     TInput extends InputTextValueDropdownControl<TNativeValue, TValue, TInput, TOpts>,
                                                     TOpts extends IInputControlDropdownValuesOptions<TNativeValue>>
                                                         extends InputTextControl<TNativeValue, TValue, TInput, TOpts>
@@ -587,7 +581,7 @@ export abstract class InputTextValueDropdownControl<TNativeValue,
 }
 
 export abstract class InputTextValuesDropdownControl<TNativeValue,
-                                                     TValue extends $JT.SimpleType<TNativeValue>,
+                                                     TValue extends $JT.SimpleType<TNativeValue, TInput>,
                                                      TInput extends InputTextValuesDropdownControl<TNativeValue, TValue, TInput, TOpts>,
                                                      TOpts extends IInputControlDropdownValuesOptions<TNativeValue>>
                                                         extends InputTextControl<TNativeValue, TValue, TInput, TOpts>
@@ -1035,7 +1029,7 @@ export interface ISelectRadioControlOptions extends IInputControlOptions
 /**
  * !!DOC
  */
-export class SelectRadio<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue,$JT.ISelectRecord>> implements ISelectRadioControl<TNativeValue,TDatasource>
+export class SelectRadio<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue,$JT.ISelectRecord>>
 {
     protected   _value:         $JT.SelectType<TNativeValue, TDatasource>|undefined;
     protected   _keyvalue:      TNativeValue|null|undefined;
@@ -1251,6 +1245,13 @@ export type SelectInputContext = $J.IUrlArgsColl|null;
 /**
  * !!DOC
  */
+export interface ISelectInputControl<TNative extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNative,$JT.ISelectRecord>> extends $JT.IControlContainer<$JT.SelectType<TNative, TDatasource>>
+{
+}
+
+/**
+ * !!DOC
+ */
 export interface ISelectInputControlOptions<TNativeValue extends $JT.SelectValue, TDatasource extends $JT.SelectDatasource<TNativeValue,$JT.ISelectRecord>> extends IInputControlOptions
 {
     filter?:                    (rec:$JT.TDatasource_Record<TDatasource>)=>(boolean|null|undefined);
@@ -1266,15 +1267,16 @@ export interface ISelectInputControlOptions<TNativeValue extends $JT.SelectValue
 /**
  * !!DOC
  */
-export class SelectInput<TNativeValue extends $JT.SelectValue,
-                         TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>>
+export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
+                         TDatasource extends $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord> = $JT.SelectDatasource<TNativeValue, $JT.ISelectRecord>>
                 extends InputTextControl<TNativeValue,
                                         $JT.SelectType<TNativeValue,TDatasource>,
                                         SelectInput<TNativeValue,TDatasource>,
                                         ISelectInputControlOptions<TNativeValue,TDatasource>,
                                         SelectDataSet<TNativeValue, TDatasource>,
-                                        $JT.TDatasource_Record<TDatasource>,
+                                        $JT.TDatasource_Record<TDatasource>|null,
                                         $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>
+                implements ISelectInputControl<TNativeValue, TDatasource>
 {
     private     _activetask:        $JA.Task<unknown>|undefined;
     private     _inputContext:      SelectInputContext|undefined;
@@ -1419,7 +1421,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue,
             }
         }
     }
-    protected       dropdownValueSet(datavalue:$JT.SelectType<TNativeValue,TDatasource>, rec:$JT.TDatasource_Record<TDatasource>, dropdown:$JPOPUP.DropdownPopup<TNativeValue, SelectInput<TNativeValue, TDatasource>, SelectDataSet<TNativeValue, TDatasource>, $JT.TDatasource_Record<TDatasource>, $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>)
+    protected       dropdownValueSet(datavalue:$JT.SelectType<TNativeValue,TDatasource>, rec:$JT.TDatasource_Record<TDatasource>, dropdown:$JPOPUP.DropdownPopup<TNativeValue, SelectInput<TNativeValue, TDatasource>, SelectDataSet<TNativeValue, TDatasource>, $JT.TDatasource_Record<TDatasource>|null, $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>)
     {
         const dataset    = dropdown.Calldata;
         const datasource = dataset.Datasource;
