@@ -1528,6 +1528,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                 break;
 
             case "Backspace":
+            case "Delete":
                 this.input_textchange();
                 break;
 
@@ -1554,10 +1555,12 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                                                     }
                                                 }
 
-                                                this._inputTimer = $J.setTimeout(() => {
-                                                                                    this._inputTimer = undefined;
-                                                                                    this._updatedropdown(false);
-                                                                                }, this._value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll ? 100 : 250);
+                                                if (this._activeDropdown || this.getinputelm().prop("value") !== '') {
+                                                    this._inputTimer = $J.setTimeout(() => {
+                                                                                        this._inputTimer = undefined;
+                                                                                        this._updatedropdown(false);
+                                                                                     }, this._value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll ? 100 : 250);
+                                                }
                                             }
                                         }, 100);
         this.setError(null);
