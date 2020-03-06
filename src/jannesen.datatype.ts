@@ -2086,6 +2086,7 @@ export interface ITimeAttributes extends ISimpleNumberTypeAttributes
     factor?:TimeFactor;
     precision?:number;
     format?:string;
+    duration?:boolean;
 }
 
 /**
@@ -2135,6 +2136,10 @@ export class Time extends SimpleNumberType<$JI.Time>
             return Math.round($J.round($JR.stringToNumber(text), this.Precision) * this.Factor);
         }
 
+        if (this.Duration && /^[0-9]+$/.test(text)) {
+            return $JR.stringToInt(text) * this.Factor;
+        }
+
         return $JR.stringToTime(text, f);
     }
 
@@ -2167,6 +2172,13 @@ export class Time extends SimpleNumberType<$JI.Time>
      */
     public get Precision():number {
         return this.getAttr("precision");
+    }
+
+    /**
+     *!!DOC
+     */
+    public get Duration():number {
+        return this.getAttr("duration");
     }
 
     /**
