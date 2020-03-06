@@ -634,16 +634,8 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
                           },
                           (e) => {
                               if (!executeContext.isStopped) {
-                                  return this._open(FormError, e, undefined, executeContext, false)
-                                             .then(() => {
-                                                        if (this._contentBody) {
-                                                            this._contentBody.formChanged(FormChangedReason.Loaded);
-                                                        }
-                                                        throw e;
-                                                   });
+                                  return this.openError(e, executeContext);
                               }
-
-                              throw e;
                         });
     }
     public              execute<TRtn>(executor: (context:$JA.Context) => $JA.Task<TRtn>, contextOptions?:$JA.IContextOptions): $JA.Task<TRtn>
@@ -694,7 +686,18 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
 
         return [];
     }
-
+    public              openError(e: Error, executeContext?:$JA.Context)
+    {
+        if (!executeContext) {
+            executeContext = new $JA.Context({ parent:this._context, dom:this._container });
+        }
+        return this._open(FormError, e, undefined, executeContext, false)
+                    .then(() => {
+                            if (this._contentBody) {
+                                this._contentBody.formChanged(FormChangedReason.Loaded);
+                            }
+                        });
+    }
     protected           _setActiveTask(task:IActiveTask|null) {
         super._setActiveTask(task);
         if (this._contentBody) {

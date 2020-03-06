@@ -395,7 +395,12 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
                 else if (typeof this._loadform === 'function') {
                     const loader = new $JUC.FormLoader(tabs.context);
                     this._container.appendChild(this._tabContent = loader);
-                    return this._loadform(loader);
+                    try {
+                        return this._loadform(loader).catch((e) => loader.openError(e));
+                    }
+                    catch (e) {
+                        loader.openError(e);
+                    }
                 }
             } catch (e) {
                 this._tabContent = undefined;
