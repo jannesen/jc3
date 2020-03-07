@@ -1937,8 +1937,6 @@ function event_bind(node:Window|Document|HTMLElement, events:$J.IEventWrapper[],
 }
 function event_unbind(node:Window|Document|HTMLElement, events:$J.IEventWrapper[]|undefined, eventName:string, handler:(ev:any) => void, thisArg?:any): void
 {
-    let n = 0;
-
     if (events) {
         let idx = 0;
 
@@ -1948,16 +1946,11 @@ function event_unbind(node:Window|Document|HTMLElement, events:$J.IEventWrapper[
             if (w.eventHandler === handler && w.thisArg === thisArg) {
                 events.splice(idx, 1);
                 node.removeEventListener(eventName, w);
-                ++n;
                 continue;
             }
 
             ++idx;
         }
-    }
-
-    if (n === 0) {
-        console.error("unbind('" + eventName + "'): failed.");
     }
 }
 
