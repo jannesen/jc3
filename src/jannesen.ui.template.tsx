@@ -1042,10 +1042,10 @@ export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition
 
     protected               initData(dlgargs:TArgs, ct:$JA.Context): $JA.Task<void>|void
     {
-        const _callargs = this.callargs as any;
-        if (_callargs instanceof $JT.Record || _callargs instanceof $JT.Set) {
+        const callargs = this.callargs as any;
+        if (callargs instanceof $JT.Record || callargs instanceof $JT.Set) {
             if (dlgargs instanceof Object && (dlgargs as any).callargs instanceof Object) {
-                _callargs.assign((dlgargs as any).callargs);
+                callargs.assign((dlgargs as any).callargs);
             }
         }
 
