@@ -1074,13 +1074,8 @@ export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition
                                                  callargs: this.callargs,
                                                  data:     this.data
                                              },
-                                              context)
-                                       .then((r) => this.onSubmitted(r));
+                                              context);
                          });
-    }
-    protected               onSubmitted(r:$JA.AjaxCallResponseType<TCall>): TRtn
-    {
-        return r;
     }
 }
 
