@@ -270,15 +270,19 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
 
     public      setHeight(height:number)
     {
-        this._setHeight(height, this._getRowHeight());
+        const rowHeight = this._getRowHeight();
+        if (rowHeight) {
+            this._setHeight(height, rowHeight);
+        }
     }
     public      setVisibleRows(n: number) {
         if (n > this._recordset.length) {
             n = this._recordset.length;
         }
         const rowheight = this._getRowHeight();
-
-        this._setHeight(this._table.select('thead')!.css('height') + rowheight * n, rowheight);
+        if (rowheight) {
+            this._setHeight(this._table.select('thead')!.css('height') + rowheight * n, rowheight);
+        }
     }
     public      focus()
     {
@@ -684,27 +688,29 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
             this._filter_btn.css('height', rowHeight);
             this._scrollbar.container.css('top', rowHeight);
             this._scrollbar.Size = height - rowHeight;
-            this._visualRows = (this._height - (this._table.outerSize.height - this._body.outerSize.height)) / rowHeight;
+            this._visualRows = (height - (this._table.outerSize.height - this._body.outerSize.height)) / rowHeight;
             this._filterset(true);
         }
     }
     private     _getRowHeight() {
-        let rowHeight:number;
+        if (this._body.isVisible) {
+            let rowHeight:number;
 
-        if (this._body.childNodesLength > 0) {
-            rowHeight = this._body.children[0].outerSize.height;
-        }
-        else {
-            this._body.appendChild(<tr><td>x</td></tr>);
-            rowHeight = this._body.children[0].outerSize.height;
-            this._body.empty();
-        }
+            if (this._body.childNodesLength > 0) {
+                rowHeight = this._body.children[0].outerSize.height;
+            }
+            else {
+                this._body.appendChild(<tr><td>x</td></tr>);
+                rowHeight = this._body.children[0].outerSize.height;
+                this._body.empty();
+            }
 
-        if (rowHeight <= 0) {
-            throw new $J.InvalidStateError("Can't determin row height.");
-        }
+            if (rowHeight <= 0) {
+                throw new $J.InvalidStateError("Can't determin row height.");
+            }
 
-        return rowHeight;
+            return rowHeight;
+        }
     }
 }
 
