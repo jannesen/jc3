@@ -3674,6 +3674,10 @@ class RecordValidator<TRec extends Record<IFieldDef>> implements IValidatable
             result = new $J.InvalidStateError("Validation not yet done.");
         }
 
+        if (opts.seterror !== false) {
+            this._setError(result);
+        }
+
         return result;
     }
 
