@@ -3189,6 +3189,10 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
         this._items.forEach((value, index) => callback.call(thisArg, value, index) );
     }
 
+    public [Symbol.iterator]()
+    {
+        return this._items.values();
+    }
     /**
      *!!DOC
      */
