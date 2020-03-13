@@ -205,7 +205,8 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
  */
 export interface IInputControlOptions extends IControlOptions
 {
-    placeholder?: string;
+    placeholder?:   string;
+    tabIndex?:      number;
 }
 
 
@@ -274,6 +275,10 @@ export abstract class InputTextControl<TNativeValue,
             }
         }
 
+        if (opts.tabIndex) {
+            input.attr("tabIndex", opts.tabIndex);
+        }
+         
         if (opts.width) {
             container.css("width", opts.width);
         }
@@ -1268,6 +1273,14 @@ export interface ISelectInputControlOptions<TNativeValue extends $JT.SelectValue
     dropdown_columns?:          $JT.ISelectTypeAttributeDropdownColumn[];
 }
 
+const enum SelectInputState
+{
+    ValueSetByCode = 0,
+    ValueSetByUI,
+    InputChanged,
+    FindActive,
+    FindFailed
+}
 /**
  * !!DOC
  */
@@ -1285,7 +1298,8 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     private     _activetask:        $JA.Task<unknown>|undefined;
     private     _inputContext:      SelectInputContext|undefined;
     private     _inputTimer:        number|undefined;
-    private     _inputChanged:      boolean;
+    private     _state:             SelectInputState;
+    private     _dataset:           SelectDataSet<TNativeValue, TDatasource>|undefined;
 
                     constructor(value:$JT.SelectType<TNativeValue,TDatasource>, opts:ISelectInputControlOptions<TNativeValue,TDatasource>) {
         super(value, "text", "-select", opts, (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) === 0 || (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0, true);
@@ -1293,7 +1307,8 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
         this._activetask   = undefined;
         this._inputContext = undefined;
         this._inputTimer   = undefined;
-        this._inputChanged = false;
+        this._state        = SelectInputState.ValueSetByCode;
+        this._dataset      = undefined;
     }
 
     /**
@@ -1310,63 +1325,69 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     {
         this._inputContext = (typeof this._opts.get_context === "function") ? this._opts.get_context(this) : null;
     }
+    /**
+     * Inform the input that the input context is changed.
+     * @param setOnlyOne
+     * as the dataset only contains 1 record then set this one value like user selected it.
+     */
+    public          contextChanged(setOnlyOne:boolean)
+    {
+        if (this._value) {
+            if (this._state !== SelectInputState.ValueSetByCode || (this._value.internalvalue === null && setOnlyOne)) {
+                const text = this._input.prop("value") as string;
+                if (text !== '' || setOnlyOne) {
+                    const inputContext = this._getContext();
+                    if (typeof inputContext === 'object' && !$J.isEqual(this._inputContext, inputContext)) {
+                        this._findContextChanged(text, inputContext, setOnlyOne);
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * This method is call from jannesen.datatype. not to by called from user code!
+     */
     public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
-        this._setactivetask();
+        this._stoptask();
 
         if (this._value) {
             const vvalue = this._value.internalvalue;
             const rec    = this._value.getrecordAsync(vvalue, true);
 
             if (rec instanceof $JA.Task) {
-                this._setactivetask(rec);
-                rec.thenD((data) => {
-                              if (this._isactivetask(rec)) {
+                this._runtask(rec,
+                              (data) => {
                                   if (this._value && vvalue === this._value.internalvalue) {
-                                      this._inputChanged = false;
                                       this._input.prop("value", this._text = this._value.toDisplayText(vvalue, data));
                                   }
-                              }
-                          },
-                          (err) => {
-                              if (this._isactivetask(rec)) {
+                              },
+                              (err) => {
                                   if (this._value && vvalue === this._value.internalvalue) {
-                                      this._inputChanged = false;
                                       this._input.prop("value", this._text = this._value.toDisplayText(vvalue, err));
                                   }
-                              }
-                          });
+                              });
             }
             else {
-                this._inputChanged = false;
                 this._input.prop("value", this._text = this._value.toDisplayText(vvalue, rec));
             }
         } else {
-            this._inputChanged = false;
             this._input.prop("value", this._text = "");
         }
 
         if (reason !== $JT.ChangeReason.UI) {
             this._inputContext = undefined;
+            this._state = SelectInputState.ValueSetByCode;
             this.closeDropdown(true);
+        }
+        else {
+            this._state = SelectInputState.ValueSetByUI;
         }
 
         this.setError(null);
     }
-    public          parseInput(validate:boolean): void {
-        if (this._value) {
-            const text = this._input.prop("value");
-
-            if (this._text !== text || (validate && !(this._inputContext===undefined || $J.isEqual(this._inputContext, this._getContext())))) {
-                if (text === "") {
-                    this._inputContext = undefined;
-                    this._value.setValue(null, $JT.ChangeReason.UI);
-                }
-                else {
-                    throw new $J.FormatError($JL.input_incomplete);
-                }
-            }
-        }
-    }
+    /**
+     * !!DOC
+     */
     public          get_opts()
     {
         return this._opts;
@@ -1376,11 +1397,32 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
      */
     public          preValidate(): $JA.Task<unknown>|null
     {
-        if (this._activetask) {
-            return this._activetask;
+        if (this._value) {
+            if (this._activetask) {
+                return this._activetask;
+            }
+
+            const text = this._input.prop("value") as string;
+
+            if (this._state !== SelectInputState.ValueSetByCode) {
+                const inputContext = this._getContext();
+                if (typeof inputContext ==='object' && !$J.isEqual(this._inputContext, inputContext)) {
+                    const t = this._findContextChanged(text, inputContext, false);
+                    if (t) {
+                        return t;
+                    }
+                }
+
+                if (!(this._state === SelectInputState.ValueSetByUI && $J.isEqual(this._inputContext, inputContext))) {
+                    throw new $J.FormatError($JL.input_incomplete);
+                }
+            }
+
+            if (this._text !== text) {
+                throw new $J.FormatError($JL.input_incomplete);
+            }
         }
 
-        this.parseInput(true);
         return null;
     }
 
@@ -1441,15 +1483,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     }
     protected       dropdownValueSet(datavalue:$JT.SelectType<TNativeValue,TDatasource>, rec:$JT.TDatasource_Record<TDatasource>, dropdown:$JPOPUP.DropdownPopup<TNativeValue, SelectInput<TNativeValue, TDatasource>, SelectDataSet<TNativeValue, TDatasource>, $JT.TDatasource_Record<TDatasource>|null, $JSELECT.SelectInputDropdown<TNativeValue,TDatasource>>)
     {
-        const dataset    = dropdown.Calldata;
-        const datasource = dataset.Datasource;
-
-        if (rec && datasource instanceof $JT.RemoteSelectDatasource) {
-            datasource.addrecord(rec);
-        }
-
-        this._inputContext = (rec !== null ? dataset.InputContext : null);
-        datavalue.setValue(rec, $JT.ChangeReason.UI);
+        this._setValueUI(rec, dropdown.Calldata);
     }
 
     protected       input_onblur(ev:FocusEvent) {
@@ -1460,58 +1494,42 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
         }
 
         if (!(ev && this.hasFocus(ev.relatedTarget as Element))) {
-            let dataset:SelectDataSet<TNativeValue,TDatasource>|undefined;
-
+            let dataset:SelectDataSet<TNativeValue, TDatasource>|undefined;
             if (this._activeDropdown) {
                 dataset = this._activeDropdown.Calldata;
                 this.closeDropdown(false);
             }
 
-            if (this._value && this._inputChanged) {
-                this._inputChanged = false;
+            if (this._value && (this._state === SelectInputState.InputChanged || this._state === SelectInputState.FindFailed)) {
                 const text = this.getinputelm().prop("value") as string;
 
                 if (this._text !== text) {
                     if (text.trim() === "") {
-                        this.setError(null);
-
-                        if (this._value.internalvalue !== null) {
-                            this._inputContext = undefined;
-                            this._value.setValue(null, $JT.ChangeReason.UI);
-                        }
+                        this._setValueUI(null);
                     }
                     else {
-                        if (ev) {
-                            if (!dataset) {
-                                const context = this._getContext();
-                                if (typeof context === 'object') {
-                                    dataset = new SelectDataSet<TNativeValue, TDatasource>(this, context);
-                                }
-                            }
+                        if (!dataset) {
+                            dataset = this._getDataset(this._getContext());
+                        }
 
-                            if (dataset) {
-                                const task = dataset.Fetch(text, 1);
-                                this._setactivetask(task);
-                                task.thenD((result) => {
-                                               if (this._isactivetask(task)) {
-                                                   if (result instanceof Array && result.length === 1 && this._value) {
-                                                       this._inputContext = dataset!.InputContext;
-                                                       this._value.setValue(result[0], $JT.ChangeReason.UI);
-                                                   }
-                                                   else {
-                                                       this.setError($JL.input_incomplete);
-                                                   }
-                                               }
-                                           },
-                                           (err) => {
-                                               if (this._isactivetask(task)) {
-                                                   this.setError(err.message);
-                                               }
-                                           });
-                            }
-                            else {
-                                this.setError($JL.input_incomplete);
-                            }
+                        if (dataset &&
+                            (this._state === SelectInputState.InputChanged || !$J.isEqual(this._inputContext, dataset!.InputContext))) {
+                            this._state = SelectInputState.FindActive;
+                            this._runtask(dataset.FetchByText(text),
+                                          (result) => {
+                                              if (result) {
+                                                  this._setValueUI(result, dataset);
+                                              }
+                                              else {
+                                                  this._findFailed($JL.input_incomplete, dataset);
+                                              }
+                                          },
+                                          (err) => {
+                                              this._findFailed(err, dataset);
+                                          });
+                        }
+                        else {
+                            this._findFailed($JL.input_incomplete);
                         }
                     }
                 }
@@ -1545,9 +1563,9 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
         }
     }
     protected       input_textchange() {
-        this._inputChanged = true;
-        this._setactivetask();
+        this._stoptask();
         this._inputTimerStop();
+        this._state = SelectInputState.InputChanged;
         this._inputTimer = $J.setTimeout(() => {
                                             this._inputTimer = undefined;
 
@@ -1584,18 +1602,25 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     }
     private         _getDropdown(focus:boolean, onready:(content:$JSELECT.SelectInputDropdown<TNativeValue,TDatasource>)=>void)
     {
-        const context = this._getContext();
-
-        if (typeof context === 'object') {
-            let dataset = this._activeDropdown && this._activeDropdown.Calldata;
-            if (!(dataset && $J.isEqual(dataset.InputContext, context))) {
-                dataset = new SelectDataSet(this, context);
-            }
+        const dataset = this._getDataset(this._getContext());
+        if (dataset) {
             this.getDropdown("jc3/jannesen.ui.select:SelectInputDropdown", "-tablelist -select", focus, dataset, onready);
         }
         else {
             this.closeDropdown(true);
         }
+    }
+    private         _getDataset(inputContext:SelectInputContext|undefined):SelectDataSet<TNativeValue, TDatasource>|undefined
+    {
+        if (typeof inputContext === 'object') {
+            if (!(this._dataset && $J.isEqual(this._dataset.InputContext, inputContext))) {
+                this._dataset = new SelectDataSet(this, inputContext);
+            }
+
+            return this._dataset;
+        }
+
+        return undefined;
     }
     private         _getContext()
     {
@@ -1618,19 +1643,89 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
             this._inputTimer = undefined;
         }
     }
-    private         _isactivetask(task:$JA.Task<unknown>)
+    private         _findContextChanged(text:string, inputContext:SelectInputContext|undefined, setOnlyOne:boolean)
     {
-        if (this._activetask === task) {
-            this._setactivetask();
-            return true;
+        const dataset = this._getDataset(inputContext);
+        if (dataset) {
+            this._state = SelectInputState.FindActive;
+            return this._runtask(dataset.FetchContextChange(text, setOnlyOne),
+                                 (result) => {
+                                     if (result) {
+                                         this._setValueUI(result, dataset);
+                                     }
+                                     else {
+                                         this._findFailed(text !== '' ? $JL.input_incomplete : null, dataset);
+                                     }
+                                 },
+                                 (err) => {
+                                     this._findFailed(err, dataset);
+                                 });
+        }
+    }
+    private         _runtask<T>(task:$JA.Task<T>, onfulfilled:(value:T)=>void, onrejected?: (err:Error)=>void): $JA.Task<T>
+    {
+        if (task.isFulfilled) {
+            onfulfilled(task.value);
+        }
+        else if (task.isRejected) {
+            if (onrejected) {
+                onrejected(task.reason);
+            }
+        }
+        else {
+            task = task.then((r) => {
+                        if (this._activetask === task) {
+                            this._stoptask();
+                            onfulfilled(r);
+                        }
+                        return r;
+                    },
+                    (e) => {
+                        if (this._activetask === task) {
+                            this._stoptask();
+                            if (onrejected) {
+                                onrejected(e);
+                            }
+                        }
+                        throw e;
+                    });
+            this._activetask = task;
+            this.container.addClass("-busy");
         }
 
-        return false;
+        return task;
     }
-    private         _setactivetask(task?:$JA.Task<unknown>)
+    private         _stoptask()
     {
-        this._activetask = task;
-        this.container.toggleClass("-busy", task instanceof $JA.Task);
+        this._activetask = undefined;
+        this.container.removeClass("-busy");
+    }
+    private         _setValueUI(rec:$JT.TDatasource_Record<TDatasource>|null, dataset?:SelectDataSet<TNativeValue, TDatasource>)
+    {
+        this._stoptask();
+
+        if (rec && dataset) {
+            const datasource = dataset.Datasource;
+
+            if (datasource instanceof $JT.RemoteSelectDatasource) {
+                datasource.addrecord(rec);
+            }
+
+            this._inputContext = dataset.InputContext;
+        }
+        else {
+            this._inputContext = undefined;
+        }
+
+        if (this._value) {
+            this._value.setValue(rec, $JT.ChangeReason.UI);
+        }
+    }
+    private         _findFailed(err:Error|string|null, dataset?:SelectDataSet<TNativeValue, TDatasource>|undefined)
+    {
+        this._inputContext = dataset ? dataset.InputContext : undefined;
+        this._state = SelectInputState.FindFailed;
+        this.setError($JT.stringErrorToMessage(err));
     }
 }
 
@@ -1732,6 +1827,39 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
                     ? this._currectfetch.task
                     : this._fetchDataAsync(undefined, (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch ? this._inputOpts.fetchmax || 250 : undefined));
     }
+    public      FetchByText(text: string): $JA.Task<$JT.TDatasource_Record<TDatasource>|undefined>
+    {
+        return this.Fetch(text, 1)
+                   .thenD((result) => {
+                       if (result instanceof Array && result.length === 1) {
+                           return result[0];
+                       }
+                   });
+    }
+    public      FetchContextChange(text:string, selectone:boolean): $JA.Task<$JT.TDatasource_Record<TDatasource>|undefined>
+    {
+        if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
+            return this.FetchByText(text);
+        }
+        else {
+            text = $JSTRING.removeDiacritics(text.trim()).toUpperCase();
+            return this.FetchAll()
+                       .thenD((data) => {
+                           if (data instanceof Array) {
+                               if (data.length === 1 && selectone) {
+                                   return data[0];
+                               }
+
+                               if (text !== '') {
+                                   const x = this._filterData(data, text, 1);
+                                   if (x instanceof Array && x.length === 1) {
+                                       return x[0];
+                                   }
+                               }
+                           }
+                       });
+        }
+    }
     public      LocalSearch(text:string)
     {
         if (this._currectfetch && this._currectfetch.task.isFulfilled) {
@@ -1764,7 +1892,6 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
                                      }
                                      return data;
                                  });
-
 
         this._currectfetch = { ct, task, searchkeys };
 
@@ -1919,7 +2046,6 @@ export class ErrorMessage
             this._popup = new $JPOPUP.Tooltip(this._inputelm, this._message);
         }
     }
-
     private         _removePopup() {
         if (this._popup) {
             this._popup.Stop();
