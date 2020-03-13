@@ -3587,9 +3587,9 @@ function mergeValidateResult(r1:ValidateResult, r2:ValidateResult): ValidateResu
     return ValidateResult.Error;
 }
 
-function stringErrorToMessage(e:string|Error): string;
-function stringErrorToMessage(e:null|string|Error): string|null;
-function stringErrorToMessage(e:null|string|Error): string|null
+export function stringErrorToMessage(e:string|Error): string;
+export function stringErrorToMessage(e:null|string|Error): string|null;
+export function stringErrorToMessage(e:null|string|Error): string|null
 {
     if (e === null)             return null;
     if (typeof e === "string")  return e;
