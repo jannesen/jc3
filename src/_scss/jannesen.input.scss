@@ -271,7 +271,7 @@ div.jannesen-input {
             font-weight:    $font-awesome-solid;
             @include        fa-icon($fa-var-sync);
         }
-        &.-dropdown {
+        &.-dropdown::before {
             right:          1.25em;
         }
     }
