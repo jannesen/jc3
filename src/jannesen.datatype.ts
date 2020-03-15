@@ -2664,7 +2664,7 @@ export type RecordObject<TRec extends IFieldDef, TNames extends string[]> = { [K
 /**
  *!!DOC
  */
-export class Record<TRec extends IFieldDef> extends BaseType implements $J.IUrlArgsFunc
+export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseControl> extends BaseType<TControl> implements $J.IUrlArgsFunc
 {
     public static   Name                = "Record";
     public static   Attributes          = $J.extend<IRecordAttributes>({ null_response_error:true }, BaseType.Attributes);
