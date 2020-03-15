@@ -207,6 +207,7 @@ export interface IInputControlOptions extends IControlOptions
 {
     placeholder?:   string;
     tabIndex?:      number;
+    'class'?:       string;
 }
 
 
@@ -278,7 +279,11 @@ export abstract class InputTextControl<TNativeValue,
         if (opts.tabIndex) {
             input.attr("tabIndex", opts.tabIndex);
         }
-         
+
+        if (opts['class']) {
+            input.addClass(opts['class']);
+        }
+
         if (opts.width) {
             container.css("width", opts.width);
         }
