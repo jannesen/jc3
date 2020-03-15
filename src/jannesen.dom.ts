@@ -992,7 +992,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
     }
 
     /**
-     * !!DOC
+     * method inserts a set of AddNode before the first child of the ParentNode.
      */
     public prependChild(...children: AddNode[]): DOMHTMLElement
     {
