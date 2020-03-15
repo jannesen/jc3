@@ -1341,10 +1341,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
             if (this._state !== SelectInputState.ValueSetByCode || (this._value.internalvalue === null && setOnlyOne)) {
                 const text = this._input.prop("value") as string;
                 if (text !== '' || setOnlyOne) {
-                    const inputContext = this._getContext();
-                    if (typeof inputContext === 'object' && !$J.isEqual(this._inputContext, inputContext)) {
-                        this._findContextChanged(text, inputContext, setOnlyOne);
-                    }
+                    this._findContextChanged(text, this._getContext(), setOnlyOne);
                 }
             }
         }
@@ -1409,13 +1406,11 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
 
             const text = this._input.prop("value") as string;
 
-            if (this._state !== SelectInputState.ValueSetByCode) {
+            if (this._state !== SelectInputState.ValueSetByCode && text !== '') {
                 const inputContext = this._getContext();
-                if (typeof inputContext ==='object' && !$J.isEqual(this._inputContext, inputContext)) {
-                    const t = this._findContextChanged(text, inputContext, false);
-                    if (t) {
-                        return t;
-                    }
+                const t = this._findContextChanged(text, inputContext, false);
+                if (t) {
+                    return t;
                 }
 
                 if (!(this._state === SelectInputState.ValueSetByUI && $J.isEqual(this._inputContext, inputContext))) {
@@ -1650,21 +1645,23 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     }
     private         _findContextChanged(text:string, inputContext:SelectInputContext|undefined, setOnlyOne:boolean)
     {
-        const dataset = this._getDataset(inputContext);
-        if (dataset) {
-            this._state = SelectInputState.FindActive;
-            return this._runtask(dataset.FetchContextChange(text, setOnlyOne),
-                                 (result) => {
-                                     if (result) {
-                                         this._setValueUI(result, dataset);
-                                     }
-                                     else {
-                                         this._findFailed(text !== '' ? $JL.input_incomplete : null, dataset);
-                                     }
-                                 },
-                                 (err) => {
-                                     this._findFailed(err, dataset);
-                                 });
+        if (typeof inputContext === 'object' && !$J.isEqual(this._inputContext, inputContext)) {
+            const dataset = this._getDataset(inputContext);
+            if (dataset) {
+                this._state = SelectInputState.FindActive;
+                return this._runtask(dataset.FetchContextChange(text, setOnlyOne),
+                                     (result) => {
+                                         if (result) {
+                                             this._setValueUI(result, dataset);
+                                         }
+                                         else {
+                                             this._findFailed(text !== '' ? $JL.input_incomplete : null, dataset);
+                                         }
+                                     },
+                                     (err) => {
+                                         this._findFailed(err, dataset);
+                                     });
+            }
         }
     }
     private         _runtask<T>(task:$JA.Task<T>, onfulfilled:(value:T)=>void, onrejected?: (err:Error)=>void): $JA.Task<T>
