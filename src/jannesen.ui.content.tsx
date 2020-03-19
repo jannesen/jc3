@@ -1366,8 +1366,22 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
     }
     protected           formFooter(): $JD.AddNode
     {
-        let buttons = this.formFooterButtons();
-
+        return this._footerButtons(this.formFooterButtons())
+    }
+    protected           formFooterButtons(): IDialogButton[]|null
+    {
+        return null;
+    }
+    protected           setDialogContent(title:string, body:$JD.AddNode, buttons:IDialogButton[])
+    {
+        this.content.appendChild(<>
+                                    <div class="-header -dialog-move-target"><span class="-title">{ title }</span></div>
+                                    <div class="-body"                      >{ body }</div>
+                                    <div class="-footer"                    >{ this._footerButtons(buttons) }</div>
+                                </>);
+    }
+    private             _footerButtons(buttons:IDialogButton[]|null): $JD.AddNode
+    {
         if (buttons) {
             var footer = <div class="-buttons"/>;
 
@@ -1390,10 +1404,6 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
             return footer;
         }
 
-        return null;
-    }
-    protected           formFooterButtons(): IDialogButton[]|null
-    {
         return null;
     }
 }
