@@ -20,12 +20,13 @@ export interface IDataTableOpts<TRec extends $JT.Record<$JT.IFieldDef>>
 
 export interface IDataTableOptsColumn<TRec extends $JT.Record<$JT.IFieldDef>>
 {
-    title?:         string;
+    title?:         string|$JD.AddNode;
     data?:          $JT.RecordFieldNames<TRec> | ((rec: TRec)=>string|$JD.AddNode);
     dataExt?:       (rec: TRec)=>$JD.AddNode;
     dataFilter?:    (rec: TRec)=>string;
     format?:        string;
     style?:         string;
+    'class'?:       string;
     width?:         string|number;
 }
 
@@ -150,7 +151,7 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
 
         opts.columns.forEach((col,index) => {
                                 colgroup.appendChild(col.width ? <col style={ "width:"+col.width } /> : <col/>);
-                                theadtr.appendChild(<td class={"-col"+(index+1)} style={ col.style }>{ col.title }</td>);
+                                theadtr.appendChild(<td class={$JD.classJoin("-col"+(index+1), col['class'])} style={ col.style }>{ col.title }</td>);
                             });
 
         if (opts.buttons) {
@@ -647,7 +648,7 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
             var rec = this._filter_rset[idx];
             var row = <tr/>;
 
-            this._opts.columns.forEach((c, i) => row.appendChild(<td class={"-col" + (i+1)} style={c.style}>
+            this._opts.columns.forEach((c, i) => row.appendChild(<td class={$JD.classJoin("-col" + (i+1), c['class'])} style={c.style}>
                                                                 {
                                                                       (typeof c.data    === "string")   ? rec.field(c.data).toDom(c.format)
                                                                     : (typeof c.data    === "function") ? c.data(rec)
