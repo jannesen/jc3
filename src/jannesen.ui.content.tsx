@@ -1366,7 +1366,7 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
     }
     protected           formFooter(): $JD.AddNode
     {
-        return this._footerButtons(this.formFooterButtons())
+        return this._footerButtons(this.formFooterButtons());
     }
     protected           formFooterButtons(): IDialogButton[]|null
     {
