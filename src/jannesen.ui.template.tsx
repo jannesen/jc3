@@ -498,13 +498,13 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
                     return;
                 }
 
-                callargs = formargs.clone() as any/*!!ANY typescript limitation*/;
+                callargs = formargs.clone() as any/* ANY typescript limitation*/;
             }
 
             return $JA.Ajax(this.interfaceGet, { callargs: callargs }, ct)
                       .then((resultdata) => {
                                 this.clearResult();
-                                const datatable = new $JDATATABLE.DataTable<$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>>(resultdata as any/*!!ANY typescript limitation*/, this.dataTableOpts());
+                                const datatable = new $JDATATABLE.DataTable<$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>>(resultdata as any/*ANY typescript limitation*/, this.dataTableOpts());
                                 const container = <div class="-result">
                                                       { datatable }
                                                   </div>;
