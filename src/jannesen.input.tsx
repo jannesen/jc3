@@ -1301,6 +1301,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                 implements ISelectInputControl<TNativeValue, TDatasource>
 {
     private     _activetask:        $JA.Task<unknown>|undefined;
+    private     _lookuptask:        $JA.Task<unknown>|undefined;
     private     _inputContext:      SelectInputContext|undefined;
     private     _inputTimer:        number|undefined;
     private     _state:             SelectInputState;
@@ -1357,17 +1358,27 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
             const rec    = this._value.getrecordAsync(vvalue, true);
 
             if (rec instanceof $JA.Task) {
-                this._runtask(rec,
-                              (data) => {
-                                  if (this._value && vvalue === this._value.internalvalue) {
-                                      this._input.prop("value", this._text = this._value.toDisplayText(vvalue, data));
-                                  }
-                              },
-                              (err) => {
-                                  if (this._value && vvalue === this._value.internalvalue) {
-                                      this._input.prop("value", this._text = this._value.toDisplayText(vvalue, err));
-                                  }
-                              });
+                this._input.prop("value", this._text = "loading. . .");
+                this.container.addClass("-busy");
+                this._lookuptask = rec;
+                rec.then((data) => {
+                             if (this._lookuptask === rec) {
+                                 this._lookuptask = undefined;
+                                 this.container.removeClass("-busy");
+                                 if (this._value && vvalue === this._value.internalvalue) {
+                                    this._input.prop("value", this._text = this._value.toDisplayText(vvalue, data));
+                                 }
+                             }
+                         },
+                         (err) => {
+                             if (this._lookuptask === rec) {
+                                 this._lookuptask = undefined;
+                                 this.container.removeClass("-busy");
+                                 if (this._value && vvalue === this._value.internalvalue) {
+                                     this._input.prop("value", this._text = this._value.toDisplayText(vvalue, err));
+                                 }
+                             }
+                         });
             }
             else {
                 this._input.prop("value", this._text = this._value.toDisplayText(vvalue, rec));
@@ -1700,6 +1711,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     private         _stoptask()
     {
         this._activetask = undefined;
+        this._lookuptask = undefined;
         this.container.removeClass("-busy");
     }
     private         _setValueUI(rec:$JT.TDatasource_Record<TDatasource>|null, dataset?:SelectDataSet<TNativeValue, TDatasource>)
