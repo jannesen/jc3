@@ -137,8 +137,9 @@ div.jannesen-ui-content.-form {
 }
 
 div.jannesen-ui-content.-dialog {
+    overflow:   visible;
     > div.-scrollbox {
-        overflow:   hidden;
+        overflow:   visible;
 
         &.-scroll {
             overflow:   auto;
