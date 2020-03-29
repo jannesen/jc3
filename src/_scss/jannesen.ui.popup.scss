@@ -108,9 +108,6 @@
             &.-position {
                 width:          1000px;
                 height:         300px;
-                > div {
-                    display:        inline-block;
-                }
             }
 
             > div.-message {
@@ -166,6 +163,14 @@
                         }
                     }
                 }
+            }
+        }
+    }
+
+    &.-dropdown.-noscroll {
+        > div.-popup {
+            &.-position { 
+                overflow:     hidden;     // Tel PositionPopup that we like no scrolling. 
             }
         }
     }

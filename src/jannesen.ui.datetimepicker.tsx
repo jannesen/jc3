@@ -421,7 +421,7 @@ export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue,
                 rtnrange(self._from, ev);
             });
 
-        this.setContent(<div class="-calendar-container" tabIndex="1">
+        this.setContent(<div class="jannesen-ui-range-calendar-container" tabIndex="1">
                             { this._from }
                             { this._to   }
                         </div>);

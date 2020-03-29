@@ -586,15 +586,15 @@ export class DropdownPopup<TNativeValue,
             this.PositionPopup(this._container, this._poselmOuterRect);
         }
     }
-    /* @internal */     PositionPopup(container:$JD.DOMHTMLElement, poselmOuterRect:$JD.IRect,)
+    /* @internal */     PositionPopup(container:$JD.DOMHTMLElement, poselmOuterRect:$JD.IRect)
     {
         let winSize       = $JD.window.size;
         let left          = poselmOuterRect.left;
-        let size:$JD.ISize;
         let maxWidth      = Math.round((winSize.width) * ($JD.body.hasClass("jannesen-ui-mobile") ? 1 : 0.95));
         let maxHeight     = Math.max(winSize.height - (poselmOuterRect.top + poselmOuterRect.height), poselmOuterRect.top);
         let borderHeight:number;
         let borderWidth:number;
+        let size:$JD.ISize;
 
         {
             let css = container.css([ 'border-left-width', 'border-right-width', 'border-top-width', 'border-bottom-width']);
@@ -603,13 +603,19 @@ export class DropdownPopup<TNativeValue,
         }
 
         if (this._popupcontainer && this._popupcontainer.childNodesLength > 0) {
-            let childNode = this._popupcontainer.childNodes(0);
-            this._popupcontainer.addClass("-position").css({ width: maxWidth-borderWidth, height: maxHeight-borderHeight-1 });
-            size = childNode.outerRect;
-            size.height += borderHeight;
-            size.width  += borderWidth;
-            size.height = Math.round(size.height + 0.44);
-            size.width  = Math.round(size.width  + 2.45); // Add extra of 2 px to keep browser little bit more happy
+            this._popupcontainer.addClass("-position").css({ 'width': "max-content", 'height': "max-content", 'overflow-y':undefined });
+
+            if (this._popupcontainer.css('overflow') === 'hidden') {
+                maxHeight     = Math.round(winSize.height * ($JD.body.hasClass("jannesen-ui-mobile") ? 1 : 0.95));
+
+            }
+
+            const popupsize = this._popupcontainer.outerRect;
+
+            size = {
+                height: Math.min(Math.round(popupsize.height + borderHeight   ), maxHeight-borderHeight-1),
+                width:  Math.min(Math.round(popupsize.width  + borderWidth + 2), maxWidth-borderWidth)     // Add extra of 2 px to keep browser little bit more happy
+            };
         }
         else {
             size = {
@@ -652,15 +658,18 @@ export class DropdownPopup<TNativeValue,
         }
 
         container.css({
-                "top":      top,
-                "left":     left,
-                "height":   size.height,
-                "width":    size.width
-        });
+                      "top":      top,
+                      "left":     left,
+                      "height":   size.height,
+                      "width":    size.width
+                  });
 
         if (this._popupcontainer) {
-            this._popupcontainer.css("overflow-y", this._popupcontainer.prop("scrollHeight") === this._popupcontainer.prop("offsetHeight")  ? "hidden" : undefined);
-            this._popupcontainer.css({ width: undefined, height: undefined }).removeClass("-position");
+            this._popupcontainer.css({
+                                     width:         undefined,
+                                     height:        undefined,
+                                     "overflow-y":  this._popupcontainer.prop("scrollHeight") > (size.height - borderHeight) + 1 ? undefined : "hidden"
+                                 }).removeClass("-position");
         }
     }
 }

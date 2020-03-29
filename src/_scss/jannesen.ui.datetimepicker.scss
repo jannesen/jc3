@@ -1,7 +1,7 @@
 ﻿div.jannesen-ui-datetimepicker {
     background:     $jc-input-background-color;
     box-sizing:     border-box;
-    display:        inline-block;
+    display:        block;
     @include user-select(none);
 
     table {
@@ -187,6 +187,7 @@ div.jannesen-ui-daterangepicker {
     }
 }
 
-.daterangepicker > .-calendar-container:focus {
-    outline: none;
+div.jannesen-ui-range-calendar-container {
+    display:            flex;
+    flex-direction:     row;
 }

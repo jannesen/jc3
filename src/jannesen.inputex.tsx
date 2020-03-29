@@ -32,7 +32,7 @@ export class DateRange extends $JI.InputTextControl<$JTE.IRangeValue,
                 this.focus();
                 this.parseInput(false);
                 this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateRangeInputDropdown", "-daterange", true);
+                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateRangeInputDropdown", "-noscroll -daterange", true);
             } catch (e) {
                 this.setError(e.message);
             }
@@ -73,7 +73,7 @@ export class DateTimeRange extends $JI.InputTextControl<$JTE.IRangeValue,
                 this.focus();
                 this.parseInput(false);
                 this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeRangeInputDropdown", "-timerange", true);
+                this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeRangeInputDropdown", "-noscroll -timerange", true);
             } catch (e) {
                 this.setError(e.message);
             }

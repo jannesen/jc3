@@ -954,7 +954,7 @@ export class Date extends InputTextValueDropdownControl<number, $JT.Date, Date, 
     }
     protected   getDropdownStd()
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-date", true, undefined);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-noscroll -date", true, undefined);
     }
 }
 
@@ -977,7 +977,7 @@ export class DateTime extends InputTextValueDropdownControl<number, $JT.DateTime
 
     protected   getDropdownStd()
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-datetime", true, undefined);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-noscroll -datetime", true, undefined);
     }
 }
 
@@ -1028,7 +1028,7 @@ export class Time extends InputTextValueDropdownControl<number, $JT.Time, Time, 
     }
     protected   getDropdownStd()
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-time", true, undefined);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-noscroll -time", true, undefined);
     }
 }
 
