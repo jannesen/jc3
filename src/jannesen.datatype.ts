@@ -13,7 +13,7 @@ const regexDateTime = new RegExp("^(" + regexToString($JR.regexDate) + ") *[ .] 
 
 //===================================== Enums =====================================================
 /**
- *!!DOC
+ * Value change reason
  */
 export const enum ChangeReason
 {
@@ -715,7 +715,7 @@ export abstract class BaseType<TControl extends IBaseControl=IBaseControl> imple
     /**
      *!!DOC
      */
-    public toJSON():$J.JsonValue {
+    public toJSON(flags?:$J.ToJsonFlags):$J.JsonValue {
         throw new $J.NotImplentedError("$JT.BaseType.toJSON");
     }
 
@@ -966,7 +966,7 @@ export abstract class SimpleType<TNative,TControl extends IBaseControl=IBaseCont
     /**
      *!!DOC
      */
-    public toJSON():$J.JsonValue {
+    public toJSON(flags?:$J.ToJsonFlags):$J.JsonValue {
         return this.toInvariant();
     }
 
@@ -1338,7 +1338,7 @@ export class Integer extends SimpleNumberType<$JI.Integer>
         return this.getinputcontrol<$JI.Integer, $JI.IIntegerControlOptions>("jc3/jannesen.input", "Integer", opts);
     }
 
-    public toJSON(): $J.JsonValue {
+    public toJSON(flags?:$J.ToJsonFlags): $J.JsonValue {
         return this.value;
     }
 
@@ -1400,7 +1400,7 @@ export class Number extends SimpleNumberType<$JI.Number>
         return this.getinputcontrol<$JI.Number, $JI.INumberControlOptions>("jc3/jannesen.input", "Number", opts);
     }
 
-    public toJSON(): $J.JsonValue {
+    public toJSON(flags?:$J.ToJsonFlags): $J.JsonValue {
         return this.value;
     }
 
@@ -1497,7 +1497,7 @@ export interface IStringAttributes extends ISimpleTypeAttributes<string>
  */
 export abstract class StringBase<TControl extends IBaseControl=IBaseControl> extends SimpleType<string, TControl>
 {
-    public toJSON(): $J.JsonValue {
+    public toJSON(flags?:$J.ToJsonFlags): $J.JsonValue {
         return this.value;
     }
 
@@ -1690,7 +1690,7 @@ export class Boolean extends SimpleType<boolean, $JI.Boolean>
     /**
      *!!DOC
      */
-    public toJSON(): $J.JsonValue {
+    public toJSON(flags?:$J.ToJsonFlags): $J.JsonValue {
         return this.value;
     }
 
@@ -2343,7 +2343,7 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
     /**
      *!!DOC
      */
-    public toJSON() {
+    public toJSON(flags?:$J.ToJsonFlags) {
         return this.value;
     }
 
@@ -2790,14 +2790,19 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
         return this._fields[name];
     }
 
-    public toJSON(): $J.JsonValue {
+    public toJSON(flags?:$J.ToJsonFlags): $J.JsonValue {
         if (this._fields === null)
             return null;
 
         let rtn:$J.JsonObject = {};
 
         for(let name of Object.getOwnPropertyNames(this._fields)) {
-            rtn[name] = this._fields[name].toJSON();
+            const v = this._fields[name].toJSON(flags);
+
+            if (!((v === null || (v instanceof Array && v.length === 0)) &&
+                  (flags||0 & $J.ToJsonFlags.StripNullEmpty) !== 0)) {
+                rtn[name] = v;
+            }
         }
 
         return rtn;
@@ -2827,6 +2832,13 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
 
         for (let name of Object.getOwnPropertyNames(this._fields)) {
             this._fields[name].setDefault();
+        }
+    }
+
+    public clear()
+    {
+        if (this._fields) {
+            this.setDefault();
         }
     }
 
@@ -3110,8 +3122,11 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
     /**
      *!!DOC
      */
-    public toJSON(): $J.JsonValue {
-        return this._items.map(item => item.toJSON());
+    public toJSON(flags?:$J.ToJsonFlags): $J.JsonValue {
+        return this._items.map(item => {
+                                    const i = item.toJSON(flags);
+                                    return i !== undefined ? i : null;
+                               });
     }
 
     /**

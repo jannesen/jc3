@@ -29,6 +29,15 @@ export const enum TimeFormat
     MS      = 10     // MM:SS (mm can be bigger then 60)
 }
 
+/**
+ * To JSON conversion flags
+ */
+export const enum ToJsonFlags
+{
+    None            = 0,
+    StripNullEmpty = 0x01
+}
+
 
 //=============================================== Interface =======================================
 /**

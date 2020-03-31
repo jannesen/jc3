@@ -1021,7 +1021,7 @@ export var AjaxDefaults:IAjaxCallDefinition<void,void,void> = {
                                                             encoder:    function(opts: IAjaxOpts, data: any)
                                                                         {
                                                                             if (typeof data.toJSON === "function")
-                                                                                data = data.toJSON();
+                                                                                data = data.toJSON($J.ToJsonFlags.StripNullEmpty);
 
                                                                             return JSON.stringify(data);
                                                                         },
