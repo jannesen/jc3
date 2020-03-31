@@ -1051,7 +1051,7 @@ export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition
 
         const _data = this.data as any;
         if (_data instanceof $JT.Record || _data instanceof $JT.Set) {
-            _data.setDefault();
+            //_data.setDefault();
             if (dlgargs instanceof Object && (dlgargs as any).data instanceof Object) {
                 _data.assign((dlgargs as any).data);
             }
