@@ -1808,27 +1808,26 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
                     if (this._currectfetch && SelectDataSet.hassearchdata(this._currectfetch.searchkeys, searchkeys) &&
                         ((this._currectfetch.task.isFulfilled && this._currectfetch.task.value instanceof Array) ||
                          $J.isEqual(this._currectfetch.searchkeys, searchkeys) )) {
-                        return this._currectfetch.task.thenD((data) => this._filterData(data, text, maxrec!));
+                        return this._filterSortDataTask(this._currectfetch.task, text, maxrec!);
                     }
 
                     this._fetchDataStop();
 
                     if (searchkeys.length > 0 || (this._datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0) {
-                        return this._fetchDataAsync(searchkeys, maxrec).thenD((data) => this._filterData(data, text, maxrec!));
+                        return this._filterSortDataTask(this._fetchDataAsync(searchkeys, maxrec), text, maxrec!);
                     } else {
                         return $JA.Task.resolve("NEEDS-MORE-KEYS");
                     }
                 }
                 else {
-                    if (this._currectfetch && this._currectfetch.searchkeys === searchkeys) {
-                        return this._currectfetch.task;
-                    } else {
-                        return this._fetchDataAsync(searchkeys, maxrec);
-                    }
+                    return this._filterSortDataTask((this._currectfetch && this._currectfetch.searchkeys === searchkeys)
+                                                        ? this._currectfetch.task
+                                                        : this._fetchDataAsync(searchkeys, maxrec),
+                                                    undefined, 10000000);
                 }
             }
             else {
-                return ((this._currectfetch) ? this._currectfetch.task : this._fetchDataAsync()).thenD((data) => this._filterData(data, text, maxrec!));
+                return this._filterSortDataTask(this._currectfetch ? this._currectfetch.task : this._fetchDataAsync(), text, maxrec!);
             }
         }
         catch (err) {
@@ -1837,9 +1836,10 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
     }
     public      FetchAll(): $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>
     {
-        return (this._currectfetch && this._currectfetch.searchkeys === undefined)
-                    ? this._currectfetch.task
-                    : this._fetchDataAsync(undefined, (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch ? this._inputOpts.fetchmax || 250 : undefined));
+        return this._filterSortDataTask((this._currectfetch && this._currectfetch.searchkeys === undefined)
+                                            ? this._currectfetch.task
+                                            : this._fetchDataAsync(undefined, (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch ? this._inputOpts.fetchmax || 250 : undefined)),
+                                        undefined, 1000000);
     }
     public      FetchByText(text: string): $JA.Task<$JT.TDatasource_Record<TDatasource>|undefined>
     {
@@ -1859,13 +1859,14 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
             text = $JSTRING.removeDiacritics(text.trim()).toUpperCase();
             return this.FetchAll()
                        .thenD((data) => {
+                           data = this._filterSortData(data, this._inputOpts.filter, undefined, undefined, 1000000);
                            if (data instanceof Array) {
                                if (data.length === 1 && selectone) {
                                    return data[0];
                                }
 
                                if (text !== '') {
-                                   const x = this._filterData(data, text, 1);
+                                   const x = this._filterSortData(data, undefined, text, undefined, 1);
                                    if (x instanceof Array && x.length === 1) {
                                        return x[0];
                                    }
@@ -1893,19 +1894,7 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
     {
         this._fetchDataStop();
         const ct   = new $JA.Context({ });
-        const task = (this._datasource.fetchdataAsync(ct, this._inputContext, searchkeys, max) as (/*TS Limit*/ $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>))
-                          .thenD((data) => {
-                                     if (data instanceof Array) {
-                                         if (typeof this._inputOpts.filter === "function") {
-                                             data = data.filter(this._inputOpts.filter);
-                                         }
-
-                                         if (typeof this._inputOpts.sort === "function") {
-                                             data = data.sort(this._inputOpts.sort);
-                                         }
-                                     }
-                                     return data;
-                                 });
+        const task = this._datasource.fetchdataAsync(ct, this._inputContext, searchkeys, max) as (/*TS Limit*/ $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>);
 
         this._currectfetch = { ct, task, searchkeys };
 
@@ -1920,24 +1909,41 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
             this._currectfetch = undefined;
         }
     }
-    private     _filterData(data:string|$JT.TDatasource_Record<TDatasource>[], text:string, maxrec:number)
+
+    private     _filterSortDataTask(task:        $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>,
+                                    filterText:  string|undefined,
+                                    maxrec:number)
+    {
+        return task.thenD((data) => this._filterSortData(data, this._inputOpts.filter, filterText, this._inputOpts.sort, maxrec));
+    }
+
+    private     _filterSortData(data:        string|$JT.TDatasource_Record<TDatasource>[],
+                                filterFunc:  ((rec:$JT.TDatasource_Record<TDatasource>)=>(boolean|null|undefined))|undefined,
+                                filterText:  string|undefined,
+                                sortFunc:    ((rec1:$JT.TDatasource_Record<TDatasource>,rec2:$JT.TDatasource_Record<TDatasource>)=>number)|undefined,
+                                maxrec:number)
     {
         if (typeof data === 'string') {
             return data;
         }
 
-        const keys = SelectDataSet.normalizeSearchKeys(text.split(' '));
+        const keys = filterText ? SelectDataSet.normalizeSearchKeys(filterText.split(' ')) : undefined;
 
-        const rtn = [] as $JT.TDatasource_Record<TDatasource>[];
+        let rtn = [] as $JT.TDatasource_Record<TDatasource>[];
 
         for (const rec of data) {
-            if (this._recFilter(rec, keys)) {
+            if ((!filterFunc || filterFunc(rec)) &&
+                (!keys || this._recFilter(rec, keys))) {
                 if (rtn.length >= maxrec) {
                     return "TOMANY-RESULTS";
                 }
 
                 rtn.push(rec);
             }
+        }
+
+        if (sortFunc) {
+            rtn = rtn.sort(sortFunc);
         }
 
         return rtn;
