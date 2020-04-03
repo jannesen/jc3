@@ -6,7 +6,13 @@ import * as $JD       from "jc3/jannesen.dom";
 import * as $JT       from "jc3/jannesen.datatype";
 import * as $JCONTENT from "jc3/jannesen.ui.content";
 
-export interface IDataTableOpts<TRec extends $JT.Record<$JT.IFieldDef>>
+export type DataTableSourceRecType = $JT.Record<$JT.IFieldDef>;
+export type DataTableSourceObjType = { [key:string]:any };
+export type DataTableSourceType = DataTableSourceRecType | DataTableSourceObjType;
+export type DataTableSourceSetType<TRec extends DataTableSourceType> = TRec extends $JT.Record<$JT.IFieldDef> ? $JT.Set<TRec>|TRec[] : TRec[];
+export type DataTableColumnNames<TRec extends DataTableSourceType> = TRec extends $JT.Record<$JT.IFieldDef> ? $JT.RecordFieldNames<TRec> : keyof TRec;
+
+export interface IDataTableOpts<TRec extends DataTableSourceType>
 {
     containerClass?:string;
     tableClass?:    string;
@@ -18,11 +24,10 @@ export interface IDataTableOpts<TRec extends $JT.Record<$JT.IFieldDef>>
     sort?:          (a:TRec, b:TRec) => number;
 }
 
-export interface IDataTableOptsColumn<TRec extends $JT.Record<$JT.IFieldDef>>
+export interface IDataTableOptsColumn<TRec extends DataTableSourceType>
 {
     title?:         string|$JD.AddNode;
-    data?:          $JT.RecordFieldNames<TRec> | ((rec: TRec)=>string|$JD.AddNode);
-    dataExt?:       (rec: TRec)=>$JD.AddNode;
+    data?:          DataTableColumnNames<TRec> | ((rec: TRec)=>string|$JD.AddNode);
     dataFilter?:    (rec: TRec)=>string;
     format?:        string;
     style?:         string;
@@ -30,7 +35,7 @@ export interface IDataTableOptsColumn<TRec extends $JT.Record<$JT.IFieldDef>>
     width?:         string|number;
 }
 
-export interface IDataTableOptsButton<TRec extends $JT.Record<$JT.IFieldDef>>
+export interface IDataTableOptsButton<TRec extends DataTableSourceType>
 {
     className:      string;
     title?:         string;
@@ -54,10 +59,11 @@ const enum DelayReason
     Scroll      = 1,
     Filter      = 2
 }
-export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD.IDOMContainer
+export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMContainer
 {
     private     _opts:          IDataTableOpts<TRecord>;
-    private     _recordset:     TRecord[];
+    private     _sourceset:     DataTableSourceSetType<TRecord>;
+    private     _sortedset:     TRecord[];
     private     _container:     $JD.DOMHTMLElement;
     private     _filter_input:  $JD.DOMHTMLElement;
     private     _filter_btn:    $JD.DOMHTMLElement;
@@ -122,17 +128,15 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
         return this._filter_rset;
     }
 
-    public      constructor(recordset:$JT.Set<TRecord>, opts: IDataTableOpts<TRecord>)
+    public      constructor(source:DataTableSourceSetType<TRecord>, opts: IDataTableOpts<TRecord>)
     {
-        this._recordset    = recordset.toArray();
-        if (typeof opts.sort === 'function') {
-            this._recordset.sort(opts.sort);
-        }
+        this._sourceset    = source;
         this._opts         = opts;
+        this._sortedset    = this._sort();
+        this._filter_text  = '';
+        this._filter_rset  = this._sortedset;
         this._mouseenabled = false;
         this._mousemovecnt = null;
-        this._filter_text  = '';
-        this._filter_rset  = this._recordset;
 
         this._container =   <div class="jannesen-datatable" tabIndex="0" onkeydown={(ev) => {
                                         if (this._onkeydown(ev)) {
@@ -277,8 +281,8 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
         }
     }
     public      setVisibleRows(n: number) {
-        if (n > this._recordset.length) {
-            n = this._recordset.length;
+        if (n > this._sortedset.length) {
+            n = this._sortedset.length;
         }
         const rowheight = this._getRowHeight();
         if (rowheight) {
@@ -293,7 +297,25 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
             this._select(0, true);
         }
     }
+    public      refreshData()
+    {
+        this._sortedset = this._sort();
+        this._filterset(true);
+    }
+    public      refreshRowClass()
+    {
+        let rowClass = this._opts.rowClass;
 
+        if (typeof rowClass === "function") {
+            for (const tr of this._body.children) {
+                let idx = helper_getrecordId(tr.element);
+                if (idx !== null) {
+                    const cls = rowClass(this._filter_rset[idx], idx);
+                    tr.attr('class', typeof cls === 'string' ? cls : undefined);
+                }
+            }
+        }
+    }
     private     _onkeydown(ev:KeyboardEvent):boolean
     {
         this._delay();
@@ -371,9 +393,20 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
         this._container.toggleClass("-filter-enabled", e);
         this._filterset(true);
     }
+    private     _sort()
+    {
+        const source = this._sourceset;
+        const set    = (source instanceof $JT.Set ? source.toArray() : source) as TRecord[];
+
+        if (typeof this._opts.sort === 'function') {
+            set.sort(this._opts.sort);
+        }
+
+        return set;
+    }
     private     _filterset(force?:boolean) {
         const enabled     = this._container.hasClass("-filter-enabled");
-        const filterText  = enabled? this._filter_input.prop('value').trim().toLowerCase() : '';
+        const filterText  = enabled ? this._filter_input.prop('value').trim().toLowerCase() : '';
         const filterArray = filterText !== '' ? filterText.split(' ') : null;
 
         if (this._filter_text !== filterText || force) {
@@ -381,18 +414,8 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
 
             if (filterArray) {
                 if (!this._filter_sset) {
-                    this._filter_sset = this._recordset.map((rec, idx) => this._opts.columns.map((c) => {
-                                                                                let t:string|$JD.AddNode|undefined;
-                                                                                if (typeof c.data === "string") {
-                                                                                    t = rec.field(c.data).toText(c.format);
-                                                                                }
-                                                                                else if (typeof c.data === "function") {
-                                                                                    t = c.data(rec);
-                                                                                }
-                                                                                else if (typeof c.dataFilter === 'function') {
-                                                                                    t = c.dataFilter(rec);
-                                                                                }
-
+                    this._filter_sset = this._sortedset.map((rec, idx) => this._opts.columns.map((copts) => {
+                                                                                let t = DataTable._toText(rec, copts);
                                                                                 return (typeof t === 'string') ? t.toLowerCase() : '';
                                                                             }).join(' '));
                 }
@@ -401,8 +424,8 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
                 let toprow: number = 0;
                 let topfound:boolean = false;
 
-                for (let idx = 0 ; idx < this._recordset.length ; ++idx) {
-                    const rec = this._recordset[idx];
+                for (let idx = 0 ; idx < this._sortedset.length ; ++idx) {
+                    const rec = this._sortedset[idx];
                     if (rec === toprec) {
                         topfound = true;
                     }
@@ -419,7 +442,7 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
                 this._scrollbar.Value = toprow;
             }
             else {
-                new_rset = this._recordset;
+                new_rset = this._sortedset;
 
                 if (typeof this._scrollbar.Value === 'number') {
                     const toprow = new_rset.indexOf(this._filter_rset[this._scrollbar.Value]);
@@ -650,10 +673,7 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
 
             this._opts.columns.forEach((c, i) => row.appendChild(<td class={$JD.classJoin("-col" + (i+1), c['class'])} style={c.style}>
                                                                 {
-                                                                      (typeof c.data    === "string")   ? rec.field(c.data).toDom(c.format)
-                                                                    : (typeof c.data    === "function") ? c.data(rec)
-                                                                    : (typeof c.dataExt === "function") ? c.dataExt(rec)
-                                                                    : undefined
+                                                                    DataTable._toDom(rec, c)
                                                                 }
                                                                 </td>));
             row.attr("_recordidx", "" + idx);
@@ -711,6 +731,53 @@ export class DataTable<TRecord extends $JT.Record<$JT.IFieldDef>> implements $JD
             }
 
             return rowHeight;
+        }
+    }
+
+    private static  _toText<TRecord extends DataTableSourceType>(rec:TRecord, copts:IDataTableOptsColumn<TRecord>): string|undefined
+    {
+        if (typeof copts.data === "string") {
+            if (rec instanceof $JT.Record) {
+                return rec.field(copts.data).toText(copts.format);
+            }
+
+            const d = (rec as DataTableSourceObjType)[copts.data];
+            if (typeof d.toText === 'function') {
+                return d.toText(copts.format) as string;
+            }
+
+            if (typeof d === 'string') {
+                return d;
+            }
+        }
+        else if (typeof copts.dataFilter === 'function') {
+            return copts.dataFilter(rec);
+        }
+        else if (typeof copts.data === "function") {
+            const s = copts.data(rec);
+            if (typeof s === 'string') {
+                return s;
+            }
+        }
+    }
+    private static  _toDom<TRecord extends DataTableSourceType>(rec:TRecord, copts:IDataTableOptsColumn<TRecord>): $JD.AddNode
+    {
+        if (typeof copts.data === "string") {
+            if (rec instanceof $JT.Record) {
+                return rec.field(copts.data).toDom(copts.format);
+            }
+
+            const d = (rec as DataTableSourceObjType)[copts.data];
+            if (typeof d.toDom === 'function') {
+                return d.toDom(copts.format) as $JD.AddNode;
+            }
+
+            if (typeof d === 'string') {
+                return d;
+            }
+        }
+        else if (typeof copts.data === "function") {
+            return copts.data(rec) as $JD.AddNode;
         }
     }
 }
@@ -885,7 +952,7 @@ function helper_getrecordId(e:any): number|null
 
     return null;
 }
-function helper_getbutton<TRec extends $JT.Record<$JT.IFieldDef>>(buttons:IDataTableOptsButton<TRec>[], e:any): IDataTableOptsButton<TRec>|undefined
+function helper_getbutton<TRec extends DataTableSourceType>(buttons:IDataTableOptsButton<TRec>[], e:any): IDataTableOptsButton<TRec>|undefined
 {
     if (e.tagName === "SPAN") {
         let className = e.getAttribute("class");
