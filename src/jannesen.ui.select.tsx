@@ -204,7 +204,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
                 for(const rec of data) {
                     tb.push(<tr>
                             {
-                                (columns) ? columns.map((f) => <td>{ $JI.SelectDataSet.valueText((rec as ({readonly [key:string]:any}))[f.fieldname]) }</td>)
+                                (columns) ? columns.map((f) => <td>{ $JI.SelectDataSet.columnText(rec, f.fieldname) }</td>)
                                             : <td>{ value.toDisplayText((rec as ({readonly [key:string]:any}))[keyfieldname] as (TNativeValue|null|undefined), rec) }</td>
                             }
                             </tr>);

@@ -2249,15 +2249,18 @@ export class Time extends SimpleNumberType<$JI.Time>
 /**
  *!!DOC
  */
-export interface ISelectTypeAttributeDropdownColumn
+
+
+export interface ISelectTypeAttributeDropdownColumn<TRecord>
 {
-    fieldname:      string;
+    fieldname:      TDatasource_FieldNames<TRecord>|((rec:TRecord)=>string);
     width?:         string;
 }
 
 /**
  *!!DOC
  */
+export type TDatasource_FieldNames<TRecord> = TRecord extends { [key:string]:any } ? keyof TRecord : string;
 export type TDatasource_Record<TDatasource extends SelectDatasource<SelectValue, ISelectRecord>> = TDatasource extends SelectDatasource<infer T1, infer T2> ? T2 : ISelectRecord;
 
 /**
@@ -2266,9 +2269,9 @@ export type TDatasource_Record<TDatasource extends SelectDatasource<SelectValue,
 export interface ISelectTypeAttributes<TNativeType extends SelectValue, TDatasource extends SelectDatasource<SelectValue, ISelectRecord>> extends ISimpleTypeAttributes<TNativeType>
 {
     datasource:         TDatasource;
-    displayfield?:      string|((rec:TDatasource_Record<TDatasource>,format:string)=>string);
+    displayfield?:      TDatasource_FieldNames<TDatasource_Record<TDatasource>>|((rec:TDatasource_Record<TDatasource>,format:string)=>string);
     href?:              (key:TNativeType)=>string;
-    dropdown_columns?:  ISelectTypeAttributeDropdownColumn[];
+    dropdown_columns?:  ISelectTypeAttributeDropdownColumn<TDatasource_Record<TDatasource>>[];
 }
 
 /**

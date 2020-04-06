@@ -1275,7 +1275,7 @@ export interface ISelectInputControlOptions<TNativeValue extends $JT.SelectValue
     simpleDropdown?:            boolean;
     simpleNulltext?:            string;
     dropdown_height?:           number;
-    dropdown_columns?:          $JT.ISelectTypeAttributeDropdownColumn[];
+    dropdown_columns?:          $JT.ISelectTypeAttributeDropdownColumn<$JT.TDatasource_Record<TDatasource>>[];
 }
 
 const enum SelectInputState
@@ -1757,7 +1757,7 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
     private     _datasource:                TDatasource;
     private     _inputContext:              SelectInputContext;
     private     _inputOpts:                 ISelectInputControlOptions<TNativeValue, TDatasource>;
-    private     _columns:                   $JT.ISelectTypeAttributeDropdownColumn[];
+    private     _columns:                   $JT.ISelectTypeAttributeDropdownColumn<$JT.TDatasource_Record<TDatasource>>[];
     private     _currectfetch:              ISelectDataSetFetch<$JT.TDatasource_Record<TDatasource>>|undefined;
 
     public get  Value()
@@ -1786,7 +1786,7 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
         this._datasource   = this._value.Datasource;
         this._inputContext = inputContext;
         this._inputOpts    = input.get_opts();
-        this._columns      = input.get_opts().dropdown_columns || this._value.getAttr("dropdown_columns") as $JT.ISelectTypeAttributeDropdownColumn[];
+        this._columns      = input.get_opts().dropdown_columns || this._value.getAttr("dropdown_columns") as $JT.ISelectTypeAttributeDropdownColumn<$JT.TDatasource_Record<TDatasource>>[];
         this._currectfetch = undefined;
     }
 
@@ -1951,7 +1951,7 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
     private     _recFilter(rec:$JT.TDatasource_Record<TDatasource>, keys:string[])
     {
         for(let key of keys) {
-            if (!(this._columns && this._columns.some((col) => SelectDataSet.containskey((rec as ({readonly [key:string]:any}))[col.fieldname] as string, key))) &&
+            if (!(this._columns && this._columns.some((col) => SelectDataSet.containskey(SelectDataSet.columnText(rec, col.fieldname), key))) &&
                 !SelectDataSet.containskey(this._value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec), key)) {
                 return false;
             }
@@ -1960,6 +1960,25 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
         return true;
     }
 
+    public  static  columnText<TRec extends { [key:string]:any }>(rec:TRec, field:$JT.TDatasource_FieldNames<TRec>|((rec:TRec)=>string))
+    {
+        if (typeof field === 'function') {
+            return field(rec);
+        }
+        else {
+            const v = (rec as any)[field];
+            switch (typeof v) {
+            case "string":      return v as string;
+            case "number":      return v.toString();
+            case "boolean":     return v ? "true":"false";
+            default:
+                if (v === null)
+                    return null;
+
+                return "???";
+            }
+        }
+    }
     private static  normalizeSearchKeys(keys:string[]):string[];
     private static  normalizeSearchKeys(keys:string|string[]):string|string[];
     private static  normalizeSearchKeys(keys:string|string[]) {
@@ -1988,12 +2007,10 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
 
         return false;
     }
-    private static  containskey(value:any, key:string)
+    private static  containskey(text:string|null, key:string)
     {
-        const vt = SelectDataSet.valueText(value);
-
-        if (typeof vt === 'string') {
-            const text = $JSTRING.removeDiacritics(vt).toUpperCase();
+        if (typeof text === 'string') {
+            text = $JSTRING.removeDiacritics(text).toUpperCase();
 
             let p = text.indexOf(key);
             if (p >= 0) {
@@ -2010,19 +2027,6 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
             }
         }
         return false;
-    }
-    public  static  valueText(v:any): string|null
-    {
-        switch (typeof v) {
-        case "string":      return v as string;
-        case "number":      return v.toString();
-        case "boolean":     return v ? "true":"false";
-        default:
-            if (v === null)
-                return null;
-
-            return "???";
-        }
     }
 }
 
