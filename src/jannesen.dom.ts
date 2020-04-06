@@ -285,16 +285,16 @@ export function ImplementsShow(o: any): o is IShow
 }
 
 
-interface DOMWindowEventMap extends WindowEventMap
+export interface DOMWindowEventMap extends WindowEventMap
 {
     "focusin":              FocusEvent;
 }
-interface DOMDocumentEventMap
+export interface DOMDocumentEventMap
 {
     "scroll":               UIEvent;
     "visibilitychange":     Event;
 }
-interface DOMElementEventMap
+export interface DOMElementEventMap
 {
     "click":                      MouseEvent;
     "dblclick":                   MouseEvent;

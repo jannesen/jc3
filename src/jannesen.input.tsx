@@ -31,12 +31,12 @@ export interface IControlOptions
  */
 export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
                                     TOpts extends IControlOptions>
-                                        implements $JT.IControlContainer<TValue>
+                                        implements $JT.IControlContainer<TValue>, $J.IEventSource
 {
-    protected   _container!:    $JD.DOMHTMLElement;
-    protected   _opts:          TOpts;
-    protected   _value:         TValue|undefined;
-    protected   _errormsg:      ErrorMessage|undefined;
+    protected   _container!:        $JD.DOMHTMLElement;
+    protected   _opts:              TOpts;
+    protected   _value:             TValue|undefined;
+    protected   _errormsg:          ErrorMessage|undefined;
 
     /**
      * !!DOC
@@ -171,10 +171,25 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
     }
 
     /**
-     * !!DOC
+     * Focus input element
      */
     public      focus() {
         this.getinputelm().focus();
+    }
+
+    /**
+     * Bind handler to input element event
+     */
+    public      bind<K extends keyof $JD.DOMElementEventMap>(eventName: K, handler:(ev:$JD.DOMElementEventMap[K]) => void, thisArg?:any, options?:AddEventListenerOptions): void
+    {
+        this.getinputelm().bind(eventName, handler, thisArg, options);
+    }
+    /**
+     * Unbind handler to input element event
+     */
+    public      unbind(eventName: string, handler:(ev:any) => void, thisArg?:any): void
+    {
+        this.getinputelm().unbind(eventName, handler, thisArg);
     }
 
     protected       setcontainer(container: $JD.DOMHTMLElement) {
@@ -227,6 +242,7 @@ export abstract class InputTextControl<TNativeValue,
     protected   _input:             $JD.DOMHTMLElement;
     protected   _text:              string | undefined;
     protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TInput, TDropdownData, TDropdownRtn, TDropdown>|undefined;
+    protected   _eventHandlers?:    $J.IEventHandlerCollection;
 
                             constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown:boolean, forcecontainer?:boolean)
     {
@@ -245,7 +261,7 @@ export abstract class InputTextControl<TNativeValue,
         }
 
         if (dropdown) {
-            const dropdownctl = <span class="-dropdown-button" />;
+            const dropdownctl = <span class="-dropdown-button" tabIndex={-1} />;
             dropdownctl.bind("click", this.dropdown_click, this);
             container = <div>{ input }{ dropdownctl }</div>;
         }
@@ -369,6 +385,32 @@ export abstract class InputTextControl<TNativeValue,
         return this._input;
     }
 
+    /**
+     * Bind handler to input element event
+     */
+    public          bind<K extends keyof $JD.DOMElementEventMap>(eventName: K, handler:(ev:$JD.DOMElementEventMap[K]) => void, thisArg?:any, options?:AddEventListenerOptions): void
+    {
+        if (eventName === 'blur') {
+            if (!this._eventHandlers) this._eventHandlers = {};
+            $J.eventBind(this._eventHandlers, eventName, handler, thisArg);
+            return;
+        }
+
+        super.bind(eventName, handler, thisArg, options);
+    }
+    /**
+     * Unbind handler to input element event
+     */
+    public          unbind(eventName: string, handler:(ev:any) => void, thisArg?:any): void
+    {
+        if (eventName === 'blur') {
+            $J.eventUnbind(this._eventHandlers, eventName, handler, thisArg);
+            return;
+        }
+
+        super.unbind(eventName, handler, thisArg);
+    }
+
     protected   abstract    openDropdown(): void;
 
     protected               defaultPlaceHolder(value: TValue): string|undefined
@@ -482,6 +524,7 @@ export abstract class InputTextControl<TNativeValue,
             }
 
             this.onblurparse();
+            $J.eventTrigger(this._eventHandlers, 'blur', ev);
         }
     }
     protected               input_onkeypress(evt:KeyboardEvent): void
@@ -1307,6 +1350,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     private     _state:             SelectInputState;
     private     _dataset:           SelectDataSet<TNativeValue, TDatasource>|undefined;
 
+
                     constructor(value:$JT.SelectType<TNativeValue,TDatasource>, opts:ISelectInputControlOptions<TNativeValue,TDatasource>) {
         super(value, "text", "-select", opts, (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) === 0 || (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0, true);
         this.getinputelm().bind("input", this.input_textchange, this);
@@ -1545,6 +1589,8 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                     }
                 }
             }
+
+            $J.eventTrigger(this._eventHandlers, "blur", ev);
         }
     }
     protected       input_onkeydown(evt:KeyboardEvent) {

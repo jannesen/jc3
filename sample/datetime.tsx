@@ -13,5 +13,9 @@ export function main()
 
         $JD.body.appendChild(<div> {dr.getControl()} </div>);
         $JD.body.appendChild(<div> <button onclick={() => { dr.validateNow({}); }}>Validate</button></div>);
+
+        dr.control.bind('blur', () => {
+                console.log('blur');
+            });
     });
 }

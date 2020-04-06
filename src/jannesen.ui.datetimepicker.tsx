@@ -395,7 +395,7 @@ export class TimeInputDropdown extends InputDropdown<$JT.Time, $JI.Time, $JI.ITi
     }
 }
 
-export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue,
+export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue<TInput>,
                                          TInput extends $JI.InputTextControl<$JTE.IRangeValue, TValue, TInput, TOpt, void, $JTE.IRangeValue|null, TDropdown>,
                                          TOpt extends $JI.IInputControlOptions,
                                          TDropdown extends $JPOPUP.DropdownContent<$JTE.IRangeValue, TInput, void, $JTE.IRangeValue|null>>

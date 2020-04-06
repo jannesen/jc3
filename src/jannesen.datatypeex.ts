@@ -24,7 +24,7 @@ export interface IRangeAttributes extends $JT.ISimpleTypeAttributes<DateRange> {
 /**
  *!!DOC
  */
-export abstract class RangeValue extends $JT.SimpleType<IRangeValue> {
+export abstract class RangeValue<TControl extends $JT.IBaseControl> extends $JT.SimpleType<IRangeValue,TControl> {
     public static NativeType = "object";
 
     public  cnvTextToValue(text: string): IRangeValue|null {
@@ -124,7 +124,7 @@ export interface IDateRangeAttributes extends IRangeAttributes {
 /**
  *!!DOC
  */
-export class DateRange extends RangeValue {
+export class DateRange extends RangeValue<$JIE.DateRange> {
     public static Name       = "DateRange";
     public static Attributes = $J.extend<IDateRangeAttributes>({ minValue: $J.newDate(1900, 1, 1), maxValue: $J.newDate(2100, 12, 31) }, $JT.SimpleType.Attributes);
 
@@ -169,7 +169,7 @@ export interface IDateTimeRangeAttributes extends IRangeAttributes {
 /**
  *!!DOC
  */
-export class DateTimeRange extends RangeValue {
+export class DateTimeRange extends RangeValue<$JIE.DateTimeRange> {
     public static Name       = "DateTimeRange";
     public static Attributes = $J.extend<IDateTimeRangeAttributes>({ }, $JT.SimpleType.Attributes);
 

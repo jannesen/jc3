@@ -212,6 +212,9 @@ div.jannesen-input {
         @include            fa-icon();
         opacity:            .3;
         transition:         opacity ease-in-out .2s;
+        &:focus {
+            outline:        none;
+        }
         &:hover {
             opacity:            1;
         }
