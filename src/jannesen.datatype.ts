@@ -164,7 +164,7 @@ export interface IControlContainer<T extends BaseType<IBaseControl>> extends ICo
 export interface IValidateOptions
 {
     seterror?:      boolean;
-    partial?:       $JD.DOMHTMLElement;
+    itemselector?:  (item:BaseType, path:string) => boolean;
 }
 
 /**
@@ -579,6 +579,10 @@ export abstract class BaseType<TControl extends IBaseControl=IBaseControl> imple
     {
         let errors:ValidateErrors|undefined;
         let rtn = this.validateTreeWalker((item, path, result) => {
+                                                if (opts.itemselector && !opts.itemselector(item, path)) {
+                                                    return result;
+                                                }
+
                                                 let err:ValidateValueResult = null;
 
                                                 if (result === ValidateResult.OK) {
