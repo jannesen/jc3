@@ -280,13 +280,17 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
             this._setHeight(height, rowHeight);
         }
     }
-    public      setVisibleRows(n: number) {
-        if (n > this._sortedset.length) {
-            n = this._sortedset.length;
+    public      setVisibleRows(rows: number, minRows?:number) {
+        if (rows > this._sortedset.length) {
+            rows = this._sortedset.length;
         }
+        if (minRows && minRows > rows) {
+            rows = minRows;
+        }
+
         const rowheight = this._getRowHeight();
         if (rowheight) {
-            this._setHeight(this._table.select('thead')!.css('height') + rowheight * n, rowheight);
+            this._setHeight(this._table.select('thead')!.css('height') + rowheight * rows, rowheight);
         }
     }
     public      focus()
@@ -640,7 +644,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                     this._setSelected(this._selectedRow);
                 }
 
-                if (toprow > 0 && toprow >= this._scrollbar.maxValue!) {
+                if (toprow >= this._scrollbar.maxValue!) {
                     let     containerBottom = this._container.clientRect.bottom;
                     let     n = 0;
 
@@ -914,6 +918,16 @@ export class Scrollbar extends $JD.Container
             this._sliderSize = 0;
             this._slider.show(false);
         }
+
+        if (recalc) {
+            this._updBtn();
+        }
+    }
+    private     _updBtn()
+    {
+        const v = this._value;
+        this._btnup  .toggleClass("-enabled", typeof v === "number" && typeof this._minValue === 'number' && v > this._minValue);
+        this._btndown.toggleClass("-enabled", typeof v === "number" && typeof this._maxValue === 'number' && v < this._maxValue);
     }
     private     _setValue(v:number|null|undefined, reason:$JT.ChangeReason, calcSlider:boolean)
     {
@@ -928,8 +942,7 @@ export class Scrollbar extends $JD.Container
             if (calcSlider) {
                 this._calcSlider(false);
             }
-            this._btnup  .toggleClass("-enabled", typeof v === "number" && typeof this._minValue === 'number' && v > this._minValue);
-            this._btndown.toggleClass("-enabled", typeof v === "number" && typeof this._maxValue === 'number' && v < this._maxValue);
+            this._updBtn();
             this.trigger("changed", reason);
         }
     }
