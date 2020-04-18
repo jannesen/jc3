@@ -972,9 +972,14 @@ export abstract class SubmitDialog<TArgs, TRtn=void> extends $JCONTENT.DialogBas
         btnSubmit.bind('click', this.cmdSubmit, this);
 
         return  <div class="-buttons">
+                    { this.formFooterExtButtons() }
                     { btnCancel }
                     { btnSubmit   }
                 </div>;
+    }
+    protected               formFooterExtButtons(): $JD.DOMHTMLElement[]|undefined
+    {
+        return undefined;
     }
     protected               cmdCancel()
     {

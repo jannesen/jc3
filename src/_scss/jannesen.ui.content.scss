@@ -256,6 +256,9 @@ div.jannesen-ui-content-dialog {
                 white-space:    nowrap;
                 vertical-align: middle;
 
+                &.-left {
+                    float:  left;
+                }
                 &:not(:first-child) {
                     margin-left: 1em;
                 }
