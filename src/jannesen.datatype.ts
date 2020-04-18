@@ -72,20 +72,12 @@ export type RecordSet<TRec extends IFieldDef> = Set<Record<TRec>>;
 /**
  * Assign type
  */
-type NativeTypeOf      <T extends SimpleType<any>> = T extends SimpleType<infer V> ? V : unknown;
-type AssignSympleType  <T extends SimpleType<any>> = T|NativeTypeOf<T>|null;
-type AssignRecord      <T extends Record<any>>     = T extends Record<infer V> ? T|AssignRecordMapper<V>|null : unknown;
-type AssignRecordMapper<T extends IFieldDef>       = { [K in keyof T]?: AssignType<InstanceType<T[K]>> };
-type AssignSet         <T extends Set<any>>        = T extends Set<infer V> ? T|AssignTypeSet<V>[]|null : unknown;
-
-export type AssignType <T> = T extends SimpleType<any> ? AssignSympleType<T>
-                           : T extends Record<any> ? AssignRecord<T>
-                           : T extends Set<any> ? AssignSet<T>
-                           : unknown;
-
-export type AssignTypeSet<T> = T extends SimpleType<any> ? AssignSympleType<T>
-                             : T extends Record<any> ? AssignRecord<T>
-                             : unknown;
+type AssignRecordMapper<T extends IFieldDef> = { [K in keyof T]?: AssignType<InstanceType<T[K]>> };
+interface AssignSetArray<V> extends Array<AssignType<V>> {}
+export type AssignType<T> = T extends SimpleType<infer V> ? T|V|null
+                          : T extends Record<infer V> ? T|AssignRecordMapper<V>|null
+                          : T extends Set<infer V> ? T|AssignSetArray<V>|null
+                          : unknown;
 
 //===================================== Interfaces ================================================
 /**
