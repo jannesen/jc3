@@ -58,7 +58,7 @@ export class UrlArgSet implements $JCONTENT.IUrlArgsSet
         this._curr = curr;
     }
 
-    public static   RecordsetMap<T extends $JT.Record<$JT.IFieldDef>>(recordset: $JT.Set<T>|T[], currecord: T, mapper:(c:T)=>$J.IUrlArgsColl)
+    public static   RecordsetMap<T extends $JT.Record<$JT.IFieldDef>>(recordset: $JT.Set<T>, currecord: T, mapper:(c:T)=>$J.IUrlArgsColl)
     {
         let set:$J.IUrlArgsColl[]  = [];
         let curr:number|null       = null;
@@ -453,16 +453,16 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
             }
         }
     }
-    protected               onopen(args:$J.IUrlArgs, state:ISearchFormState<any>|null|undefined, ct:$JA.Context):$JA.Task<void>|void
+    protected               onopen(args:$J.IUrlArgs, state:ISearchFormState<TCall>|null|undefined, ct:$JA.Context):$JA.Task<void>|void
     {
         this.showDataPopup();
         if (state) {
             if (this._formargs as unknown instanceof $JT.Record) {
-                (this._formargs as $JT.Record<$JT.IFieldDef>).parseUrlArgs(state.callargs);
+                (this._formargs as $JT.Record<$JT.IFieldDef>).assign(state.callargs);
             }
 
             this.clearResult();
-            const datatable = new $JDATATABLE.DataTable<$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>>(state.resultdata, this.dataTableOpts());
+            const datatable = new $JDATATABLE.DataTable<$JT.RecordOfSet<$JA.AjaxCallResponseType<TCall>>>(state.resultdata as any/*ANY typescript limitation*/, this.dataTableOpts());
             const container = <div class="-result">
                                     { datatable }
                               </div>;
