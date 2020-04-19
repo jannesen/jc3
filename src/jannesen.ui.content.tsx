@@ -477,6 +477,8 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
     protected           _loader:            TLoader|null;
     protected           _contentNameClass!: string|(new (context:$JA.Context)=>this);
     protected           _args:              TArgs|undefined;
+    protected           _content_id?:       string;
+
     /*@internal*/       _scrollbox:         $JD.DOMHTMLElement;
     /*@internal*/       _content:           $JD.DOMHTMLElement;
     /*@internal*/       _shownow?:          boolean;
@@ -560,6 +562,10 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
     public              executeDisplayError(e:string|Error|Error[]): $JA.Task<void>
     {
         return this.execute((ct) => DialogError.show(e, ct));
+    }
+    public              getContentID()
+    {
+        return this._content_id || (this._content_id = Math.floor(Math.random()*0x10000000).toString(16));
     }
 
     public              body_onkeydown(ev: KeyboardEvent) {
@@ -749,7 +755,6 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
     {
         return this._size;
     }
-
 
     public              constructor(context:$JA.Context)
     {
