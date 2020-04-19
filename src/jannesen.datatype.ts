@@ -3053,11 +3053,11 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
     public select(filter: (item:TSet)=>boolean): Set<TSet> {
         let rtn = new (this.constructor as any)();
 
-        this.forEach((item) => {
-                            if (filter(item)) {
-                                rtn._items.push(item);
-                            }
-                        });
+        for (const item of this._items) {
+            if (filter(item)) {
+                rtn._items.push(item);
+            }
+        }
 
         return rtn;
     }
