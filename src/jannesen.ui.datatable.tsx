@@ -22,6 +22,7 @@ export interface IDataTableOpts<TRec extends DataTableSourceType>
     columns:        IDataTableOptsColumn<TRec>[];
     buttons?:       IDataTableOptsButton<TRec>[];
     sort?:          (a:TRec, b:TRec) => number;
+    track_set?:     boolean;
 }
 
 export interface IDataTableOptsColumn<TRec extends DataTableSourceType>
@@ -83,6 +84,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
     private     _delay_timeout: number|undefined;
     private     _mouseenabled:  boolean;
     private     _mousemovecnt:  number|null;
+    private     _refresh_cb?:   () => void;
 
     public get  recordset()
     {
@@ -148,6 +150,11 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                             </div>;
         if (opts.containerClass) {
             this._container.addClass(opts.containerClass);
+        }
+
+        if (opts.track_set) {
+            this._container.bind('AddedToDocument',     () => this._track_set_bind());
+            this._container.bind('RemovedFromDocument', () => this._track_set_unbind());
         }
 
         let colgroup = <colgroup/>;
@@ -303,8 +310,14 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
     }
     public      refreshData()
     {
-        this._sortedset = this._sort();
-        this._filterset(true);
+        if (!this._refresh_cb) {
+            this._refresh_cb    = () => {
+                                     this._sortedset = this._sort();
+                                     this._filterset(true);
+                                  };
+        }
+
+        $J.runAsync(this._refresh_cb, false);
     }
     public      refreshRowClass()
     {
@@ -737,7 +750,20 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
             return rowHeight;
         }
     }
-
+    private     _track_set_bind()
+    {
+        if (this._sourceset instanceof $JT.Set) {
+            this._sourceset.bind('added',   this.refreshData, this);
+            this._sourceset.bind('removed', this.refreshData, this);
+        }
+    }
+    private     _track_set_unbind()
+    {
+        if (this._sourceset instanceof $JT.Set) {
+            this._sourceset.unbind('added',   this.refreshData, this);
+            this._sourceset.unbind('removed', this.refreshData, this);
+        }
+    }
     private static  _toText<TRecord extends DataTableSourceType>(rec:TRecord, copts:IDataTableOptsColumn<TRecord>): string|undefined
     {
         if (typeof copts.data === "string") {
