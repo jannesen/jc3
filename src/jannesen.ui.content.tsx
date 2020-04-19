@@ -510,10 +510,12 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
     // #region mixin $J.EventHandling
     public              _eventHandlers!:    $J.IEventHandlerCollection;
     public              bind(eventName: string,            handler: (ev:any)=>void,                 thisArg?:any): void;
+    public              bind(eventName: "destroy",         handler: ()=>void,                       thisArg?:any): void;
     public              bind(eventName: "keypress-cancel", handler: (event:KeyboardEvent)=>void,    thisArg?:any): void;
     public              bind(eventName: "keypress-ok",     handler: (event:KeyboardEvent)=>void,    thisArg?:any): void;
     public              bind(eventName: string,            handler: (ev:any)=>void,                 thisArg?:any): void         { throw new $J.InvalidStateError("Mixin not applied."); }
     public              unbind(eventName: string, handler: (ev?:any)=>void, thisArg?:any): void                                 { throw new $J.InvalidStateError("Mixin not applied."); }
+    public              trigger(eventName: "destroy"                                  ): void;
     public              trigger(eventName: "keypress-cancel", data:KeyboardEvent      ): void;
     public              trigger(eventName: "keypress-ok",     data:KeyboardEvent      ): void;
     public              trigger(eventName: string,            data?: any              ): void                                   { throw new $J.InvalidStateError("Mixin not applied."); }
@@ -594,7 +596,14 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
     /*@internal*/       _trigger_ondestroy()
     {
         this._context.stop();
-        this.ondestroy();
+        try {
+            this.ondestroy();
+        }
+        catch (e) {
+            $J.globalError("ondestroy failed.", e);
+        }
+
+        this.trigger('destroy');
     }
     /*@internal*/ abstract _openContent(args:TArgs, formState:IFormState|null|undefined, ct:$JA.Context):$JA.Task<void>|void;
 }
