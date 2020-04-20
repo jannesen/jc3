@@ -876,7 +876,7 @@ export class Boolean extends SimpleControl<$JT.Boolean, IBooleanControlOptions>
             button = container;
         }
 
-        button.attr("tabIndex",   0).addClass("-button");
+        button.attr("tabIndex",   opts.tabIndex || 0).addClass("-button");
         button.bind("keypress",   this._onKeyPress, this);
         container.bind("click",   this._onClick,    this);
 

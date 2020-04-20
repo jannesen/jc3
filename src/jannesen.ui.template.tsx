@@ -808,11 +808,11 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
         let btns =  <div class="-buttons"/>;
 
         if (this._allowDelete() && this.allowDelete()) {
-            btns.appendChild(<button class={ $JCONTENT.std_button_remove.class } onclick={() => this.cmdDelete() }>{ $JCONTENT.std_button_remove.text }</button>);
+            btns.appendChild(<button class={ $JCONTENT.std_button_remove.class } tabIndex={100} onclick={() => this.cmdDelete() }>{ $JCONTENT.std_button_remove.text }</button>);
         }
 
-        btns.appendChild(<button class={ $JCONTENT.std_button_cancel.class } onclick={() => this.cmdCancel() }>{ $JCONTENT.std_button_cancel.text }</button>);
-        btns.appendChild(<button class={ $JCONTENT.std_button_save.class   } onclick={() => this.cmdSave()   }>{ $JCONTENT.std_button_save.text   }</button>);
+        btns.appendChild(<button class={ $JCONTENT.std_button_cancel.class } tabIndex={100} onclick={() => this.cmdCancel() }>{ $JCONTENT.std_button_cancel.text }</button>);
+        btns.appendChild(<button class={ $JCONTENT.std_button_save.class   } tabIndex={100} onclick={() => this.cmdSave()   }>{ $JCONTENT.std_button_save.text   }</button>);
 
         return btns;
     }
