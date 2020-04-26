@@ -739,6 +739,8 @@ export abstract class BaseType<TControl extends IBaseControl=IBaseControl> imple
         return 0;
     }
 
+    public abstract isEqual(o:BaseType): boolean;
+
     /**
      *!!DOC
      */
@@ -1094,6 +1096,12 @@ export abstract class SimpleType<TNative,TControl extends IBaseControl=IBaseCont
             return 1;
         return 0;
     }
+
+    public isEqual(o:BaseType): boolean
+    {
+        return o instanceof SimpleType && this.isTypeOf(o) && this.value === o.value;
+    }
+
 
     /**
      *!!DOC
@@ -2037,12 +2045,19 @@ export class DateTime extends SimpleNumberType<$JI.DateTime>
         return (this.TimeZone || this.DisplayUtc) ? true : false;
     }
     /**
-     *!!DOC
+     * return now according to te timezone.
      */
     public Now(): number
     {
         let     d = (new $global.Date());
         return this.ValueIsUtc ? d.getTime() : d.getTime() - (d.getTimezoneOffset() * 60 * 1000);
+    }
+    /**
+     * Set the value to now
+     */
+    public SetNow()
+    {
+        this.value = this.Now();
     }
     /**
      * Return (local) date.
@@ -2909,6 +2924,28 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
         return 0;
     }
 
+    public isEqual(o:BaseType): boolean
+    {
+        if (o instanceof Record) {
+            if ($J.isEqual(this.FieldNames, o.FieldNames)) {
+                if (this._fields && o._fields) {
+                    for (const name of this.FieldNames) {
+                        if (!this._fields[name].isEqual(o._fields[name])) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                else {
+                    return (!this._fields && !o._fields);
+                }
+            }
+        }
+
+        return false;
+    }
+
+
     /**
      * register a record (async) validator
      */
@@ -3223,6 +3260,22 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
      */
     public toArray():TSet[] {
         return this._items.slice();
+    }
+
+    public isEqual(o:BaseType): boolean
+    {
+        if (o instanceof Set) {
+            if (this._items.length === o._items.length) {
+                for (let i = 0 ; i < this._items.length ; ++i) {
+                    if (!this._items[i].isEqual(o._items[i])) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

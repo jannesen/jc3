@@ -395,9 +395,10 @@ export function isEqual(a1: any, a2: any) {
                         }
                     }
                 }
-            }
 
-            if (l instanceof Array && r instanceof Array) {
+                return true;
+            }
+            else if (l instanceof Array && r instanceof Array) {
                 if (l.length !== r.length) {
                     return false;
                 }
@@ -407,9 +408,14 @@ export function isEqual(a1: any, a2: any) {
                         return false;
                     }
                 }
+
+                return true;
+            }
+            else if (typeof l.isEqual === 'function') {
+                return l.isEqual(r);
             }
 
-            return true;
+            return false;
         }
 
         return false;
