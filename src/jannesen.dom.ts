@@ -1415,6 +1415,11 @@ export class DOMNodeList
     public  show(visible:boolean): void {
         this.forEach((n) => n.show(visible));
     }
+
+    public [Symbol.iterator]()
+    {
+        return this.getElements().values();
+    }
 }
 
 //-------------------------------------------------------------------------------------------------
