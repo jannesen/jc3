@@ -196,7 +196,7 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record<
  */
 export abstract class SimpleForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record<$JT.IFieldDef>|void,void,$JT.Record<$JT.IFieldDef>|$JT.RecordSet<$JT.IFieldDef>>> extends BaseForm<TCall, void>
 {
-    private                 _resultdata:            $JA.AjaxCallResponseType<TCall>|undefined;
+    protected               _resultdata:            $JA.AjaxCallResponseType<TCall>|undefined;
 
     protected get           resultdata() {
         if (this._resultdata === undefined) {
