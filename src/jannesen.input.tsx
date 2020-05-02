@@ -1345,9 +1345,10 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
 {
     private     _activetask:        $JA.Task<unknown>|undefined;
     private     _lookuptask:        $JA.Task<unknown>|undefined;
-    private     _inputContext:      SelectInputContext|undefined;
     private     _inputTimer:        number|undefined;
     private     _state:             SelectInputState;
+    private     _stateContext:      SelectInputContext|undefined;
+    private     _stateText:         string|undefined;
     private     _dataset:           SelectDataSet<TNativeValue, TDatasource>|undefined;
 
 
@@ -1355,9 +1356,10 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
         super(value, "text", "-select", opts, (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) === 0 || (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0, true);
         this.getinputelm().bind("input", this.input_textchange, this);
         this._activetask   = undefined;
-        this._inputContext = undefined;
         this._inputTimer   = undefined;
         this._state        = SelectInputState.ValueSetByCode;
+        this._stateContext = undefined;
+        this._stateText    = undefined;
         this._dataset      = undefined;
     }
 
@@ -1373,7 +1375,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
      */
     public          setContext()
     {
-        this._inputContext = (typeof this._opts.get_context === "function") ? this._opts.get_context(this) : null;
+        this._stateContext = (typeof this._opts.get_context === "function") ? this._opts.get_context(this) : null;
     }
     /**
      * Inform the input that the input context is changed.
@@ -1386,7 +1388,11 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
             if (this._state !== SelectInputState.ValueSetByCode || (this._value.internalvalue === null && setOnlyOne)) {
                 const text = this._input.prop("value") as string;
                 if (text !== '' || setOnlyOne) {
-                    this._findContextChanged(text, this._getContext(), setOnlyOne);
+                    const inputContext = this._getContext();
+
+                    if (typeof inputContext === 'object' && !$J.isEqual(this._stateContext, inputContext)) {
+                        this._findContextChanged(text, inputContext, setOnlyOne);
+                    }
                 }
             }
         }
@@ -1432,12 +1438,14 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
         }
 
         if (reason !== $JT.ChangeReason.UI) {
-            this._inputContext = undefined;
             this._state = SelectInputState.ValueSetByCode;
+            this._stateContext = undefined;
+            this._stateText = undefined;
             this.closeDropdown(true);
         }
         else {
             this._state = SelectInputState.ValueSetByUI;
+            this._stateText = undefined;
         }
 
         this.setError(null);
@@ -1463,12 +1471,16 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
 
             if (this._state !== SelectInputState.ValueSetByCode && text !== '') {
                 const inputContext = this._getContext();
-                const t = this._findContextChanged(text, inputContext, false);
-                if (t) {
-                    return t;
+                if (typeof inputContext === 'object' &&
+                    !(this._state === SelectInputState.ValueSetByUI && $J.isEqual(this._stateContext, inputContext)) &&
+                    !(this._state === SelectInputState.FindFailed   && $J.isEqual(this._stateContext, inputContext) && this._stateText === text)) {
+                    const t = this._findContextChanged(text, inputContext, false);
+                    if (t && t.isPending) {
+                        return t;
+                    }
                 }
 
-                if (!(this._state === SelectInputState.ValueSetByUI && $J.isEqual(this._inputContext, inputContext))) {
+                if (!(this._state === SelectInputState.ValueSetByUI && $J.isEqual(this._stateContext, inputContext))) {
                     throw new $J.FormatError($JL.input_incomplete);
                 }
             }
@@ -1567,24 +1579,26 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                             dataset = this._getDataset(this._getContext());
                         }
 
-                        if (dataset &&
-                            (this._state === SelectInputState.InputChanged || !$J.isEqual(this._inputContext, dataset!.InputContext))) {
+                        if (dataset && (this._state === SelectInputState.InputChanged || !$J.isEqual(this._stateContext, dataset!.InputContext))) {
                             this._state = SelectInputState.FindActive;
+                            this._stateText = undefined;
                             this._runtask(dataset.FetchByText(text),
                                           (result) => {
                                               if (result) {
                                                   this._setValueUI(result, dataset);
                                               }
                                               else {
-                                                  this._findFailed($JL.input_incomplete, dataset);
+                                                  this._findFailed($JL.input_incomplete, dataset!.InputContext, text);
                                               }
                                           },
                                           (err) => {
-                                              this._findFailed(err, dataset);
+                                              this._findFailed(err, dataset!.InputContext, text);
                                           });
                         }
                         else {
-                            this._findFailed($JL.input_incomplete);
+                            if (this._state !== SelectInputState.FindFailed) {
+                                this._findFailed($JL.input_incomplete, dataset && dataset!.InputContext, text);
+                            }
                         }
                     }
                 }
@@ -1702,23 +1716,21 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     }
     private         _findContextChanged(text:string, inputContext:SelectInputContext|undefined, setOnlyOne:boolean)
     {
-        if (typeof inputContext === 'object' && !$J.isEqual(this._inputContext, inputContext)) {
-            const dataset = this._getDataset(inputContext);
-            if (dataset) {
-                this._state = SelectInputState.FindActive;
-                return this._runtask(dataset.FetchContextChange(text, setOnlyOne),
-                                     (result) => {
-                                         if (result) {
-                                             this._setValueUI(result, dataset);
-                                         }
-                                         else {
-                                             this._findFailed(text !== '' ? $JL.input_incomplete : null, dataset);
-                                         }
-                                     },
-                                     (err) => {
-                                         this._findFailed(err, dataset);
-                                     });
-            }
+        const dataset = this._getDataset(inputContext);
+        if (dataset) {
+            this._state = SelectInputState.FindActive;
+            return this._runtask(dataset.FetchContextChange(text, setOnlyOne),
+                                    (result) => {
+                                        if (result) {
+                                            this._setValueUI(result, dataset);
+                                        }
+                                        else {
+                                            this._findFailed(text !== '' ? $JL.input_incomplete : null, inputContext, text);
+                                        }
+                                    },
+                                    (err) => {
+                                        this._findFailed(err, inputContext, text);
+                                    });
         }
     }
     private         _runtask<T>(task:$JA.Task<T>, onfulfilled:(value:T)=>void, onrejected?: (err:Error)=>void): $JA.Task<T>
@@ -1771,20 +1783,21 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                 datasource.addrecord(rec);
             }
 
-            this._inputContext = dataset.InputContext;
+            this._stateContext = dataset.InputContext;
         }
         else {
-            this._inputContext = undefined;
+            this._stateContext = undefined;
         }
 
         if (this._value) {
             this._value.setValue(rec, $JT.ChangeReason.UI);
         }
     }
-    private         _findFailed(err:Error|string|null, dataset?:SelectDataSet<TNativeValue, TDatasource>|undefined)
+    private         _findFailed(err:Error|string|null, context:SelectInputContext|undefined, text:string)
     {
-        this._inputContext = dataset ? dataset.InputContext : undefined;
         this._state = SelectInputState.FindFailed;
+        this._stateContext = context;
+        this._stateText    = text;
         this.setError($JT.stringErrorToMessage(err));
     }
 }
