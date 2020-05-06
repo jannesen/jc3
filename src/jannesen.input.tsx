@@ -1463,11 +1463,13 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     public          preValidate(): $JA.Task<unknown>|null
     {
         if (this._value) {
+            this.closeDropdown(true);
+
             if (this._activetask) {
                 return this._activetask;
             }
 
-            const text = this._input.prop("value") as string;
+            let text = this._input.prop("value") as string;
 
             if (this._state !== SelectInputState.ValueSetByCode && text !== '') {
                 const inputContext = this._getContext();
@@ -1475,8 +1477,13 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                     !(this._state === SelectInputState.ValueSetByUI && $J.isEqual(this._stateContext, inputContext)) &&
                     !(this._state === SelectInputState.FindFailed   && $J.isEqual(this._stateContext, inputContext) && this._stateText === text)) {
                     const t = this._findContextChanged(text, inputContext, false);
-                    if (t && t.isPending) {
-                        return t;
+                    if (t) {
+                        if (t.isPending) {
+                            return t;
+                        }
+                        else {
+                            text = this._input.prop("value") as string;
+                        }
                     }
                 }
 
