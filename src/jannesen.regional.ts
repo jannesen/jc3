@@ -5,7 +5,7 @@ import * as $JL from "jc3/jannesen.language";
 export const decimalPoint        = ".";
 export const firstDay            = 1;
 export const regexDate           = /^([0-3]?[0-9][0-2][0-9])$|^([0-9]{1,4})[\-\/. ]([01]?[0-9]|[A-Za-z]+)(?:[\-\/. ]([0-9]{1,4}))?$/;
-export const regexTime           = /^([0-2]?[0-9]{3})$|^([0-2]?[0-9]):([0-5][0-9])(?::([0-5][0-9])(?:\.([0-9]{1,3}))?)?$/;
+export const regexTime           = /^([0-2]?[0-9]{3})$|^([0-2]?[0-9])[:.]([0-5][0-9])(?:[:.]([0-5][0-9])(?:\.([0-9]{1,3}))?)?$/;
 export const regexTimeMS         = /^([0-9]+):([0-5][0-9])(?:\.([0-9]{1,3}))?$/;
 
 export function timePlaceHolder(format: string|$J.TimeFormat): string|undefined
@@ -165,7 +165,7 @@ export function stringToTime(text:string, timeformat:$J.TimeFormat):number {
         if (m = regexTime.exec(text)) {
             if (typeof m[1] === "string") {
                 return $J.parseIntExact(m[1].substr(0, m[1].length-2)) * 3600000 +
-                        $J.parseIntExact(m[1].substr(m[1].length-2, 2))   * 60000;
+                       $J.parseIntExact(m[1].substr(m[1].length-2, 2))   * 60000;
             }
             else if (typeof m[2] === "string" && typeof m[3] === "string") {
                 return $J.parseIntExact(m[2]!) * 3600000 +

@@ -6,7 +6,7 @@ import * as $JL from "jc3/jannesen.language";
 export const decimalPoint        = ",";
 export const firstDay            = 1;
 export const regexDate           = /^([0-3]?[0-9][0-2][0-9])$|^([0-9]{1,4})[\-\/. ]([01]?[0-9]|[A-Za-z]+)(?:[\-\/. ]([0-9]{1,4}))?$/;
-export const regexTime           = /^([0-2]?[0-9]{3})$|^([0-2]?[0-9]):([0-5][0-9])(?::([0-5][0-9])(?:\.([0-9]{1,3}))?)?$/;
+export const regexTime           = /^([0-2]?[0-9]{3})$|^([0-2]?[0-9])[:.]([0-5][0-9])(?:[:.]([0-5][0-9])(?:\.([0-9]{1,3}))?)?$/;
 export const regexTimeMS         = /^([0-9]+):([0-5][0-9])(?:\.([0-9]{1,3}))?$/;
 
 export function timePlaceHolder(format: string|$J.TimeFormat): string|undefined
