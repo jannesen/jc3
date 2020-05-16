@@ -4,8 +4,8 @@
     <NBuildProjectBuild Condition="'$(NBuildProjectBuild)'==''">$(MSBuildExtensionsPath)\Jannesen.NBuildProject\</NBuildProjectBuild>
     <ProjectGuid>c28a738b-772e-48d1-ae85-f2ebbce41881</ProjectGuid>
     <BuildJSDirectory>..\BuildJS</BuildJSDirectory>
-    <TypeScriptToolsVersion>3.4</TypeScriptToolsVersion>
   </PropertyGroup>
+  <Import Project="..\TypeScript\TypeScript.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" Label="Configuration">
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'" Label="Configuration">
