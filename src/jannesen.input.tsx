@@ -1611,6 +1611,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                 }
             }
 
+            this._dataset = undefined;
             $J.eventTrigger(this._eventHandlers, "blur", ev);
         }
     }
