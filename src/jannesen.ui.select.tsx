@@ -5,6 +5,7 @@ import * as $JA      from "jc3/jannesen.async";
 import * as $JD      from "jc3/jannesen.dom";
 import * as $JT      from "jc3/jannesen.datatype";
 import * as $JI      from "jc3/jannesen.input";
+import * as $JSTRING from "jc3/jannesen.string";
 import * as $JPOPUP  from "jc3/jannesen.ui.popup";
 import * as $JL      from "jc3/jannesen.language";
 
@@ -14,18 +15,22 @@ export class ValuesDropdown<TNativeValue,
                             TOpts extends $JI.IInputControlDropdownValuesOptions<TNativeValue>>
                         extends $JPOPUP.TableDropdown<TNativeValue, TInput, void, TNativeValue|null>
 {
-    private     _values?:   TNativeValue[];
+    private     _inputelm?:     $JD.DOMHTMLElement;
+    private     _valueList?:    $JI.DropdownValues<TNativeValue>[]|null;
+    private     _rowValues?:    TNativeValue[];
 
     public      OnLoad(data:void, ct:$JA.Context): $JA.Task<void>|void
     {
-        const input           = this.control;
+        const input = this.control;
 
         if (input && input.value) {
+            this._inputelm = input.getinputelm();
+
             try {
                 const valueList = input.opts.dropdown_values!();
 
                 if (valueList instanceof $JA.Task) {
-                    return valueList.then((v) => { this._fillValues(v); })
+                    return valueList.then((v) => { this._init(v); })
                                     .catch((e) => {
                                          if (!(e instanceof $JA.OperationCanceledError)) {
                                             this.setMessage(e);
@@ -33,7 +38,7 @@ export class ValuesDropdown<TNativeValue,
                                     });
                  }
                 else {
-                    this._fillValues(valueList);
+                    this._init(valueList);
                 }
             }
             catch (e) {
@@ -41,35 +46,57 @@ export class ValuesDropdown<TNativeValue,
             }
         }
     }
+    public      OnRemove()
+    {
+        if (this._inputelm) {
+            this._inputelm.unbind('input', this._fillBody, this);
+            this._inputelm = undefined;
+        }
+    }
 
     protected   clickrow(row:number|undefined, ev:Event|undefined)
     {
-        this.Close((this._values && typeof row === 'number' ? this._values[row] : undefined), ev);
+        this.Close((this._rowValues && typeof row === 'number' ? this._rowValues[row] : undefined), ev);
     }
 
-    private     _fillValues(valueList: $JI.DropdownValues<TNativeValue>[]|null|undefined)
+    private     _init(valueList:$JI.DropdownValues<TNativeValue>[]|null|undefined)
     {
-
+        const input = this.control;
+        if (input) {
+            this._inputelm = input.getinputelm();
+            this._valueList = valueList;
+            this._fillBody();
+            this._inputelm.bind('input', this._fillBody, this);
+        }
+    }
+    private     _fillBody()
+    {
         const input = this.control;
         const value = input && input.value;
 
-        if (value && valueList) {
+        if (value && this._valueList && this._inputelm) {
             const values = [] as TNativeValue[];
             const lines  = [] as string[];
+            const keys   = $JI.normalizeSearchKeys($JSTRING.removeDiacritics(this._inputelm.prop('value')).toUpperCase().split(' '));
             const format = value.getAttr("format");
 
-            for (const v of valueList) {
+            for (const v of this._valueList) {
                 if (v instanceof Object) {
-                    values.push(v.value);
-                    lines.push(v.text);
+                    if (this._containsKey(keys, v.text)) {
+                        values.push(v.value);
+                        lines.push(v.text);
+                    }
                 }
                 else {
-                    values.push(v);
-                    lines.push(value.cnvValueToText(v, format));
+                    const text = value.cnvValueToText(v, format);
+                    if (this._containsKey(keys, text)) {
+                        values.push(v);
+                        lines.push(text);
+                    }
                 }
             }
 
-            this._values = values;
+            this._rowValues = values;
             if (lines.length > 0) {
                 this.setTBody(lines.map((l) => <tr><td>{ l }</td></tr>));
                 return;
@@ -77,6 +104,15 @@ export class ValuesDropdown<TNativeValue,
         }
 
         this.setMessage($JL.no_result, true);
+    }
+    private     _containsKey(keys: string[], text: string)
+    {
+        for (const key of keys) {
+            if (!$JI.textContainsKey(text, key)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 

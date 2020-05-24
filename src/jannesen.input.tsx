@@ -1875,7 +1875,7 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
             }
 
             if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
-                let searchkeys = SelectDataSet.normalizeSearchKeys(this._datasource.normalize_searchtext(text));
+                let searchkeys = normalizeSearchKeys(this._datasource.normalize_searchtext(text));
 
                 if (searchkeys instanceof Array) {
                     searchkeys   = this._datasource.filter_searchtext(searchkeys);
@@ -1955,7 +1955,7 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
         if (this._currectfetch && this._currectfetch.task.isFulfilled) {
             if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
                 const keywords = this._datasource.normalize_searchtext($JSTRING.removeDiacritics(text.trim()).toUpperCase());
-                return SelectDataSet.hassearchdata(this._currectfetch.searchkeys, SelectDataSet.normalizeSearchKeys(keywords));
+                return SelectDataSet.hassearchdata(this._currectfetch.searchkeys, normalizeSearchKeys(keywords));
             }
             else {
                 return true;
@@ -2002,7 +2002,7 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
             return data;
         }
 
-        const keys = filterText ? SelectDataSet.normalizeSearchKeys(filterText.split(' ')) : undefined;
+        const keys = filterText ? normalizeSearchKeys(filterText.split(' ')) : undefined;
 
         let rtn = [] as $JT.TDatasource_Record<TDatasource>[];
 
@@ -2026,8 +2026,8 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
     private     _recFilter(rec:$JT.TDatasource_Record<TDatasource>, keys:string[])
     {
         for(let key of keys) {
-            if (!(this._columns && this._columns.some((col) => SelectDataSet.containskey(SelectDataSet.columnText(rec, col.fieldname), key))) &&
-                !SelectDataSet.containskey(this._value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec), key)) {
+            if (!(this._columns && this._columns.some((col) => textContainsKey(SelectDataSet.columnText(rec, col.fieldname), key))) &&
+                !textContainsKey(this._value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec), key)) {
                 return false;
             }
         }
@@ -2054,15 +2054,6 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
             }
         }
     }
-    private static  normalizeSearchKeys(keys:string[]):string[];
-    private static  normalizeSearchKeys(keys:string|string[]):string|string[];
-    private static  normalizeSearchKeys(keys:string|string[]) {
-        if (typeof keys === 'string') {
-            return keys;
-        }
-
-        return keys.filter((k) => k.length > 0 && !keys.some((r) => r.length > k.length && r.startsWith(k)));
-    }
     private static  hassearchdata(fd_searchtext:string|string[]|undefined, searchtext:string|string[])
     {
         if (typeof searchtext === 'string' && typeof fd_searchtext === 'string') {
@@ -2080,27 +2071,6 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
             return true;
         }
 
-        return false;
-    }
-    private static  containskey(text:string|null, key:string)
-    {
-        if (typeof text === 'string') {
-            text = $JSTRING.removeDiacritics(text).toUpperCase();
-
-            let p = text.indexOf(key);
-            if (p >= 0) {
-                if (p === 0) {
-                    return true;
-                }
-
-                if (/[A-Z0-9]/.test(key.charAt(0))) {
-                    return /[^A-Z0-9]/.test(text.charAt(p-1));
-                }
-                else {
-                    return true;
-                }
-            }
-        }
         return false;
     }
 }
@@ -2396,6 +2366,41 @@ export abstract class SetItem<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleT
 
         return false;
     }
+}
+
+
+//=======
+export function normalizeSearchKeys(keys:string[]):string[];
+export function normalizeSearchKeys(keys:string|string[]):string|string[];
+export function normalizeSearchKeys(keys:string|string[])
+{
+    if (typeof keys === 'string') {
+        return keys;
+    }
+
+    return keys.filter((k) => k.length > 0 && !keys.some((r) => r.length > k.length && r.startsWith(k)));
+}
+
+export function textContainsKey(text:string|null, key:string)
+{
+    if (typeof text === 'string') {
+        text = $JSTRING.removeDiacritics(text).toUpperCase();
+
+        let p = text.indexOf(key);
+        if (p >= 0) {
+            if (p === 0) {
+                return true;
+            }
+
+            if (/[A-Z0-9]/.test(key.charAt(0))) {
+                return /[^A-Z0-9]/.test(text.charAt(p-1));
+            }
+            else {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 //===================================== Helpers ===================================================
