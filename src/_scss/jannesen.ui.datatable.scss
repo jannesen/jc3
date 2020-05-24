@@ -12,8 +12,9 @@ div.jannesen-datatable {
     user-select:        none;
 
     >div.-table {
-        width:      calc(100% - 16px);
-        overflow:   hidden;
+        width:          calc(100% - 16px);
+        overflow:       hidden;
+        user-select:    text;
 
         > table {
             box-sizing:     border-box;

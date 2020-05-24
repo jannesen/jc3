@@ -288,4 +288,5 @@ span.jannesen-ui-output {
     width:              100%;
     border:             1px solid $jc-input-border-color;
     border-radius:      $jc-input-border-radius;
+    user-select:        text;
 }
