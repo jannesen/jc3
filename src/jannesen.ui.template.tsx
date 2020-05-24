@@ -885,6 +885,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
 
         return this.validateAsync(context)
                    .then(() => {
+                             this.onSaveAfterValidated();
                              let opts = {
                                              callargs: this.callargs,
                                              data:     this.data
@@ -897,6 +898,9 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
                              return $JA.Ajax(this.interfaceSave, opts, context)
                                        .then((r) => this.onSaved(r));
                          });
+    }
+    protected               onSaveAfterValidated()
+    {
     }
     protected               onSaved(r:$JA.AjaxCallResponseType<TCall>): TRtn|string|null
     {
