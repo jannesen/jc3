@@ -24,7 +24,6 @@ export interface IControlOptions
     disabled?:  boolean;
 }
 
-
 //===================================== SimpleControl =============================================
 /**
  * !!DOC
@@ -225,6 +224,11 @@ export interface IInputControlOptions extends IControlOptions
     'class'?:       string;
 }
 
+export const enum DropdownFocus {
+    No          = 0,
+    Yes         = 1,
+    Mandatory   = 2
+}
 
 /**
  * !!DOC
@@ -388,7 +392,7 @@ export abstract class InputTextControl<TNativeValue,
     /**
      * Bind handler to input element event
      */
-    public          bind<K extends keyof $JD.DOMElementEventMap>(eventName: K, handler:(ev:$JD.DOMElementEventMap[K]) => void, thisArg?:any, options?:AddEventListenerOptions): void
+    public                  bind<K extends keyof $JD.DOMElementEventMap>(eventName: K, handler:(ev:$JD.DOMElementEventMap[K]) => void, thisArg?:any, options?:AddEventListenerOptions): void
     {
         if (eventName === 'blur') {
             if (!this._eventHandlers) this._eventHandlers = {};
@@ -401,7 +405,7 @@ export abstract class InputTextControl<TNativeValue,
     /**
      * Unbind handler to input element event
      */
-    public          unbind(eventName: string, handler:(ev:any) => void, thisArg?:any): void
+    public                  unbind(eventName: string, handler:(ev:any) => void, thisArg?:any): void
     {
         if (eventName === 'blur') {
             $J.eventUnbind(this._eventHandlers, eventName, handler, thisArg);
@@ -433,11 +437,11 @@ export abstract class InputTextControl<TNativeValue,
             elm.selectionEnd   = elm.value.length;
         }
     }
-    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TInput, TDropdownData, TDropdownRtn, TDropdown>, className:string, focus:boolean, calldata:TDropdownData, onready?:(content:TDropdown)=>void)
+    protected               getDropdown(dropdownClass: string|$JPOPUP.IDropdownConstructor<TNativeValue, TInput, TDropdownData, TDropdownRtn, TDropdown>, className:string, focus:DropdownFocus, calldata:TDropdownData, onready?:(content:TDropdown)=>void)
     {
         if (!(this._activeDropdown && this._activeDropdown.DropdownClass === dropdownClass && $J.isEqual(this._activeDropdown.Calldata, calldata))) {
             this.closeDropdown(false);
-            this._activeDropdown  = new $JPOPUP.DropdownPopup(this as any /* Typing is ok */, this._input, dropdownClass, className, calldata);
+            this._activeDropdown  = new $JPOPUP.DropdownPopup(this as any /* Typing is ok */, this._input, dropdownClass, className, focus === DropdownFocus.Mandatory, calldata);
             this._activeDropdown.load();
             this._activeDropdown.container!.bind("blur", this.input_onblur, this);
         }
@@ -487,6 +491,10 @@ export abstract class InputTextControl<TNativeValue,
     }
     protected               input_onfocus(ev:FocusEvent): void
     {
+        if (this._activeDropdown && this._activeDropdown.FocusMandatory) {
+            this.closeDropdown(false);
+        }
+
         if (this._container !== this._input) {
             this._container.addClass("-focus");
         }
@@ -618,7 +626,7 @@ export abstract class InputTextValueDropdownControl<TNativeValue,
                 if (typeof this.opts.dropdown_values === 'function') {
                     this.focus();
                     this.setError(null);
-                    this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", true);
+                    this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", DropdownFocus.Yes);
                 }
                 else {
                     this.focus();
@@ -656,7 +664,7 @@ export abstract class InputTextValuesDropdownControl<TNativeValue,
             try {
                 this.focus();
                 this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", true);
+                this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", DropdownFocus.Yes);
             } catch(e) {
                 this.setError(e.message);
             }
@@ -997,7 +1005,7 @@ export class Date extends InputTextValueDropdownControl<number, $JT.Date, Date, 
     }
     protected   getDropdownStd()
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-noscroll -date", true, undefined);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-noscroll -date", DropdownFocus.Mandatory);
     }
 }
 
@@ -1020,7 +1028,7 @@ export class DateTime extends InputTextValueDropdownControl<number, $JT.DateTime
 
     protected   getDropdownStd()
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-noscroll -datetime", true, undefined);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-noscroll -datetime", DropdownFocus.Mandatory);
     }
 }
 
@@ -1071,7 +1079,7 @@ export class Time extends InputTextValueDropdownControl<number, $JT.Time, Time, 
     }
     protected   getDropdownStd()
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-noscroll -time", true, undefined);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-noscroll -time", DropdownFocus.Mandatory);
     }
 }
 
@@ -1545,13 +1553,13 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                 const text = (this.getinputelm().prop("value") as string).trim();
 
                 if (text.length > 0) {
-                    this._getDropdown(true, (content) => content.Refresh(text));
+                    this._getDropdown(DropdownFocus.Yes, (content) => content.Refresh(text));
                     return;
                 }
             }
 
             if ((this._value.Datasource.flags & ($JT.SelectDatasourceFlags.StaticEnum|$JT.SelectDatasourceFlags.SearchAll)) !== 0) {
-                this._getDropdown(true, (content) => content.RefrechAll());
+                this._getDropdown(DropdownFocus.Yes, (content) => content.RefrechAll());
             }
         }
     }
@@ -1622,7 +1630,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
             case "F4":
                 if (this._inputTimer || this._activeDropdown) {
                     this._inputTimerStop();
-                    this._updatedropdown(true);
+                    this._updatedropdown(DropdownFocus.Yes);
                 } else {
                     this.openDropdown();
                 }
@@ -1651,7 +1659,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                                             if (this._value) {
                                                 if (this._activeDropdown && this._activeDropdown.Content) {
                                                     if ((this._activeDropdown.Content).LocalSearch((this.getinputelm().prop("value") as string).trim())) {
-                                                        this._updatedropdown(false);
+                                                        this._updatedropdown(DropdownFocus.No);
                                                         return ;
                                                     }
                                                 }
@@ -1659,7 +1667,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                                                 if (this._activeDropdown || this.getinputelm().prop("value") !== '') {
                                                     this._inputTimer = $J.setTimeout(() => {
                                                                                         this._inputTimer = undefined;
-                                                                                        this._updatedropdown(false);
+                                                                                        this._updatedropdown(DropdownFocus.No);
                                                                                      }, this._value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll ? 100 : 250);
                                                 }
                                             }
@@ -1667,7 +1675,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
         this.setError(null);
     }
 
-    private         _updatedropdown(focus:boolean) {
+    private         _updatedropdown(focus:DropdownFocus) {
         if (this._value) {
             let text = (this.getinputelm().prop("value") as string).trim();
 
@@ -1679,7 +1687,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
             }
         }
     }
-    private         _getDropdown(focus:boolean, onready:(content:$JSELECT.SelectInputDropdown<TNativeValue,TDatasource>)=>void)
+    private         _getDropdown(focus:DropdownFocus, onready:(content:$JSELECT.SelectInputDropdown<TNativeValue,TDatasource>)=>void)
     {
         const dataset = this._getDataset(this._getContext());
         if (dataset) {

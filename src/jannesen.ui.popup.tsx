@@ -443,6 +443,7 @@ export class DropdownPopup<TNativeValue,
     /* @internal */     _focuselement:      $JD.DOMHTMLElement;
     /* @internal */     _control:           TControl|null;
     private             _dropdownClass:     string|IDropdownConstructor<TNativeValue, TControl, TDropdownData, TDropdownRtn, TDropdown>;
+    private             _focusMandatory:    boolean;
     private             _calldata:          TDropdownData;
     private             _content:           TDropdown|undefined;
     private             _loadTask!:         $JA.Task<TDropdown>;
@@ -451,6 +452,10 @@ export class DropdownPopup<TNativeValue,
     public get          DropdownClass()
     {
         return this._dropdownClass;
+    }
+    public get          FocusMandatory()
+    {
+        return this._focusMandatory;
     }
     public get          Calldata()
     {
@@ -470,12 +475,13 @@ export class DropdownPopup<TNativeValue,
         return this._focuselement;
     }
 
-                        constructor(control:TControl, focuselement:$JD.DOMHTMLElement, dropdownClass:string|IDropdownConstructor<TNativeValue, TControl, TDropdownData, TDropdownRtn, TDropdown>, className:string, calldata:TDropdownData)
+                        constructor(control:TControl, focuselement:$JD.DOMHTMLElement, dropdownClass:string|IDropdownConstructor<TNativeValue, TControl, TDropdownData, TDropdownRtn, TDropdown>, className:string, focusMandatory:boolean, calldata:TDropdownData)
     {
         super(control.container,  "-dropdown " + className, undefined);
         this._focuselement      = focuselement;
         this._control           = control;
         this._dropdownClass     = dropdownClass;
+        this._focusMandatory    = focusMandatory;
         this._calldata          = calldata;
         this._content           = undefined;
         this._loadingTimer      = new $J.Timeout(this.ShowLoading, this);
@@ -869,6 +875,7 @@ export abstract class TableDropdown<TNativeValue,
         }
         else {
             this._tbody.empty().appendChild(rows);
+            this.PositionPopup();
         }
 
         this._rowcount = rows.length;
