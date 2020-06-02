@@ -23,7 +23,7 @@ export class DateRange extends $JI.InputTextControl<$JTE.IRangeValue,
                                                     $JDTPICKER.DateRangeInputDropdown> implements $JD.IDOMContainer {
 
     constructor(range: $JTE.DateRange, opts: IDateRangeControlOptions) {
-        super(range, "text", "-daterange", opts, true);
+        super(range, "text", "-daterange", opts, 40, true);
     }
 
     protected   openDropdown(): void {
@@ -64,7 +64,7 @@ export class DateTimeRange extends $JI.InputTextControl<$JTE.IRangeValue,
                                                         $JDTPICKER.DateTimeRangeInputDropdown> implements $JD.IDOMContainer {
 
     constructor(range: $JTE.DateTimeRange, opts: IDateTimeRangeControlOptions) {
-        super(range, "text", "-datetimerange", opts, true);
+        super(range, "text", "-datetimerange", opts, 60, true);
     }
 
     protected   openDropdown(): void {

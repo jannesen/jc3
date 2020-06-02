@@ -248,13 +248,13 @@ export abstract class InputTextControl<TNativeValue,
     protected   _activeDropdown:    $JPOPUP.DropdownPopup<TNativeValue, TInput, TDropdownData, TDropdownRtn, TDropdown>|undefined;
     protected   _eventHandlers?:    $J.IEventHandlerCollection;
 
-                            constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown:boolean, forcecontainer?:boolean)
+                            constructor(value:TValue, type:string, typeClass:string, opts:TOpts, maxlength:number, dropdown:boolean, forcecontainer?:boolean)
     {
         super(opts);
 
 
         let container:$JD.DOMHTMLElement;
-        let input = <input type={type} spellCheck={false} autoComplete="no-autocomplete" />;
+        let input = <input type={type} spellCheck={false} autoComplete="no-autocomplete" maxLength={maxlength} />;
 
         input.bind("focus",   this.input_onfocus, this);
         input.bind("blur",    this.input_onblur,  this);
@@ -555,9 +555,14 @@ export abstract class InputTextControl<TNativeValue,
                             inputtext += key;
                         }
 
-                        this._input.prop("value", inputtext);
-                        (this._input.element as any).selectionStart = selectionStart + 1;
-                        (this._input.element as any).selectionEnd   = selectionStart + 1;
+                        const smaxlength = this.getinputelm().attr('maxlength');
+                        const maxlength = (typeof smaxlength === 'string') ? $J.parseIntExact(smaxlength) : 64000;
+
+                        if (inputtext.length <= maxlength) {
+                            this._input.prop("value", inputtext);
+                            (this._input.element as any).selectionStart = selectionStart + 1;
+                            (this._input.element as any).selectionEnd   = selectionStart + 1;
+                        }
                     }
                 }
             }
@@ -614,9 +619,9 @@ export abstract class InputTextValueDropdownControl<TNativeValue,
                                                     TOpts extends IInputControlDropdownValuesOptions<TNativeValue>>
                                                         extends InputTextControl<TNativeValue, TValue, TInput, TOpts>
 {
-                constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown?:boolean)
+                constructor(value:TValue, type:string, typeClass:string, opts:TOpts, maxlength:number, dropdown?:boolean)
     {
-        super(value, type, typeClass, opts, true);
+        super(value, type, typeClass, opts, maxlength, true);
     }
 
     protected   openDropdown()
@@ -653,9 +658,9 @@ export abstract class InputTextValuesDropdownControl<TNativeValue,
                                                      TOpts extends IInputControlDropdownValuesOptions<TNativeValue>>
                                                         extends InputTextControl<TNativeValue, TValue, TInput, TOpts>
 {
-                constructor(value:TValue, type:string, typeClass:string, opts:TOpts, dropdown?:boolean)
+                constructor(value:TValue, type:string, typeClass:string, opts:TOpts, maxlength:number, dropdown?:boolean)
     {
-        super(value, type, typeClass, opts, dropdown || typeof opts.dropdown_values === 'function');
+        super(value, type, typeClass, opts, maxlength, dropdown || typeof opts.dropdown_values === 'function');
     }
 
     protected   openDropdown()
@@ -690,7 +695,7 @@ export interface IIntegerControlOptions extends IInputControlDropdownValuesOptio
 export class Integer extends InputTextValuesDropdownControl<number, $JT.Integer, Integer, IIntegerControlOptions>
 {
     constructor(value:$JT.Integer, opts:IIntegerControlOptions) {
-        super(value, "text", "-integer", opts);
+        super(value, "text", "-integer", opts, 20);
     }
 
     protected   keyRemap(key: string) {
@@ -720,7 +725,7 @@ export interface INumberControlOptions extends IInputControlDropdownValuesOption
 export class Number extends InputTextValuesDropdownControl<number, $JT.Number, Number, INumberControlOptions>
 {
     constructor(value:$JT.Number, opts:INumberControlOptions) {
-        super(value, "text", "-number", opts);
+        super(value, "text", "-number", opts, 30);
     }
 
     protected   keyRemap(key: string) {
@@ -753,7 +758,7 @@ export interface IStringControlOptions extends IInputControlDropdownValuesOption
 export class String extends InputTextValuesDropdownControl<string, $JT.String, String, IStringControlOptions>
 {
     constructor(value:$JT.String, opts:IStringControlOptions) {
-        super(value, ((value.Options & $JT.StringOptions.Password) ? "password" : "text"), "-string", opts);
+        super(value, ((value.Options & $JT.StringOptions.Password) ? "password" : "text"), "-string", opts, value.MaxLength || 4000);
     }
 
     protected       keyRemap(key: string) {
@@ -776,7 +781,6 @@ export class String extends InputTextValuesDropdownControl<string, $JT.String, S
 
         return null;
     }
-
 }
 
 //===================================== StringMultiLine ===========================================
@@ -802,7 +806,7 @@ export class StringMultiLine extends SimpleControl<$JT.StringMultiLine, IStringM
         super(opts);
         this._text = undefined;
 
-        let textarea = <textarea type="text" class="jannesen-input -string -multiline" spellCheck={false} onblur={()=>{this._textarea_onblur();}} />;
+        let textarea = <textarea type="text" class="jannesen-input -string -multiline" spellCheck={false} maxLength={ value.MaxLength } onblur={()=>{this._textarea_onblur();}} />;
 
         genericAttr(textarea, textarea, opts, value);
 
@@ -979,7 +983,7 @@ export interface IDateControlOptions extends IInputControlDropdownValuesOptions<
 export class Date extends InputTextValueDropdownControl<number, $JT.Date, Date, IDateControlOptions>
 {
     constructor(value:$JT.Date, opts:IDateControlOptions) {
-        super(value, "text", "-date", opts, true);
+        super(value, "text", "-date", opts, 20, true);
     }
 
     protected   defaultPlaceHolder(value:$JT.Date):string {
@@ -1023,7 +1027,7 @@ export interface IDateTimeControlOptions extends IInputControlOptions
 export class DateTime extends InputTextValueDropdownControl<number, $JT.DateTime, DateTime, IDateTimeControlOptions>
 {
     constructor(value:$JT.DateTime, opts:IDateTimeControlOptions) {
-        super(value, "text", "-datetime", opts, true);
+        super(value, "text", "-datetime", opts, 30, true);
     }
 
     protected   getDropdownStd()
@@ -1046,7 +1050,7 @@ export interface ITimeControlOptions extends IInputControlOptions
 export class Time extends InputTextValueDropdownControl<number, $JT.Time, Time, ITimeControlOptions>
 {
     constructor(value:$JT.Time, opts:ITimeControlOptions) {
-        super(value, "text", "-time", opts, true);
+        super(value, "text", "-time", opts, 10, true);
     }
 
     protected   defaultPlaceHolder(value:$JT.Time):string|undefined {
@@ -1361,7 +1365,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
 
 
                     constructor(value:$JT.SelectType<TNativeValue,TDatasource>, opts:ISelectInputControlOptions<TNativeValue,TDatasource>) {
-        super(value, "text", "-select", opts, (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) === 0 || (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0, true);
+        super(value, "text", "-select", opts, 1024, (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) === 0 || (value.Datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0, true);
         this.getinputelm().bind("input", this.input_textchange, this);
         this._activetask   = undefined;
         this._inputTimer   = undefined;
