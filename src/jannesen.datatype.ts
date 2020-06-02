@@ -268,7 +268,7 @@ export class ValueError extends __Error
 
 export interface IValidatable
 {
-    preValidateAsync?:                   (context:$JA.Context|null)=>($JA.Task<unknown>|Error)[]|$JA.Task<unknown>|Error|null;
+    preValidateAsync?:                   (context:$JA.Context|null, opts:IValidateOptions)=>($JA.Task<unknown>|Error)[]|$JA.Task<unknown>|Error|null;
     validateNow(opts:IValidateOptions):  ValidateResult|Error;
 }
 
@@ -295,7 +295,7 @@ export function validateAsync(opts:IValidateOptionsAsync, ...validatables:(IVali
 
                        for (const v of validatables) {
                            if (v instanceof Object && typeof v.preValidateAsync === 'function') {
-                               addPreValidate(v.preValidateAsync(opts.context));
+                               addPreValidate(v.preValidateAsync(opts.context, opts));
                                if (errors.errors.length > 0 || waitTasks.length > 0) {
                                    break;
                                }
@@ -498,7 +498,7 @@ export abstract class BaseType<TControl extends IBaseControl=IBaseControl> imple
     /**
      * Returns all busy tasks before the data can be validated
      */
-    public preValidateAsync(context:$JA.Context|null)
+    public preValidateAsync(context:$JA.Context|null, opts:IValidateOptions)
     {
         let rtn = [] as ($JA.Task<unknown>|Error)[];
 
@@ -514,12 +514,16 @@ export abstract class BaseType<TControl extends IBaseControl=IBaseControl> imple
                                             if (item instanceof Record) {
                                                 if (item._validators) {
                                                     for (const v of item._validators) {
-                                                        addTask(item, path, v.preValidateAsync(context));
+                                                        addTask(item, path, v.preValidateAsync(context, opts));
                                                     }
                                                 }
                                             }
                                         }
                                         catch(err) {
+                                            if (opts.itemselector && !opts.itemselector(item, path)) {
+                                                 return result;
+                                            }
+
                                             addTask(item, path, err);
                                             return ValidateResult.Error;
                                         }
@@ -3704,7 +3708,7 @@ class RecordValidator<TRec extends Record<IFieldDef>> implements IValidatable
         this._allfields.forEach((f) => f.bind('changed', this._fieldChanged, this));
     }
 
-    public  preValidateAsync(context:$JA.Context|null):($JA.Task<unknown>|Error)[]|$JA.Task<unknown>|Error|null
+    public  preValidateAsync(context:$JA.Context|null, opts:IValidateOptions):($JA.Task<unknown>|Error)[]|$JA.Task<unknown>|Error|null
     {
         const waiton = [] as $JA.Task<unknown>[];
 
