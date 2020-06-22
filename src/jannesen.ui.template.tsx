@@ -739,7 +739,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     }
     protected               onopen(args: TArgs, ct: $JA.Context)
     {
-        this.copyData(true, this.args, this.callargs, this.data);
+        this.copyData(true, args, this.callargs, this.data);
 
         let title   = this.formTitle();
         let body    = this.formBody  (this.callargs, this.data);
