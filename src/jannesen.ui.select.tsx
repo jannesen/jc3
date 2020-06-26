@@ -11,15 +11,15 @@ import * as $JL      from "jc3/jannesen.language";
 
 export class ValuesDropdown<TNativeValue,
                             TValue extends $JT.SimpleType<TNativeValue>,
-                            TInput extends $JI.InputTextControl<TNativeValue, TValue, TInput, TOpts, void, TNativeValue|null, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>,
+                            TInput extends $JI.InputTextControl<TNativeValue, TValue, TInput, TOpts, $JI.IDropdownStdData, TNativeValue|null, ValuesDropdown<TNativeValue, TValue, TInput, TOpts>>,
                             TOpts extends $JI.IInputControlDropdownValuesOptions<TNativeValue>>
-                        extends $JPOPUP.TableDropdown<TNativeValue, TInput, void, TNativeValue|null>
+                        extends $JPOPUP.TableDropdown<TNativeValue, TInput, $JI.IDropdownStdData, TNativeValue|null>
 {
     private     _inputelm?:     $JD.DOMHTMLElement;
     private     _valueList?:    $JI.DropdownValues<TNativeValue>[]|null;
     private     _rowValues?:    TNativeValue[];
 
-    public      OnLoad(data:void, ct:$JA.Context): $JA.Task<void>|void
+    public      OnLoad(data:$JI.IDropdownStdData, ct:$JA.Context): $JA.Task<void>|void
     {
         const input = this.control;
 
@@ -30,7 +30,7 @@ export class ValuesDropdown<TNativeValue,
                 const valueList = input.opts.dropdown_values!();
 
                 if (valueList instanceof $JA.Task) {
-                    return valueList.then((v) => { this._init(v); })
+                    return valueList.then((v) => { this._init(v, data.keydown); })
                                     .catch((e) => {
                                          if (!(e instanceof $JA.OperationCanceledError)) {
                                             this.setMessage(e);
@@ -38,7 +38,7 @@ export class ValuesDropdown<TNativeValue,
                                     });
                  }
                 else {
-                    this._init(valueList);
+                    this._init(valueList, data.keydown);
                 }
             }
             catch (e) {
@@ -59,17 +59,17 @@ export class ValuesDropdown<TNativeValue,
         this.Close((this._rowValues && typeof row === 'number' ? this._rowValues[row] : undefined), ev);
     }
 
-    private     _init(valueList:$JI.DropdownValues<TNativeValue>[]|null|undefined)
+    private     _init(valueList:$JI.DropdownValues<TNativeValue>[]|null|undefined, filter:boolean)
     {
         const input = this.control;
         if (input) {
             this._inputelm = input.getinputelm();
             this._valueList = valueList;
-            this._fillBody();
-            this._inputelm.bind('input', this._fillBody, this);
+            this._fillBody(filter);
+            this._inputelm.bind('input', () => this._fillBody(true), this);
         }
     }
-    private     _fillBody()
+    private     _fillBody(filter:boolean)
     {
         const input = this.control;
         const value = input && input.value;
@@ -77,7 +77,7 @@ export class ValuesDropdown<TNativeValue,
         if (value && this._valueList && this._inputelm) {
             const values = [] as TNativeValue[];
             const lines  = [] as string[];
-            const keys   = $JI.normalizeSearchKeys($JSTRING.removeDiacritics(this._inputelm.prop('value')).toUpperCase().split(' '));
+            const keys   = filter ? $JI.normalizeSearchKeys($JSTRING.removeDiacritics(this._inputelm.prop('value')).toUpperCase().split(' ')) : null;
             const format = value.getAttr("format");
 
             for (const v of this._valueList) {
@@ -105,11 +105,13 @@ export class ValuesDropdown<TNativeValue,
 
         this.setMessage($JL.no_result, true);
     }
-    private     _containsKey(keys: string[], text: string)
+    private     _containsKey(keys:string[]|null, text:string)
     {
-        for (const key of keys) {
-            if (!$JI.textContainsKey(text, key)) {
-                return false;
+        if (keys) {
+            for (const key of keys) {
+                if (!$JI.textContainsKey(text, key)) {
+                    return false;
+                }
             }
         }
         return true;

@@ -237,7 +237,7 @@ export abstract class InputTextControl<TNativeValue,
                                        TValue extends $JT.SimpleType<TNativeValue>,
                                        TInput extends InputTextControl<TNativeValue, TValue, TInput, TOpts, TDropdownData, TDropdownRtn, TDropdown>,
                                        TOpts extends IInputControlOptions,
-                                       TDropdownData = void,
+                                       TDropdownData,
                                        TDropdownRtn = TNativeValue|null,
                                        TDropdown extends $JPOPUP.DropdownContent<TNativeValue, TInput, TDropdownData, TDropdownRtn> = $JPOPUP.DropdownContent<TNativeValue, TInput, TDropdownData, TDropdownRtn>>
                                             extends SimpleControl<TValue, TOpts>
@@ -415,7 +415,7 @@ export abstract class InputTextControl<TNativeValue,
         super.unbind(eventName, handler, thisArg);
     }
 
-    protected   abstract    openDropdown(): void;
+    protected   abstract    openDropdown(clickF4:boolean): void;
 
     protected               defaultPlaceHolder(value: TValue): string|undefined
     {
@@ -478,7 +478,7 @@ export abstract class InputTextControl<TNativeValue,
     protected               dropdown_click()
     {
         if (!this._activeDropdown) {
-            this.openDropdown();
+            this.openDropdown(false);
         } else {
             this.closeDropdown(false);
             this.getinputelm().focus();
@@ -515,7 +515,7 @@ export abstract class InputTextControl<TNativeValue,
         case "ArrowDown":
         case "F4":
             if (!(evt.altKey || evt.ctrlKey || evt.metaKey)) {
-                this.openDropdown();
+                this.openDropdown(evt.key === "ArrowDown");
                 return;
             }
         }
@@ -607,6 +607,10 @@ export abstract class InputTextControl<TNativeValue,
 
 export type DropdownValues<TNative> = TNative | { value:TNative, text:string };
 export type DropdownValuesList<TNative> = DropdownValues<TNative>[] | $JA.Task<DropdownValues<TNative>[]>;
+export interface IDropdownStdData
+{
+    keydown:        boolean;
+}
 
 export interface IInputControlDropdownValuesOptions<TNative> extends IInputControlOptions
 {
@@ -617,27 +621,28 @@ export abstract class InputTextValueDropdownControl<TNativeValue,
                                                     TValue extends $JT.SimpleType<TNativeValue,TInput>,
                                                     TInput extends InputTextValueDropdownControl<TNativeValue, TValue, TInput, TOpts>,
                                                     TOpts extends IInputControlDropdownValuesOptions<TNativeValue>>
-                                                        extends InputTextControl<TNativeValue, TValue, TInput, TOpts>
+                                                        extends InputTextControl<TNativeValue, TValue, TInput, TOpts, IDropdownStdData>
 {
                 constructor(value:TValue, type:string, typeClass:string, opts:TOpts, maxlength:number, dropdown?:boolean)
     {
         super(value, type, typeClass, opts, maxlength, true);
     }
 
-    protected   openDropdown()
+    protected   openDropdown(keydown:boolean)
     {
         if (this._value) {
             try {
+                const data = { keydown };
                 if (typeof this.opts.dropdown_values === 'function') {
                     this.focus();
                     this.setError(null);
-                    this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", DropdownFocus.Yes);
+                    this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", DropdownFocus.Yes, data);
                 }
                 else {
                     this.focus();
                     this.parseInput(false);
                     this.setError(null);
-                    this.getDropdownStd();
+                    this.getDropdownStd(data);
                 }
             } catch(e) {
                 this.setError(e.message);
@@ -649,27 +654,27 @@ export abstract class InputTextValueDropdownControl<TNativeValue,
         datavalue.setValue(value, $JT.ChangeReason.UI);
     }
 
-    protected abstract getDropdownStd():void;
+    protected abstract getDropdownStd(arg:IDropdownStdData):void;
 }
 
 export abstract class InputTextValuesDropdownControl<TNativeValue,
                                                      TValue extends $JT.SimpleType<TNativeValue, TInput>,
                                                      TInput extends InputTextValuesDropdownControl<TNativeValue, TValue, TInput, TOpts>,
                                                      TOpts extends IInputControlDropdownValuesOptions<TNativeValue>>
-                                                        extends InputTextControl<TNativeValue, TValue, TInput, TOpts>
+                                                        extends InputTextControl<TNativeValue, TValue, TInput, TOpts, IDropdownStdData>
 {
                 constructor(value:TValue, type:string, typeClass:string, opts:TOpts, maxlength:number, dropdown?:boolean)
     {
         super(value, type, typeClass, opts, maxlength, dropdown || typeof opts.dropdown_values === 'function');
     }
 
-    protected   openDropdown()
+    protected   openDropdown(keydown:boolean)
     {
         if (typeof this.opts.dropdown_values === 'function' && this._value) {
             try {
                 this.focus();
                 this.setError(null);
-                this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", DropdownFocus.Yes);
+                this.getDropdown("jc3/jannesen.ui.select:ValuesDropdown", "-tablelist -valuedropdown", DropdownFocus.Yes, { keydown });
             } catch(e) {
                 this.setError(e.message);
             }
@@ -1007,9 +1012,9 @@ export class Date extends InputTextValueDropdownControl<number, $JT.Date, Date, 
 
         return null;
     }
-    protected   getDropdownStd()
+    protected   getDropdownStd(data:IDropdownStdData)
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-noscroll -date", DropdownFocus.Mandatory);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateInputDropdown", "-noscroll -date", DropdownFocus.Mandatory, data);
     }
 }
 
@@ -1030,9 +1035,9 @@ export class DateTime extends InputTextValueDropdownControl<number, $JT.DateTime
         super(value, "text", "-datetime", opts, 30, true);
     }
 
-    protected   getDropdownStd()
+    protected   getDropdownStd(data:IDropdownStdData)
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-noscroll -datetime", DropdownFocus.Mandatory);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:DateTimeInputDropdown", "-noscroll -datetime", DropdownFocus.Mandatory, data);
     }
 }
 
@@ -1081,9 +1086,9 @@ export class Time extends InputTextValueDropdownControl<number, $JT.Time, Time, 
 
         return null;
     }
-    protected   getDropdownStd()
+    protected   getDropdownStd(data:IDropdownStdData)
     {
-        this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-noscroll -time", DropdownFocus.Mandatory);
+        this.getDropdown("jc3/jannesen.ui.datetimepicker:TimeInputDropdown", "-noscroll -time", DropdownFocus.Mandatory, data);
     }
 }
 
@@ -1550,7 +1555,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     {
         return !!this._opts.simpleDropdown && super.disableKeyboard();
     }
-    protected       openDropdown() {
+    protected       openDropdown(keydown:boolean) {
         this.focus();
         if (this._value) {
             if ((this._value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) !== 0) {
@@ -1636,7 +1641,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                     this._inputTimerStop();
                     this._updatedropdown(DropdownFocus.Yes);
                 } else {
-                    this.openDropdown();
+                    this.openDropdown(evt.key === "ArrowDown");
                 }
                 break;
 
@@ -2390,18 +2395,18 @@ export function textContainsKey(text:string|null, key:string)
     if (typeof text === 'string') {
         text = $JSTRING.removeDiacritics(text).toUpperCase();
 
-        let p = text.indexOf(key);
-        if (p >= 0) {
-            if (p === 0) {
+        let pos = 0;
+        for (;;) {
+            let p = text.indexOf(key, pos);
+            if (p < 0) {
+                return false;
+            }
+
+            if (p === 0 || !/[A-Z0-9]/.test(key.charAt(0)) || !/[A-Z0-9]/.test(text.charAt(p-1))) {
                 return true;
             }
 
-            if (/[A-Z0-9]/.test(key.charAt(0))) {
-                return /[^A-Z0-9]/.test(text.charAt(p-1));
-            }
-            else {
-                return true;
-            }
+            pos = p + 1;
         }
     }
     return false;

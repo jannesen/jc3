@@ -278,10 +278,10 @@ $J.applyMixins(DatePicker, [$J.EventHandling]);
 
 //===================================== Dropdown ==================================================
 export abstract class InputDropdown<TValue extends $JT.SimpleType<number>,
-                                    TInput extends $JI.InputTextControl<number, TValue, TInput, TOpts>,
+                                    TInput extends $JI.InputTextControl<number, TValue, TInput, TOpts, $JI.IDropdownStdData>,
                                     TOpts extends $JI.IInputControlOptions,
                                     TDropdown extends InputDropdown<TValue, TInput, TOpts, TDropdown>>
-                                        extends $JPOPUP.DropdownContent<number, TInput, void, number|null>
+                                        extends $JPOPUP.DropdownContent<number, TInput, $JI.IDropdownStdData, number|null>
 {
     protected       _datepicker!:       DatePicker;
 
@@ -316,7 +316,7 @@ export abstract class InputDropdown<TValue extends $JT.SimpleType<number>,
 
 export class DateInputDropdown extends InputDropdown<$JT.Date, $JI.Date, $JI.IDateControlOptions, DateInputDropdown>
 {
-                    constructor(popup:$JPOPUP.DropdownPopup<number, $JI.Date>)
+                    constructor(popup:$JPOPUP.DropdownPopup<number, $JI.Date, $JI.IDropdownStdData>)
     {
         super(popup);
     }
@@ -343,7 +343,7 @@ export class DateInputDropdown extends InputDropdown<$JT.Date, $JI.Date, $JI.IDa
 
 export class DateTimeInputDropdown extends InputDropdown<$JT.DateTime, $JI.DateTime, $JI.IDateTimeControlOptions, DateTimeInputDropdown>
 {
-                    constructor(popup:$JPOPUP.DropdownPopup<number, $JI.DateTime>)
+                    constructor(popup:$JPOPUP.DropdownPopup<number, $JI.DateTime, $JI.IDropdownStdData>)
     {
         super(popup);
     }
@@ -370,7 +370,7 @@ export class DateTimeInputDropdown extends InputDropdown<$JT.DateTime, $JI.DateT
 
 export class TimeInputDropdown extends InputDropdown<$JT.Time, $JI.Time, $JI.ITimeControlOptions, TimeInputDropdown>
 {
-                    constructor(popup:$JPOPUP.DropdownPopup<number, $JI.Time>)
+                    constructor(popup:$JPOPUP.DropdownPopup<number, $JI.Time, $JI.IDropdownStdData>)
     {
         super(popup);
     }
