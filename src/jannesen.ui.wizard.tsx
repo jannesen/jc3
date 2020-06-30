@@ -65,25 +65,26 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
     }
 
     protected               onopen(args: TArgs, ct: $JA.Context) {
-        this.copyData(true, this.args, this.callargs, this.data);
+        return $JA.Task.from(this.copyData(true, this.args, this.callargs, this.data, ct))
+                       .thenD(() => { 
+                           let title = this.formTitle();
+                           let body = this.formBody(this.callargs, this.data);
+                           let footer = this.formFooter();
 
-        let title = this.formTitle();
-        let body = this.formBody(this.callargs, this.data);
-        let footer = this.formFooter();
+                           let first = this.steps[0];
+                           first.container.show(true);
+                           first.setActive();
 
-        let first = this.steps[0];
-        first.container.show(true);
-        first.setActive();
+                           this.nextButton.show(true);
 
-        this.nextButton.show(true);
-
-        this.content.addClass("jannesen-ui-template-wizard-dialog");
-        this.content.appendChild(<div class="-header -dialog-move-target"><span class="-title">{title}</span>{this.stepCounter}</div>,
-            <div class="-body"                      >{body}</div>,
-            <div class="-footer"                    >{footer}</div>);
+                           this.content.addClass("jannesen-ui-template-wizard-dialog");
+                           this.content.appendChild(<div class="-header -dialog-move-target"><span class="-title">{title}</span>{this.stepCounter}</div>,
+                                                    <div class="-body"                      >{body}</div>,
+                                                    <div class="-footer"                    >{footer}</div>);
+                       });
     }
 
-    protected               copyData(onopen: boolean, dlgargs: IWizardDialogCallData, callargs: $JA.AjaxCallArgsType<TCall> | undefined, data: $JA.AjaxCallRequestType<TCall> | void) {
+    protected               copyData(onopen: boolean, dlgargs: IWizardDialogCallData, callargs: $JA.AjaxCallArgsType<TCall> | undefined, data: $JA.AjaxCallRequestType<TCall> | void, ct:$JA.Context): void|$JA.Task<void> {
         const _dlgargs = dlgargs;
         const _callargs = callargs as any;
         const _data = data as any;
