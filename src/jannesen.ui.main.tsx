@@ -596,7 +596,7 @@ export function absoluteUrl(basepath: ({ host:string, path:string}), url:string)
  */
 export function baseUrl(url: string)
 {
-    const match = /^([a-zA-Z]+\:\/\/[a-zA-Z0-9_\-\.]+(?:\:[0-9]+)?)(\/(?:[a-zA-Z0-9\-\.\_\~\:\/\@\!\$\+\,\;\=]+\/))/.exec(url);
+    const match = /^([a-zA-Z]+\:\/\/[a-zA-Z0-9_\-\.]+(?:\:[0-9]+)?)(\/(?:[a-zA-Z0-9\-\.\_\~\:\@\!\$\+\,\;\= ]+\/)*)/.exec(url);
 
     if (!(match && match.length === 3 && typeof match[1] === "string" && typeof match[2] === "string")) {
         throw new Error("Invalid path '" + url + "'.");
