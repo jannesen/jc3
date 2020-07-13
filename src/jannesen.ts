@@ -26,7 +26,8 @@ export const enum TimeFormat
     HM      =  1,    // HH:MM
     HMS     =  2,    // HH:MM:SS
     HMSF    =  3,    // HH:MM:SS.FFF
-    MS      = 10     // MM:SS (mm can be bigger then 60)
+    MS      = 10,    // MM:SS (mm can be bigger then 60)
+    SEC     = 11     // SS.FFF
 }
 
 /**
