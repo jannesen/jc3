@@ -230,9 +230,9 @@ export class DateTimeRange extends RangeValue<$JIE.DateTimeRange> {
 const regexTime              = /^([0-2]?[0-9]):([0-5][0-9])(?::([0-5][0-9])(?:\.([0-9]{1,3}))?)?$/;
 const sregexDate             = regexToString($JR.regexDate);
 const sregexTime             = regexToString(regexTime);
-const regexDataRangeFull     = new RegExp("^(" + sregexDate + ") ?-? ?(" + sregexDate + ")$");
-const regexDateAndTimeRange  = new RegExp("^(" + sregexDate + ") (" + sregexTime + ") ?-? ?(" + sregexTime + ")$");
-const regexDataTimeRangeFull = new RegExp("^(" + sregexDate + ") (" + sregexTime + ") ?-? ?(" + sregexDate + ") (" + sregexTime + ")$");
+const regexDataRangeFull     = new RegExp("^(" + sregexDate + ") *- *(" + sregexDate + ")$");
+const regexDateAndTimeRange  = new RegExp("^(" + sregexDate + ") (" + sregexTime + ") *- *(" + sregexTime + ")$");
+const regexDataTimeRangeFull = new RegExp("^(" + sregexDate + ") (" + sregexTime + ") *- *(" + sregexDate + ") (" + sregexTime + ")$");
 
 function dateRangeToString(dateRange: IRangeValue):string
 {
@@ -310,7 +310,12 @@ function stringToDateRange(text:string):IRangeValue|null
             }
         }
 
-        if (match = /^^([1[0-2]|0?[1-9]|[a-z]+) ?-? ?([12][0-9]{3})$/.exec(text)) {
+        if (match = $JR.regexDate.exec(text)) {
+            const d = $JR.stringToDate(text);
+            return { Begin: d, End: d };
+        }
+
+        if (match = /^^([1[0-2]|0?[1-9]|[a-z]+) *[. ] *([12][0-9]{3})$/.exec(text)) {
             if (typeof match[1] === "string" && typeof match[2] === "string") {
                 const m    = $JR.stringToMonth(match[1]!);
                 if (isNaN(m))
@@ -322,7 +327,7 @@ function stringToDateRange(text:string):IRangeValue|null
             }
         }
 
-        if (match = /^q([1-4]) ?-? ?([12][0-9]{3})$/.exec(text)) {
+        if (match = /^q([1-4]) *[. ] *([12][0-9]{3})$/.exec(text)) {
             if (typeof match[1] === "string" && typeof match[2] === "string") {
                 const m    = ($J.parseIntExact(match[1]!) - 1) * 3 + 1;
                 const year = $J.parseIntExact(match[2]!);
