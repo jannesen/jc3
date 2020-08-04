@@ -1029,7 +1029,7 @@ export abstract class SimpleType<TNative,TControl extends IBaseControl=IBaseCont
      */
     public setDefault():void {
         if (this._value === null) {
-            this.setValue(this.Default, ChangeReason.Parse);
+            this.setValue(this.Default, ChangeReason.Assign);
         }
     }
 
@@ -2859,9 +2859,7 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
 
     public clear()
     {
-        if (this._fields) {
-            this.setDefault();
-        }
+        this._fields = null;
     }
 
     public toUrlArgs(): $J.IUrlArgsInvariant {
