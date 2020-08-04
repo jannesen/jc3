@@ -66,7 +66,7 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
 
     protected               onopen(args: TArgs, ct: $JA.Context) {
         return $JA.Task.from(this.copyData(true, this.args, this.callargs, this.data, ct))
-                       .thenD(() => { 
+                       .thenD(() => {
                            let title = this.formTitle();
                            let body = this.formBody(this.callargs, this.data);
                            let footer = this.formFooter();

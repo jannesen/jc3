@@ -2223,6 +2223,7 @@ export class Time extends SimpleNumberType<$JI.Time>
             case TimeFactor.Hour:       return "F2";
             case TimeFactor.Min:        return $J.TimeFormat.HM;
             case TimeFactor.Sec:        return (this.Precision === 0 ? $J.TimeFormat.HMS : $J.TimeFormat.HMSF);
+            case TimeFactor.Ms:         return $J.TimeFormat.SEC;
             default:                    return $J.TimeFormat.HMSF;
             }
         }
