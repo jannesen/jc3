@@ -953,7 +953,7 @@ export abstract class SubmitDialog<TArgs, TRtn=void> extends $JCONTENT.DialogBas
     }
     protected               onopen(args: TArgs, ct: $JA.Context)
     {
-        const t = this.initData(this.args, ct);
+        const t = this.initData(args, ct);
 
         if (t) {
             return t.then(() => this._createcontent());
@@ -1083,7 +1083,7 @@ export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition
                                                  callargs: this.callargs,
                                                  data:     this.data
                                              },
-                                              context);
+                                             context);
                          });
     }
 }
