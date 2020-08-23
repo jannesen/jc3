@@ -344,7 +344,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
 
         return !!this._moremenu;
     }
-    public      moreMenuDatasource(ct:$JA.Context):$JUM.DataSourceResult
+    public      moreMenuDatasource(ct:$JA.Context):$JUM.DataSourceResult|undefined
     {
         if ($JUC.ImplementsMoreMenu(this._tabContent)) {
             return this._tabContent.moreMenuDatasource(ct);

@@ -24,7 +24,7 @@ interface IActiveTask
 export interface IMoreMenu
 {
     moreMenuEnabled():boolean;
-    moreMenuDatasource(ct:$JA.Context):$JUM.DataSourceResult;
+    moreMenuDatasource(ct:$JA.Context):$JUM.DataSourceResult|undefined;
 }
 
 /**
@@ -693,13 +693,11 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
     {
         return this._contentBody && this._contentBody.isIdle ? this._contentBody.moreMenuEnabled() : false;
     }
-    public              moreMenuDatasource(ct:$JA.Context):$JUM.DataSourceResult
+    public              moreMenuDatasource(ct:$JA.Context):$JUM.DataSourceResult|undefined
     {
         if (this._contentBody && this._contentBody.isIdle) {
             return this._contentBody.moreMenuDatasource(ct);
         }
-
-        return [];
     }
     public              openError(e: Error, executeContext?:$JA.Context)
     {
@@ -771,9 +769,9 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
     {
         return false;
     }
-    public              moreMenuDatasource(ct:$JA.Context):$JUM.DataSourceResult
+    public              moreMenuDatasource(ct:$JA.Context):$JUM.DataSourceResult|undefined
     {
-        return [];
+        return undefined;
     }
 
     protected abstract  onopen(args:TArgs, state:TState|null|undefined, ct:$JA.Context):$JA.Task<void>|void;

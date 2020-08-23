@@ -167,8 +167,9 @@ export class Main extends $JD.Container
                                                                            title="Action menu"
                                                                            menupos={$JUM.MenuPosition.Right}
                                                                            dataSource={(ct) => {
-                                                                               let   form = !this._formloader.isBusy && this._formloader.contentBody;
-                                                                               return (form && form.isIdle) ? form.moreMenuDatasource(ct) : [];
+                                                                               const form = !this._formloader.isBusy && this._formloader.contentBody;
+                                                                               const data = form && form.isIdle && form.moreMenuDatasource(ct);
+                                                                               return data ? data : [];
                                                                            }} /> }
                                 </div>
                             </div>

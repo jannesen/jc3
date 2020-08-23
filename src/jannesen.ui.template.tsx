@@ -271,9 +271,9 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
         const tab = this._tabs && this._tabs.activeTab;
         return tab ? tab.moreMenuEnabled() : false;
     }
-    public                  moreMenuDatasource(ct:$JA.Context):$JMENU.DataSourceResult {
+    public                  moreMenuDatasource(ct:$JA.Context):$JMENU.DataSourceResult | undefined {
         const tab = this._tabs && this._tabs.activeTab;
-        return tab ? tab.moreMenuDatasource(ct) : [];
+        return tab ? tab.moreMenuDatasource(ct) : undefined;
     }
     public                  onresize(size: $JD.ISize) {
         if (this._tabs) {
