@@ -165,7 +165,7 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record<
             this._removeDataPopup();
         }
     }
-    protected               executeDialog<TArgs>(form:(new (context:$JA.Context)=>$JCONTENT.DialogBase<TArgs, string>) | string, args:TArgs)
+    protected               executeDialog<TArgs,TRtn extends any=string>(form:(new (context:$JA.Context)=>$JCONTENT.DialogBase<TArgs, TRtn>) | string, args:TArgs): $JA.Task<TRtn>
     {
         return this.execute((context) => $JCONTENT.dialogShow(form, args, context));
     }
