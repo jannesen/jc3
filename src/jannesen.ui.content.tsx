@@ -1380,11 +1380,11 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
     {
         return this._footerButtons(this.formFooterButtons());
     }
-    protected           formFooterButtons(): IDialogButton[]|null
+    protected           formFooterButtons(): (IDialogButton|$JD.DOMHTMLElement)[]|null
     {
         return null;
     }
-    protected           setDialogContent(title:string, body:$JD.AddNode, buttons:IDialogButton[])
+    protected           setDialogContent(title:string, body:$JD.AddNode, buttons:(IDialogButton|$JD.DOMHTMLElement)[])
     {
         this.content.appendChild(<>
                                     <div class="-header -dialog-move-target"><span class="-title">{ title }</span></div>
@@ -1392,13 +1392,17 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
                                     <div class="-footer"                    >{ this._footerButtons(buttons) }</div>
                                 </>);
     }
-    private             _footerButtons(buttons:IDialogButton[]|null): $JD.AddNode
+    private             _footerButtons(buttons:(IDialogButton|$JD.DOMHTMLElement)[]|null): $JD.AddNode
     {
         if (buttons) {
             var footer = <div class="-buttons"/>;
 
             for(const button of buttons) {
-                if (button) {
+                if (button instanceof $JD.DOMHTMLElement) {
+                    footer.appendChild(button);
+                }
+                else
+                if (button instanceof Object) {
                     var b = <button class={button["class"]}>{ button.text }</button>;
                     b.bind("click", () => {
                                         if (typeof button.onclick === "function") {
@@ -1408,7 +1412,6 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
                                             this.closeForm(button.value);
                                         }
                                     });
-
                     footer.appendChild(b);
                 }
             }
