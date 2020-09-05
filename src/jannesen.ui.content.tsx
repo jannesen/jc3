@@ -1175,12 +1175,15 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
     }
 }
 
+export type DialogArgType<T extends DialogBase<any,any>> = T extends DialogBase<infer V,any> ? V : unknown;
+export type DialogRtnType<T extends DialogBase<any,any>> = T extends DialogBase<any, infer V> ? V : unknown;
+
 /**
  * !!DOC
  */
-export function dialogShow<TArgs,TRtn>(form:string|(new (context:$JA.Context)=>DialogBase<TArgs, TRtn>), args: TArgs, context:$JA.Context|null, options?:IDialogOptions): $JA.Task<TRtn>
+export function dialogShow<TDlg extends DialogBase<any,any>>(form:string|(new (context:$JA.Context)=>TDlg), args:DialogArgType<TDlg>, context:$JA.Context|null, options?:IDialogOptions): $JA.Task<DialogRtnType<TDlg>>
 {
-    return (new DialogLoader<TArgs, TRtn>(context, options)).runAsync(form, args);
+    return (new DialogLoader<DialogArgType<TDlg>, DialogRtnType<TDlg>>(context, options)).runAsync(form, args);
 }
 
 /**
