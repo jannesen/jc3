@@ -236,6 +236,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
 {
     private     _name?:             string;
     private     _titleElement:      $JD.DOMHTMLElement;
+    private     _titleText:         $JD.DOMHTMLElement;
     private     _closeable:         boolean;
     private     _disabled:          boolean;
     private     _moremenu?:         (ct:$JA.Context) => $JUM.DataSourceResult;
@@ -261,10 +262,10 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
         return this._name;
     }
     public get  title() {
-        return this._titleElement.text();
+        return this._titleText.text();
     }
     public set  title(text:string) {
-        this._titleElement.text(text);
+        this._titleText.text(text);
     }
     public get  disabled() {
         return this._disabled;
@@ -288,10 +289,11 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
         const container = <div class="jannesen-ui-tab">{ children }</div>;
         super(container);
 
+        const titleText    = <span class="-text">
+                                { attr.title }
+                             </span>
         const titleElement = <span class="-tab">
-                                 <span class="-text">
-                                     { attr.title }
-                                 </span>
+                                { titleText }
                              </span>;
 
         if (attr.closeable) {
@@ -302,6 +304,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
 
         this._name          = attr.name;
         this._titleElement  = titleElement;
+        this._titleText     = titleText;
         this._closeable     = attr.closeable === undefined ? false : !!attr.closeable;
         this._disabled      = attr.disabled === undefined ? false : !!attr.disabled;
         this._loaded        = children.length > 0;
