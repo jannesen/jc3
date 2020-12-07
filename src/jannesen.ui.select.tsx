@@ -5,7 +5,6 @@ import * as $JA      from "jc3/jannesen.async";
 import * as $JD      from "jc3/jannesen.dom";
 import * as $JT      from "jc3/jannesen.datatype";
 import * as $JI      from "jc3/jannesen.input";
-import * as $JSTRING from "jc3/jannesen.string";
 import * as $JPOPUP  from "jc3/jannesen.ui.popup";
 import * as $JL      from "jc3/jannesen.language";
 
@@ -75,24 +74,27 @@ export class ValuesDropdown<TNativeValue,
         const value = input && input.value;
 
         if (value && this._valueList && this._inputelm) {
-            const values = [] as TNativeValue[];
-            const lines  = [] as string[];
-            const keys   = filter ? $JI.normalizeSearchKeys($JSTRING.removeDiacritics(this._inputelm.prop('value')).toUpperCase().split(' ')) : null;
-            const format = value.getAttr("format");
+            const values       = [] as TNativeValue[];
+            const lines        = [] as string[];
+            const searchfilter = filter ? new $JI.SearchFilter(this._inputelm.prop('value'), null) : null;
+            const format       = value.getAttr("format");
 
             for (const v of this._valueList) {
+                let xv:TNativeValue;
+                let xt:string;
+
                 if (v instanceof Object) {
-                    if (this._containsKey(keys, v.text)) {
-                        values.push(v.value);
-                        lines.push(v.text);
-                    }
+                    xv = v.value;
+                    xt = v.text;
                 }
                 else {
-                    const text = value.cnvValueToText(v, format);
-                    if (this._containsKey(keys, text)) {
-                        values.push(v);
-                        lines.push(text);
-                    }
+                    xv = v;
+                    xt = value.cnvValueToText(v, format);
+                }
+
+                if (!searchfilter || searchfilter.matchText(xt)) {
+                    values.push(xv);
+                    lines.push(xt);
                 }
             }
 
@@ -104,17 +106,6 @@ export class ValuesDropdown<TNativeValue,
         }
 
         this.setMessage($JL.no_result, true);
-    }
-    private     _containsKey(keys:string[]|null, text:string)
-    {
-        if (keys) {
-            for (const key of keys) {
-                if (!$JI.textContainsKey(text, key)) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 }
 
@@ -137,16 +128,16 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
         this._currentActionId = 0;
     }
 
-    public      LocalSearch(text:string)
+    public      LocalSearch(searchfilter:$JI.SearchFilter)
     {
-        return this._dataset.LocalSearch(text);
+        return this._dataset.LocalSearch(searchfilter);
     }
 
-    public      Refresh(text:string)
+    public      Refresh(searchfilter:$JI.SearchFilter)
     {
         try {
             this.selectRow(undefined);
-            this._fillcontentTask(this._dataset.Fetch(text), ++this._currentActionId);
+            this._fillcontentTask(this._dataset.Fetch(searchfilter), ++this._currentActionId);
         }
         catch (err) {
             this.setMessage(err, true);

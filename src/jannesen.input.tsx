@@ -824,6 +824,9 @@ export class StringMultiLine extends SimpleControl<$JT.StringMultiLine, IStringM
         if (opts.height) {
             textarea.css("height", opts.height);
         }
+        if (opts['class']) {
+            textarea.addClass(opts['class']);
+        }
 
         this.setcontainer(textarea);
     }
@@ -1557,17 +1560,18 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     }
     protected       openDropdown(keydown:boolean) {
         this.focus();
-        if (this._value) {
-            if ((this._value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) !== 0) {
+        const value = this._value;
+        if (value) {
+            if ((value.Datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) !== 0) {
                 const text = (this.getinputelm().prop("value") as string).trim();
 
                 if (text.length > 0) {
-                    this._getDropdown(DropdownFocus.Yes, (content) => content.Refresh(text));
+                    this._getDropdown(DropdownFocus.Yes, (content) => content.Refresh(new SearchFilter(text, value.Datasource)));
                     return;
                 }
             }
 
-            if ((this._value.Datasource.flags & ($JT.SelectDatasourceFlags.StaticEnum|$JT.SelectDatasourceFlags.SearchAll)) !== 0) {
+            if ((value.Datasource.flags & ($JT.SelectDatasourceFlags.StaticEnum|$JT.SelectDatasourceFlags.SearchAll)) !== 0) {
                 this._getDropdown(DropdownFocus.Yes, (content) => content.RefrechAll());
             }
         }
@@ -1606,7 +1610,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                         if (dataset && (this._state === SelectInputState.InputChanged || !$J.isEqual(this._stateContext, dataset!.InputContext))) {
                             this._state = SelectInputState.FindActive;
                             this._stateText = undefined;
-                            this._runtask(dataset.FetchByText(text),
+                            this._runtask(dataset.FetchByText(new SearchFilter(text, this._value.Datasource)),
                                           (result) => {
                                               if (result) {
                                                   this._setValueUI(result, dataset);
@@ -1667,8 +1671,9 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
 
                                             if (this._value) {
                                                 if (this._activeDropdown && this._activeDropdown.Content) {
-                                                    if ((this._activeDropdown.Content).LocalSearch((this.getinputelm().prop("value") as string).trim())) {
-                                                        this._updatedropdown(DropdownFocus.No);
+                                                    const searchfilter = new SearchFilter((this.getinputelm().prop("value") as string), this._value.Datasource);
+                                                    if ((this._activeDropdown.Content).LocalSearch(searchfilter)) {
+                                                        this._updatedropdown(DropdownFocus.No, searchfilter);
                                                         return ;
                                                     }
                                                 }
@@ -1684,15 +1689,17 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
         this.setError(null);
     }
 
-    private         _updatedropdown(focus:DropdownFocus) {
+    private         _updatedropdown(focus:DropdownFocus, searchfilter?:SearchFilter) {
         if (this._value) {
-            let text = (this.getinputelm().prop("value") as string).trim();
+            if (!searchfilter) {
+                searchfilter = new SearchFilter(this.getinputelm().prop("value") as string, this._value.Datasource);
+            }
 
-            if (text === "" && (this._value.Datasource.flags & ($JT.SelectDatasourceFlags.SearchFetch|$JT.SelectDatasourceFlags.SearchAll)) === $JT.SelectDatasourceFlags.SearchFetch) {
+            if (searchfilter.isEmpty && (this._value.Datasource.flags & ($JT.SelectDatasourceFlags.SearchFetch|$JT.SelectDatasourceFlags.SearchAll)) === $JT.SelectDatasourceFlags.SearchFetch) {
                 this.closeDropdown(false);
                 this._value.setValue(null, $JT.ChangeReason.UI);
             } else {
-               this._getDropdown(focus, (content) => content.Refresh(text));
+               this._getDropdown(focus, (content) => content.Refresh(searchfilter!));
             }
         }
     }
@@ -1744,7 +1751,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
         const dataset = this._getDataset(inputContext);
         if (dataset) {
             this._state = SelectInputState.FindActive;
-            return this._runtask(dataset.FetchContextChange(text, setOnlyOne),
+            return this._runtask(dataset.FetchContextChange(new SearchFilter(text, dataset.Datasource), setOnlyOne),
                                     (result) => {
                                         if (result) {
                                             this._setValueUI(result, dataset);
@@ -1843,6 +1850,7 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
     private     _inputOpts:                 ISelectInputControlOptions<TNativeValue, TDatasource>;
     private     _columns:                   $JT.ISelectTypeAttributeDropdownColumn<$JT.TDatasource_Record<TDatasource>>[];
     private     _currectfetch:              ISelectDataSetFetch<$JT.TDatasource_Record<TDatasource>>|undefined;
+    private     _searchcols:                ((rec:$JT.TDatasource_Record<TDatasource>)=>(string|null))[];
 
     public get  Value()
     {
@@ -1872,46 +1880,53 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
         this._inputOpts    = input.get_opts();
         this._columns      = input.get_opts().dropdown_columns || this._value.getAttr("dropdown_columns") as $JT.ISelectTypeAttributeDropdownColumn<$JT.TDatasource_Record<TDatasource>>[];
         this._currectfetch = undefined;
+
+        this._searchcols = [];
+
+        if (this._columns) {
+            for (const col of this._columns) {
+                 this._searchcols.push((rec) => SelectDataSet.columnText(rec, col.fieldname));
+            }
+        }
+
+        this._searchcols.push((rec) => this._toDisplayText(rec));
     }
 
-    public      Fetch(text:string, maxrec?:number): $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>
+    public      Fetch(searchfilter:SearchFilter, maxrec?:number): $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>
     {
         try {
-            text = $JSTRING.removeDiacritics(text.trim()).toUpperCase();
-
             if (!maxrec) {
                 maxrec = this._inputOpts.fetchmax || 250;
             }
 
             if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
-                let searchkeys = normalizeSearchKeys(this._datasource.normalize_searchtext(text));
+                const searchkeys = searchfilter.getBackendKeys();
 
                 if (searchkeys instanceof Array) {
-                    searchkeys   = this._datasource.filter_searchtext(searchkeys);
-
-                    if (this._currectfetch && SelectDataSet.hassearchdata(this._currectfetch.searchkeys, searchkeys) &&
+                    if (this._currectfetch && SelectDataSet._hassearchdata(this._currectfetch.searchkeys, searchkeys) &&
                         ((this._currectfetch.task.isFulfilled && this._currectfetch.task.value instanceof Array) ||
                          $J.isEqual(this._currectfetch.searchkeys, searchkeys) )) {
-                        return this._filterSortDataTask(this._currectfetch.task, text, maxrec!);
+                        return this._filterSortDataTask(this._currectfetch.task, searchfilter, maxrec!);
                     }
 
                     this._fetchDataStop();
 
                     if (searchkeys.length > 0 || (this._datasource.flags & $JT.SelectDatasourceFlags.SearchAll) !== 0) {
-                        return this._filterSortDataTask(this._fetchDataAsync(searchkeys, maxrec), text, maxrec!);
-                    } else {
-                        return $JA.Task.resolve("NEEDS-MORE-KEYS");
+                        return this._filterSortDataTask(this._fetchDataAsync(searchkeys, maxrec), searchfilter, maxrec!);
                     }
                 }
-                else {
+                else
+                if (typeof searchkeys === 'string') {
                     return this._filterSortDataTask((this._currectfetch && this._currectfetch.searchkeys === searchkeys)
                                                         ? this._currectfetch.task
                                                         : this._fetchDataAsync(searchkeys, maxrec),
-                                                    undefined, 10000000);
+                                                    searchfilter, 10000000);
                 }
+
+                return $JA.Task.resolve("NEEDS-MORE-KEYS");
             }
             else {
-                return this._filterSortDataTask(this._currectfetch ? this._currectfetch.task : this._fetchDataAsync(), text, maxrec!);
+                return this._filterSortDataTask(this._currectfetch ? this._currectfetch.task : this._fetchDataAsync(), searchfilter, maxrec!);
             }
         }
         catch (err) {
@@ -1925,22 +1940,21 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
                                             : this._fetchDataAsync(undefined, (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch ? this._inputOpts.fetchmax || 250 : undefined)),
                                         undefined, 1000000);
     }
-    public      FetchByText(text: string): $JA.Task<$JT.TDatasource_Record<TDatasource>|undefined>
+    public      FetchByText(searchfilter:SearchFilter): $JA.Task<$JT.TDatasource_Record<TDatasource>|undefined>
     {
-        return this.Fetch(text, 1)
+        return this.Fetch(searchfilter, 1)
                    .thenD((result) => {
                        if (result instanceof Array && result.length === 1) {
                            return result[0];
                        }
                    });
     }
-    public      FetchContextChange(text:string, selectone:boolean): $JA.Task<$JT.TDatasource_Record<TDatasource>|undefined>
+    public      FetchContextChange(searchfilter:SearchFilter, selectone:boolean): $JA.Task<$JT.TDatasource_Record<TDatasource>|undefined>
     {
         if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
-            return this.FetchByText(text);
+            return this.FetchByText(searchfilter);
         }
         else {
-            text = $JSTRING.removeDiacritics(text.trim()).toUpperCase();
             return this.FetchAll()
                        .thenD((data) => {
                            data = this._filterSortData(data, this._inputOpts.filter, undefined, undefined, 1000000);
@@ -1949,8 +1963,8 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
                                    return data[0];
                                }
 
-                               if (text !== '') {
-                                   const x = this._filterSortData(data, undefined, text, undefined, 1);
+                               if (!searchfilter.isEmpty) {
+                                   const x = this._filterSortData(data, undefined, searchfilter, undefined, 1);
                                    if (x instanceof Array && x.length === 1) {
                                        return x[0];
                                    }
@@ -1959,12 +1973,11 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
                        });
         }
     }
-    public      LocalSearch(text:string)
+    public      LocalSearch(searchfilter:SearchFilter)
     {
         if (this._currectfetch && this._currectfetch.task.isFulfilled) {
             if (this._datasource.flags & $JT.SelectDatasourceFlags.SearchFetch) {
-                const keywords = this._datasource.normalize_searchtext($JSTRING.removeDiacritics(text.trim()).toUpperCase());
-                return SelectDataSet.hassearchdata(this._currectfetch.searchkeys, normalizeSearchKeys(keywords));
+                return SelectDataSet._hassearchdata(this._currectfetch.searchkeys, searchfilter.getBackendKeys());
             }
             else {
                 return true;
@@ -1993,31 +2006,27 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
             this._currectfetch = undefined;
         }
     }
-
-    private     _filterSortDataTask(task:        $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>,
-                                    filterText:  string|undefined,
-                                    maxrec:number)
+    private     _filterSortDataTask(task:         $JA.Task<string|$JT.TDatasource_Record<TDatasource>[]>,
+                                    searchfilter: SearchFilter|undefined,
+                                    maxrec:       number)
     {
-        return task.thenD((data) => this._filterSortData(data, this._inputOpts.filter, filterText, this._inputOpts.sort, maxrec));
+        return task.thenD((data) => this._filterSortData(data, this._inputOpts.filter, searchfilter, this._inputOpts.sort, maxrec));
     }
-
-    private     _filterSortData(data:        string|$JT.TDatasource_Record<TDatasource>[],
-                                filterFunc:  ((rec:$JT.TDatasource_Record<TDatasource>)=>(boolean|null|undefined))|undefined,
-                                filterText:  string|undefined,
-                                sortFunc:    ((rec1:$JT.TDatasource_Record<TDatasource>,rec2:$JT.TDatasource_Record<TDatasource>)=>number)|undefined,
-                                maxrec:number)
+    private     _filterSortData(data:         string|$JT.TDatasource_Record<TDatasource>[],
+                                filterFunc:   ((rec:$JT.TDatasource_Record<TDatasource>)=>(boolean|null|undefined))|undefined,
+                                searchfilter: SearchFilter|undefined,
+                                sortFunc:     ((rec1:$JT.TDatasource_Record<TDatasource>,rec2:$JT.TDatasource_Record<TDatasource>)=>number)|undefined,
+                                maxrec:       number)
     {
         if (typeof data === 'string') {
             return data;
         }
 
-        const keys = filterText ? normalizeSearchKeys(filterText.split(' ')) : undefined;
-
         let rtn = [] as $JT.TDatasource_Record<TDatasource>[];
 
         for (const rec of data) {
             if ((!filterFunc || filterFunc(rec)) &&
-                (!keys || this._recFilter(rec, keys))) {
+                (!searchfilter || searchfilter.matchRec(rec, this._searchcols))) {
                 if (rtn.length >= maxrec) {
                     return "TOMANY-RESULTS";
                 }
@@ -2029,19 +2038,18 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
         if (sortFunc) {
             rtn = rtn.sort(sortFunc);
         }
+        else if ((this._datasource.flags & $JT.SelectDatasourceFlags.StandardSort) !== 0) {
+            let key =  searchfilter && searchfilter.searchKeys instanceof  Array && searchfilter.searchKeys.length > 0 ? searchfilter.searchKeys[0].toUpperCase() : undefined;
+            if (key && key.startsWith('*')) key = undefined;
 
-        return rtn;
-    }
-    private     _recFilter(rec:$JT.TDatasource_Record<TDatasource>, keys:string[])
-    {
-        for(let key of keys) {
-            if (!(this._columns && this._columns.some((col) => textContainsKey(SelectDataSet.columnText(rec, col.fieldname), key))) &&
-                !textContainsKey(this._value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec), key)) {
-                return false;
-            }
+            rtn = rtn.map((rec) => {
+                         return { rec, text:this._sortText(rec, key) };
+                     })
+                     .sort((r1,r2) => r1.text.localeCompare(r2.text))
+                     .map((h) => h.rec);
         }
 
-        return true;
+        return rtn;
     }
 
     public  static  columnText<TRec extends { [key:string]:any }>(rec:TRec, field:$JT.TDatasource_FieldNames<TRec>|((rec:TRec)=>string))
@@ -2063,7 +2071,37 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
             }
         }
     }
-    private static  hassearchdata(fd_searchtext:string|string[]|undefined, searchtext:string|string[])
+
+    private         _sortText(rec:$JT.TDatasource_Record<TDatasource>, key:string|undefined):string
+    {
+        let prefix   = 9;
+        let sorttext = '';
+
+        if (this._columns) {
+            for (let i = 0 ; i < this._columns.length ; ++i) {
+                const f = (SelectDataSet.columnText(rec, this._columns[i].fieldname) || "").toUpperCase();
+
+                sorttext = (sorttext) ? sorttext + SelectDataSet.columnSep + f : f;
+                if (key && prefix === 9 && i < 8 && f.startsWith(key)) {
+                    prefix = i;
+                }
+            }
+        }
+        else {
+            sorttext = this._toDisplayText(rec).toUpperCase();
+            if (key && sorttext.startsWith(key)) {
+                prefix = 1;
+            }
+        }
+
+        return (key) ? prefix.toString() + sorttext : sorttext;
+    }
+    private         _toDisplayText(rec:$JT.TDatasource_Record<TDatasource>)
+    {
+        const s = this._value.toDisplayText((rec as ({readonly [key:string]:any}))[this._datasource.keyfieldname] as (TNativeValue|null|undefined), rec);
+        return typeof s === 'string' ? s : '[NULL]';
+    }
+    private static  _hassearchdata(fd_searchtext:string|string[]|undefined, searchtext:string|string[]|undefined)
     {
         if (typeof searchtext === 'string' && typeof fd_searchtext === 'string') {
             return fd_searchtext === searchtext;
@@ -2081,6 +2119,127 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
         }
 
         return false;
+    }
+    private static columnSep = $global.String.fromCharCode(10);
+}
+
+export interface ISearchFilterOptions
+{
+    searchCode(searchtext:string): boolean;
+    searchNormalizeKeys(searchkeys:string[]): string[];
+}
+
+export class SearchFilter
+{
+    private     _searchText:        string;
+    private     _options:           ISearchFilterOptions|null;
+    private     _searchKeys:        string[]|null|undefined;
+    private     _backendKeys:       string[]|string|undefined;
+    private     _matches:           RegExp[]|undefined;
+
+    public get  searchText()
+    {
+        return this._searchText;
+    }
+    public get  searchKeys()
+    {
+        return this._searchKeys;
+    }
+    public get  isEmpty()
+    {
+        return !(this._searchKeys || this._backendKeys);
+    }
+
+                constructor(searchText:string, options:ISearchFilterOptions|null)
+    {
+        this._searchText = searchText;
+        this._options    = options;
+
+        searchText = searchText.trim();
+
+        if (options && options.searchCode(searchText)) {
+            this._backendKeys = searchText.toUpperCase();
+        }
+        else {
+            this._searchKeys = searchText.match(/("([^"]|"")*"|[^ ]+)/g);
+        }
+    }
+
+    public      getBackendKeys()
+    {
+        if (!this._backendKeys && this._searchKeys && this._options) {
+             const keys = this._options.searchNormalizeKeys(this._searchKeys.map((s) => $JSTRING.removeDiacritics(s).toUpperCase()));
+             this._backendKeys = keys.filter((k) => !keys.some((r) => r.length > k.length && r.startsWith(k)));
+        }
+
+        return this._backendKeys;
+    }
+    public      matchText(text:string):boolean
+    {
+        if (Array.isArray(this._searchKeys)) {
+            for (const tst of this._getRegex()) {
+                if (!tst.test($JSTRING.removeDiacritics(text))) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+    public      matchRec<T>(rec:T, fieldfunc:((r:T)=>string|null)[]):boolean
+    {
+        if (Array.isArray(this._searchKeys)) {
+            let texts:(string|null)[] = [];
+
+            for (const tst of this._getRegex()) {
+                let f = true;
+
+                for (let i = 0 ; f && i < fieldfunc.length ; ++i) {
+                    if (texts.length <= i) {
+                        const f = fieldfunc[i](rec);
+                        texts[i] = f ? $JSTRING.removeDiacritics(f) : null;
+                    }
+
+                    const s = texts[i];
+                    if (s && tst.test(s)) {
+                        f = false;
+                    }
+                }
+
+                if (f) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private     _getRegex(): RegExp[]
+    {
+        if (!this._matches) {
+            this._matches = [];
+
+            if (this._searchKeys) {
+                let keys = this._searchKeys.map((s) => $JSTRING.removeDiacritics(s).toUpperCase());
+                for (const key of keys.filter((k) => !keys.some((r) => r.length > k.length && r.startsWith(k)))) {
+                    let sregex = key.replace(/[\.\+\^\$\?\|\\\[\]\(\)\{\}\*\u0000-\u0019\u007E-\uFFFF]/g, (s) => {
+                                                 switch (s) {
+                                                 case "*":   return ".*";
+                                                 default:    return "\\u" + (s.charCodeAt(0) + 0x10000).toString(16).substr(-4).toUpperCase();
+                                                 }
+                                             });
+
+                    if (/^[A-Z0-9\"]/.test(key)) {
+                        sregex = '(?:^|[^A-Z^0-9])' + sregex;
+                    }
+
+                    this._matches.push(new RegExp(sregex, 'i'));
+                }
+            }
+        }
+
+        return this._matches;
     }
 }
 
@@ -2375,41 +2534,6 @@ export abstract class SetItem<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleT
 
         return false;
     }
-}
-
-
-//=======
-export function normalizeSearchKeys(keys:string[]):string[];
-export function normalizeSearchKeys(keys:string|string[]):string|string[];
-export function normalizeSearchKeys(keys:string|string[])
-{
-    if (typeof keys === 'string') {
-        return keys;
-    }
-
-    return keys.filter((k) => k.length > 0 && !keys.some((r) => r.length > k.length && r.startsWith(k)));
-}
-
-export function textContainsKey(text:string|null, key:string)
-{
-    if (typeof text === 'string') {
-        text = $JSTRING.removeDiacritics(text).toUpperCase();
-
-        let pos = 0;
-        for (;;) {
-            let p = text.indexOf(key, pos);
-            if (p < 0) {
-                return false;
-            }
-
-            if (p === 0 || !/[A-Z0-9]/.test(key.charAt(0)) || !/[A-Z0-9]/.test(text.charAt(p-1))) {
-                return true;
-            }
-
-            pos = p + 1;
-        }
-    }
-    return false;
 }
 
 //===================================== Helpers ===================================================

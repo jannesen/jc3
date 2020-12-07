@@ -43,8 +43,12 @@ export const enum SelectDatasourceFlags
     StaticEnum      = 0x0001,       // Static enum
     SearchFetch     = 0x0010,       // backend FetchData supports search argument.
     SearchAll       = 0x0020,       // backend FetchData supports returns all record (no search argument).
-    CacheFetch      = 0x0040,       // Cache de fetchdata
-    Loaded          = 0x1000,       // Datasource is loaded
+    SearchCode      = 0x0040,       // backend support code search '#' prefix
+    WildcardSearch  = 0x0100,       // backend support wildcard '*' search.
+    WordIndex       = 0x0200,       // backend created word index only [A-Z0-9] is indexed.
+    StandardSort    = 0x1000,       // Sort dropdown on text.
+    CacheFetch      = 0x2000,       // Cache de fetchdata
+    Loaded          = 0x8000,       // Datasource is loaded
 }
 
 /**
@@ -2905,8 +2909,11 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
     /**
      * Create object with field[fieldnames] as properties.
      */
-    public toObject<TNames extends Array<keyof TRec>>(fieldNames: TNames): { [K in (keyof TRec) & UnboxArray<TNames>]: InstanceType<TRec[K]> }
+    public toObject<TNames extends Array<keyof TRec>>(fieldNames: TNames): { [K in (keyof TRec) & UnboxArray<TNames>]: InstanceType<TRec[K]> };
+    public toObject(): AssignRecordMapper<TRec>;
+    public toObject(fieldNames?: string[]): Object
     {
+        if (!fieldNames) fieldNames = this.FieldNames;
         let rtn = {} as any;
         for (const fn of fieldNames) {
             rtn[fn] = this.field(fn);
@@ -3327,7 +3334,7 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
 /**
  *!!DOC
  */
-export abstract class SelectDatasource<TNative extends SelectValue, TRecord extends ISelectRecord>
+export abstract class SelectDatasource<TNative extends SelectValue, TRecord extends ISelectRecord> implements $JI.ISearchFilterOptions
 {
     protected       _keyfieldname:      string;
 
@@ -3343,6 +3350,9 @@ export abstract class SelectDatasource<TNative extends SelectValue, TRecord exte
     public get keyfieldname()   {
         return this._keyfieldname;
     }
+    /**
+     *!!DOC
+     */
 
     /*protected*/ constructor(keyname?: string) {
         this._keyfieldname         = keyname || "key";
@@ -3356,17 +3366,21 @@ export abstract class SelectDatasource<TNative extends SelectValue, TRecord exte
      *!!DOC
      */
     public abstract fetchdataAsync(context:$JA.Context, inputContext:$JI.SelectInputContext, searchkeys?:string|string[], max?:number): $JA.Task<TRecord[]|string>;
+
     /**
      *!!DOC
      */
-    public filter_searchtext(searchkeys:string[]): string[] {
-        return searchkeys;
+    public  searchCode(searchtext:string): boolean
+    {
+        return false;
     }
+
     /**
      *!!DOC
      */
-    public normalize_searchtext(searchtext: string) : string|string[] {
-        return searchtext.split(" ").filter((s) => s.length > 0);
+    public  searchNormalizeKeys(searchkeys:string[]): string[]
+    {
+        return searchkeys;
     }
 }
 
@@ -3422,9 +3436,8 @@ export interface RemoteSelectDatasourceOpts
     flags:                  SelectDatasourceFlags;
     cache_timeout?:         number;
     keyfieldname:           string;
-    fetch_filter?:          string[];               // List with words (in uppercase) which are not index by the server.
+    key_blacklist?:          string[];               // List with words (in uppercase) which are not index by the server.
     minkeylength?:          number;
-    searchtext_normalize?:  (text:string) => string|string[];
 }
 /**
  *!!DOC
@@ -3557,18 +3570,33 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
                                                                                   url
                                                                              }, context);
     }
-    public  filter_searchtext(searchtext:string[]): string[] {
-        const fetch_filter = this._opts.fetch_filter;
-        const minkeylength = this._opts.minkeylength || 2;
-
-        return searchtext.filter((v) => (v.length >= minkeylength && !(fetch_filter instanceof Array && fetch_filter.indexOf(v) >= 0)));
+    public  searchCode(searchtext:string): boolean
+    {
+        return (this.flags & SelectDatasourceFlags.SearchCode) !== 0 && /^#[A-Za-z0-9\.\-\_\#\*\%\@\!]$/.test(searchtext);
     }
-    public  normalize_searchtext(searchtext: string): string | string[] {
-        if (this._opts.searchtext_normalize) {
-            return this._opts.searchtext_normalize(searchtext);
+    public  searchNormalizeKeys(searchkeys:string[]): string[]
+    {
+        const minkeylength  = this._opts.minkeylength || 2;
+        const key_blacklist = this._opts.key_blacklist;
+
+        let rtn:string[] = [];
+
+        for (const key of searchkeys) {
+            if (key.indexOf('*') < 0 || ((this._opts.flags & SelectDatasourceFlags.WildcardSearch) !== 0 && (/[^\*]/.test(key)))) {
+                if ((this._opts.flags & SelectDatasourceFlags.WordIndex) !== 0) {
+                    for (const k of key.replace(/[^A-Z0-9*]/ig, " ").split(' ')) {
+                        if (k.length >= minkeylength && !(key_blacklist instanceof Array && key_blacklist.indexOf(k) >= 0)) {
+                            rtn.push(k);
+                        }
+                    }
+                }
+                else {
+                    rtn.push(key);
+                }
+            }
         }
 
-        return super.normalize_searchtext(searchtext);
+        return rtn;
     }
 
     private _entrytimeout()
