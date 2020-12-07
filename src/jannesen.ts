@@ -909,6 +909,13 @@ export class Timeout
     private     _timeout:       number|undefined;
 
     /**
+     * Return true if timeout is active.
+     */
+    public get active()
+    {
+        return typeof this._timeout === 'number';
+    }
+    /**
      * @param handler
      *  handler to call when the timeout fires.
      * @param thisArg
