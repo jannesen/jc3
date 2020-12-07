@@ -189,7 +189,7 @@ $jc-line-icon-btn-width:             1.5em !default;
     &:hover {
         border:         0;
         &:before {
-            opacity:        1;
+            opacity:        1 !important;
         }
     }
     &.-edit     { @include line-icon-btn-helper($fa-var-pencil, #0035ff, 1.5, 10.29, 12) }
