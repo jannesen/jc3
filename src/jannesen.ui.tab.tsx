@@ -291,7 +291,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
 
         const titleText    = <span class="-text">
                                 { attr.title }
-                             </span>
+                             </span>;
         const titleElement = <span class="-tab">
                                 { titleText }
                              </span>;
