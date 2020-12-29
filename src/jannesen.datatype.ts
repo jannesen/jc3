@@ -3572,7 +3572,7 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
     }
     public  searchCode(searchtext:string): boolean
     {
-        return (this.flags & SelectDatasourceFlags.SearchCode) !== 0 && /^#[A-Za-z0-9\.\-\_\#\*\%\@\!]$/.test(searchtext);
+        return (this.flags & SelectDatasourceFlags.SearchCode) !== 0 && /^#[A-Za-z0-9\.\-\_\#\*\%\@\!]+$/.test(searchtext);
     }
     public  searchNormalizeKeys(searchkeys:string[]): string[]
     {
