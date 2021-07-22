@@ -344,7 +344,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                              })
                        .catch((e) => {
                                     if (this._contentBody && newContent === this._contentBody) {
-                                        this._container.removeChild(newContent._scrollbox);
+                                        this._container.removeChild(newContent._scrollbox); // TODO: This looks wrong
                                         this._setcontentBody(null);
                                     }
 
