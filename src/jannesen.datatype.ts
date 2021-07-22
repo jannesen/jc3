@@ -2373,6 +2373,9 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
         const href = (format !== 'text' && value) ? this.cnvHRef(value) : undefined;
         if (href) {
             rtn = $JD.createElement("a", { href: href }, rtn);
+            if (format === 'newtab') {
+                rtn.attr('target', '_blank');
+            }
         }
 
         return rtn;
