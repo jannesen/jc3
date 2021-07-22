@@ -1561,7 +1561,7 @@ export interface IAsyncContainerAttrs extends $JD.HTMLAttributes
     onloaded?:      ()=>void;
 }
 
-export abstract class AsyncContainer<TArgs> extends $JD.Container
+export abstract class AsyncContainer<TArgs, TContent extends $JD.AddNode=$JD.AddNode> extends $JD.Container
 {
     private             _activeTask:    IActiveTask|null;
 
@@ -1597,7 +1597,8 @@ export abstract class AsyncContainer<TArgs> extends $JD.Container
                          .then((content) => {
                                     this._container.removeClass("-loading");
                                     if (content !== undefined) {
-                                        this._container.empty().appendChild(content as $JD.AddNode);
+                                        this._container.empty().appendChild(content);
+                                        this.onshow(content);
                                     }
                                     this.trigger('loaded');
                                },
@@ -1617,7 +1618,10 @@ export abstract class AsyncContainer<TArgs> extends $JD.Container
         return task;
     }
 
-    protected abstract  run(args:TArgs, ct:$JA.Context|null): $JA.Task<$JD.AddNode>;
+    protected abstract  run(args:TArgs, ct:$JA.Context): $JA.Task<TContent>;
+    protected           onshow(content:TContent)
+    {
+    }
 }
 //-------------------------------------------------------------------------------------------------
 /**
