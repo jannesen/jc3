@@ -29,7 +29,7 @@ export interface IDataTableOptsColumn<TRec extends DataTableSourceType>
 {
     title?:         string|$JD.AddNode;
     data?:          DataTableColumnNames<TRec> | ((rec: TRec)=>string|$JD.AddNode);
-    dataFilter?:    (rec: TRec)=>string;
+    dataFilter?:    (rec: TRec)=>string|null|undefined;
     format?:        string;
     style?:         string;
     'class'?:       string;
@@ -764,7 +764,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
             this._sourceset.unbind('removed', this.refreshData, this);
         }
     }
-    private static  _toText<TRecord extends DataTableSourceType>(rec:TRecord, copts:IDataTableOptsColumn<TRecord>): string|undefined
+    private static  _toText<TRecord extends DataTableSourceType>(rec:TRecord, copts:IDataTableOptsColumn<TRecord>): string|null|undefined
     {
         if (typeof copts.data === "string") {
             if (rec instanceof $JT.Record) {
@@ -781,12 +781,24 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
             }
         }
         else if (typeof copts.dataFilter === 'function') {
-            return copts.dataFilter(rec);
+            try {
+                return copts.dataFilter(rec);
+            }
+            catch(e) {
+                console.error('DataTable.column.dataFilter failed', e);
+                return undefined;
+            }
         }
         else if (typeof copts.data === "function") {
-            const s = copts.data(rec);
-            if (typeof s === 'string') {
-                return s;
+            try {
+                const s = copts.data(rec);
+                if (typeof s === 'string') {
+                    return s;
+                }
+            }
+            catch(e) {
+                console.error('DataTable.column.data failed', e);
+                return undefined;
             }
         }
     }
@@ -807,7 +819,13 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
             }
         }
         else if (typeof copts.data === "function") {
-            return copts.data(rec) as $JD.AddNode;
+            try {
+                return copts.data(rec) as $JD.AddNode;
+            }
+            catch(e) {
+                console.error('DataTable.column.data failed', e);
+                return "[[ERROR]]";
+            }
         }
     }
 }
