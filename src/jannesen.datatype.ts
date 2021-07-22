@@ -1671,6 +1671,38 @@ export class StringMultiLine extends StringBase<$JI.StringMultiLine> {
     }
 }
 
+export interface IStringHtmlAttributes extends IStringAttributes
+{
+    minLength?: number;
+    maxLength?: number;
+    options?:   StringOptions;
+    charset?:   RegExp;
+    validator?: RegExp|((s:string)=>boolean);
+    'class'?:   string;
+}
+
+export class StringHtml extends StringBase<$JI.StringMultiLine> {
+    public static   Name        = "StringHtml";
+    public static   NativeType  = "string";
+    public static   Attributes  = $J.extend<IStringHtmlAttributes>({ }, SimpleType.Attributes);
+    public static   subClass(attr:IStringHtmlAttributes): typeof StringMultiLine {
+        return subClassHelper(StringHtml, attr);
+    }
+
+    public getControl(opts?:$JI.IStringMultiLineControlOptions):$JI.StringMultiLine {
+        return this.getinputcontrol<$JI.StringMultiLine, $JI.IStringMultiLineControlOptions>("jc3/jannesen.input", "StringMultiLine", opts);
+    }
+
+    public toDom(format?:string):$JD.AddNode {
+        let div = $JD.createElement("div", { 'class': this.getAttr('class') });
+        const v = this.value;
+        if (v) {
+            div.html(v);
+        }
+        return div;
+    }
+}
+
 //===================================== Boolean ===================================================
 /**
  *!!DOC
