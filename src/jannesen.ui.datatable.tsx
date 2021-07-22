@@ -161,7 +161,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
         let theadtr = <tr/>;
 
         opts.columns.forEach((col,index) => {
-                                colgroup.appendChild(col.width ? <col style={ "width:"+col.width } /> : <col/>);
+                                colgroup.appendChild(<col class={"-col"+(index+1)} style={ col.width ? "width:"+col.width : undefined } />);
                                 theadtr.appendChild(<td class={$JD.classJoin("-col"+(index+1), col['class'])} style={ col.style }>{ col.title }</td>);
                             });
 
