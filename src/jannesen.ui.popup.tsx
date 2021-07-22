@@ -331,7 +331,7 @@ export class Tooltip extends Popup
     private     _markerSize!:   number;
     private     _offsetX!:      number;
 
-                constructor(parentelm: $JD.DOMHTMLElement, message:string)
+                constructor(parentelm: $JD.DOMHTMLElement, content:$JD.AddNode)
     {
         super(parentelm,  "-tooltip", undefined);
 
@@ -342,7 +342,7 @@ export class Tooltip extends Popup
         this.Show([
                     ( this._markerOuter = <span class="-marker -outer" /> ),
                     ( this._markerInner = <span class="-marker -inner" /> ),
-                    <div class="-text">{ $JD.multilineStringToContent(message) }</div>
+                    <div class="-text">{ content }</div>
                   ]);
     }
 

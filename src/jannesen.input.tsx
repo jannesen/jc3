@@ -2280,7 +2280,7 @@ export class ErrorMessage
 
     private         _createPopup() {
         if (!this._popup) {
-            this._popup = new $JPOPUP.Tooltip(this._inputelm, this._message);
+            this._popup = new $JPOPUP.Tooltip(this._inputelm, $JD.multilineStringToContent(this._message));
         }
     }
     private         _removePopup() {
