@@ -949,11 +949,13 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      * !!DOC
      */
     public html(): string;
-    public html(value:string): DOMHTMLElement;
+    public html(value:string|null|undefined): DOMHTMLElement;
     public html(value?:string): any
     {
         if (arguments.length >= 1) {
-            this._element.innerHTML = <string>value;
+            if (typeof value === 'string') {
+                this._element.innerHTML = <string>value;
+            }
             return this;
         }
 
