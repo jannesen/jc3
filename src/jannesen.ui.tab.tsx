@@ -337,6 +337,16 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
         container.show(false);
     }
 
+    public      unloadContent()
+    {
+        if (this._loaded) {
+            this._container.empty();
+            this._tabContent = undefined;
+            this._size = undefined;
+            this._loaded = false;
+        }
+    }
+
     public      bind(eventName:"click", handler: (ev:any)=>void, thisArg?:any): void;
     public      bind(eventName:string, handler: (ev:any)=>void, thisArg?:any) {
         return super.bind(eventName, handler, thisArg);
@@ -421,7 +431,7 @@ export class Tab extends $JD.Container implements $JUC.IMoreMenu
         }
     }
     /*@internal*/       setSize(size: $JD.ISize|undefined) {
-        if (!$JD.compareSize(this._size, size)) {
+        if (this._tabContent && !$JD.compareSize(this._size, size)) {
             this._container.setSize(this._size = size);
 
             if ($JD.ImplementsSetSize(this._tabContent)) {
