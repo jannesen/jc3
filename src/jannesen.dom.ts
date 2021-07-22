@@ -682,6 +682,21 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
 
         return rtn;
     }
+    public get innerSize(): ISize
+    {
+        var rtn: ISize =    {
+                                width:  this._element.offsetWidth,
+                                height: this._element.offsetHeight
+                            };
+        var style = this.defaultView.getComputedStyle(this._element);
+
+        rtn.width  -= parseFloatUndefined(style.paddingLeft)     + parseFloatUndefined(style.paddingRight) +
+                      parseFloatUndefined(style.borderLeftWidth) + parseFloatUndefined(style.borderRightWidth);
+        rtn.height -= parseFloatUndefined(style.paddingTop)  + parseFloatUndefined(style.paddingBottom) +
+                      parseFloatUndefined(style.borderTopWidth) + parseFloatUndefined(style.borderBottomWidth);
+
+        return rtn;
+    }
 
     /**
      * !!DOC
