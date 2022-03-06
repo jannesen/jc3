@@ -1475,9 +1475,9 @@ export class DialogMessage extends Dialog<IDialogMessageArgs, string>
 /**
  * !!DOC
  */
-export class DialogConfirm extends Dialog<{title:string, message:string|$JD.DOMHTMLElement}, string>
+export class DialogConfirm extends Dialog<{title:string, message:string|$JD.AddNode}, string>
 {
-    public static       show(title:string, message:string|$JD.DOMHTMLElement, ct:$JA.Context)
+    public static       show(title:string, message:string|$JD.AddNode, ct:$JA.Context)
     {
         return dialogShow(DialogConfirm,
                           {
@@ -1491,7 +1491,7 @@ export class DialogConfirm extends Dialog<{title:string, message:string|$JD.DOMH
     {
         return this.args.title || $JL.message_default_title;
     }
-    protected           formBody(): $JD.DOMHTMLElement
+    protected           formBody()
     {
         const args = this.args;
         if (typeof args.message === "string") {
