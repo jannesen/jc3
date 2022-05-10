@@ -163,6 +163,10 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
     {
         return this._isbusy;
     }
+    public  get         isExecuteBusy()
+    {
+        return !!this._activeTask;
+    }
 
     public              constructor(className:string, parentContext:$JA.Context|null)
     {
@@ -503,6 +507,11 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
     public get          isIdle():boolean                  {
         const loader = this._loader;
         return !!loader && loader.contentBody === this && !(loader.isBusy || this._content.hasClass("-loading"));
+    }
+    public get          isExecuteBusy()
+    {
+        const loader = this._loader;
+        return !!loader && loader.isExecuteBusy;
     }
     protected get       scrollbody():$JD.DOMHTMLElement     { return this._scrollbox;        }
     protected get       content():$JD.DOMHTMLElement        { return this._content;          }
