@@ -530,19 +530,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                     this._fillBody();
                 }
 
-                let     containerBottom = this._container.clientRect.bottom + 1;
-                let     rowBottom       = this._body.childNodes(row - this._curTopRow).clientRect.bottom;
-                let     n = 0;
-
-                while ((this._curTopRow + n) < row && rowBottom > containerBottom) {
-                    rowBottom -= this._body.childNodes(n).clientRect.height;
-                    ++n;
-                }
-
-                if (n > 0)  {
-                    this._scrollbar.Value! += n;
-                    this._fillBody();
-                }
+                this._scrollDownIfNeeded(row);
             }
         }
 
@@ -669,6 +657,24 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
             }
         }
     }
+    private     _scrollDownIfNeeded(row:number|null|undefined)
+    {
+        if (typeof this._curTopRow === 'number' && typeof row === 'number') {
+            let     containerBottom = this._container.clientRect.bottom + 1;
+            let     rowBottom       = this._body.childNodes(row - this._curTopRow).clientRect.bottom;
+            let     n = 0;
+
+            while ((this._curTopRow + n) < row && rowBottom > containerBottom) {
+                rowBottom -= this._body.childNodes(n).clientRect.height;
+                ++n;
+            }
+
+            if (n > 0)  {
+                this._scrollbar.Value! += n;
+                this._fillBody();
+            }
+        }
+    }
     private     _setSelected(row:number|null|undefined)
     {
         if (typeof row === 'number') {
@@ -728,6 +734,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
             this._scrollbar.Size = height - rowHeight;
             this._visualRows = (height - (this._table.outerSize.height - this._body.outerSize.height)) / rowHeight;
             this._filterset(true);
+            this._scrollDownIfNeeded(this._selectedRow);
         }
     }
     private     _getRowHeight() {
