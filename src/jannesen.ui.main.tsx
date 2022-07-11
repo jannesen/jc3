@@ -509,7 +509,7 @@ export const main_basepath = baseUrl(location.href);
 /**
  * !!DOC
  */
-export function makeAbsoluteUrl(basepath: ({ host:string, path:string}), url:string)
+export function makeAbsoluteUrl(basepath: ({ host:string; path:string}), url:string)
 {
     const p = absoluteUrl(basepath, url);
     return p.host + p.path + p.querystring;
@@ -517,7 +517,7 @@ export function makeAbsoluteUrl(basepath: ({ host:string, path:string}), url:str
 /**
  * !!DOC
  */
-export function makeRelativeUrl(basepath: ({ host:string, path:string}), url:string)
+export function makeRelativeUrl(basepath: ({ host:string; path:string}), url:string)
 {
     const p = absoluteUrl(basepath, url);
     let r:string;
@@ -537,7 +537,7 @@ export function makeRelativeUrl(basepath: ({ host:string, path:string}), url:str
 /**
  * !!DOC
  */
-export function makeModuleUrl(basepath: ({ host: string, path: string }), url: string)
+export function makeModuleUrl(basepath: ({ host: string; path: string }), url: string)
 {
     const path_hpqs = /^!([^#?]*)([#?].*)?$/.exec(url);
 
@@ -562,7 +562,7 @@ export function makeModuleUrl(basepath: ({ host: string, path: string }), url: s
 /**
  * !!DOC
  */
-export function absoluteUrl(basepath: ({ host:string, path:string}), url:string)
+export function absoluteUrl(basepath: ({ host:string; path:string}), url:string)
 {
     const path_hpqs = /^([^#?]*)([#?].*)?$/.exec(url);
 
@@ -686,7 +686,7 @@ export function get_browser_formstate(replace:boolean): $JUC.IFormState|undefine
 
         let newState = {
                             uuid:       uuid,
-                            timestamp:  (new Date).getTime(),
+                            timestamp:  (new Date()).getTime(),
                             href:       href,
                             state:      undefined as any,
                             argset:     undefined as any

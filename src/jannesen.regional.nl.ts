@@ -161,7 +161,7 @@ export function stringToTime(text:string, timeformat:$J.TimeFormat):number {
                        (typeof m[3] === "string" ? $J.parseIntExact(m[3]) : 0);
             }
         }
-
+    // fall tru
     default:
         if (m = regexTime.exec(text)) {
             if (typeof m[1] === "string") {
@@ -184,7 +184,7 @@ export function timeToString(value:number, timeformat:$J.TimeFormat):string {
     let sign = (value < 0);
     if (sign) value = -value;
 
-    let n:{ result:number, remainder:number };
+    let n:{ result:number; remainder:number };
     let fraction:number;
     let seconds:number;
 

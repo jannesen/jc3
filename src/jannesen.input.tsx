@@ -605,7 +605,7 @@ export abstract class InputTextControl<TNativeValue,
  * !!DOC
  */
 
-export type DropdownValues<TNative> = TNative | { value:TNative, text:string };
+export type DropdownValues<TNative> = TNative | { value:TNative; text:string };
 export type DropdownValuesList<TNative> = DropdownValues<TNative>[] | $JA.Task<DropdownValues<TNative>[]>;
 export interface IDropdownStdData
 {
@@ -2374,7 +2374,7 @@ export class SetInput<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleType<any>
 
     public              addNewItem() {
         if (!this._newSetEntry) {
-            this._newSetEntry = new this._itemClass(this, new this._data.ItemDef, true);
+            this._newSetEntry = new this._itemClass(this, new this._data.ItemDef(), true);
             this._container.appendChild(this._newSetEntry.domElement);
         }
     }
@@ -2387,7 +2387,7 @@ export class SetInput<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleType<any>
             item.itemRemoved(false);
         }
     }
-    private             _set_onAdded(ev:{ item:TSet, index: number}) {
+    private             _set_onAdded(ev:{ item:TSet; index: number}) {
         if (this._newSetEntry && this._newSetEntry.data === ev.item) {
             this._setItems.push(this._newSetEntry);
             this._newSetEntry.itemAdded();
@@ -2400,7 +2400,7 @@ export class SetInput<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleType<any>
             this._setItems.push(item);
         }
     }
-    private             _set_onRemoved(ev:{ item:TSet, index: number}) {
+    private             _set_onRemoved(ev:{ item:TSet; index: number}) {
         const idx = this._findSetItemByDataItem(ev.item);
         if (idx >= 0) {
             const setItem = this._setItems[idx];

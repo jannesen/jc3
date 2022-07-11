@@ -760,7 +760,7 @@ export abstract class ViewBase implements $JD.IDOMContainer
         let last  = this._viewState.firstVisable + ((this._cells.length - 1) * step);
         let value = this._viewState.selected;
 
-        if (value != null && first <= value && value < first + (this._cells.length * step)) {
+        if (value !== null && first <= value && value < first + (this._cells.length * step)) {
             let r = value % this._viewState.step;
             if (r !== 0) {
                 value -= r + ((r > this._viewState.step/2) ? this._viewState.step : 0);
@@ -813,7 +813,7 @@ export abstract class ViewBase implements $JD.IDOMContainer
         while (elmtd instanceof HTMLElement && elmtd.tagName !== "TD")
             elmtd = elmtd.parentElement;
 
-        if (elmtd != null) {
+        if (elmtd !== null) {
             let cell = this._cells.find((c) => (c && c.element === elmtd));
 
             if (cell && cell.hasClass("-clickable")) {

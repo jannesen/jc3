@@ -397,7 +397,7 @@ export class MenuEntry extends MenuItem<IMenuEntryAttr> implements IMenuParent
 interface IMenuParent
 {
     menu_closeMenu():void;                                                                                            // Close active sub menu
-    menu_positionChild(posOuterRect:$JD.IRect): $JUP.PositionFlags | { rect:$JD.IRect, flags:$JUP.PositionFlags };    // Position data for child menu.
+    menu_positionChild(posOuterRect:$JD.IRect): $JUP.PositionFlags | { rect:$JD.IRect; flags:$JUP.PositionFlags };    // Position data for child menu.
 }
 
 class PopupMenu extends $JUP.Popup

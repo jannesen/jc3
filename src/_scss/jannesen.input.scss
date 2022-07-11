@@ -21,9 +21,7 @@ $jc-input-errormsg-border-radius:      4px !default;
 }
 
 @mixin fa-input-button($content, $width, $size, $offset:0em) {
-    $fontsize: round(100 * (1em + $jc-input-padding-top-bottom * 2) / ($width / $size)) / 100;
-
-    font-size:      100% * $fontsize;
+    font-size:      calc(100% * round(calc(100 * (1em + $jc-input-padding-top-bottom * 2) / ($width / $size))) / 100);
     font-weight:    $font-awesome-solid;
     content:        fa-content($content);
     display:        flex;

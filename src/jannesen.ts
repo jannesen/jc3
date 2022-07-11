@@ -89,10 +89,10 @@ export type JsonValue   = number|string|boolean|null|undefined|JsonObject|JsonAr
 /**
  * !!DOC
  */
-export interface IUrlArgsFunc      { toUrlArgs(): { [name:string]: string }; }
-export interface IUrlValue         { toUrlValue(): string|null; }
-export interface IUrlArgsInvariant { [name:string]: string; }
-export interface IUrlArgsColl      { [name:string]: string|number|boolean|null|undefined|IUrlValue; }
+export interface IUrlArgsFunc      { toUrlArgs(): { [name:string]: string } }
+export interface IUrlValue         { toUrlValue(): string|null }
+export interface IUrlArgsInvariant { [name:string]: string }
+export interface IUrlArgsColl      { [name:string]: string|number|boolean|null|undefined|IUrlValue }
 export type IUrlArgs = IUrlArgsInvariant | IUrlArgsColl | IUrlArgsFunc;
 export function isIUrlArgsFunc(v: Object): v is IUrlArgsFunc {
     return typeof (v as any).toUrlArgs === 'function';
@@ -822,9 +822,9 @@ export function round(v: number, p: number): number
 /**
  * Divide and return result and remainder
  */
-export function divModulo(v: number,      divisor: number): { result:number, remainder:number };
-export function divModulo(v: number|null, divisor: number): { result:number, remainder:number }|null;
-export function divModulo(v: number|null, divisor: number): { result:number, remainder:number }|null {
+export function divModulo(v: number,      divisor: number): { result:number; remainder:number };
+export function divModulo(v: number|null, divisor: number): { result:number; remainder:number }|null;
+export function divModulo(v: number|null, divisor: number): { result:number; remainder:number }|null {
     if (v === null)
         return null;
 

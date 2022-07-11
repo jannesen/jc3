@@ -9,7 +9,9 @@ import * as $JCONTENT from "jc3/jannesen.ui.content";
 export type DataTableSourceRecType = $JT.Record<$JT.IFieldDef>;
 export type DataTableSourceObjType = { [key:string]:any };
 export type DataTableSourceType = DataTableSourceRecType | DataTableSourceObjType;
-export type DataTableSourceSetType<TRec extends DataTableSourceType> = TRec extends $JT.Record<$JT.IFieldDef> ? $JT.Set<TRec>|TRec[] : TRec[];
+// Workaround typescript bug #49075
+//export type DataTableSourceSetType<TRec extends DataTableSourceType> = TRec extends $JT.Record<$JT.IFieldDef> ? $JT.Set<TRec>|TRec[] : TRec[];
+export type DataTableSourceSetType<TRec extends DataTableSourceType> = TRec extends $JT.Record<$JT.IFieldDef> ? $JT.Set<$JT.Record<$JT.IFieldDef>>|TRec[] : TRec[];
 export type DataTableColumnNames<TRec extends DataTableSourceType> = TRec extends $JT.Record<$JT.IFieldDef> ? $JT.RecordFieldNames<TRec> : keyof TRec;
 
 export interface IDataTableOpts<TRec extends DataTableSourceType>

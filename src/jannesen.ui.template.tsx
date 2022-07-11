@@ -698,12 +698,18 @@ export const enum StandardDialogMode
     Create,
     Edit,
 }
+export type ArgRecord = $JT.Record<$JT.IFieldDef> | IArgRecord
+export interface IArgRecord
+{
+    [name: string]: $JT.BaseType|ArgRecord|string|number|boolean|undefined|null;
+}
+
 export interface IStandardDialogCallData
 {
     dlgmode?:               StandardDialogMode;
-    callargs?:              $JT.Record<$JT.IFieldDef> | $JT.IRecord | $J.IUrlArgs ;
+    callargs?:              ArgRecord | $J.IUrlArgs ;
     callargsext?:           $JT.IRecord;
-    data?:                  $JT.Record<$JT.IFieldDef> | $JT.IRecord | $JT.RecordSet<$JT.IFieldDef>;
+    data?:                  ArgRecord | $JT.RecordSet<$JT.IFieldDef>;
     dataext?:               $JT.IRecord;
     [key: string]:          any;
 }
@@ -839,7 +845,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
                                                          .then(() => this.onDelete(context)))
             .then((r) => this.closeForm(r));
     }
-    protected               allowDelete()
+    protected               allowDelete(): boolean
     {
         return true;
     }
@@ -848,7 +854,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
         const intfDel = this.interfaceDelete;
 
         if (intfDel) {
-            if (this.allowDelete && intfDel && intfDel.callargs_type) {
+            if (this.allowDelete() && intfDel && intfDel.callargs_type) {
                 let opts = {
                     callargs:   new intfDel.callargs_type(),
                     data:       intfDel.request_type ? new intfDel.request_type() : undefined
@@ -863,7 +869,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
         else if (this.dlgmode === StandardDialogMode.Edit) {
             const intfSave = this.interfaceSave;
             if (intfSave && intfSave.methods && intfSave.methods.includes('DELETE')) {
-                if (this.allowDelete && intfSave && intfSave.callargs_type) {
+                if (this.allowDelete() && intfSave && intfSave.callargs_type) {
                     return $JA.Ajax(intfSave, {
                                         method:     'DELETE',
                                         callargs:   this.callargs,

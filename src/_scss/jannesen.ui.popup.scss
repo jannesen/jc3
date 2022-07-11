@@ -126,7 +126,7 @@
             overflow-y:     auto;
 
             &.-position {
-                max-height:     20 * (1em * (13.525/12) + .2em) + 0.4em;
+                max-height:     calc(20 * (1em * (13.525/12) + .2em) + 0.4em);
                 >div {
                     overflow-y:     scroll;
                     td {

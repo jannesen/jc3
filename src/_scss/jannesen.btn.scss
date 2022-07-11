@@ -150,8 +150,8 @@ $jc-line-icon-btn-width:             1.5em !default;
 @mixin line-icon-btn-helper($content, $color, $size, $width, $height) {
     &:before {
         font-size:      1em * $size;
-        top:            1em * ((12 - $height * $size) / 2) / (12 * $size);
-        left:           1em * ((12 * ($jc-line-icon-btn-width / 1em) - $width * $size) / 2) / (12 * $size);
+        top:            calc(1em * ((12 - $height * $size) / 2) / (12 * $size));
+        left:           calc(1em * ((12 * ($jc-line-icon-btn-width / 1em) - $width * $size) / 2) / (12 * $size));
         color:          $color;
         font-weight:    $font-awesome-solid;
         content:        fa-content($content);

@@ -1,4 +1,4 @@
 .vs/*
-www/*
+output/*
 *.nbuildproj.user
 tsconfig.json

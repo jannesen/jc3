@@ -35,10 +35,17 @@ $dialog-padding:                        15px;
 @mixin input-hover() {
 }
 
-@import "../../../FontAwesome/font-awesome-5.8.2/scss/fontawesome";
-@import "../../../FontAwesome/font-awesome-5.8.2/scss/_variables.scss";
-@import "../../../FontAwesome/font-awesome-5.8.2/scss/regular.scss";
-@import "../../../FontAwesome/font-awesome-5.8.2/scss/solid.scss";
+$FontAwesome: 'c:/temp';
+
+@import "file:///$FontAwesome/scss/fontawesome.scss";
+@import "file:///$FontAwesome/scss/_variables.scss";
+@import "file:///$FontAwesome/scss/regular.scss";
+@import "file:///$FontAwesome/scss/solid.scss";
+
+//@import "../../../FontAwesome/font-awesome-5.8.2/scss/fontawesome.scss";
+//@import "../../../FontAwesome/font-awesome-5.8.2/scss/_variables.scss";
+//@import "../../../FontAwesome/font-awesome-5.8.2/scss/regular.scss";
+//@import "../../../FontAwesome/font-awesome-5.8.2/scss/solid.scss";
 @import "../src/_scss/jannesen.scss";
 @import "../src/_scss/jannesen.btn.scss";
 @import "../src/_scss/jannesen.input.scss";

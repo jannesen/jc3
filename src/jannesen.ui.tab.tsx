@@ -41,10 +41,10 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
     public  get sizeContent() {
         return this._sizeContent;
     }
-    public  get selectedTab() {
+    public  get selectedTab(): Tab|null {
         return this._selectedTab;
     }
-    public  get activeTab() {
+    public  get activeTab(): Tab|null {
         return this._selectedTab === this._visibleTab ? this._selectedTab : null;
     }
 

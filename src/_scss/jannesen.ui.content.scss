@@ -1,7 +1,7 @@
 ﻿$font:                                      12px Lucida Grande, Lucida Sans,Arial,sans-serif !default;
 $jc-dialog-padding:                         0.5em !default;
 $jc-dialog-narrow-padding:                  5px !default;
-$jc-dialog-header-button-padding:           $jc-dialog-padding / 1.2 $jc-dialog-padding !default; // Padding around button for beter touch on phone on tablet.
+$jc-dialog-header-button-padding:           calc($jc-dialog-padding / 1.2) $jc-dialog-padding !default; // Padding around button for beter touch on phone on tablet.
 $jc-dialog-header-background-color:         #42455e !default;
 $jc-dialog-header-font-size:                1.2em !default;
 $jc-dialog-prev-content-background-color:   rgba(0, 0, 0, 0.2) !default;
@@ -220,7 +220,7 @@ div.jannesen-ui-content-dialog {
                 display:            inline-block;
                 font-weight:        normal;
                 font-size:          1.2em;
-                margin-top:         (-$jc-dialog-padding / 1.2);
+                margin-top:         calc($jc-dialog-padding / -1.2);
                 padding:            $jc-dialog-header-button-padding;
                 border:             0;
                 cursor:             pointer;

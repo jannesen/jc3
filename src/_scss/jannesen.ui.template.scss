@@ -15,7 +15,7 @@
                 border-collapse:    separate;
                 > tr {
                     >td.-caption {
-                        padding:        (2em/12) 0.5em 0em 1em;
+                        padding:        calc(2em / 12) 0.5em 0em 1em;
                         white-space:    nowrap;
                     }
                     >td.-input {

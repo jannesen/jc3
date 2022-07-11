@@ -45,11 +45,11 @@ $fa-font-path:                "../lib/font";
 @import "../src/_scss/jannesen.input.scss";
 @import "../src/_scss/jannesen.ui.popup.scss";
 @import "../src/_scss/jannesen.ui.datetimepicker.scss";
-@import "../src/_scss/jannesen.ui.content";
+@import "../src/_scss/jannesen.ui.content.scss";
 @import "../src/_scss/jannesen.ui.menu.scss";
 @import "../src/_scss/jannesen.ui.sidebar.scss";
 @import "../src/_scss/jannesen.ui.treeview.scss";
-@import "../src/_scss/jannesen.ui.main";
+@import "../src/_scss/jannesen.ui.main.scss";
 @import "../src/_scss/jannesen.ui.tab.scss";
 
 div.jannesen-ui-dialog {

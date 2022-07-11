@@ -408,7 +408,7 @@ export abstract class BaseType<TControl extends IBaseControl=IBaseControl> imple
     public static   Attributes:IBaseTypeAttributes = {};
 
     protected   _control:       TControl|undefined;
-    protected   _attributes:    ({ [ key:string]: any; } | undefined);
+    protected   _attributes:    ({ [ key:string]: any } | undefined);
     protected   _uniqueid:      string|undefined;
 
     /**
@@ -1694,7 +1694,7 @@ export class StringHtml extends StringBase<$JI.StringMultiLine> {
     }
 
     public toDom(format?:string):$JD.AddNode {
-        let div = $JD.createElement("div", { 'class': this.getAttr('class') });
+        let div = $JD.createElement("div", { class: this.getAttr('class') });
         const v = this.value;
         if (v) {
             div.html(v);
@@ -3123,8 +3123,8 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
     /**
      *!!DOC
      */
-    public bind(eventName:"added",   handler:(ev:{ item:TSet, index: number})=>void, thisArg?:any): void;
-    public bind(eventName:"removed", handler:(ev:{ item:TSet, index: number})=>void, thisArg?:any): void;
+    public bind(eventName:"added",   handler:(ev:{ item:TSet; index: number})=>void, thisArg?:any): void;
+    public bind(eventName:"removed", handler:(ev:{ item:TSet; index: number})=>void, thisArg?:any): void;
     public bind(eventName: string,   handler:(ev:any)                        =>void, thisArg?:any): void {
         super.bind(eventName, handler, thisArg);
     }
@@ -3483,7 +3483,7 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
     private         _cache:         { [key:string]: {
                                             timeout?:       number;
                                             entry:          TRecord|undefined|$JA.Task<TRecord|undefined>;
-                                        }
+                                        };
                                     };
     private         _cachetimeout:  number;
     private         _cleanuptimer:  number|undefined;

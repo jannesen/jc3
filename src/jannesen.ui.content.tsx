@@ -151,7 +151,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
     protected           _activeTask:    IActiveTask|null;
     private             _execute_cnt:   number;
     private             _loading_cnt:   number;
-    private             _restoreFocus?: { target:HTMLElement, options?:FocusOptions };
+    private             _restoreFocus?: { target:HTMLElement; options?:FocusOptions };
 
     protected abstract get getRequesttedContentType(): new ()=>TContentBody;
 
@@ -849,7 +849,7 @@ export abstract class Form<TArgs=any,TState=any> extends ContentBody<FormLoader<
     {
         if (this._formstate) {
             try {
-                this._formstate.timestamp = (new Date).getTime();
+                this._formstate.timestamp = (new Date()).getTime();
                 this._formstate.state     = this.savestate();
             } catch (e) {
                 $J.globalError("Form.savestate failed.", e);
@@ -1484,7 +1484,7 @@ export class DialogMessage extends Dialog<IDialogMessageArgs, string>
 /**
  * !!DOC
  */
-export class DialogConfirm extends Dialog<{title:string, message:string|$JD.AddNode}, string>
+export class DialogConfirm extends Dialog<{title:string; message:string|$JD.AddNode}, string>
 {
     public static       show(title:string, message:string|$JD.AddNode, ct:$JA.Context)
     {
@@ -1796,7 +1796,7 @@ function errorToMsg(err:Error): $JD.DOMHTMLElement {
  */
 function setDialogOnTop(dialogLoader: DialogLoader<any,any>|null)
 {
-    const dialogs = [] as { dialogloader: DialogLoader<any,any>, zindex:number }[];
+    const dialogs = [] as { dialogloader: DialogLoader<any,any>; zindex:number }[];
 
     try {
         for (var c of $global.document.body.children) {

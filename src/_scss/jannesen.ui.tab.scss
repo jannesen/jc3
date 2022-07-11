@@ -4,13 +4,13 @@
     >.-tab-header {
         background-color:   #a8a8a8;
         padding-left:       .25em;
-        padding-top:        (2em / 12);
+        padding-top:        calc(2em / 12);
 
         > span {
             position:                   relative;
             display:                    inline-block;
             box-sizing:                 border-box;
-            height:                     (26em / 12);
+            height:                     calc(26em / 12);
             padding:                    .4167em 1em 0 1em;
             color:                      #fff;
             background-color:           hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), calc(var(--jc-main-color-light) + 40%) );

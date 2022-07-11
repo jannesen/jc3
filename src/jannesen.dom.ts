@@ -305,7 +305,6 @@ export interface DOMElementEventMap
     "mouseout":                   MouseEvent;
     "mouseover":                  MouseEvent;
     "mouseup":                    MouseEvent;
-    "mousewheel":                 MouseWheelEvent;
     "touchend":                   TouchEvent;
     "touchmove":                  TouchEvent;
     "touchstart":                 TouchEvent;
@@ -495,7 +494,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
     /**
      * !!DOC
      */
-    public get parent()
+    public get parent(): DOMHTMLElement|null
     {
         const p = this._element.parentElement;
         return p ? element(p) : null;
@@ -585,7 +584,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public get clientRect(): IClientRect
     {
-        let rect = this._element.getBoundingClientRect();
+        let rect:IClientRect = this._element.getBoundingClientRect();
 
         if (!rect.hasOwnProperty("width"))
             rect = { left: rect.left, top: rect.top, height: rect.bottom - rect.top, width: rect.right - rect.left, right:rect.right, bottom:rect.bottom };

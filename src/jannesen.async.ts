@@ -983,8 +983,8 @@ export interface IAjaxCallDefinitionArgs<TCallArgs>
 export interface IAjaxEncoderDecoders
 {
     [ key:string ]: {
-                            encoder:        (opts:IAjaxOpts, data:any) => any
-                            decoder:        (opts:IAjaxOpts, xdr:XMLHttpRequest) => any
+                            encoder:        (opts:IAjaxOpts, data:any) => any;
+                            decoder:        (opts:IAjaxOpts, xdr:XMLHttpRequest) => any;
                     } | undefined;
 }
 
