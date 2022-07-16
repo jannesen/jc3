@@ -19,7 +19,7 @@ export const translateError = [
                                                        case "INTERNAL-ERROR":  return "Interne fout tijdens verwerking.";
                                                        case "SERVICE-DOWN":    return "De applicatie is niet beschikbaar op het moment. Probeer het later nog eens.";
                                                        case "NO-ACCESS":       return "Je hebt geen toegang tot de gevraagde data.";
-                                                       case "ACCESS-BLOCK":    return "De toegang tot de applicantie is geblokkeerd.";
+                                                       case "ACCESS-BLOCK":    return "De toegang tot de applicatie is geblokkeerd.";
                                                        case "NO-DATA":         return "Gegevens niet beschikbaar / verwijder.";
                                                        }
                                                        return "Fout van server: " + err.message;
