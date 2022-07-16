@@ -698,7 +698,7 @@ export const enum StandardDialogMode
     Create,
     Edit,
 }
-export type ArgRecord = $JT.Record<$JT.IFieldDef> | IArgRecord
+export type ArgRecord = $JT.Record<$JT.IFieldDef> | IArgRecord;
 export interface IArgRecord
 {
     [name: string]: $JT.BaseType|ArgRecord|string|number|boolean|undefined|null;

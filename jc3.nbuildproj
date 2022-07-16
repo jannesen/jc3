@@ -3,8 +3,6 @@
   <PropertyGroup>
     <NBuildProjectBuild Condition="'$(NBuildProjectBuild)'==''">$(MSBuildExtensionsPath)\Jannesen.NBuildProject\</NBuildProjectBuild>
     <ProjectGuid>c28a738b-772e-48d1-ae85-f2ebbce41881</ProjectGuid>
-    <BuildJSDirectory>..\WebBuilder</BuildJSDirectory>
-    <BuildJSArgs>webbuilderfile.js /Configuration=$(Configuration)</BuildJSArgs>
     <LanchType>chrome</LanchType>
   </PropertyGroup>
   <Import Project="..\TypeScript\TypeScript.props" />
@@ -26,7 +24,10 @@
     <CleanTargetTree ProjectDirectory="$(MSBuildProjectDirectory)" TargetDirectory="output" />
   </Target>
   <Target Name="Build">
-    <CallTarget Targets="BuildJSBuild" />
+    <ProcessBuild ProjectDirectory="$(MSBuildProjectDirectory)"
+				  ProcessBuildConfig="..\WebBuilder\processbuild.config"
+				  Args="webbuilderfile.js /Configuration=$(Configuration)"
+	/>
   </Target>
   <Target Name="Rebuild">
     <CallTarget Targets="Clean" />
