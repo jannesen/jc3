@@ -54,7 +54,6 @@ var eslint = {
         "no-console": [ "error", { "allow": [ "log", "warn", "assert", "error", "Console", "timeStamp" ] } ],
         "no-debugger": "error",
         "no-duplicate-case": "error",
-        "no-empty": ["error", {"allowEmptyCatch": true }],
         "no-eval": "error",
         "no-extra-bind": "error",
         "no-fallthrough": ["error", { "commentPattern": "fall[\\s\\w]*tru" }],
@@ -108,13 +107,9 @@ var eslint = {
         "@typescript-eslint/adjacent-overload-signatures": "error",
         "@typescript-eslint/no-misused-new": "error",
         //"@typescript-eslint/array-type": "error",
-        //"@typescript-eslint/consistent-type-definitions": ["error", "interface"],
-        //"@typescript-eslint/no-inferrable-types": "error",
         //"@typescript-eslint/no-redeclare": "error",
         //"@typescript-eslint/prefer-function-type": "error",
-        //"@typescript-eslint/space-before-function-paren": ["error", {"asyncArrow": "always", "anonymous": "always", "named": "never" }],
         //"@typescript-eslint/triple-slash-reference": "error",
-        //"@typescript-eslint/unified-signatures": "error",
        
         // eslint-plugin-import
         "import/no-extraneous-dependencies": ["error", { "optionalDependencies": false }],
