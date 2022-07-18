@@ -124,7 +124,7 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
         }
 
         if (select) {
-            var loadtask = this.selectTab(tab);
+            const loadtask = this.selectTab(tab);
 
             if (loadtask) {
                 tab.titleElement.show(false);
@@ -185,7 +185,7 @@ export class Tabs extends $JD.Container implements $JD.ISetSize
 
     private     _addChild(child:AddTab) {
         if (Array.isArray(child)) {
-            for (let c of child) {
+            for (const c of child) {
                 this._addChild(c);
             }
         }

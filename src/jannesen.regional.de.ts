@@ -22,7 +22,7 @@ export function timePlaceHolder(format: string|$J.TimeFormat): string|undefined
 
 export function stringToInt(s: string): number
 {
-    var r = parseInt(s.trim(), 10);
+    const r = parseInt(s.trim(), 10);
 
     if (!isNaN(r))
         return r;
@@ -56,7 +56,7 @@ export function booleanToString(v: boolean, f?: string): string
 
 export function stringToNumber(s: string): number
 {
-    var r = parseFloat(s.trim().replace(/\./g, "").replace(/,/, "."));
+    const r = parseFloat(s.trim().replace(/\./g, "").replace(/,/, "."));
 
     if (!isNaN(r))
         return r;
@@ -143,7 +143,7 @@ export function stringToDate(s: string): number
 
 export function dateToString(v: number | Date): string
 {
-    var d: Date = !(v instanceof Date) ? new Date(v * (24 * 60 * 60 * 1000)) : <Date>v;
+    const d: Date = !(v instanceof Date) ? new Date(v * (24 * 60 * 60 * 1000)) : <Date>v;
     return $J.intToA(d.getUTCDate(), 1) + " " +
            $JL.monthNamesShort[d.getUTCMonth()] + " " +
            $J.intToA(d.getUTCFullYear(), 4);
@@ -181,7 +181,7 @@ export function stringToTime(text:string, timeformat:$J.TimeFormat):number {
 }
 
 export function timeToString(value:number, timeformat:$J.TimeFormat):string {
-    let sign = (value < 0);
+    const sign = (value < 0);
     if (sign) value = -value;
 
     let n:{ result:number; remainder:number };
@@ -228,7 +228,7 @@ export function stringToMonth(s: string): number
     if (/^[0-9]+$/.test(s))
         return parseInt(s, 10);
 
-    for (var m = 0 ; m < 12 ; ++m) {
+    for (let m = 0 ; m < 12 ; ++m) {
         if ($JL.monthNames[m] === s || $JL.monthNamesShort[m] === s)
             return m+1;
     }
@@ -239,7 +239,7 @@ export function stringToMonth(s: string): number
 export function stringToYear(s: string): number
 {
     if (/^[0-9]+$/.test(s)) {
-        var m = parseInt(s, 10);
+        const m = parseInt(s, 10);
 
         if (m>=0 && m<100)
             return (m >= 30 ? 1900 : 2000) + m;

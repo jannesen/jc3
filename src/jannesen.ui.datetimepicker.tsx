@@ -50,7 +50,7 @@ export class YearMonth
 
     public static       FromDate(date:number)
     {
-        let parts  = $J.dateParts(date);
+        const parts  = $J.dateParts(date);
 
         return new YearMonth(parts.Year, parts.Month);
     }
@@ -407,7 +407,7 @@ export abstract class RangeInputDropdown<TValue extends $JTE.RangeValue<TInput>,
     public          OnLoad() {
         this._from = new DatePicker();
         this._to   = new DatePicker();
-        let self        = this;
+        const self        = this;
         let active      = this._from;
         let fromclicked = false;
         let toclicked   = false;
@@ -684,10 +684,10 @@ export abstract class ViewBase implements $JD.IDOMContainer
             table.appendChild(this.tableHeader());
 
             for(let j = 0 ; j < state.sizeY ; ++j) {
-                let tr = <tr/>;
+                const tr = <tr/>;
 
                 for(let i = 0 ; i < state.sizeX ; ++i) {
-                    let c  = <td/>;
+                    const c  = <td/>;
                     cells.push(c);
                     tr.appendChild(c);
                 }
@@ -755,13 +755,13 @@ export abstract class ViewBase implements $JD.IDOMContainer
     }
     protected               movePrevNext(d:number)
     {
-        let step  = this._viewState.step;
-        let first = this._viewState.firstVisable;
-        let last  = this._viewState.firstVisable + ((this._cells.length - 1) * step);
-        let value = this._viewState.selected;
+        const step  = this._viewState.step;
+        let   first = this._viewState.firstVisable;
+        let   last  = this._viewState.firstVisable + ((this._cells.length - 1) * step);
+        let   value = this._viewState.selected;
 
         if (value !== null && first <= value && value < first + (this._cells.length * step)) {
-            let r = value % this._viewState.step;
+            const r = value % this._viewState.step;
             if (r !== 0) {
                 value -= r + ((r > this._viewState.step/2) ? this._viewState.step : 0);
             }
@@ -814,10 +814,10 @@ export abstract class ViewBase implements $JD.IDOMContainer
             elmtd = elmtd.parentElement;
 
         if (elmtd !== null) {
-            let cell = this._cells.find((c) => (c && c.element === elmtd));
+            const cell = this._cells.find((c) => (c && c.element === elmtd));
 
             if (cell && cell.hasClass("-clickable")) {
-                let value = cell.data<number>("value");
+                const value = cell.data<number>("value");
 
                 if (this.validValue(value)) {
                     this.setSelected(value);
@@ -898,15 +898,15 @@ class MonthView extends ViewBase
     }
     protected       stateChanged(setHeader:boolean)
     {
-        let yearMonth = YearMonth.FromTicks(this._month.Value);
-        let firstDay  = yearMonth.FirstDay - 1;
+        const yearMonth = YearMonth.FromTicks(this._month.Value);
+        let   firstDay  = yearMonth.FirstDay - 1;
 
         while ($J.getDateDay(firstDay) !== $JR.firstDay)
             --firstDay;
 
         if (setHeader || this._viewState.firstVisable !== firstDay) {
-            let prevValueTicks = this._month.Value - 1;
-            let nextValueTicks = this._month.Value + 1;
+            const prevValueTicks = this._month.Value - 1;
+            const nextValueTicks = this._month.Value + 1;
             this._picker.setHeader(this,
                                    this._validMonth(prevValueTicks),
                                    this._validMonth(nextValueTicks),

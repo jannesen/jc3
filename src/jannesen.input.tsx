@@ -54,11 +54,11 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
     }
     public set  disabled(d:boolean)
     {
-        let cur = this._container.disabled;
+        const cur = this._container.disabled;
 
         d = !!d;
         if (cur !== d) {
-            let input = this.getinputelm();
+            const input = this.getinputelm();
 
             switch(input.prop("tagName")) {
             case "INPUT":
@@ -252,9 +252,8 @@ export abstract class InputTextControl<TNativeValue,
     {
         super(opts);
 
-
-        let container:$JD.DOMHTMLElement;
-        let input = <input type={type} spellCheck={false} autoComplete="no-autocomplete" maxLength={maxlength} />;
+        let   container:$JD.DOMHTMLElement;
+        const input = <input type={type} spellCheck={false} autoComplete="no-autocomplete" maxLength={maxlength} />;
 
         input.bind("focus",   this.input_onfocus, this);
         input.bind("blur",    this.input_onblur,  this);
@@ -330,7 +329,7 @@ export abstract class InputTextControl<TNativeValue,
         this.closeDropdown(true);
 
         if (this._value && (changed || this.isDirty())) {
-            let vvalue = this._value.internalvalue;
+            const vvalue = this._value.internalvalue;
             this._text = (vvalue !== null ? this._value.cnvValueToText(vvalue, this._value.getAttr("format")) : "");
 
             if (this._input.prop("value") !== this._text)
@@ -377,7 +376,7 @@ export abstract class InputTextControl<TNativeValue,
     public                  parseInput(validate:boolean): void
     {
         if (this._value) {
-            let text = this._input.prop("value");
+            const text = this._input.prop("value");
 
             if (this._text !== text) {
                 this._value.setValue((text === "" ? null : this._value.cnvTextToValue(text)), $JT.ChangeReason.UI);
@@ -431,7 +430,7 @@ export abstract class InputTextControl<TNativeValue,
     }
     protected               selectall(): void
     {
-        let elm = this._input.element as HTMLInputElement;
+        const elm = this._input.element as HTMLInputElement;
         if (elm === document.activeElement && elm.selectionStart! >= 0) {
             elm.selectionStart = 0;
             elm.selectionEnd   = elm.value.length;
@@ -543,8 +542,8 @@ export abstract class InputTextControl<TNativeValue,
             if (key !== evt.key) {
                 evt.preventDefault();
                 if (typeof key === 'string') {
-                    let selectionStart = (this._input.element as any).selectionStart as number;
-                    let selectionEnd   = (this._input.element as any).selectionEnd   as number;
+                    const selectionStart = (this._input.element as any).selectionStart as number;
+                    const selectionEnd   = (this._input.element as any).selectionEnd   as number;
 
                     if (selectionStart <= selectionEnd) {
                         let inputtext = this._input.prop("value") as string;
@@ -768,8 +767,8 @@ export class String extends InputTextValuesDropdownControl<string, $JT.String, S
 
     protected       keyRemap(key: string) {
         if (this._value) {
-            let charset = this._value.Charset;
-            let options = this._value.Options;
+            const charset = this._value.Charset;
+            const options = this._value.Options;
 
             if ((options & $JT.StringOptions.LowerCase) && key >= "A" && key <= "Z") {
                 key = key.toLowerCase();
@@ -811,7 +810,7 @@ export class StringMultiLine extends SimpleControl<$JT.StringMultiLine, IStringM
         super(opts);
         this._text = undefined;
 
-        let textarea = <textarea type="text" class="jannesen-input -string -multiline" spellCheck={false} maxLength={ value.MaxLength } onblur={()=>{this._textarea_onblur();}} />;
+        const textarea = <textarea type="text" class="jannesen-input -string -multiline" spellCheck={false} maxLength={ value.MaxLength } onblur={()=>{this._textarea_onblur();}} />;
 
         genericAttr(textarea, textarea, opts, value);
 
@@ -833,7 +832,7 @@ export class StringMultiLine extends SimpleControl<$JT.StringMultiLine, IStringM
 
     public          valueChanged(reason:$JT.ChangeReason, changed:boolean): void {
         if (this._value && (changed || this._container.prop("value") !== this._text)) {
-            let vvalue = this._value.internalvalue;
+            const vvalue = this._value.internalvalue;
             this._text = vvalue !== null ? this._value!.cnvValueToText(vvalue) : "";
 
             if (this._container.prop("value") !== this._text)
@@ -887,8 +886,8 @@ export class Boolean extends SimpleControl<$JT.Boolean, IBooleanControlOptions>
     constructor(value:$JT.Boolean, opts:IBooleanControlOptions) {
         super(opts);
 
-        let container = <div class="jannesen-input -boolean"/>;
-        let button:     $JD.DOMHTMLElement;
+        const container = <div class="jannesen-input -boolean"/>;
+        let   button:     $JD.DOMHTMLElement;
 
         if (typeof opts.text === "string") {
             container.appendChild(button = <span/>, <span class="-label">{ opts.text }</span>);
@@ -915,7 +914,7 @@ export class Boolean extends SimpleControl<$JT.Boolean, IBooleanControlOptions>
 
     public      parseInput(validate:boolean): void {
         if (this._value) {
-            let value = this._getValue();
+            const value = this._getValue();
 
             if (value !== this._value.internalvalue) {
                 this._value.setValue(value, $JT.ChangeReason.UI);
@@ -1130,7 +1129,7 @@ export class SelectRadio<TNativeValue extends $JT.SelectValue, TDatasource exten
     public set  disabled(d:boolean) {
         this._disabled = !!d;
 
-        for (let b of this._buttons) {
+        for (const b of this._buttons) {
             b.disabled = d;
         }
     }
@@ -1214,7 +1213,7 @@ export class SelectRadio<TNativeValue extends $JT.SelectValue, TDatasource exten
             text = this._value.toDisplayText(keyvalue, this._value.getrecordAsync(keyvalue, false));
         }
 
-        let button = new RadioButton<TNativeValue,TDatasource>(this, keyvalue, text, keyvalue === this._keyvalue);
+        const button = new RadioButton<TNativeValue,TDatasource>(this, keyvalue, text, keyvalue === this._keyvalue);
 
         this._buttons.push(button);
 
@@ -1263,7 +1262,7 @@ export class RadioButton<TNativeValue extends $JT.SelectValue, TDatasource exten
 
 
     constructor(control: SelectRadio<TNativeValue,TDatasource>, keyvalue: TNativeValue, text:string, checked:boolean) {
-        let container = <div class="jannesen-input -radio"/>;
+        const container = <div class="jannesen-input -radio"/>;
         let button:$JD.DOMHTMLElement;
 
         if (typeof text === 'string') {
@@ -1523,8 +1522,8 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     /* @internal */ dropdownKeyDown(ev:KeyboardEvent) {
         if ((ev.key.length === 1 || (ev.key === 'Backspace' && !ev.shiftKey)) && !(ev.ctrlKey || ev.altKey || ev.metaKey) && !this.disableKeyboard()) {
             $J.runAsync(() => {
-                            let input = this.getinputelm();
-                            let v = input.prop("value") as string;
+                            const input = this.getinputelm();
+                            let   v = input.prop("value") as string;
 
                             switch(ev.key) {
                             case 'Backspace':
@@ -2109,7 +2108,7 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
 
         if (searchtext instanceof Array && fd_searchtext instanceof Array) {
             for (let i = 0 ; i < fd_searchtext.length ; ++i) {
-                let k = fd_searchtext[i];
+                const k = fd_searchtext[i];
 
                 if (!(searchtext as string[]).some((s) => s.startsWith(k)))
                     return false;
@@ -2189,7 +2188,7 @@ export class SearchFilter
     public      matchRec<T>(rec:T, fieldfunc:((r:T)=>string|null)[]):boolean
     {
         if (Array.isArray(this._searchKeys)) {
-            let texts:(string|null)[] = [];
+            const texts:(string|null)[] = [];
 
             for (const tst of this._getRegex()) {
                 let f = true;
@@ -2221,7 +2220,7 @@ export class SearchFilter
             this._matches = [];
 
             if (this._searchKeys) {
-                let keys = this._searchKeys.map((s) => $JSTRING.removeDiacritics(s).toUpperCase());
+                const keys = this._searchKeys.map((s) => $JSTRING.removeDiacritics(s).toUpperCase());
                 for (const key of keys.filter((k) => !keys.some((r) => r.length > k.length && r.startsWith(k)))) {
                     let sregex = key.replace(/[\.\+\^\$\?\|\\\[\]\(\)\{\}\*\u0000-\u0019\u007E-\uFFFF]/g, (s) => {
                                                  switch (s) {
@@ -2357,7 +2356,7 @@ export class SetInput<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleType<any>
     public              removeItem(setItem: SetItem<TSet>) {
         const activeElement = $global.document.activeElement;
         if (activeElement instanceof HTMLElement && setItem.domElement.element.contains($global.document.activeElement)) {
-            let form = $JD.getTabForm(setItem.domElement.element);
+            const form = $JD.getTabForm(setItem.domElement.element);
             if (form) {
                 let f = $JD.nextTabStop(form, activeElement, false, setItem.domElement.element);
                 if (!f) {
@@ -2480,7 +2479,7 @@ export abstract class SetItem<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleT
         }
 
         if (data instanceof $JT.Record) {
-            for (var n of data.FieldNames) {
+            for (const n of data.FieldNames) {
                 this._bindFields(data.field(n));
             }
         }
@@ -2512,7 +2511,7 @@ export abstract class SetItem<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleT
         if (v instanceof $JT.Record) {
             const fields = v.fields;
             if (fields) {
-                for(var name in fields) {
+                for(const name in fields) {
                     if (fields.hasOwnProperty(name) && this._hasValue(fields[name])) {
                         return true;
                     }
@@ -2523,7 +2522,7 @@ export abstract class SetItem<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleT
         }
 
         if (v instanceof $JT.Set) {
-            for (var idx = 0 ; idx < v.count ; ++idx) {
+            for (let idx = 0 ; idx < v.count ; ++idx) {
                 if (this._hasValue(v.item(idx))) {
                     return true;
                 }
@@ -2550,7 +2549,7 @@ function genericAttr(container:$JD.DOMHTMLElement, node: $JD.DOMHTMLElement, opt
         container.addClass(opts.extClass);
     }
 
-    let uiClass = value.UIClass;
+    const uiClass = value.UIClass;
     if (uiClass) {
         container.addClass(uiClass);
     }

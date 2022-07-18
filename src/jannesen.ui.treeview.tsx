@@ -153,7 +153,7 @@ export class TreeView extends $JD.Container
         }
     }
     private         _retrieveListItem(parent: $JD.DOMHTMLElement, item: TreeViewItemList|null) {
-        var listItems: IDataSourceResult;
+        let listItems: IDataSourceResult;
 
         try {
             listItems = this._retrieveData(item, this._context);

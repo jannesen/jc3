@@ -156,7 +156,7 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     protected   clickrow(row:number|undefined, ev:Event|undefined)
     {
         if (this._tbodydata && row !== undefined) {
-            let rec = this._tbodydata[row];
+            const rec = this._tbodydata[row];
             if (rec !== null) {
                 this.Close(rec, ev);
                 return;
@@ -222,8 +222,8 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
                 const keyfieldname = this._dataset.Datasource.keyfieldname;
                 const columns      = this._dataset.Columns;
 
-                let tb:$JD.DOMHTMLElement[]                             = [];
-                let tbdata:($JT.TDatasource_Record<TDatasource>|null)[] = [];
+                const tb:$JD.DOMHTMLElement[]                             = [];
+                const tbdata:($JT.TDatasource_Record<TDatasource>|null)[] = [];
 
                 if (input.get_opts().simpleDropdown && !value.Required) {
                     tb.push(<tr><td colSpan={columns ? columns.length : 1}>{ input.get_opts().simpleNulltext || "\xA0" }</td></tr>);

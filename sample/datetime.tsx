@@ -9,7 +9,7 @@ export function main()
 {
     $JD.ondomready(() => {
         const daterange = $JTE.DateRange.subClass({ maxValue: $J.curDate() });
-        let dr = new daterange();
+        const dr = new daterange();
 
         $JD.body.appendChild(<div> {dr.getControl()} </div>);
         $JD.body.appendChild(<div> <button onclick={() => { dr.validateNow({}); }}>Validate</button></div>);

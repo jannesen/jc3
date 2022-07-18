@@ -71,8 +71,7 @@ var eslint = {
         "unicode-bom": ["error", "always"],
         "use-isnan": "error",
         //"curly": ["error", "multi-line"],
-        //"dot-notation": "error",
-        //"no-new-func": "error",
+        "no-new-func": "error",
         //"no-restricted-globals": ["error",
         //    { "name": "setTimeout" },
         //    { "name": "clearTimeout" },
@@ -81,9 +80,8 @@ var eslint = {
         //    { "name": "setImmediate" },
         //    { "name": "clearImmediate" }
         //],
-        //"no-var": "error",
-        //"prefer-const": "error",
-        //"quote-props": ["error", "consistent-as-needed"],
+        "no-var": "error",
+        "prefer-const": "error",
 
         // @typescript-eslint
         "@typescript-eslint/member-delimiter-style": [

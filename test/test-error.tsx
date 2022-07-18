@@ -32,11 +32,11 @@ function runtests()
 
 function test(test: ()=>any, exceptedResult:any)
 {
-    var result:string|undefined;
-    var status:string;
+    let result:string|undefined;
+    let status:string;
 
     try {
-        var r = test();
+        const r = test();
 
         switch(typeof r) {
         case "undefined":   result = "undefined";               break;

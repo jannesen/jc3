@@ -1,11 +1,11 @@
 ﻿/// <reference path="lib-ext.d.ts"/>
 import * as $J    from "jc3/jannesen";
 
-var ondomreadyHandlers:             $J.IEventWrapper[]|undefined  = [];
-var onlocationhashchangeHandlers:   $J.IEventWrapper[]            = [];
-var curlocationhash:                string|undefined;
-var styleNameDefaultExt:            any = { "border-block-end-width": "px", "border-block-start-width": "px", "border-bottom-left-radius": "px", "border-bottom-right-radius": "px", "border-bottom-width": "px", "border-image-width": "px", "border-inline-end-width": "px", "border-inline-start-width": "px", "border-left-width": "px", "border-right-width": "px", "border-top-left-radius": "px", "border-top-right-radius": "px", "border-top-width": "px", "bottom": "px", "column-rule-width": "px", "column-width": "px", "font-size": "px", "height": "px", "left": "px", "letter-spacing": "px", "line-height": "px", "margin-bottom": "px", "margin-left": "px", "margin-right": "px", "margin-top": "px", "max-height": "px", "min-height": "px", "max-width":"px", "min-width":"px", "outline-width": "px", "padding-bottom": "px", "padding-left": "px", "padding-right": "px", "padding-top": "px", "right": "px", "top": "px", "width": "px", "z-index": "" } ;
-var styleNameDefaultExtSet:         any = { "border-width": "px", "margin": "px", "padding": "px" };
+let   ondomreadyHandlers:             $J.IEventWrapper[]|undefined  = [];
+const onlocationhashchangeHandlers:   $J.IEventWrapper[]            = [];
+let   curlocationhash:                string|undefined;
+const styleNameDefaultExt:            any = { "border-block-end-width": "px", "border-block-start-width": "px", "border-bottom-left-radius": "px", "border-bottom-right-radius": "px", "border-bottom-width": "px", "border-image-width": "px", "border-inline-end-width": "px", "border-inline-start-width": "px", "border-left-width": "px", "border-right-width": "px", "border-top-left-radius": "px", "border-top-right-radius": "px", "border-top-width": "px", "bottom": "px", "column-rule-width": "px", "column-width": "px", "font-size": "px", "height": "px", "left": "px", "letter-spacing": "px", "line-height": "px", "margin-bottom": "px", "margin-left": "px", "margin-right": "px", "margin-top": "px", "max-height": "px", "min-height": "px", "max-width":"px", "min-width":"px", "outline-width": "px", "padding-bottom": "px", "padding-left": "px", "padding-right": "px", "padding-top": "px", "right": "px", "top": "px", "width": "px", "z-index": "" } ;
+const styleNameDefaultExtSet:         any = { "border-width": "px", "margin": "px", "padding": "px" };
 
 type NodeFragment = (HTMLElement|Text)|(HTMLElement|Text)[];
 
@@ -505,7 +505,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public get offsetParent()
     {
-        var p:HTMLElement = <HTMLElement>(this._element.offsetParent);
+        let p:HTMLElement = <HTMLElement>(this._element.offsetParent);
 
         if (this._element.ownerDocument) {
             while (p && p !== this._element.ownerDocument.body) {
@@ -524,7 +524,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      * !!DOC
      */
     public get index(): number {
-        var index = 0;
+        let index = 0;
         let node: Element|null = this._element;
 
         while (node = node.previousElementSibling) {
@@ -572,7 +572,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public get offset(): IPosition
     {
-        var rect = this._element.getBoundingClientRect();
+        const rect = this._element.getBoundingClientRect();
         return  {
                     left:   rect.left + this.defaultView.pageXOffset,
                     top:    rect.top  + this.defaultView.pageYOffset
@@ -597,14 +597,14 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public get outerRect(): IClientRect
     {
-        let rect = this._element.getBoundingClientRect();
-        let style = this.defaultView.getComputedStyle(this._element);
+        const rect = this._element.getBoundingClientRect();
+        const style = this.defaultView.getComputedStyle(this._element);
 
-        let rtn = {
-                    left:   rect.left   - parseFloatUndefined(style.marginLeft),
-                    top:    rect.top    - parseFloatUndefined(style.marginTop),
-                    right:  rect.right  + parseFloatUndefined(style.marginRight),
-                    bottom: rect.bottom + parseFloatUndefined(style.marginBottom)
+        const rtn = {
+                        left:   rect.left   - parseFloatUndefined(style.marginLeft),
+                        top:    rect.top    - parseFloatUndefined(style.marginTop),
+                        right:  rect.right  + parseFloatUndefined(style.marginRight),
+                        bottom: rect.bottom + parseFloatUndefined(style.marginBottom)
                     } as IClientRect;
 
         rtn.height = rtn.bottom - rtn.top;
@@ -616,18 +616,18 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
 
     public get position(): IPosition
     {
-        var rect = this._element.getBoundingClientRect();
+        const rect = this._element.getBoundingClientRect();
 
-        var rtn:IPosition = {
-                                left:   rect.left - <number>getElementComputedStyleProperty(this._element, "margin-left", 0),
-                                top:    rect.top  - <number>getElementComputedStyleProperty(this._element, "margin-top",  0)
-                            };
+        const rtn:IPosition = {
+                                  left:   rect.left - <number>getElementComputedStyleProperty(this._element, "margin-left", 0),
+                                  top:    rect.top  - <number>getElementComputedStyleProperty(this._element, "margin-top",  0)
+                              };
 
         if (getElementComputedStylePropertyString(this._element, "position") !== "fixed") {
-            var offsetParent = this.offsetParent;
+            const offsetParent = this.offsetParent;
 
             if (offsetParent) {
-                var parentRect   = offsetParent._element.getBoundingClientRect();
+                const parentRect   = offsetParent._element.getBoundingClientRect();
 
                 rtn.top  -= parentRect.top  + <number>getElementComputedStyleProperty(offsetParent._element, "border-top-width",  0);
                 rtn.left -= parentRect.left + <number>getElementComputedStyleProperty(offsetParent._element, "border-left-width", 0);
@@ -670,11 +670,11 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public get outerSize(): ISize
     {
-        var rtn: ISize =    {
+        const rtn: ISize =  {
                                 width:  this._element.offsetWidth,
                                 height: this._element.offsetHeight
                             };
-        var style = this.defaultView.getComputedStyle(this._element);
+        const style = this.defaultView.getComputedStyle(this._element);
 
         rtn.width  += parseFloatUndefined(style.marginLeft) + parseFloatUndefined(style.marginRight);
         rtn.height += parseFloatUndefined(style.marginTop)  + parseFloatUndefined(style.marginBottom);
@@ -683,11 +683,11 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
     }
     public get innerSize(): ISize
     {
-        var rtn: ISize =    {
+        const rtn: ISize =  {
                                 width:  this._element.offsetWidth,
                                 height: this._element.offsetHeight
                             };
-        var style = this.defaultView.getComputedStyle(this._element);
+        const style = this.defaultView.getComputedStyle(this._element);
 
         rtn.width  -= parseFloatUndefined(style.paddingLeft)     + parseFloatUndefined(style.paddingRight) +
                       parseFloatUndefined(style.borderLeftWidth) + parseFloatUndefined(style.borderRightWidth);
@@ -702,11 +702,11 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public get children(): DOMHTMLElement[]
     {
-        var rtn:DOMHTMLElement[] = [];
+        const rtn:DOMHTMLElement[] = [];
 
-        var c = this._element.childNodes;
+        const c = this._element.childNodes;
 
-        for (var n = 0 ; n < c.length ; ++n) {
+        for (let n = 0 ; n < c.length ; ++n) {
             if (c[n].nodeType === 1)
                 rtn.push(element(<HTMLElement>c[n]));
         }
@@ -737,7 +737,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
     public childNodes(idx:number): DOMHTMLElement
     {
         if (idx>=0 && idx < this._element.childNodes.length) {
-            let node = this._element.childNodes[idx];
+            const node = this._element.childNodes[idx];
 
             if (node.nodeType === 1)
                 return element(node as HTMLElement);
@@ -753,7 +753,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
     public addClass(className:string): DOMHTMLElement
     {
         if (className.indexOf(" ") >= 0) {
-            for (let cn of className.split(' ')) {
+            for (const cn of className.split(' ')) {
                 if (cn.length > 0) {
                     this._element.classList.add(cn);
                 }
@@ -865,7 +865,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
         }
 
         if (propertyName instanceof Object) {
-            for (var key in propertyName) {
+            for (const key in propertyName) {
                 if (propertyName.hasOwnProperty(key))
                     setElementStyleProperty(this._element, key, propertyName[key]);
             }
@@ -885,7 +885,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
     public attr(attrName:string|any, value?:string|number|boolean): any
     {
         if (typeof attrName === "string" && arguments.length === 1) {
-            let v = this._element.getAttribute(attrName);
+            const v = this._element.getAttribute(attrName);
 
             if (!(v === undefined || v === null || v === "") || this._element.hasAttribute(attrName))
                 return v;
@@ -899,7 +899,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
         }
 
         if (attrName instanceof Object) {
-            for (var key in attrName) {
+            for (const key in attrName) {
                 if (attrName.hasOwnProperty(key))
                     setElementAttribute(this._element, key, attrName[key]);
             }
@@ -928,7 +928,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
         }
 
         if (propName instanceof Object) {
-            for (var key in propName) {
+            for (const key in propName) {
                 if (propName.hasOwnProperty(key))
                     (<any>this._element)[key] = propName[key];
             }
@@ -944,10 +944,10 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public empty(): DOMHTMLElement
     {
-        let childs:HTMLElement[] = [];
+        const childs:HTMLElement[] = [];
 
         if (this.isLive) {
-            for (var n = 0 ; n < this._element.childNodes.length ; ++n) {
+            for (let n = 0 ; n < this._element.childNodes.length ; ++n) {
                 if (this._element.childNodes[n].nodeType === 1)
                     childs.push(<HTMLElement>this._element.childNodes[n]);
             }
@@ -996,7 +996,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public appendChild(...children:AddNode[]): DOMHTMLElement
     {
-        var f = insertHelperArray(arguments);
+        const f = insertHelperArray(arguments);
         if (f !== null) {
             this._element.appendChild(insertFragment(f));
             if (this.isLive) {
@@ -1012,7 +1012,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public prependChild(...children: AddNode[]): DOMHTMLElement
     {
-        var f = insertHelperArray(arguments);
+        const f = insertHelperArray(arguments);
         if (f !== null) {
             this._element.insertBefore(insertFragment(f), this._element.firstChild);
             if (this.isLive) {
@@ -1057,11 +1057,11 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public removeChild(...children:RemoveNode[]): DOMHTMLElement
     {
-        for (var a = 0 ; a < arguments.length ; ++a) {
-            var child = arguments[a];
+        for (let a = 0 ; a < arguments.length ; ++a) {
+            const child = arguments[a];
 
             if (Array.isArray(child)) {
-                for (var n = 0 ; n < child.length ; ++n)
+                for (let n = 0 ; n < child.length ; ++n)
                     this.removeChild(child[n]);
             }
             else
@@ -1106,7 +1106,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public insertBefore(...children:AddNode[]): DOMHTMLElement
     {
-        var f = insertHelperArray(arguments);
+        const f = insertHelperArray(arguments);
         if (f !== null) {
             const p = this._element.parentNode;
 
@@ -1127,7 +1127,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public insertAfter(...children:AddNode[]): DOMHTMLElement
     {
-        var f = insertHelperArray(arguments);
+        const f = insertHelperArray(arguments);
         if (f !== null) {
             const p = this._element.parentNode;
             if (!p)
@@ -1147,7 +1147,7 @@ export class DOMHTMLElement implements $J.IEventSource, ISetSize, IShow
      */
     public appendElement(tagName:string, attrs?:HTMLAttributes, ...children:AddNode[]): DOMHTMLElement
     {
-        var e = createElement.apply(this, arguments as any /* typescript can't correctly check arguments */);
+        const e = createElement.apply(this, arguments as any /* typescript can't correctly check arguments */);
         this.appendChild(e);
         return e;
     }
@@ -1345,7 +1345,7 @@ export class DOMNodeList
      */
     public  getElements(): DOMHTMLElement[] {
         for (let i = 0 ; i < this._elements.length ; ++i) {
-            let e = this._elements[i];
+            const e = this._elements[i];
             if (!(e instanceof DOMHTMLElement || e instanceof DOMText)) {
                 this._elements[i] = element(<HTMLElement>e);
             }
@@ -1386,12 +1386,12 @@ export class DOMNodeList
      */
     public  byClass(className: string): DOMHTMLElement|null {
         for (let i = 0 ; i < this._elements.length ; ++i) {
-            let elm = this.element(i);
+            const elm = this.element(i);
             if (elm.hasClass(className)) {
                 return elm;
             }
 
-            let e = elm.element.querySelector("." + className);
+            const e = elm.element.querySelector("." + className);
             if (e) {
                 return element(<HTMLElement>e);
             }
@@ -1404,10 +1404,10 @@ export class DOMNodeList
      * !!DOC
      */
     public  byClassAll(className: string): DOMNodeList {
-        let rtn = new DOMNodeList();
+        const rtn = new DOMNodeList();
 
         for (let i = 0 ; i < this._elements.length ; ++i) {
-            let elm = this.element(i);
+            const elm = this.element(i);
             if (elm.hasClass(className)) {
                 rtn.addNode(elm);
             }
@@ -1457,9 +1457,9 @@ export abstract class Container extends $J.EventHandling implements IDOMContaine
 
     protected   _applyAttr(attrs?:any, ...attrNames:string[]) {
         if (attrs instanceof Object) {
-            for (let attrName of attrNames) {
+            for (const attrName of attrNames) {
                 if (attrs.hasOwnProperty(attrName)) {
-                    let attrValue = (attrs as any)[attrName];
+                    const attrValue = (attrs as any)[attrName];
 
                     if (attrName.startsWith("on")) {
                         if (typeof attrValue === "function") {
@@ -1483,12 +1483,12 @@ export abstract class Container extends $J.EventHandling implements IDOMContaine
 type intrinsicNames = "a" | "abbr" | "address" | "area" | "article" | "aside" | "audio" | "b" | "base" | "bdi" | "bdo" | "big" | "blockquote" | "body" | "br" | "button" | "canvas" | "caption" | "cite" | "code" | "col" | "colgroup" | "data" | "datalist" | "dd" | "del" | "details" | "dfn" | "dialog" | "div" | "dl" | "dt" | "em" | "embed" | "fieldset" | "figcaption" | "figure" | "footer" | "form" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "head" | "header" | "hr" | "html" | "i" | "iframe" | "img" | "input" | "ins" | "kbd" | "keygen" | "label" | "legend" | "li" | "link" | "main" | "map" | "mark" | "menu" | "menuitem" | "meta" | "meter" | "nav" | "noscript" | "object" | "ol" | "optgroup" | "option" | "output" | "p" | "param" | "picture" | "pre" | "progress" | "q" | "rp" | "rt" | "ruby" | "s" | "samp" | "script" | "section" | "select" | "small" | "source" | "span" | "strong" | "style" | "sub" | "summary" | "sup" | "table" | "tbody" | "td" | "textarea" | "tfoot" | "th" | "thead" | "time" | "title" | "tr" | "track" | "u" | "ul" | "var" | "video" | "wbr";
 export function createElement(tagName:intrinsicNames, attrs?:HTMLAttributes, ...children:AddNode[]): DOMHTMLElement
 {
-    var elm = new DOMHTMLElement($global.document.createElement(tagName));
+    const elm = new DOMHTMLElement($global.document.createElement(tagName));
 
     if (attrs !== undefined && attrs !== null && typeof attrs === "object") {
-        for (var attrName in attrs) {
+        for (const attrName in attrs) {
             if (attrs.hasOwnProperty(attrName)) {
-                var attrValue = (attrs as any)[attrName];
+                const attrValue = (attrs as any)[attrName];
 
                 if (attrValue !== undefined && attrValue !== null) {
                     if (attrName.startsWith("on")) {
@@ -1522,7 +1522,7 @@ export function createElement(tagName:intrinsicNames, attrs?:HTMLAttributes, ...
         }
     }
 
-    for (var a = 2; a < arguments.length ; ++a)
+    for (let a = 2; a < arguments.length ; ++a)
         elm.appendChild(arguments[a]);
 
     return elm;
@@ -1568,14 +1568,14 @@ export const document = new DOMHTMLDocument($global.document);
 /**
  * !!DOC
  */
-export var body:DOMHTMLElement;
+export var body:DOMHTMLElement; //eslint-disable-line no-var
 
 /**
  * !!DOC
  */
 export function ondomready(handler: () => void, thisArg?: any): void
 {
-    let wrapper = $J.eventWrapper("domready", handler, thisArg);
+    const wrapper = $J.eventWrapper("domready", handler, thisArg);
 
     if (ondomreadyHandlers) {
         ondomreadyHandlers.push(wrapper);
@@ -1597,7 +1597,7 @@ export function onlocationhashchange(handler: (h:string) => void, thisArg?: any)
  */
 export function onlocationhashready(handler: (h:string) => void, thisArg?: any): void
 {
-    let wrapper = $J.eventWrapper("locationhashready", handler, thisArg);
+    const wrapper = $J.eventWrapper("locationhashready", handler, thisArg);
     ondomready(() => { onlocationhashchangeHandlers.push(wrapper); wrapper(location.hash); });
 }
 
@@ -1646,7 +1646,7 @@ export function multilineStringToContent(s:string|string[]|null)
     }
 
     if (lines.length > 1) {
-        let rtn: (DOMText|DOMHTMLElement)[] = [];
+        const rtn: (DOMText|DOMHTMLElement)[] = [];
 
         for (let i = 0 ; i < lines.length ; ++i) {
             if (i > 0)              rtn.push(createElement("br"));
@@ -1708,7 +1708,7 @@ export function getTabForm(elm:HTMLElement|null) {
  * !!DOC
  */
 export function nextTabStop(body:HTMLElement, cur:HTMLElement|null, back:boolean, ignorearea?:HTMLElement) {
-    let nodelist = body.querySelectorAll("input,button,textarea,select,*[tabIndex]");
+    const nodelist = body.querySelectorAll("input,button,textarea,select,*[tabIndex]");
 
     if (nodelist.length > 0) {
         let targetTabIndex: number;
@@ -1863,9 +1863,9 @@ function transitionSchedule()
  */
 export function onAnimationTransitionEnd(elm: DOMHTMLElement, cb: ()=>void)
 {
-    let timeoutid:number|null;
-    let s:number;
-    let evts = new $J.EventCollection();
+    const evts = new $J.EventCollection();
+    let   timeoutid:number|null;
+    let   s:number;
 
     if ((s = parseCssTimer(elm.css("animation-duration"))) > 0) {
         evts.bind(elm, "animationstart", start);
@@ -1926,7 +1926,7 @@ function DOMContentLoaded()
         body = new DOMHTMLElement($global.document.body);
         body.pinElement();
 
-        for (var h of ondomreadyHandlers) {
+        for (const h of ondomreadyHandlers) {
             h(null);
         }
 
@@ -1939,7 +1939,7 @@ function WINHashChange()
         if (curlocationhash !== location.hash) {
             curlocationhash = location.hash;
 
-            for (var i = 0 ; i < onlocationhashchangeHandlers.length ; ++i) {
+            for (let i = 0 ; i < onlocationhashchangeHandlers.length ; ++i) {
                 onlocationhashchangeHandlers[i](curlocationhash);
             }
         }
@@ -1951,7 +1951,7 @@ function WINHashChange()
 //
 function event_bind(node:Window|Document|HTMLElement, events:$J.IEventWrapper[], eventName:string, handler: (ev: any) => void, thisArg:any, options?:AddEventListenerOptions): $J.IEventWrapper
 {
-    let wrapper = $J.eventWrapper(eventName, handler, thisArg);
+    const wrapper = $J.eventWrapper(eventName, handler, thisArg);
     events.push(wrapper);
     node.addEventListener(eventName, wrapper, options);
     return wrapper;
@@ -1980,7 +1980,7 @@ function event_unbind(node:Window|Document|HTMLElement, events:$J.IEventWrapper[
 //
 function domelement_addremove_node(element:NodeFragment, added:boolean) {
     if (element instanceof HTMLElement) {
-        for (var n = 0 ; n < element.childNodes.length ; ++n) {
+        for (let n = 0 ; n < element.childNodes.length ; ++n) {
             if (element.childNodes[n].nodeType === 1)
                 domelement_addremove_node(<HTMLElement>element.childNodes[n], added);
         }
@@ -2005,7 +2005,7 @@ function select(elm:(Document|HTMLElement), selector: string): DOMHTMLElement|nu
 }
 function selectAll(elm:(Document|HTMLElement), selector:string): DOMNodeList
 {
-    let rtn = new DOMNodeList();
+    const rtn = new DOMNodeList();
 
     if (elm !== null) {
         rtn.addNodeList(elm.querySelectorAll(selector));
@@ -2020,10 +2020,10 @@ function selectAll(elm:(Document|HTMLElement), selector:string): DOMNodeList
 function insertHelperArray(children:any):NodeFragment|null
 {
     if (children.length > 1) {
-        var rtn:(Text|HTMLElement)[] = [];
+        const rtn:(Text|HTMLElement)[] = [];
 
-        for (var n = 0 ; n < children.length ; ++n) {
-            let e = insertHelper(children[n]);
+        for (let n = 0 ; n < children.length ; ++n) {
+            const e = insertHelper(children[n]);
             if (e) {
                 if (Array.isArray(e)) {
                     e.forEach((i) => rtn.push(i));
@@ -2080,7 +2080,7 @@ function insertHelper(child:any):NodeFragment|null
 function insertFragment(f:NodeFragment):Text|HTMLElement|DocumentFragment
 {
     if (Array.isArray(f)) {
-        let rtn = $global.document.createDocumentFragment();
+        const rtn = $global.document.createDocumentFragment();
         f.forEach((i) => rtn.appendChild(i));
         return rtn;
     } else {
@@ -2100,12 +2100,12 @@ function getElementComputedStylePropertyString(element:HTMLElement, propertyName
 }
 function getElementComputedStyleProperty(element:HTMLElement, propertyName:string, defaultValue:string|number|null): string|number|null
 {
-    var v   = getElementComputedStylePropertyString(element, propertyName);
+    const v = getElementComputedStylePropertyString(element, propertyName);
 
     if (typeof v !== "string")
         return defaultValue;
 
-    var ext = <string>styleNameDefaultExt[propertyName];
+    const ext = <string>styleNameDefaultExt[propertyName];
     if (ext !== undefined) {
         if (!v.endsWith(ext))
             throw new $J.InvalidStateError("css('" + propertyName + "') has a invalid property value '" + v + "'.");
@@ -2119,12 +2119,12 @@ function getElementComputedStyleProperties(element:HTMLElement, propertyNames:st
     if (!(element.ownerDocument && element.ownerDocument.defaultView)) {
         throw new $J.InvalidStateError("defaultView is null.");
     }
-    let cssValues:ICssValues = {};
-    let computedStyle = element.ownerDocument.defaultView.getComputedStyle(element);
+    const cssValues:ICssValues = {};
+    const computedStyle = element.ownerDocument.defaultView.getComputedStyle(element);
 
     propertyNames.forEach((propertyName) => {
-            let v:any = computedStyle.getPropertyValue(propertyName);
-            let ext   = styleNameDefaultExt[propertyName] as string;
+            const ext   = styleNameDefaultExt[propertyName] as string;
+            let   v:any = computedStyle.getPropertyValue(propertyName);
             if (ext !== undefined) {
                 if (!v.endsWith(ext))
                     throw new $J.InvalidStateError("css('" + propertyName + "') has a invalid property value '" + v + "'.");
@@ -2140,7 +2140,7 @@ function getElementComputedStyleProperties(element:HTMLElement, propertyNames:st
 function setElementStyleProperty(element:HTMLElement, propertyName: string, value: string|number|undefined): void
 {
     if (typeof value === "number") {
-        var e = styleNameDefaultExt[propertyName] || styleNameDefaultExtSet[propertyName];
+        const e = styleNameDefaultExt[propertyName] || styleNameDefaultExtSet[propertyName];
         if (e) {
             value = "" + value + e;
         }

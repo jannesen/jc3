@@ -159,8 +159,8 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
             this._container.bind('RemovedFromDocument', () => this._track_set_unbind());
         }
 
-        let colgroup = <colgroup/>;
-        let theadtr = <tr/>;
+        const colgroup = <colgroup/>;
+        const theadtr = <tr/>;
 
         opts.columns.forEach((col,index) => {
                                 colgroup.appendChild(<col class={"-col"+(index+1)} style={ col.width ? "width:"+col.width : undefined } />);
@@ -215,10 +215,10 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                                                     onclick={(ev) => {
                                                             ev.stopPropagation();
                                                             this._mouseenabled = true;
-                                                            let idx = helper_getrecordId(ev.target);
+                                                            const idx = helper_getrecordId(ev.target);
                                                             if (typeof idx === 'number') {
                                                                 if (this._opts.buttons && (ev.target as HTMLElement).tagName === "SPAN") {
-                                                                    let b = helper_getbutton(this._opts.buttons, ev.target);
+                                                                    const b = helper_getbutton(this._opts.buttons, ev.target);
                                                                     if (b && typeof b.onClick === 'function') {
                                                                         b.onClick(this._filter_rset[idx]);
                                                                         return ;
@@ -232,7 +232,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                                                     ondblclick={(ev) => {
                                                             if (typeof this._opts.rowDblClick === "function") {
                                                                 ev.stopPropagation();
-                                                                let idx = helper_getrecordId(ev.target);
+                                                                const idx = helper_getrecordId(ev.target);
                                                                 if (typeof idx === 'number') {
                                                                     this._opts.rowDblClick(this._filter_rset[idx], ev);
                                                                 }
@@ -323,11 +323,11 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
     }
     public      refreshRowClass()
     {
-        let rowClass = this._opts.rowClass;
+        const rowClass = this._opts.rowClass;
 
         if (typeof rowClass === "function") {
             for (const tr of this._body.children) {
-                let idx = helper_getrecordId(tr.element);
+                const idx = helper_getrecordId(tr.element);
                 if (idx !== null) {
                     const cls = rowClass(this._filter_rset[idx], idx);
                     tr.attr('class', typeof cls === 'string' ? cls : undefined);
@@ -434,7 +434,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
             if (filterArray) {
                 if (!this._filter_sset) {
                     this._filter_sset = this._sortedset.map((rec, idx) => this._opts.columns.map((copts) => {
-                                                                                let t = DataTable._toText(rec, copts);
+                                                                                const t = DataTable._toText(rec, copts);
                                                                                 return (typeof t === 'string') ? t.toLowerCase() : '';
                                                                             }).join(' '));
                 }
@@ -488,7 +488,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
 
         function filterCompare(s: string) {
             if (filterArray !== null) {
-                for (let f of filterArray) {
+                for (const f of filterArray) {
                     if (s.indexOf(f) < 0) {
                         return false;
                     }
@@ -500,8 +500,8 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
     private     _bottomVisibleRow(): number|undefined
     {
         if (typeof this._curTopRow === 'number' && typeof this._curCountRow === 'number') {
-            let     containerBottom = this._container.clientRect.bottom + 1;
-            let     bottomRow       = this._curTopRow + this._curCountRow - 1;
+            const containerBottom = this._container.clientRect.bottom + 1;
+            let   bottomRow       = this._curTopRow + this._curCountRow - 1;
 
             while (bottomRow > this._curTopRow && this._body.childNodes(bottomRow - this._curTopRow).clientRect.bottom > containerBottom)
                 --bottomRow;
@@ -525,7 +525,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                 this._fillBody();
             }
             else {
-                let visualrows = Math.floor(this._visualRows!);
+                const visualrows = Math.floor(this._visualRows!);
 
                 if (row >= this._curTopRow + visualrows) {
                     this._scrollbar.Value = row-visualrows;
@@ -538,7 +538,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
 
         if (this._selectedRow !== row) {
             if (typeof this._selectedRow === 'number' && typeof this._curTopRow === 'number') {
-                let idx = this._selectedRow - this._curTopRow;
+                const idx = this._selectedRow - this._curTopRow;
                 if (idx >= 0 && idx < this._body.childNodesLength) {
                     this._body.childNodes(idx).removeClass("-selected");
                 }
@@ -635,12 +635,12 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                         this._curCountRow += rows.length;
                     }
                     else if (this._curCountRow > visualRows * 1.5 + 8) {
-                        let rows = this._body.children.slice(visualRows * 1.5 + 8);
+                        const rows = this._body.children.slice(visualRows * 1.5 + 8);
                         this._body.removeChild(rows);
                         this._curCountRow -= rows.length;
                     }
                 } else {
-                    let rows = this._getRows(toprow, Math.min(visualRows, rowcount - toprow));
+                    const rows = this._getRows(toprow, Math.min(visualRows, rowcount - toprow));
                     this._curTopRow   = toprow;
                     this._curCountRow = rows.length;
                     this._body.empty().appendChild(rows);
@@ -648,8 +648,8 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                 }
 
                 if (toprow >= this._scrollbar.maxValue!) {
-                    let     containerBottom = this._container.clientRect.bottom;
-                    let     n = 0;
+                    const containerBottom = this._container.clientRect.bottom;
+                    let   n = 0;
 
                     while (n < this._curCountRow && this._body.childNodes(this._curCountRow - n - 1).clientRect.bottom > containerBottom)
                         ++n;
@@ -662,9 +662,9 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
     private     _scrollDownIfNeeded(row:number|null|undefined)
     {
         if (typeof this._curTopRow === 'number' && typeof row === 'number') {
-            let     containerBottom = this._container.clientRect.bottom + 1;
-            let     rowBottom       = this._body.childNodes(row - this._curTopRow).clientRect.bottom;
-            let     n = 0;
+            const containerBottom = this._container.clientRect.bottom + 1;
+            let   rowBottom       = this._body.childNodes(row - this._curTopRow).clientRect.bottom;
+            let   n = 0;
 
             while ((this._curTopRow + n) < row && rowBottom > containerBottom) {
                 rowBottom -= this._body.childNodes(n).clientRect.height;
@@ -681,7 +681,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
     {
         if (typeof row === 'number') {
             if (typeof this._curTopRow === 'number') {
-                let idx = row - this._curTopRow;
+                const idx = row - this._curTopRow;
                 if (idx >= 0 && idx < this._body.childNodesLength) {
                     this._body.childNodes(idx).addClass("-selected");
                 }
@@ -690,11 +690,11 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
     }
     private     _getRows(idx:number, n:number)
     {
-        let rows:$JD.DOMHTMLElement[] = [];
+        const rows:$JD.DOMHTMLElement[] = [];
 
         while (n > 0) {
-            var rec = this._filter_rset[idx];
-            var row = <tr/>;
+            const rec = this._filter_rset[idx];
+            const row = <tr/>;
 
             this._opts.columns.forEach((c, i) => row.appendChild(<td class={$JD.classJoin("-col" + (i+1), c['class'])} style={c.style}>
                                                                 {
@@ -1006,7 +1006,7 @@ function helper_getrecordId(e:any): number|null
 {
     while (e instanceof Element) {
         if (e.tagName === "TR") {
-            let id = e.getAttribute("_recordidx");
+            const id = e.getAttribute("_recordidx");
 
             if (typeof id === "string") {
                 return parseInt(id, 10);
@@ -1021,7 +1021,7 @@ function helper_getrecordId(e:any): number|null
 function helper_getbutton<TRec extends DataTableSourceType>(buttons:IDataTableOptsButton<TRec>[], e:any): IDataTableOptsButton<TRec>|undefined
 {
     if (e.tagName === "SPAN") {
-        let className = e.getAttribute("class");
+        const className = e.getAttribute("class");
         return buttons.find((b) => b.className === className);
     }
 

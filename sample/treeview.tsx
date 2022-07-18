@@ -17,7 +17,7 @@ export function main()
     $JD.ondomready(()  => {
         const treeview = <$JUT.TreeView dataSource={(item, cancelationToken) => {
                                                         if (!item || item.data.treelist) {
-                                                            let url = item ? item.data.treelist : 'api-root.json';
+                                                            const url = item ? item.data.treelist : 'api-root.json';
                                                             return $JA.Ajax<$JA.IAjaxCallDefinition<void, void, IItem[]>>(undefined, { url: 'data/' + url }, cancelationToken)
                                                                       .then(items => items.map((i) => i.url ? new $JUT.TreeViewItemEndPoint(i.text, item) : new $JUT.TreeViewItemList(i.text, item)));
                                                         } else if (item.data.children) {

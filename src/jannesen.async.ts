@@ -3,7 +3,7 @@
 import * as $J   from "jc3/jannesen";
 import * as $JD  from "jc3/jannesen.dom";
 
-export var  MimeType =
+export const MimeType =
 {
     Text:   "text/plain",
     Xml:    "text/xml",
@@ -458,7 +458,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
         }
 
         // Construct new Task, but use subclassed constructor, if any
-        var slave = new (this.constructor as any)(internalResolver) as Task<any>;
+        const slave = new (this.constructor as any)(internalResolver) as Task<any>;
         if (slave._context) {
             slave._context.register(slave, slave._stop);
         }
@@ -580,11 +580,11 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
         }
 
         return new Task((resolved, reject, oncancel) => {
-                let done:boolean[] = [];
-                let rtn:any[]      = [];
-                let rejected       = false;
-                let reason:Error;
-                let ndone          = 0;
+                const done:boolean[] = [];
+                const rtn:any[]      = [];
+                let   rejected       = false;
+                let   reason:Error;
+                let   ndone          = 0;
 
                 values.forEach((task, index) => {
                                                     if (isPromiseLike(task)) {
@@ -655,11 +655,11 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
         }
 
         const task = new Task((resolved, reject, oncancel) => {
-                                  let done:boolean[] = [];
-                                  let rtn:any[]      = [];
-                                  let rejected       = false;
-                                  let reason:Error;
-                                  let ndone          = 0;
+                                  const done:boolean[] = [];
+                                  const rtn:any[]      = [];
+                                  let   rejected       = false;
+                                  let   reason:Error;
+                                  let   ndone          = 0;
 
                                   values.forEach((task, index) => {
                                                      if (isPromiseLike(task)) {
@@ -748,7 +748,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
      */
     public static       reject<T>(reason: Error)
     {
-        let rtn = new Task<T>(internalResolver, null);
+        const rtn = new Task<T>(internalResolver, null);
         rtn._state  = TaskState.Rejected;
         rtn._result = (reason instanceof Error) ? reason : new Error('' + reason);
         return rtn;
@@ -764,7 +764,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
             return value;
         }
 
-        let rtn = new Task<T>(internalResolver, null);
+        const rtn = new Task<T>(internalResolver, null);
 
         if (isPromiseLike(value)) {
             if (rtn._context) {
@@ -793,7 +793,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
         }
     }
     private             _followThenable(slave: PromiseLike<T>) {
-        var called = false;
+        let called = false;
         try {
             slave.then((y): void => {
                             if (!called) {
@@ -872,9 +872,9 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
         }
 
         if (this._handlers) {
-            let handlers = this._handlers;
+            const handlers = this._handlers;
             this._handlers = undefined;
-            for (let h of handlers) {
+            for (const h of handlers) {
                 Task._unwrapper(h);
             }
         }
@@ -883,10 +883,10 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
     private static      _unwrapper(handler: Handler<any>)
     {
         try {
-            let task     = handler.task;
-            let slave    = handler.slave;
+            const task     = handler.task;
+            const slave    = handler.slave;
             if (slave) {
-                let callback = (task._state === TaskState.Fulfilled ? handler.onfulfilled : handler.onrejected) as ((x: any) => any);
+                const callback = (task._state === TaskState.Fulfilled ? handler.onfulfilled : handler.onrejected) as ((x: any) => any);
 
                 if (typeof callback === "function") {
                     try {
@@ -902,7 +902,7 @@ export class Task<T> implements Promise<T>,PromiseLike<T>,TaskInspection<T>
                     }
                 }
             } else {
-                let callback = handler.onfinally;
+                const callback = handler.onfinally;
                 if (typeof callback === "function") {
                     try {
                         callback();
@@ -1011,7 +1011,7 @@ export interface IAjaxOpts extends IAjaxArgs, IAjaxCallDefinition<any,any,any>
 /**
  * !!DOC
  */
-export var AjaxDefaults:IAjaxCallDefinition<void,void,void> = {
+export var AjaxDefaults:IAjaxCallDefinition<void,void,void> = { //eslint-disable-line no-var
     method:                 "GET",
     request_contenttype:    MimeType.Json,
     response_contenttype:   MimeType.Json,
@@ -1027,11 +1027,11 @@ export var AjaxDefaults:IAjaxCallDefinition<void,void,void> = {
                                                                         },
                                                             decoder:    function(opts: IAjaxOpts, xdr: XMLHttpRequest)
                                                                         {
-                                                                            var data = JSON.parse(xdr.responseText);
+                                                                            const data = JSON.parse(xdr.responseText);
 
                                                                             if (xdr.status === 200) {
                                                                                 if (typeof opts.response_type === 'function') {
-                                                                                    let r = new (opts.response_type)();
+                                                                                    const r = new (opts.response_type)();
                                                                                     r.parseJSON(data);
                                                                                     return r;
                                                                                 }
@@ -1060,12 +1060,12 @@ export type AjaxCallResponseType<TCall extends IAjaxCallDefinition<any,any,any>>
  */
 export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinitions:TCall|undefined, args: IAjaxArgs, context: Context|null): Task<AjaxCallResponseType<TCall>>
 {
-    let opts = $J.extend({}, args, callDefinitions, AjaxDefaults) as IAjaxOpts;
+    const opts = $J.extend({}, args, callDefinitions, AjaxDefaults) as IAjaxOpts;
 
     return new Task<AjaxCallResponseType<TCall>>((resolve, reject, oncancel) => {
-            let xhr:XMLHttpRequest;
-            let xhr_done = false;
-            let task_start = performance.now();
+            const task_start = performance.now();
+            let   xhr:XMLHttpRequest;
+            let   xhr_done     = false;
 
             oncancel(on_cancel);
             start();
@@ -1095,7 +1095,7 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
                 }
 
                 let contenttype  = opts.request_contenttype;
-                var data:any     = null;
+                let data:any     = null;
 
                 if (opts.data !== undefined && opts.data !== null) {
                     if (opts.method === "GET")
@@ -1166,9 +1166,9 @@ export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinit
                 let rtn:any;
 
                 try {
-                    var contenttype = xhr.getResponseHeader("Content-Type");
+                    let contenttype = xhr.getResponseHeader("Content-Type");
                     if (contenttype) {
-                        var i = contenttype.indexOf(";");
+                        const i = contenttype.indexOf(";");
                         if (i > 0)
                             contenttype = contenttype.substr(0, i);
                     }
@@ -1256,9 +1256,9 @@ export function Delay(delay: number, context: Context|null)
                         reject(reason);
                      });
 
-            var timer = setTimeout(() => {
-                                       resolve(undefined);
-                                   }, delay);
+            const timer = setTimeout(() => {
+                                         resolve(undefined);
+                                     }, delay);
         }, context);
 }
 

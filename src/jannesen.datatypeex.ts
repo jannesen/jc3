@@ -28,7 +28,7 @@ export abstract class RangeValue<TControl extends $JT.IBaseControl> extends $JT.
     public static NativeType = "object";
 
     public  cnvTextToValue(text: string): IRangeValue|null {
-        let rtn = stringToDateRange(text);
+        const rtn = stringToDateRange(text);
         return rtn;
     }
 
@@ -82,7 +82,7 @@ export abstract class RangeValue<TControl extends $JT.IBaseControl> extends $JT.
             }
 
             if (v && v.Begin! > v.End!) {
-                var t = v.Begin;
+                const t = v.Begin;
                 v.Begin = v.End;
                 v.End   = t;
             }
@@ -91,11 +91,11 @@ export abstract class RangeValue<TControl extends $JT.IBaseControl> extends $JT.
         return v;
     }
     public validateValue() {
-        let value = this._value;
+        const value = this._value;
 
         if (value !== null) {
-            let minValue = this.MinValue;
-            let maxValue = this.MaxValue;
+            const minValue = this.MinValue;
+            const maxValue = this.MaxValue;
 
             // Make sure the dates do not cross the min and max value
             if (typeof maxValue === 'number' && (value.End! > maxValue || value.Begin! > maxValue)) {
@@ -145,7 +145,7 @@ export class DateRange extends RangeValue<$JIE.DateRange> {
     }
 
     public  cnvInvariantToValue(datestring: string): IRangeValue {
-        let parts = datestring.split('~', 2);
+        const parts = datestring.split('~', 2);
         return { Begin: $J.parseDate(parts[0]), End: $J.parseDate(parts[1]) };
     }
 
@@ -205,7 +205,7 @@ export class DateTimeRange extends RangeValue<$JIE.DateTimeRange> {
     }
 
     public  cnvInvariantToValue(datestring: string): IRangeValue {
-        let parts = datestring.split('~', 2);
+        const parts = datestring.split('~', 2);
         return { Begin: $J.parseDatetimeNumber(parts[0]), End: $J.parseDatetimeNumber(parts[1]) };
     }
 
@@ -279,7 +279,7 @@ function dateTimeRangeToString(dateRange: IRangeValue):string {
         return dateRangeToString({ Begin: begin.result, End: end.result });
     }
 
-    var timeformat = $J.TimeFormat.HM;
+    let timeformat = $J.TimeFormat.HM;
 
     if ((begin && begin.remainder % 1000 !== 0) || (end  && end.remainder % 1000 !== 0))
         timeformat = $J.TimeFormat.HMSF;
@@ -372,7 +372,7 @@ function stringToDateTimeRange(text:string):IRangeValue|null {
             }
         }
 
-        let d = stringToDateRange(text);
+        const d = stringToDateRange(text);
         if (d) {
             return {
                 Begin: (typeof d.Begin === 'number' ? d.Begin     * 86400000 : null),

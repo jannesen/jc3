@@ -27,7 +27,7 @@ export function main()
                                   sidebarVisible={true}
                                   sidebarDataSource={(item, ct) => {
                                                                         if (!item || item.data.treelist) {
-                                                                            let url = item ? item.data.treelist : 'api-root.json';
+                                                                            const url = item ? item.data.treelist : 'api-root.json';
                                                                             return $JA.Ajax<$JA.IAjaxCallDefinition<void, void, IItem[]>>(undefined, { url: 'data/' + url }, ct)
                                                                                       .then(items => items.map(item => item.url ? new $JTREEVIEW.TreeViewItemEndPoint(item.text, item) : new $JTREEVIEW.TreeViewItemList(item.text, item)));
                                                                         } else if (item.data.children) {

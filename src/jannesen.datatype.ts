@@ -7,8 +7,8 @@ import * as $JR  from "jc3/jannesen.regional";
 import * as $JL  from "jc3/jannesen.language";
 import * as $JI  from "jc3/jannesen.input";
 
-var rounderror = 100.5 - (1.005 * 100);
-var emptyOpts  = {};
+const rounderror = 100.5 - (1.005 * 100);
+const emptyOpts  = {};
 const regexDateTime = new RegExp("^(" + regexToString($JR.regexDate) + ") *[ .] *(" + regexToString($JR.regexTime) + ")$");
 
 //===================================== Enums =====================================================
@@ -247,8 +247,8 @@ export class ValidateErrors extends __Error
     {
         let rtn:string = '';
 
-        for (let e of this._errors) {
-            let s = e.path  ? '[ValidateErrors][' + e.path +']: ' + stringErrorToMessage(e.error) : stringErrorToMessage(e.error);
+        for (const e of this._errors) {
+            const s = e.path  ? '[ValidateErrors][' + e.path +']: ' + stringErrorToMessage(e.error) : stringErrorToMessage(e.error);
             rtn = rtn.length > 0 ? rtn + '\n' + s : s;
         }
 
@@ -290,7 +290,7 @@ export function validateAsync(opts:IValidateOptionsAsync, ...validatables:(IVali
                waitTasks();
 
                function waitTasks() {
-                   let waitTasks = [] as $JA.Task<unknown>[];
+                   const waitTasks = [] as $JA.Task<unknown>[];
 
                    try {
                        if (typeof opts.preValidates === 'function') {
@@ -315,7 +315,7 @@ export function validateAsync(opts:IValidateOptionsAsync, ...validatables:(IVali
                        reject(errors);
                    }
                    else if ((runningTasks = waitTasks.length) > 0) {
-                       for (let r of waitTasks) {
+                       for (const r of waitTasks) {
                            r.then(() => {
                                       taskDone();
                                   },
@@ -491,7 +491,7 @@ export abstract class BaseType<TControl extends IBaseControl=IBaseControl> imple
      */
     public clone(): this
     {
-        let c = new (this.constructor as any)();
+        const c = new (this.constructor as any)();
 
         if (this._attributes !== undefined) c._attributes = this._attributes;
         if (this._uniqueid   !== undefined) c._uniqueid   = this._uniqueid;
@@ -504,7 +504,7 @@ export abstract class BaseType<TControl extends IBaseControl=IBaseControl> imple
      */
     public preValidateAsync(context:$JA.Context|null, opts:IValidateOptions)
     {
-        let rtn = [] as ($JA.Task<unknown>|Error)[];
+        const rtn = [] as ($JA.Task<unknown>|Error)[];
 
         this.validateTreeWalker((item, path, result) => {
                                     if (result === ValidateResult.OK) {
@@ -578,7 +578,7 @@ export abstract class BaseType<TControl extends IBaseControl=IBaseControl> imple
     public validateNow(opts:IValidateOptions)
     {
         let errors:ValidateErrors|undefined;
-        let rtn = this.validateTreeWalker((item, path, result) => {
+        const rtn = this.validateTreeWalker((item, path, result) => {
                                                 if (opts.itemselector && !opts.itemselector(item, path)) {
                                                     return result;
                                                 }
@@ -640,7 +640,7 @@ export abstract class BaseType<TControl extends IBaseControl=IBaseControl> imple
      */
     public getAttr(name:string):any {
         if (this._attributes instanceof Object) {
-            var r = this._attributes[name];
+            const r = this._attributes[name];
             if (r !== undefined)
                 return r;
         }
@@ -850,7 +850,7 @@ export abstract class SimpleType<TNative,TControl extends IBaseControl=IBaseCont
      *!!DOC
      */
     public static castFrom(v:any) {
-        var x = new (this as any)();
+        const x = new (this as any)();
         x.setValue(x.convertAnyToValue(v), ChangeReason.Parse);
         return x;
     }
@@ -913,7 +913,7 @@ export abstract class SimpleType<TNative,TControl extends IBaseControl=IBaseCont
      */
     public clone(): this
     {
-        let c = (super.clone() as this);
+        const c = (super.clone() as this);
 
         c._value = this.value;
 
@@ -937,7 +937,7 @@ export abstract class SimpleType<TNative,TControl extends IBaseControl=IBaseCont
      *!!DOC
      */
     public toText(format?:string):string {
-        let value = this.value;
+        const value = this.value;
         return value !== null ? this.cnvValueToText(value, format || this.getAttr("format")) : "";
     }
 
@@ -945,7 +945,7 @@ export abstract class SimpleType<TNative,TControl extends IBaseControl=IBaseCont
      *!!DOC
      */
     public toUrlValue(): string|null {
-        let value = this._value;
+        const value = this._value;
 
         if (value === null) {
             return null;
@@ -962,7 +962,7 @@ export abstract class SimpleType<TNative,TControl extends IBaseControl=IBaseCont
      *!!DOC
      */
     public toInvariant() {
-        let value = this.value;
+        const value = this.value;
         return value !== null ? this.cnvValueToInvariant(value) : null;
     }
 
@@ -1249,7 +1249,7 @@ export abstract class SimpleType<TNative,TControl extends IBaseControl=IBaseCont
      *!!DOC
      */
     public get Default():TNative|null {
-        var d = this.getAttr("default");
+        const d = this.getAttr("default");
         return (d !== undefined) ? d : null;
     }
 
@@ -1314,11 +1314,11 @@ export abstract class SimpleNumberType<TControl extends IBaseControl> extends Si
     }
 
     public validateValue(): ValidateValueResult {
-        let value = this._value;
+        const value = this._value;
 
         if (value !== null) {
-            let minValue = this.MinValue;
-            let maxValue = this.MaxValue;
+            const minValue = this.MinValue;
+            const maxValue = this.MaxValue;
 
             if (typeof minValue === 'number' && minValue > value)
                 return $JL.valuetolow_message;
@@ -1472,7 +1472,7 @@ export class Number extends SimpleNumberType<$JI.Number>
 
     protected _normalizeValue(v:number|null):number|null {
         if (v !== null) {
-            var p = this.getAttr("precision");
+            const p = this.getAttr("precision");
             if (typeof p === 'number' && p >= 0 && p <= 10)      v = $J.round(v, p);
         }
         return v;
@@ -1522,7 +1522,7 @@ export abstract class StringBase<TControl extends IBaseControl=IBaseControl> ext
     }
 
     public cnvTextToValue(text: string): string|null {
-        let options = this.Options;
+        const options = this.Options;
 
         if (!(options & StringOptions.NoTrim)) {
             text = text.trim();
@@ -1537,7 +1537,7 @@ export abstract class StringBase<TControl extends IBaseControl=IBaseControl> ext
             text = text.toLowerCase();
         }
         if (options & StringOptions.RemoveInvalidChars) {
-            let charset = this.Charset;
+            const charset = this.Charset;
             if (charset) {
                 for (let i = 0 ; i < text.length ; ++i) {
                     if (!charset.test(text.charAt(i))) {
@@ -1607,7 +1607,7 @@ export abstract class StringBase<TControl extends IBaseControl=IBaseControl> ext
     }
 
     public validateValue(): ValidateValueResult {
-        let value = this.value;
+        const value = this.value;
 
         if (value !== null) {
             const minLength = this.MinLength;
@@ -1620,7 +1620,7 @@ export abstract class StringBase<TControl extends IBaseControl=IBaseControl> ext
                 return $JL.text_to_long(maxLength);
             }
 
-            let validator = this.Validator;
+            const validator = this.Validator;
 
             if (validator instanceof RegExp) {
                 if (!(<RegExp>validator).test(value)) {
@@ -1694,7 +1694,7 @@ export class StringHtml extends StringBase<$JI.StringMultiLine> {
     }
 
     public toDom(format?:string):$JD.AddNode {
-        let div = $JD.createElement("div", { class: this.getAttr('class') });
+        const div = $JD.createElement("div", { class: this.getAttr('class') });
         const v = this.value;
         if (v) {
             div.html(v);
@@ -1833,13 +1833,13 @@ export class Date extends SimpleNumberType<$JI.Date>
         const format = this.Format;
 
         if (typeof format === "string" && format !== "") {
-            let date = new $global.Date(value * (24 * 60 * 60 * 1000));
+            const date = new $global.Date(value * (24 * 60 * 60 * 1000));
             let rtn  = "";
             let p    = 0;
 
             while (p < format.length) {
-                let c = format.substr(p, 1);
-                let n = 0;
+                const c = format.substr(p, 1);
+                let   n = 0;
 
                 while (p < format.length && format[p] === c) { ++n; ++p; }
 
@@ -1966,9 +1966,9 @@ export class DateTime extends SimpleNumberType<$JI.DateTime>
         if (typeof format === "string" && format !== "") {
             let date = new $global.Date(value);
 
-            var rtn:string = "";
-            var p:number   = 0;
-            var h:number   = 0;
+            let rtn:string = "";
+            let p:number   = 0;
+            let h:number   = 0;
 
             if (format.substr(0, 1) === "~") {
                 ++p;
@@ -1980,8 +1980,8 @@ export class DateTime extends SimpleNumberType<$JI.DateTime>
             }
 
             while (p < format.length) {
-                var c = format.substr(p, 1);
-                var n = 0;
+                const c = format.substr(p, 1);
+                let   n = 0;
 
                 while (p < format.length && format[p] === c)
                     { ++n; ++p; }
@@ -2089,7 +2089,7 @@ export class DateTime extends SimpleNumberType<$JI.DateTime>
      */
     public Now(): number
     {
-        let     d = (new $global.Date());
+        const d = (new $global.Date());
         return this.ValueIsUtc ? d.getTime() : d.getTime() - (d.getTimezoneOffset() * 60 * 1000);
     }
     /**
@@ -2170,7 +2170,7 @@ export class Time extends SimpleNumberType<$JI.Time>
     }
 
     public cnvValueToText(value: number, format?:string): string {
-        let f = this.getTimeFormat(format);
+        const f = this.getTimeFormat(format);
 
         if (typeof f === "string") {
             return $JR.numberToString(value, format);
@@ -2185,7 +2185,7 @@ export class Time extends SimpleNumberType<$JI.Time>
         if (text.length === 0)
             return null;
 
-        let f = this.getTimeFormat();
+        const f = this.getTimeFormat();
 
         if (typeof f === "string") {
             return Math.round($J.round($JR.stringToNumber(text), this.Precision) * this.Factor);
@@ -2211,7 +2211,7 @@ export class Time extends SimpleNumberType<$JI.Time>
     }
 
     public cnvNumberToValue(v: number): number {
-        var p = Math.round(this.Factor / Math.pow(10, this.Precision));
+        const p = Math.round(this.Factor / Math.pow(10, this.Precision));
         return Math.round(v / p) * p;
     }
 
@@ -2285,7 +2285,7 @@ export class Time extends SimpleNumberType<$JI.Time>
 
     protected _normalizeValue(v:number|null):number|null {
         if (v !== null) {
-            var p = Math.round(this.Factor / Math.pow(10, this.Precision));
+            const p = Math.round(this.Factor / Math.pow(10, this.Precision));
             v = Math.round(v / p) * p;
         }
 
@@ -2482,7 +2482,7 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
             else if (rec instanceof Object) {
                 let rtn:string|undefined;
 
-                let displayfield = this.Displayfield;
+                const displayfield = this.Displayfield;
                 if (typeof displayfield === 'string') {
                     rtn = (rec as any)[displayfield as string];
                 }
@@ -2736,7 +2736,7 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
     /*@internal*/   _validators?:RecordValidator<this>[];
 
     public static   define<T extends IFieldDef>(recdef:T, attr?:IRecordAttributes): IRecordConstructor<T> {
-        var newClass:any = new Function("this._initialize();");
+        const newClass:any = new Function("this._initialize();"); //eslint-disable-line no-new-func
 
         newClass.prototype   = Object.create(Record.prototype);
         newClass.prototype.constructor = newClass;
@@ -2771,7 +2771,7 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
      */
     public get hasValue():boolean {
         if (this._fields !== null) {
-            for(var name in this._fields) {
+            for(const name in this._fields) {
                 if (this._fields.hasOwnProperty(name) && this._fields[name].hasValue)
                     return true;
             }
@@ -2793,11 +2793,11 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
      *!!DOC
      */
     public clone():this {
-        let c = super.clone();
+        const c = super.clone();
 
         if (this._fields) {
             c._fields = <IRecord>{};
-            for(let name of this.FieldNames) {
+            for(const name of this.FieldNames) {
                 c._fields[name] = this._fields[name].clone();
             }
         }
@@ -2856,9 +2856,9 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
         if (this._fields === null)
             return null;
 
-        let rtn:$J.JsonObject = {};
+        const rtn:$J.JsonObject = {};
 
-        for(let name of Object.getOwnPropertyNames(this._fields)) {
+        for(const name of Object.getOwnPropertyNames(this._fields)) {
             const v = this._fields[name].toJSON(flags);
 
             if (!((v === null || (v instanceof Array && v.length === 0)) &&
@@ -2876,7 +2876,7 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
                 this._fields = this._createFields();
             }
 
-            for(let name of Object.getOwnPropertyNames(this._fields)) {
+            for(const name of Object.getOwnPropertyNames(this._fields)) {
                 try {
                     this._fields[name].parseJSON((v as $J.JsonObject)[name]);
                 }
@@ -2892,7 +2892,7 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
             this._fields = this._createFields();
         }
 
-        for (let name of Object.getOwnPropertyNames(this._fields)) {
+        for (const name of Object.getOwnPropertyNames(this._fields)) {
             this._fields[name].setDefault();
         }
     }
@@ -2903,11 +2903,11 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
     }
 
     public toUrlArgs(): $J.IUrlArgsInvariant {
-        var rtn = {} as $J.IUrlArgsInvariant;
+        const rtn = {} as $J.IUrlArgsInvariant;
 
         if (this._fields !== null) {
-            for (let name of Object.getOwnPropertyNames(this._fields)) {
-                let urlValue = this._fields[name].toUrlValue();
+            for (const name of Object.getOwnPropertyNames(this._fields)) {
+                const urlValue = this._fields[name].toUrlValue();
                 if (urlValue !== null) {
                     rtn[name] = urlValue;
                 }
@@ -2930,7 +2930,7 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
                 this._fields = this._createFields();
             }
 
-            for(let name of Object.getOwnPropertyNames(this._fields)) {
+            for(const name of Object.getOwnPropertyNames(this._fields)) {
                 try {
                     this._fields[name].parseUrlValue(urlargs[name]);
                 }
@@ -2949,7 +2949,7 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
     public toObject(fieldNames?: string[]): Object
     {
         if (!fieldNames) fieldNames = this.FieldNames;
-        let rtn = {} as any;
+        const rtn = {} as any;
         for (const fn of fieldNames) {
             rtn[fn] = this.field(fn);
         }
@@ -2962,7 +2962,7 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
     public sortCompare<K extends keyof TRec>(other:this, ...fields:K[])
     {
         for(let i = 0 ; i < fields.length ; ++i) {
-            let c  = this.field(fields[i]).sortCompare(other.field(fields[i]));
+            const c  = this.field(fields[i]).sortCompare(other.field(fields[i]));
             if (c !== 0)
                 return c;
         }
@@ -3009,7 +3009,7 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
         let rtn = ValidateResult.OK;
 
         if (this._fields !== null) {
-            for (let name of Object.getOwnPropertyNames(this._fields)) {
+            for (const name of Object.getOwnPropertyNames(this._fields)) {
                 rtn = mergeValidateResult(rtn, this._fields[name].validateTreeWalker(cb, path + '.' + name));
             }
         }
@@ -3018,10 +3018,10 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
     }
 
     private _createFields() {
-        let fielddef = this.FieldDef;
-        let fields   = <IRecord>{};
+        const fielddef = this.FieldDef;
+        const fields   = <IRecord>{};
 
-        for (let name of Object.getOwnPropertyNames(fielddef)) {
+        for (const name of Object.getOwnPropertyNames(fielddef)) {
             fields[name] = new fielddef[name]();
         }
 
@@ -3078,7 +3078,7 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
     protected       _items!:TSet[];
 
     public static   define<TSet extends Record<IFieldDef>|SimpleType<any>>(itemdef:IBaseConstructor<TSet, IBaseTypeAttributes>, attr?:ISetAttributes): ISetConstructor<TSet> {
-        var newClass:any = new Function("this._initialize();");
+        const newClass:any = new Function("this._initialize();"); //eslint-disable-line no-new-func
 
         newClass.prototype   = Object.create(Set.prototype);
         newClass.prototype.constructor = newClass;
@@ -3133,7 +3133,7 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
      *!!DOC
      */
     public select(filter: (item:TSet)=>boolean): Set<TSet> {
-        let rtn = new (this.constructor as any)();
+        const rtn = new (this.constructor as any)();
 
         for (const item of this._items) {
             if (filter(item)) {
@@ -3161,7 +3161,7 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
      *!!DOC
      */
     public clone():this {
-        let c = super.clone();
+        const c = super.clone();
 
         c._items = this._items.map((i) => i.clone()) as any;
 
@@ -3346,7 +3346,7 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
         const maxOccurs = this.MaxOccurs;
         if (typeof maxOccurs === 'number' && maxOccurs < this._items.length)    return $JL.items_to_many;
 
-        let validate = this.getAttr("validate") as ((set:Set<TSet>) => ValidateValueResult)|undefined;
+        const validate = this.getAttr("validate") as ((set:Set<TSet>) => ValidateValueResult)|undefined;
 
         return typeof validate === 'function' ? validate(this) : null;
     }
@@ -3442,7 +3442,7 @@ export class EnumSelectDatasource<TNative extends SelectValue, TRecord extends I
         const enumset = this._enumset;
         const keyname = this._keyfieldname;
 
-        for(var i=0 ; i<enumset.length ; ++i) {
+        for(let i=0 ; i<enumset.length ; ++i) {
             if ((enumset[i] as ({readonly [key:string]:any}))[keyname] === key) {
                     return enumset[i];
             }
@@ -3576,12 +3576,12 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
             throw new $J.InvalidStateError("RemoteSelectDatasource.fetch not defined.");
         }
 
-        let callargs: $J.IUrlArgsColl = {};
+        const callargs: $J.IUrlArgsColl = {};
 
         if (inputContext) {
-            for (var key in inputContext) {
+            for (const key in inputContext) {
                 if (inputContext.hasOwnProperty(key)) {
-                    var value = inputContext[key];
+                    const value = inputContext[key];
                     if (value !== undefined && value !== null) {
                         callargs[key] = value;
                     }
@@ -3614,7 +3614,7 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
         const minkeylength  = this._opts.minkeylength || 2;
         const key_blacklist = this._opts.key_blacklist;
 
-        let rtn:string[] = [];
+        const rtn:string[] = [];
 
         for (const key of searchkeys) {
             if (key.indexOf('*') < 0 || ((this._opts.flags & SelectDatasourceFlags.WildcardSearch) !== 0 && (/[^\*]/.test(key)))) {
@@ -3666,7 +3666,7 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
 //===================================== helpers ===================================================
 export function subClassHelper(baseClass:any,attr:IBaseTypeAttributes)
 {
-    var newClass:any = new Function("this._initialize();");
+    const newClass:any = new Function("this._initialize();"); //eslint-disable-line no-new-func
 
     newClass.prototype   = Object.create(baseClass.prototype);
     newClass.prototype.constructor = newClass;
@@ -3881,7 +3881,7 @@ class RecordValidator<TRec extends Record<IFieldDef>> implements IValidatable
     }
     private _setError(result:undefined|ValidateResult|Error)
     {
-        let fields = RecordValidator._getFields(this._fields);
+        const fields = RecordValidator._getFields(this._fields);
 
         if (result instanceof ValidateErrors) {
             const errors = result.errors;
@@ -3889,7 +3889,7 @@ class RecordValidator<TRec extends Record<IFieldDef>> implements IValidatable
                 for (const err of errors) {
                     const value = err.value;
                     if (value) {
-                        const i     = fields.indexOf(value);
+                        const i = fields.indexOf(value);
                         if (i !== -1) {
                             value.setError(err.error instanceof Error ? err.error.message : err.error);
                             fields.splice(i, 1);

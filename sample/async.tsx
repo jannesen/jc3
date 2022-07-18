@@ -32,7 +32,7 @@ function test1(context:$JA.Context): $JA.Task<void>
 
 async function promise1(delay:number, text:string, context:$JA.Context)
 {
-    for (var i = 0 ; i < 3 ; ++i) {
+    for (let i = 0 ; i < 3 ; ++i) {
         await $JA.Delay(delay, context);
         $JD.body.appendChild(<p>{text}</p>);
     }
@@ -63,7 +63,7 @@ function promise1(delay:number, text:string, context:$JA.Context): $JA.Task<void
 function promise_error(delay: number, context:$JA.Context)
 {
     return new $JA.Task<void>((resolve, reject, oncancel) => {
-            var timer = setTimeout(() => {
+            const timer = setTimeout(() => {
                             reject(new Error("promise_error"));
                         }, delay);
             oncancel(() => { clearTimeout(timer); });

@@ -102,7 +102,11 @@ export const enum FormChangedReason {
     TabChanged
 }
 
-export var  dialogfullscreenflags = DialogFlags.Window;     // Allowed DialogFlags for fullscreen.
+/**
+ * Allowed DialogFlags for fullscreen
+ */
+export var  dialogfullscreenflags = DialogFlags.Window;  //eslint-disable-line no-var
+
 /**
  * !!DOC
  */
@@ -291,12 +295,12 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
         this._container.addClass("-loading");
         (this._loading_cnt)++;
 
-        let task = this.cancel()
-                       .then(() => {
+        const task = this.cancel()
+                         .then(() => {
                                     executeContext.throwIfStopped();
 
                                     if (typeof contentNameClass === "string") {
-                                        let     nameparts = contentNameClass.split(":", 2);
+                                        const nameparts = contentNameClass.split(":", 2);
 
                                         if (nameparts.length === 1) {
                                             nameparts.push("FormModule");
@@ -323,7 +327,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
 
                                     throw new $J.InvalidStateError("FormLoader.open: argument exception 'form': invalid type.");
                              })
-                       .then((formConstructor) => {
+                         .then((formConstructor) => {
                                     executeContext.throwIfStopped();
                                     if (!(allowReUse && this._contentBody && this._contentBody.constructor === formConstructor && this._contentBody.canReOpen)) {
                                         newContent = new formConstructor(this._context);
@@ -340,13 +344,13 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                         }
                                     }
                              })
-                       .then(() => {
+                         .then(() => {
                                     return this._contentBody!._openContent(args, formstate, executeContext);
                              })
-                       .then(() => {
+                         .then(() => {
                                     this._showContent(newContent);
                              })
-                       .catch((e) => {
+                         .catch((e) => {
                                     if (this._contentBody && newContent === this._contentBody) {
                                         this._container.removeChild(newContent._scrollbox); // TODO: This looks wrong
                                         this._setcontentBody(null);
@@ -354,7 +358,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
 
                                     throw e;
                               })
-                       .finally(() => {
+                         .finally(() => {
                                     if (--(this._loading_cnt) === 0) {
                                         this._container.removeClass("-loading");
                                     }
@@ -374,7 +378,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
     protected           _destroy() {
         this._container.unbind("keydown", this._onkeydown, this);
 
-        for (let child of this._container.children) {
+        for (const child of this._container.children) {
             const cb = child.data("contentbody") as TContentBody;
             if (cb instanceof ContentBody) {
                 cb._trigger_ondestroy();
@@ -458,7 +462,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
     }
     protected           _cleanupContent()
     {
-        for (let child of this._container.children) {
+        for (const child of this._container.children) {
             const cb = child.data("contentbody") as TContentBody;
             if (cb instanceof ContentBody && cb !== this._contentBody) {
                 cb._trigger_ondestroy();
@@ -1092,8 +1096,8 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
         }
 
         if (dialogfullscreenflags & DialogFlags.FullScreen) {
-            let dlgSize           = this._initDlgSize!;
-            let winSize           = $JD.window.size;
+            const dlgSize           = this._initDlgSize!;
+            const winSize           = $JD.window.size;
 
             if ((winSize.width * 0.8) < dlgSize.width) {
                 let flags:DialogFlags = dialogfullscreenflags & (DialogFlags.FullScreen | DialogFlags.FullDialogScroll);
@@ -1122,7 +1126,7 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
                 this._contentBody._layoutDialog({ top:0, left:0 });
             }
 
-            let size = this._container.size;
+            const size = this._container.size;
             if (typeof height !== 'number') height = size.height;
             if (typeof width  !== 'number') width  = size.width;
         }
@@ -1162,7 +1166,7 @@ export class DialogLoader<TArgs=any, TRtn=any> extends ContentLoader<DialogBase<
     }
     public              _resizeFullScreen()
     {
-        let winSize = $JD.window.size;
+        const winSize = $JD.window.size;
         this._container.css({ position: "fixed", top: 0, left: 0, width: winSize.width, height: winSize.height });
 
         if (this._contentBody) {
@@ -1327,7 +1331,7 @@ export abstract class DialogBase<TArgs, TRtn> extends ContentBody<DialogLoader<T
                 const noBodyWidth = ((borderWidth["border-left-width"] as number) + (borderWidth["border-right-width"] as number)) || 0;
                 noBodyHeight += ((borderWidth["border-top-width"] as number) + (borderWidth["border-bottom-width"] as number)) || 0;
 
-                let css = {
+                const css = {
                             "min-height":   undefined as number|undefined,
                             "max-height":   Math.floor(Math.max(Math.round(Math.max(winSize.height - pos.top,  winSize.height / 2) - noBodyHeight - 0.5), 32)),
                             "min-width":    undefined as number|undefined,
@@ -1363,9 +1367,9 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
 
     protected           formContent()
     {
-        let header  = this.formHeader();
-        let body    = this.formBody  ();
-        let footer  = this.formFooter();
+        const header  = this.formHeader();
+        const body    = this.formBody  ();
+        const footer  = this.formFooter();
 
         this.content.appendChild((header ? <div class="-header -dialog-move-target">{ header }</div> : null),
                                  (body   ? <div class="-body"                      >{ body   }</div> : null),
@@ -1377,7 +1381,7 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
     }
     protected           formHeader(): $JD.AddNode
     {
-        let title = this.formTitle();
+        const title = this.formTitle();
         if (title) {
             return <span class="-title">{ title }</span>;
         }
@@ -1407,7 +1411,7 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
     private             _footerButtons(buttons:(IDialogButton|$JD.DOMHTMLElement)[]|null): $JD.AddNode
     {
         if (buttons) {
-            var footer = <div class="-buttons"/>;
+            const footer = <div class="-buttons"/>;
 
             for(const button of buttons) {
                 if (button instanceof $JD.DOMHTMLElement) {
@@ -1415,7 +1419,7 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
                 }
                 else
                 if (button instanceof Object) {
-                    var b = <button class={button["class"]}>{ button.text }</button>;
+                    const b = <button class={button["class"]}>{ button.text }</button>;
                     b.bind("click", () => {
                                         if (typeof button.onclick === "function") {
                                             button.onclick.call(this);
@@ -1638,16 +1642,16 @@ export abstract class AsyncContainer<TArgs, TContent extends $JD.AddNode=$JD.Add
  */
 export function normalizeUrlArgs(args:$J.IUrlArgs)
 {
-    let nargs = {} as $J.IUrlArgsInvariant;
+    const nargs = {} as $J.IUrlArgsInvariant;
 
     if (args instanceof Object) {
         if ($J.isIUrlArgsFunc(args)) {
             return args.toUrlArgs();
         }
 
-        for (var key in args) {
+        for (const key in args) {
             if (args.hasOwnProperty(key)) {
-                var value = args[key];
+                let value = args[key];
                 if (value !== undefined && value !== null) {
                     value = $J.valueToInvariant(value);
 
@@ -1676,11 +1680,11 @@ export function waitAnimationAsync<T>(elm: $JD.DOMHTMLElement, rtn:T)
  * !!DOC
  */
 export function moveTracker(ev:UIEvent, initPos: $JD.IPosition, callback: (pos:$JD.IPosition)=>void, callbackdone?:()=>void) {
-    let touch = ev.type === "touchstart";
-    let eventCollection = new $J.EventCollection();
+    const touch = ev.type === "touchstart";
+    const eventCollection = new $J.EventCollection();
 
     if (validEvent(ev)) {
-        var nulpoint = getEventPosition(ev);
+        const nulpoint = getEventPosition(ev);
 
         if (initPos) {
             nulpoint.top  -= initPos.top;
@@ -1688,32 +1692,32 @@ export function moveTracker(ev:UIEvent, initPos: $JD.IPosition, callback: (pos:$
         }
         eventCollection.bind<"touchmove"|"mousemove", UIEvent>($JD.window, (touch ? "touchmove" : "mousemove"), move);
         eventCollection.bind<"touchend"|"mouseup",    UIEvent>($JD.window, (touch ? "touchend"  : "mouseup"  ), stop);
-    }
 
-    function move(ev:UIEvent) {
-        ev.stopPropagation();
+        function move(ev:UIEvent) {
+            ev.stopPropagation();
 
-        if (validEvent(ev)) {
-            let pos = getEventPosition(ev);
-            try {
-                callback({
-                    top:  pos.top  - nulpoint.top,
-                    left: pos.left - nulpoint.left
-                });
+            if (validEvent(ev)) {
+                const pos = getEventPosition(ev);
+                try {
+                    callback({
+                        top:  pos.top  - nulpoint.top,
+                        left: pos.left - nulpoint.left
+                    });
+                }
+                catch(e) {
+                    $J.globalError("moveTracker callback failed", e);
+                    stop();
+                }
             }
-            catch(e) {
-                $J.globalError("moveTracker callback failed", e);
+            else
                 stop();
-            }
         }
-        else
-            stop();
-    }
 
-    function stop() {
-        eventCollection.unbindAll();
-        if (callbackdone) {
-            callbackdone();
+        function stop() {
+            eventCollection.unbindAll();
+            if (callbackdone) {
+                callbackdone();
+            }
         }
     }
 
@@ -1738,13 +1742,13 @@ export function errorToContent(err:string|Error|Error[]|$JD.DOMHTMLElement): $JD
         return err;
     }
 
-    let msgbody = <div class="jannesen-ui-content-error-message" />;
+    const msgbody = <div class="jannesen-ui-content-error-message" />;
 
     if (typeof err === "string") {
         msgbody.appendChild(<div class="-message">{ $JD.multilineStringToContent(err as string) }</div>);
     } else {
         msgbody.appendChild(<div class="-message">{ $JD.multilineStringToContent($J.translateError(err)) } </div>);
-        let details = <div class="-details" onclick={() => { msgbody.addClass("-display-details"); }} ><span class="-expand">+</span><span class="-header">{ $JL.details }</span></div>;
+        const details = <div class="-details" onclick={() => { msgbody.addClass("-display-details"); }} ><span class="-expand">+</span><span class="-header">{ $JL.details }</span></div>;
 
         errorObjToError(details, err);
         msgbody.appendChild(details);
@@ -1774,10 +1778,10 @@ function errorObjToError(body:$JD.DOMHTMLElement, err:any) {
 }
 function errorToMsg(err:Error): $JD.DOMHTMLElement {
     let f   = false;
-    let msg = <div class="-error"/>;
+    const msg = <div class="-error"/>;
 
     for(let e:Error|undefined=err ; e instanceof Error ; e = e.innerError) {
-        for (let m of (e instanceof __Error ? e.toMessageString() : "[" + e.name + "]: " + e.toString()).split('\n')) {
+        for (const m of (e instanceof __Error ? e.toMessageString() : "[" + e.name + "]: " + e.toString()).split('\n')) {
             if (f)
                 msg.appendChild(<br/>);
             else
@@ -1799,7 +1803,7 @@ function setDialogOnTop(dialogLoader: DialogLoader<any,any>|null)
     const dialogs = [] as { dialogloader: DialogLoader<any,any>; zindex:number }[];
 
     try {
-        for (var c of $global.document.body.children) {
+        for (const c of $global.document.body.children) {
             const dl = $JD.getElementData(c, "contentloader");
             if (dl instanceof DialogLoader && dl !== dialogLoader) {
                 dialogs.push({
@@ -1838,7 +1842,7 @@ function setDialogOnTop(dialogLoader: DialogLoader<any,any>|null)
 function resetWindowFullscreen()
 {
     try {
-        for (let c of $JD.body.children) {
+        for (const c of $JD.body.children) {
             if (c.hasClass("jannesen-ui-content") && c.hasClass("-fullscreen")) {
                 return;
             }
@@ -1852,10 +1856,10 @@ function resetWindowFullscreen()
 
 //-------------------------------------------------------------------------------------------------
 function window_onfocusin(ev:FocusEvent) {
-    let target = ev.target;
+    const target = ev.target;
     if (target instanceof HTMLElement) {
         if (target === $global.document.body) {
-            for (var c of $global.document.body.children) {
+            for (const c of $global.document.body.children) {
                 const dl = $JD.getElementData(c, "contentloader");
                 if (dl instanceof DialogLoader) {
                     if (dl.isOnTop) {

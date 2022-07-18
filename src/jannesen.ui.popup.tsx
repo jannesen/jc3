@@ -153,7 +153,7 @@ export abstract class Popup
 
 
             for (let e = this._parentelm.parent; e !== null; e = e.parent) {
-                let s = e.css(["overflow-x", "overflow-y"]);
+                const s = e.css(["overflow-x", "overflow-y"]);
                 if (s["overflow-x"] === "auto" || s["overflow-x"] === "scroll" ||
                     s["overflow-y"] === "auto" || s["overflow-y"] === "scroll") {
                     this._eventCollection.bind(e, "scroll", this._onScroll, this);
@@ -175,7 +175,7 @@ export abstract class Popup
             this.PositionPopup(this._container, this._poselmOuterRect = this._parentelm.outerRect);
 
             if (starttransition) {
-                let transition = this._container.css([ "transition-duration", "transition-property" ]);
+                const transition = this._container.css([ "transition-duration", "transition-property" ]);
 
                 if (typeof transition["transition-duration"] === 'string' && transition["transition-duration"] !== "0s" &&
                     (transition["transition-property"] === "height" || transition["transition-property"] === "width")) {
@@ -219,18 +219,18 @@ export abstract class Popup
         const fixed     = flags & (PositionFlags._fixed) ? true : false;
         let   posLeft   = poselmOuterRect.left;
         let   posTop    = poselmOuterRect.top;
-        let   cssset    = { position: fixed ? "fixed" : "absolute" } as ICssPosition;
-        let   window    = this._parentelm.defaultView;
+        const cssset    = { position: fixed ? "fixed" : "absolute" } as ICssPosition;
+        const window    = this._parentelm.defaultView;
         if (!fixed) {
             posLeft += window.pageXOffset;
             posTop  += window.pageYOffset;
         }
 
-        let windowWidth  = window.innerWidth  - screen_width_correction;
-        let windowHeight = window.innerHeight - screen_height_correction;
-        let correctWidth = false;
-        let correctBottom = false;
-        let actuelRect = container.outerRect;
+        const windowWidth  = window.innerWidth  - screen_width_correction;
+        const windowHeight = window.innerHeight - screen_height_correction;
+        const actuelRect = container.outerRect;
+        let   correctWidth = false;
+        let   correctBottom = false;
 
         switch (flags & PositionFlags.Horizontal) {
         case PositionFlags.AlignLeft:       cssset.left  = posLeft;                                                                                                     break;
@@ -301,7 +301,7 @@ export abstract class Popup
     private     _onScroll()
     {
         if (this._poselmOuterRect && this._container) {
-            let posClientRect = this._parentelm.outerRect;
+            const posClientRect = this._parentelm.outerRect;
 
             if (!(posClientRect.left   === this._poselmOuterRect.left   &&
                   posClientRect.top    === this._poselmOuterRect.top    &&
@@ -315,7 +315,7 @@ export abstract class Popup
     private     _onResize()
     {
         if (this._poselmOuterRect && this._container) {
-            let posClientRect = this._parentelm.outerRect;
+            const posClientRect = this._parentelm.outerRect;
             this._poselmOuterRect = posClientRect;
             this.PositionPopup(this._container, this._poselmOuterRect);
         }
@@ -349,7 +349,7 @@ export class Tooltip extends Popup
     protected   PositionPopup(container:$JD.DOMHTMLElement, poselmOuterRect:$JD.IRect)
     {
         const winSize     = $JD.window.size;
-        let posClientRect = { top: poselmOuterRect.top, left: poselmOuterRect.left, width: poselmOuterRect.width, height: poselmOuterRect.height };
+        const posClientRect = { top: poselmOuterRect.top, left: poselmOuterRect.left, width: poselmOuterRect.width, height: poselmOuterRect.height };
 
         if (!this._bottom && posClientRect.top - container.outerSize.height - this._offsetX < 0) {
             this._bottom = true;
@@ -394,7 +394,7 @@ export class Tooltip extends Popup
         if (this._postionFixed) {
             container.css("position", "fixed").css("left", posClientRect.left);
         } else {
-            let view = this._parentelm.defaultView;
+            const view = this._parentelm.defaultView;
             container.css("position", "absolute").css("left", posClientRect.left + view.pageXOffset);
             posClientRect.top  += view.pageYOffset;
         }
@@ -541,7 +541,7 @@ export class DropdownPopup<TNativeValue,
             let divMessage:$JD.DOMHTMLElement;
 
             if (msg instanceof Error) {
-                let m:$JD.AddNode[] = [];
+                const m:$JD.AddNode[] = [];
 
                 m.push("ERROR: " + (msg as Error).message);
 
@@ -594,16 +594,16 @@ export class DropdownPopup<TNativeValue,
     }
     /* @internal */     PositionPopup(container:$JD.DOMHTMLElement, poselmOuterRect:$JD.IRect)
     {
-        let winSize       = $JD.window.size;
-        let left          = poselmOuterRect.left;
-        let maxWidth      = Math.round((winSize.width) * ($JD.body.hasClass("jannesen-ui-mobile") ? 1 : 0.95));
-        let maxHeight     = Math.max(winSize.height - (poselmOuterRect.top + poselmOuterRect.height), poselmOuterRect.top);
-        let borderHeight:number;
-        let borderWidth:number;
-        let size:$JD.ISize;
+        const winSize       = $JD.window.size;
+        let   left          = poselmOuterRect.left;
+        const maxWidth      = Math.round((winSize.width) * ($JD.body.hasClass("jannesen-ui-mobile") ? 1 : 0.95));
+        let   maxHeight     = Math.max(winSize.height - (poselmOuterRect.top + poselmOuterRect.height), poselmOuterRect.top);
+        let   borderHeight:number;
+        let   borderWidth:number;
+        let   size:$JD.ISize;
 
         {
-            let css = container.css([ 'border-left-width', 'border-right-width', 'border-top-width', 'border-bottom-width']);
+            const css = container.css([ 'border-left-width', 'border-right-width', 'border-top-width', 'border-bottom-width']);
             borderHeight = (css['border-left-width']! + css['border-right-width']! ) || 0;
             borderWidth  = (css['border-top-width']!  + css['border-bottom-width']!) || 0;
         }
@@ -643,7 +643,7 @@ export class DropdownPopup<TNativeValue,
 
         left -= Math.round(Math.max(0, (size.width - poselmOuterRect.width - 1) / 2));
 
-        let rest = Math.min(Math.round((maxWidth - size.width) / 2), 30);
+        const rest = Math.min(Math.round((maxWidth - size.width) / 2), 30);
 
         if (left > winSize.width - rest - size.width)
             left = winSize.width - rest - size.width;
@@ -719,10 +719,9 @@ export abstract class DropdownContent<TNativeValue,
     {
         const container = this._popup.container;
         if (container) {
-            let e:Element|null;
-            let celm = container.element;
+            const celm = container.element;
 
-            for (e = document.activeElement ; e !== null && e !== undefined && e !== document.body ; e = e.parentElement) {
+            for (let e = document.activeElement ; e !== null && e !== undefined && e !== document.body ; e = e.parentElement) {
                 if (e === celm)
                     return true;
             }
@@ -746,7 +745,7 @@ export abstract class DropdownContent<TNativeValue,
     }
     protected           Close(value:TDropdownRtn|undefined, ev:Event|undefined)
     {
-        let control = this.control;
+        const control = this.control;
 
         if (control) {
             control.dropdownClose(value, ev);
@@ -982,7 +981,7 @@ export abstract class TableDropdown<TNativeValue,
     private         _getrow(elm: any)
     {
         if (this._tbody) {
-            let tbody = this._tbody.element;
+            const tbody = this._tbody.element;
 
             while (elm instanceof Element && elm !== document.body && elm.parentElement !== tbody) {
                 elm = elm.parentElement;
@@ -1009,7 +1008,7 @@ function loadDropdownConstructor<TNativeValue,
         return $JA.Task.resolve(dropdownClass);
     }
 
-    let classNameParts = dropdownClass.split(":", 2);
+    const classNameParts = dropdownClass.split(":", 2);
     if (classNameParts.length !== 2) {
         throw new $J.InvalidStateError("Invalid dropdownClass '" + classNameParts + "'");
     }
@@ -1033,6 +1032,6 @@ function loadDropdownConstructor<TNativeValue,
 }
 function calcPageStep(container:$JD.DOMHTMLElement): number
 {
-    let rowheight = container.css("font-size") * 1.167 + 2;
+    const rowheight = container.css("font-size") * 1.167 + 2;
     return Math.max(1, Math.floor(container.clientRect.height / rowheight - 0.9));
 }

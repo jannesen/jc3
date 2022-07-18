@@ -41,7 +41,7 @@ class Content implements $JD.IDOMContainer
                              this._index();
                          }
                          if (this._intnameparts.length===2) {
-                             let callopts = (intfaceobj as any)[this._intnameparts[1]];
+                             const callopts = (intfaceobj as any)[this._intnameparts[1]];
                              if (!(callopts && callopts.callname)) {
                                  throw new Error("Unknown interface.");
                              }
@@ -60,8 +60,8 @@ class Content implements $JD.IDOMContainer
     }
 
     private     _index(): void {
-        let index = [] as $JD.DOMHTMLElement[];
-        let extarg = (this._argv.length>1) ? "!" + this._argv.slice(1).join("!") : "";
+        const index = [] as $JD.DOMHTMLElement[];
+        const extarg = (this._argv.length>1) ? "!" + this._argv.slice(1).join("!") : "";
         Object.getOwnPropertyNames(this._intfaceobj).forEach((name) => {
             index.push(<a href={ location.pathname + "#!" + this._intnameparts[0] + ":" + name + extarg}>{ name }</a>);
             index.push(<br/>);
@@ -71,8 +71,8 @@ class Content implements $JD.IDOMContainer
     }
 
     private     _call(callDefinitions: $JA.IAjaxCallDefinition<any,any,any>): void {
-        let     callcontent = <div/>;
-        let     args: $JA.IAjaxArgs = {};
+        const   callcontent = <div/>;
+        const   args: $JA.IAjaxArgs = {};
 
         if (callDefinitions.callargs_type) {
             args.callargs = new callDefinitions.callargs_type();
@@ -96,14 +96,14 @@ class Content implements $JD.IDOMContainer
                                     </div>);
         }
 
-        let responsecontainer = <div/>;
+        const responsecontainer = <div/>;
 
         callcontent.appendChild(<button onclick={() => {
                                     $JA.Task.resolve()
                                             .then(() => args.callargs instanceof $JT.BaseType ? args.callargs.validateAsync({ context:null }) : $JT.ValidateResult.OK )
                                             .then((r) => r === $JT.ValidateResult.OK && args.data instanceof $JT.BaseType ? args.data.validateAsync({ context:null }) : r)
                                             .then(() => {
-                                                        let response = <div>loading</div>;
+                                                        const response = <div>loading</div>;
                                                         responsecontainer.empty().appendChild(<h1>RESPONSE</h1>, response);
 
                                                         const responseContext = new $JA.Context({ parent:this._context, dom: response });
@@ -193,7 +193,7 @@ class Content implements $JD.IDOMContainer
         return "Set.[UNKNOWN]";
     }
     private     _createResponseSetRecord(data: $JT.Set<any>, FieldDef: $JT.IFieldDef): $JD.AddNode {
-        let fieldNames = Object.getOwnPropertyNames(FieldDef);
+        const fieldNames = Object.getOwnPropertyNames(FieldDef);
 
         return <table class="response">
                     <thead>

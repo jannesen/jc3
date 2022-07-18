@@ -39,8 +39,8 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
     }
 
     protected get           currentStep() {
-        let current = this.getCurrentStep();
-        let currentIndex = this.steps.indexOf(current[0], undefined);
+        const current = this.getCurrentStep();
+        const currentIndex = this.steps.indexOf(current[0], undefined);
         return currentIndex + 1;
     }
 
@@ -52,7 +52,7 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
         this.nextButton = <button class={$JCONTENT.std_button_next.class} onclick={() => this.switch(true)}>{$JCONTENT.std_button_next.text}</button>;
         this.stepCounter = <span class="wizard-steps"></span>;
 
-        let interfaceSave = this.interfaceSave;
+        const interfaceSave = this.interfaceSave;
         this.callargs = (interfaceSave.callargs_type) ? (new interfaceSave.callargs_type()) : undefined;
         this.data = (interfaceSave.request_type) ? (new interfaceSave.request_type()) as any : undefined;
     }
@@ -67,11 +67,11 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
     protected               onopen(args: TArgs, ct: $JA.Context) {
         return $JA.Task.from(this.copyData(true, this.args, this.callargs, this.data, ct))
                        .thenD(() => {
-                           let title = this.formTitle();
-                           let body = this.formBody(this.callargs, this.data);
-                           let footer = this.formFooter();
+                           const title = this.formTitle();
+                           const body = this.formBody(this.callargs, this.data);
+                           const footer = this.formFooter();
 
-                           let first = this.steps[0];
+                           const first = this.steps[0];
                            first.container.show(true);
                            first.setActive();
 
@@ -135,7 +135,7 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
     protected abstract      formBody(callargs:$JA.AjaxCallArgsType<TCall>, data:$JA.AjaxCallRequestType<TCall>): $JD.AddNode;
     protected               formFooter()
     {
-        let btns =  <div class="-buttons"/>;
+        const btns =  <div class="-buttons"/>;
 
         this.nextButton.show(false);
         this.prevButton.show(false);
@@ -164,9 +164,9 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
     }
 
     protected               switch(next: boolean) {
-        let current = this.getCurrentStep();
-        let currentIndex = this.steps.indexOf(current[0], undefined);
-        let nextIndex = next ? currentIndex + 1 : currentIndex - 1;
+        const current = this.getCurrentStep();
+        const currentIndex = this.steps.indexOf(current[0], undefined);
+        const nextIndex = next ? currentIndex + 1 : currentIndex - 1;
 
         // set next/previous step active if there are any
         if (nextIndex !== this.steps.length) {
@@ -215,10 +215,10 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
     {
         return this.validate(context)
                    .then(() => {
-                             let opts = {
+                             const opts = {
                                              callargs: this.callargs,
                                              data:     this.data
-                                        } as $JA.IAjaxArgs;
+                                          } as $JA.IAjaxArgs;
 
                              return $JA.Ajax(this.interfaceSave, opts, context)
                                        .then((r) => this.onSaved(r));

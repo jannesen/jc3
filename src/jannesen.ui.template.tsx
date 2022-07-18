@@ -19,7 +19,7 @@ function normalizeArgs(args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record<$JT
     }
 
     if (args instanceof $JT.Record) {
-        let rtn:$J.IUrlArgsColl = {};
+        const rtn:$J.IUrlArgsColl = {};
 
         for (const n of args.FieldNames) {
             const f = args.field(n);
@@ -36,7 +36,7 @@ function normalizeArgs(args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record<$JT
 }
 
 //-------------------------------------------------------------------------------------------------
-export var hasPermission:(o:string|$JA.IAjaxCallDefinition<any,any,any>|(new(context:$JA.Context)=>BaseForm<any,any>)|(new()=>StandardDialog<any,any>), method?:string) => boolean = (cls) => true;
+export var hasPermission:(o:string|$JA.IAjaxCallDefinition<any,any,any>|(new(context:$JA.Context)=>BaseForm<any,any>)|(new()=>StandardDialog<any,any>), method?:string) => boolean = (cls) => true; //eslint-disable-line no-var
 
 export function setHasPermission(f: (o:string|$JA.IAjaxCallDefinition<any,any,any>|(new(context:$JA.Context)=>BaseForm<any,any>)|(new()=>StandardDialog<any,any>), method?:string) => boolean)
 {
@@ -60,8 +60,8 @@ export class UrlArgSet implements $JCONTENT.IUrlArgsSet
 
     public static   RecordsetMap<T extends $JT.Record<$JT.IFieldDef>>(recordset: $JT.Set<T>, currecord: T, mapper:(c:T)=>$J.IUrlArgsColl)
     {
-        let set:$J.IUrlArgsColl[]  = [];
-        let curr:number|null       = null;
+        const set:$J.IUrlArgsColl[]  = [];
+        let   curr:number|null       = null;
 
         recordset.forEach((rec) => {
                                 const r = mapper(rec);
@@ -128,7 +128,7 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record<
     {
         super(context);
 
-        let queryargs_type = this.interfaceGet.callargs_type;
+        const queryargs_type = this.interfaceGet.callargs_type;
         this._formargs   = (queryargs_type) ? new queryargs_type() : null as any;
     }
 
@@ -136,12 +136,12 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record<
     {
         const loader = this.loader;
         if (loader) {
-            let state = this._formstate;
+            const state = this._formstate;
             if (state) {
                 state.state = undefined;
             }
 
-            let args = normalizeArgs(this._formargs);
+            const args = normalizeArgs(this._formargs);
 
             this.showDataPopup();
             loader.open(this.contentNameClass, args, state, undefined, true);
@@ -234,7 +234,7 @@ export abstract class SimpleForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
     public                  gotoNextInSet()
     {
         if (this._formstate && this._formstate.argset) {
-            let next = this._formstate.argset.next();
+            const next = this._formstate.argset.next();
             if (next) {
                 this.openform(".", next, true);
                 return true;
@@ -355,7 +355,7 @@ export abstract class QueryForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record
     {
         super(context);
 
-        let queryargs_type = this.interfaceGet.callargs_type;
+        const queryargs_type = this.interfaceGet.callargs_type;
         this._formargs = (queryargs_type) ? new queryargs_type() : null as any;
     }
 
@@ -441,7 +441,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
                                      </div>;
                 elmqueryform.bind("keypress", (ev) => { if ((ev.key === "Enter" || ev.key === "NumpadEnter") && !(ev.altKey || ev.shiftKey || ev.metaKey || ev.ctrlKey)) { this.onExecuteQuery(); } });
                 formargs.FieldNames.forEach((n) => {
-                                                let fld = formargs.field(n);
+                                                const fld = formargs.field(n);
                                                 fld.bind("changed", () => {
                                                                             if (this._result) {
                                                                                 this._result.container.addClass("-querychanged");
@@ -623,7 +623,7 @@ export abstract class ReportForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
                                  </div>;
             elmqueryform.bind("keypress", (ev) => { if (ev.key === "Enter" || ev.key === "NumpadEnter") { this.onExecuteQuery(); } });
             formargs.FieldNames.forEach((n) => {
-                                            let fld = formargs.field(n);
+                                            const fld = formargs.field(n);
                                             fld.bind("changed", () => {
                                                                         if (this._resultcontainer) {
                                                                             this._resultcontainer.addClass("-querychanged");
@@ -735,7 +735,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     public                  constructor(context:$JA.Context)
     {
         super(context);
-        let interfaceSave = this.interfaceSave;
+        const interfaceSave = this.interfaceSave;
         this.callargs = (interfaceSave.callargs_type) ? (new interfaceSave.callargs_type()) : undefined;
         this.data     = (interfaceSave.request_type)  ? (new interfaceSave.request_type()) as any : undefined;
     }
@@ -747,9 +747,9 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     {
         this.copyData(true, args, this.callargs, this.data);
 
-        let title   = this.formTitle();
-        let body    = this.formBody  (this.callargs, this.data);
-        let footer  = this.formFooter();
+        const title   = this.formTitle();
+        const body    = this.formBody  (this.callargs, this.data);
+        const footer  = this.formFooter();
 
 
         this.content.appendChild(<div class="-header -dialog-move-target"><span class="-title">{ title }</span></div>,
@@ -811,7 +811,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     protected abstract      formBody(callargs:$JA.AjaxCallArgsType<TCall>, data:$JA.AjaxCallRequestType<TCall>): $JD.AddNode;
     protected               formFooter()
     {
-        let btns =  <div class="-buttons"/>;
+        const btns =  <div class="-buttons"/>;
 
         if (this._allowDelete() && this.allowDelete()) {
             btns.appendChild(<button class={ $JCONTENT.std_button_remove.class } tabIndex={100} onclick={() => this.cmdDelete() }>{ $JCONTENT.std_button_remove.text }</button>);
@@ -855,7 +855,7 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
 
         if (intfDel) {
             if (this.allowDelete() && intfDel && intfDel.callargs_type) {
-                let opts = {
+                const opts = {
                     callargs:   new intfDel.callargs_type(),
                     data:       intfDel.request_type ? new intfDel.request_type() : undefined
                 };
@@ -892,10 +892,10 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
         return this.validateAsync(context)
                    .then(() => {
                              this.onSaveAfterValidated();
-                             let opts = {
-                                             callargs: this.callargs,
-                                             data:     this.data
-                                        } as $JA.IAjaxArgs;
+                             const opts = {
+                                              callargs: this.callargs,
+                                              data:     this.data
+                                          } as $JA.IAjaxArgs;
 
                              switch (dlgmode) {
                              case StandardDialogMode.Create:     opts.method = 'POST';       break;
@@ -1015,9 +1015,9 @@ export abstract class SubmitDialog<TArgs, TRtn=void> extends $JCONTENT.DialogBas
 
     private                 _createcontent()
     {
-        let title   = this.formTitle();
-        let body    = this.formBody();
-        let footer  = this.formFooter();
+        const title   = this.formTitle();
+        const body    = this.formBody();
+        const footer  = this.formFooter();
 
         this.content.appendChild(<div class="-header -dialog-move-target"><span class="-title">{ title }</span></div>,
                                  <div class="-body"                      >{ body   }</div>,
@@ -1050,7 +1050,7 @@ export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition
     public                  constructor(context:$JA.Context)
     {
         super(context);
-        let interfaceSave = this.interface;
+        const interfaceSave = this.interface;
         this.callargs = (interfaceSave.callargs_type) ? (new interfaceSave.callargs_type()) : undefined;
         this.data     = (interfaceSave.request_type)  ? (new interfaceSave.request_type()) as any : undefined;
     }

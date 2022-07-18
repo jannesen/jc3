@@ -1,7 +1,7 @@
 ﻿/// <reference path="lib-ext.d.ts"/>
 const tick_per_day            = (24*60*60*1000);
 const rounderror              = 100.5 - (1.005 * 100);
-var global_uniqueidcounter  = Math.floor(Math.random() * 100000);
+let   global_uniqueidcounter  = Math.floor(Math.random() * 100000);
 
 //=============================================== Enums ===========================================
 /**
@@ -228,7 +228,7 @@ export class ServerError extends __Error
         let rtn = '';
 
         if (this.serverError instanceof Object && Array.isArray(this.serverError.detail)) {
-            for (let d of this.serverError.detail) {
+            for (const d of this.serverError.detail) {
                 const m = '[ServerError.detail]: ' + (typeof d.message === 'string' && d.message.length > 0 ? d.message : 'UNKNOWN');
                 rtn = (rtn.length ? rtn + '\n' + m : m);
             }
@@ -293,7 +293,7 @@ export function testContructorOf<T extends new ()=>Object>(constructor:any, type
             return true;
         }
 
-        let x = Object.getPrototypeOf(constructor.prototype);
+        const x = Object.getPrototypeOf(constructor.prototype);
         if (!x) {
             return false;
         }
@@ -315,7 +315,7 @@ export function extend(target:any, ...sources: any[]): Object
     sources.forEach(obj =>
     {
         if (obj instanceof Object) {
-            for (var propertyName in obj) {
+            for (const propertyName in obj) {
                 if (obj.hasOwnProperty(propertyName)) {
                     if (target[propertyName] === undefined)
                         target[propertyName] = obj[propertyName];
@@ -372,13 +372,13 @@ export function isEqual(a1: any, a2: any) {
 
                 if (lnames.length > 0) {
                     const names = new Set(lnames);
-                    for (let n of rnames) {
+                    for (const n of rnames) {
                         if (!names.has(n)) {
                             return false;
                         }
                     }
 
-                    for (let n of lnames) {
+                    for (const n of lnames) {
                         if (!compare(l[n], r[n])) {
                             return false;
                         }
@@ -430,7 +430,7 @@ export function removeItemFromArray(arr:any[], item:any): void {
     console.assert(Array.isArray(arr), "Array.isArray(arr) failed");
 
     if (Array.isArray(arr)) {
-        let foundIndex = arr.indexOf(item);
+        const foundIndex = arr.indexOf(item);
         console.assert(foundIndex !== -1, "arr.indexOf(item) failed");
         if (foundIndex !== -1)
             arr.splice(foundIndex, 1);
@@ -484,7 +484,7 @@ export function newDate(year: number, month: number, day: number): number
  */
 export function curDate(): number
 {
-    var d = Date.now();
+    let d = Date.now();
     d = d - ((new Date(d)).getTimezoneOffset() * 60 * 1000);
     return Math.floor(d / tick_per_day);
 }
@@ -494,7 +494,7 @@ export function curDate(): number
  */
 export function dateParts(d:number): DateParts
 {
-    let date =new Date(Math.floor(d) * (24*60*60*1000));
+    const date =new Date(Math.floor(d) * (24*60*60*1000));
 
     return {
         Year:   date.getUTCFullYear(),
@@ -564,7 +564,7 @@ export function datetimeNumberFromDate(d: number): number {
 export function parseIntExact(s: string): number
 {
     if (/^(\-|\+)?[0-9]+$/.test(s)) {
-        var r = parseInt(s, 10);
+        const r = parseInt(s, 10);
 
         if (!isNaN(r))
             return r;
@@ -579,7 +579,7 @@ export function parseIntExact(s: string): number
 export function parseFloatExact(s: string): number
 {
     if (/^(\-\+)?[0-9]*(\.[0-9]*)?$/.test(s)) {
-        var r = parseFloat(s);
+        const r = parseFloat(s);
 
         if (!isNaN(r))
             return r;
@@ -594,12 +594,12 @@ export function parseFloatExact(s: string): number
 export function parseDate(s: string): number
 {
     try {
-        var parts = /^([0-9]{4})\-([0-9]{1,2})\-([0-9]{1,2})$/.exec(s);
+        const parts = /^([0-9]{4})\-([0-9]{1,2})\-([0-9]{1,2})$/.exec(s);
 
         if (parts !== null && typeof parts[1] === "string" && typeof parts[2] === "string" && typeof parts[2] === "string") {
-            var y  = parseIntExact(parts[1]!);
-            var m  = parseIntExact(parts[2]!);
-            var d  = parseIntExact(parts[3]!);
+            const y  = parseIntExact(parts[1]!);
+            const m  = parseIntExact(parts[2]!);
+            const d  = parseIntExact(parts[3]!);
 
             if (y>=1900 && y<=2099 && m>=1 && m<=12 && d>=1 && d<=31)
                 return newDate(y, m, d);
@@ -625,16 +625,16 @@ export function parseDatetime(s: string): Date
 export function parseDatetimeNumber(s: string): number
 {
     try {
-        var parts = /^([0-9]{4})\-([0-9]{1,2})\-([0-9]{1,2})T([0-9]{1,2}):([0-9]{1,2})(?::([0-9]{2})(?:\.([0-9]{1,3}))?)?$/.exec(s);
+        const parts = /^([0-9]{4})\-([0-9]{1,2})\-([0-9]{1,2})T([0-9]{1,2}):([0-9]{1,2})(?::([0-9]{2})(?:\.([0-9]{1,3}))?)?$/.exec(s);
 
         if (parts !== null && typeof parts[1] === "string" && typeof parts[2] === "string" && typeof parts[3] === "string" && typeof parts[4] === "string" && typeof parts[5] === "string") {
-            var y = parseIntExact(parts[1]!);
-            var m = parseIntExact(parts[2]!);
-            var d = parseIntExact(parts[3]!);
-            var H = parseIntExact(parts[4]!);
-            var M = parseIntExact(parts[5]!);
-            var S = 0;
-            var F = 0;
+            const y = parseIntExact(parts[1]!);
+            const m = parseIntExact(parts[2]!);
+            const d = parseIntExact(parts[3]!);
+            const H = parseIntExact(parts[4]!);
+            const M = parseIntExact(parts[5]!);
+            let   S = 0;
+            let   F = 0;
 
             if (typeof parts[6] === "string") {
                 S = parseIntExact(parts[6]!) ;
@@ -663,11 +663,11 @@ export function parseDatetimeNumber(s: string): number
 export function parseUrlArgs(urlargs: IUrlArgsInvariant|string): IUrlArgsInvariant
 {
     if (typeof urlargs === 'string') {
-        var args = <IUrlArgsInvariant>{};
+        const args = <IUrlArgsInvariant>{};
 
         if (urlargs.length > 0) {
-            for (let urlarg of urlargs.split("&")) {
-                var s = urlarg.indexOf("=");
+            for (const urlarg of urlargs.split("&")) {
+                const s = urlarg.indexOf("=");
                 if (s < 0)
                     throw new FormatError("syntax error in urlargs.");
 
@@ -692,7 +692,7 @@ export function intToA(v: number, l: number): string
     if (v === null || v === undefined)
         return "";
 
-    var s = v.toString();
+    const s = v.toString();
 
     if (l === s.length + 1) return "0"+s;
     if (l >   s.length)     return "0".repeat(l-s.length) + s;
@@ -708,7 +708,7 @@ export function dateToString(v: number|null|undefined): string
     if (v === null || v === undefined)
         return "";
 
-    var d = new Date(v * (24*60*60*1000));
+    const d = new Date(v * (24*60*60*1000));
 
     return intToA(d.getUTCFullYear(), 4) + "-" +
            intToA(d.getUTCMonth()+1,  2) + "-" +
@@ -726,7 +726,7 @@ export function datetimeToString(v: number|Date|null|undefined): string
     if (typeof v === "number")
         v = new Date(<number>v);
 
-    var r = intToA(v.getUTCFullYear(), 4) + "-" +
+    let r = intToA(v.getUTCFullYear(), 4) + "-" +
             intToA(v.getUTCMonth()+1,  2) + "-" +
             intToA(v.getUTCDate(),     2) + "T" +
             intToA(v.getUTCHours(),    2) + ":" +
@@ -760,9 +760,9 @@ export function objectToUrlArgs(p1: string|IUrlArgs|null|undefined|void, p2?: IU
             p1 = p1.toUrlArgs();
         }
 
-        for (var key in p1) {
+        for (const key in p1) {
             if (p1.hasOwnProperty(key)) {
-                var value = p1[key];
+                let value = p1[key];
 
                 if (value !== undefined && value !== null) {
                     value = valueToInvariant(value);
@@ -783,12 +783,12 @@ export function objectToUrlArgs(p1: string|IUrlArgs|null|undefined|void, p2?: IU
  */
 export function generateUUID()
 {
-    var d = new Date().getTime();
+    let d = new Date().getTime();
     if(window.performance && typeof window.performance.now === "function"){
         d += performance.now(); //use high-precision timer if available
     }
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                                                                        var r = (d + Math.random()*16)%16 | 0;
+                                                                        const r = (d + Math.random()*16)%16 | 0;
                                                                         d = Math.floor(d/16);
                                                                         return (c==='x' ? r : (r&0x3|0x8)).toString(16);
                                                                     });
@@ -802,7 +802,7 @@ export function round(v: number, p: number): number
     if (v === undefined || v === null)
         return <any>v;
 
-    var pow: number;
+    let pow: number;
 
     switch(p) {
     case 0:     return Math.round(v);
@@ -828,7 +828,7 @@ export function divModulo(v: number|null, divisor: number): { result:number; rem
     if (v === null)
         return null;
 
-    let r = Math.floor(v / divisor + rounderror);
+    const r = Math.floor(v / divisor + rounderror);
 
     return {
         result:     r,
@@ -866,11 +866,11 @@ export function div(...values: (number|null|undefined)[]): number|null|undefined
 function MathHelper(func:number, values:(number|null|undefined)[]): number|null|undefined {
     if (values.length === 0)
         return undefined;
-    var r = values[0];
+    let r = values[0];
     if (typeof r !== 'number')
         return r;
-    for (var i = 1; i < values.length; ++i) {
-        var v = values[i];
+    for (let i = 1; i < values.length; ++i) {
+        const v = values[i];
         if (typeof v !== 'number')
             return v;
 
@@ -1076,7 +1076,7 @@ export function translateError(err: Error|Error[]): string
 
 function translateErrorError(err: Error):string|undefined
 {
-    for (let translates of g_errorTranslators) {
+    for (const translates of g_errorTranslators) {
         try {
             if (typeof translates === 'function') {
                 const r = translates(err);
@@ -1085,7 +1085,7 @@ function translateErrorError(err: Error):string|undefined
                 }
             }
             else if (Array.isArray(translates)) {
-                for (let translate of translates) {
+                for (const translate of translates) {
                     if ((typeof translate.errclass === 'string'   && translate.errclass === err.name) ||
                         (typeof translate.errclass === 'function' && err instanceof translate.errclass)) {
                         let rtn:string|undefined;
@@ -1096,7 +1096,7 @@ function translateErrorError(err: Error):string|undefined
                             rtn = translate.translator(err);
                         }
                         else if (Array.isArray(translate.translator)) {
-                            for (let translateregex of translate.translator) {
+                            for (const translateregex of translate.translator) {
                                 rtn = translateErrorRegExp(err, translateregex);
                                 if (rtn) {
                                     break;
@@ -1146,9 +1146,9 @@ function translateErrorRegExp(err: Error, r: IErrorTranslatorRegExp)
  */
 export function globalError(msg:string, e:Object):void
 {
-    var firsterr:Object|undefined;
+    let firsterr:Object|undefined;
 
-    var m = "=== ERROR ===";
+    let m = "=== ERROR ===";
 
     if (msg)
         m = m + "\n" + msg;
@@ -1187,7 +1187,7 @@ export function logError(err:Error):void
     if (log) {
         let firsterr:Error|undefined;
 
-        var m = "=== ERROR ===";
+        let m = "=== ERROR ===";
 
         for (e = err; e instanceof Error; e = ((firsterr = e) as any).innerError) {
             m += "\n" + e.toString();
@@ -1313,7 +1313,7 @@ export function eventBind(eventHandlers:IEventHandlerCollection, eventName: stri
     if (!events) {
         eventHandlers[eventName] = events = [];
     }
-    let wrapper = eventWrapper(eventName, handler, thisArg);
+    const wrapper = eventWrapper(eventName, handler, thisArg);
     events.push(wrapper);
 }
 export function eventUnbind(eventHandlers:IEventHandlerCollection|undefined, eventName: string, handler: (ev:any)=>void, thisArg?:any) {
@@ -1368,7 +1368,7 @@ export function eventTrigger(eventHandlers:IEventHandlerCollection|undefined, ev
 }
 export function eventWrapper(eventName:string, eventHandler:(ev:any)=>void, thisArg:any): IEventWrapper
 {
-    let h = newEventHandler() as IEventWrapper;
+    const h = newEventHandler() as IEventWrapper;
     h.eventName    = eventName;
     h.eventHandler = eventHandler;
     h.thisArg      = thisArg;

@@ -576,7 +576,7 @@ class PopupMenu extends $JUP.Popup
             if (item.hasSubMenu) {
                 this._selectItem(item, true);
             } else {
-                let root = this._root;
+                const root = this._root;
                 if (root) {
                     root.menu_itemClick(item);
                 }
@@ -642,15 +642,15 @@ class PopupMenu extends $JUP.Popup
 
 function optimizeMenuItem(items:AddMenuItems)
 {
-    let rtn:MenuItem<unknown>[] = [];
-    let sep:MenuSeperator|null = null;
+    const rtn:MenuItem<unknown>[] = [];
+    let   sep:MenuSeperator|null = null;
 
     addItems(items);
 
     return rtn;
 
     function addItems(items: AddMenuItems) {
-        for (let i of items) {
+        for (const i of items) {
             if (Array.isArray(i)) {
                 addItems(i);
             }

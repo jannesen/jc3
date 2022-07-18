@@ -7,7 +7,7 @@ export function UtcToLocal<T extends number|null|undefined>(d:T):T
     if (typeof d !== 'number')
         return d;
 
-    var o=60;
+    let o=60;
     if (d<1269738000000){
         if (d<1017536400000){
             if (d<891133200000){
@@ -91,7 +91,7 @@ export function LocalToUtc<T extends number|null|undefined>(d:T):T
     if (typeof d !== 'number')
         return d;
 
-    var o=60;
+    let o=60;
     if (d<1269745200000){
         if (d<1017543600000){
             if (d<891140400000){

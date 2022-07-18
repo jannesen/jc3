@@ -225,7 +225,7 @@ export class Main extends $JD.Container
     public          gotoprev()
     {
         if (this._formloader.contentBody && this._formloader.contentBody._formstate && this._formloader.contentBody._formstate.argset) {
-            let prev = this._formloader.contentBody._formstate.argset.prev();
+            const prev = this._formloader.contentBody._formstate.argset.prev();
 
             if (prev) {
                 this._openform(".", prev, true);
@@ -235,7 +235,7 @@ export class Main extends $JD.Container
     public          gotonext()
     {
         if (this._formloader.contentBody && this._formloader.contentBody._formstate && this._formloader.contentBody._formstate.argset) {
-            let next = this._formloader.contentBody._formstate.argset.next();
+            const next = this._formloader.contentBody._formstate.argset.next();
             if (next) {
                 this._openform(".", next, true);
             }
@@ -275,7 +275,7 @@ export class Main extends $JD.Container
             return $JUC.DialogError.show(err, this._context) as $JA.Task<void>;
         }
 
-        let formstate = (this.newform) ? this.newform(formName, nargs, historyReplace) : undefined;
+        const formstate = (this.newform) ? this.newform(formName, nargs, historyReplace) : undefined;
 
         if (formstate) {
             formstate.argset = argset;
@@ -285,7 +285,7 @@ export class Main extends $JD.Container
     }
     private         _historyChangeArgs(args:$J.IUrlArgsColl, historyReplace:boolean) {
         if (this.newform) {
-            let curFormNameClass = this._formloader.contentBody && this._formloader.contentBody.contentNameClass;
+            const curFormNameClass = this._formloader.contentBody && this._formloader.contentBody.contentNameClass;
 
             if (typeof curFormNameClass === 'string'){
                 try {
@@ -398,7 +398,7 @@ export class Main extends $JD.Container
         if (progess < 1) {
             $J.setTimeout(() => {
                                 if (this._container.isLive) {
-                                    let t = ((new Date()).getTime() - this._transition_start!) / 500;
+                                    const t = ((new Date()).getTime() - this._transition_start!) / 500;
                                     this._updateSidebarWidth((t >= 0 && t < 1) ? (t < 0.5 ? 2*t*t : -1 + (4-2*t)*t) : 1);
                                 }
                           }, 20);
@@ -408,8 +408,8 @@ export class Main extends $JD.Container
     }
     private         _formChanged(reason:$JUC.FormChangedReason, sourceform:$JUC.Form|null)
     {
-        let   form    = this._formloader.contentBody;
-        let   isLoaded = form ? form.isLoaded : false;
+        const form    = this._formloader.contentBody;
+        const isLoaded = form ? form.isLoaded : false;
 
         if ((reason === $JUC.FormChangedReason.Loaded || reason === $JUC.FormChangedReason.TitleChanged) && sourceform && form === sourceform) {
             let title:$JD.AddNode;
@@ -651,7 +651,7 @@ export function optimizePath(path: string) {
 /**
  * !!DOC
  */
-var g_statecache:$JUC.IFormState[] = [];
+var g_statecache:$JUC.IFormState[] = []; //eslint-disable-line no-var
 
 export function get_browser_formstate(replace:boolean): $JUC.IFormState|undefined
 {
@@ -664,7 +664,7 @@ export function get_browser_formstate(replace:boolean): $JUC.IFormState|undefine
         const uuid = history.state as string;
 
         for (let i = g_statecache.length - 1 ; i >= 0 ; --i) {
-            let state = g_statecache[i];
+            const state = g_statecache[i];
             if (state.uuid === uuid) {
                 if (!replace && state.href === href) {
                     if (i < g_statecache.length - 1) {
@@ -684,13 +684,13 @@ export function get_browser_formstate(replace:boolean): $JUC.IFormState|undefine
             g_statecache.splice(0, g_statecache.length - 6);
         }
 
-        let newState = {
+        const newState = {
                             uuid:       uuid,
                             timestamp:  (new Date()).getTime(),
                             href:       href,
                             state:      undefined as any,
                             argset:     undefined as any
-                       };
+                         };
 
         g_statecache.push(newState);
 
