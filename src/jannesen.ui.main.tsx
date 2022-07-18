@@ -260,7 +260,7 @@ export class Main extends $JD.Container
 
         if ($JUC.isIUrlArgsSet(args)) {
             argset = args;
-            args = $J.extend<$J.IUrlArgsColl>({}, argset.args());
+            args = { ...argset.args() };
         }
 
         if (this._formloader.contentBody && formName === this._formloader.contentBody.contentNameClass) {

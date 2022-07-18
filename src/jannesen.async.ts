@@ -940,6 +940,7 @@ export interface IAjaxArgs
     url?:                   string;
     data?:                  Object|string|void;
     timeout?:               number;
+    headers?:               IHttpHeaderNameValue[];
 }
 export interface IAjaxArgsDelete
 {
@@ -963,6 +964,7 @@ export interface IAjaxCallDefinition<TCallArgs,TRequest,TResponse>
     callargs_type?:         new () => TCallArgs;
     request_type?:          new () => TRequest;
     response_type?:         new () => TResponse;
+    headers?:               IHttpHeaderNameValue[];
     encoder_decoder?:       IAjaxEncoderDecoders;
     hook_before_send?:      (opts:IAjaxOpts)=>void;
     hook_after_received?:   (opts:IAjaxOpts, success:boolean, data:any)=>void;
@@ -1060,7 +1062,7 @@ export type AjaxCallResponseType<TCall extends IAjaxCallDefinition<any,any,any>>
  */
 export function Ajax<TCall extends IAjaxCallDefinition<any,any,any>>(callDefinitions:TCall|undefined, args: IAjaxArgs, context: Context|null): Task<AjaxCallResponseType<TCall>>
 {
-    const opts = $J.extend({}, args, callDefinitions, AjaxDefaults) as IAjaxOpts;
+    const opts = { ...AjaxDefaults, ...callDefinitions, ...args} as IAjaxOpts;
 
     return new Task<AjaxCallResponseType<TCall>>((resolve, reject, oncancel) => {
             const task_start = performance.now();

@@ -63,7 +63,7 @@ export class MenuButton extends $JD.Container implements IMenuBase,IMenuParent
 
     public      constructor(attr?: IMenuButtonAttr, ...children:AddMenuItems)
     {
-        attr = $J.extend<IMenuButtonAttr>({} as IMenuButtonAttr, attr);
+        attr = { ...attr };
         if (children && children.length > 0)    attr.dataSource = () => children;
         if (attr.menupos === undefined)         attr.menupos = MenuPosition.Left;
 
@@ -175,7 +175,7 @@ export class FloatingMenu implements IMenuBase,IMenuParent
 
     public      constructor(attr?: IFloatingMenuAttr, ...children:AddMenuItems)
     {
-        attr = $J.extend<IFloatingMenuAttr>({} as IFloatingMenuAttr, attr);
+        attr = { ...attr };
         if (children && children.length > 0)    attr.dataSource = () => children;
         if (attr.menupos === undefined)         attr.menupos = MenuPosition.Left;
 
@@ -337,7 +337,7 @@ export class MenuEntry extends MenuItem<IMenuEntryAttr> implements IMenuParent
     public      constructor(attr?: IMenuEntryAttr, ...children:AddMenuItem[])
     {
         if (children && children.length > 0) {
-            attr = $J.extend<IMenuEntryAttr>({} as IMenuEntryAttr, attr);
+            attr = { ...attr };
             attr.dataSource = () => children;
         }
         if (!(attr instanceof Object)) attr = {};

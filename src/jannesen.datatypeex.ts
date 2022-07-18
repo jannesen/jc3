@@ -125,8 +125,8 @@ export interface IDateRangeAttributes extends IRangeAttributes {
  *!!DOC
  */
 export class DateRange extends RangeValue<$JIE.DateRange> {
-    public static Name       = "DateRange";
-    public static Attributes = $J.extend<IDateRangeAttributes>({ minValue: $J.newDate(1900, 1, 1), maxValue: $J.newDate(2100, 12, 31) }, $JT.SimpleType.Attributes);
+    public static Name                            = "DateRange";
+    public static Attributes:IDateRangeAttributes = { ...$JT.SimpleType.Attributes, minValue: $J.newDate(1900, 1, 1), maxValue: $J.newDate(2100, 12, 31) };
 
     public static subClass(attr: IDateRangeAttributes): typeof DateRange {
         return $JT.subClassHelper(DateRange, attr);
@@ -170,8 +170,8 @@ export interface IDateTimeRangeAttributes extends IRangeAttributes {
  *!!DOC
  */
 export class DateTimeRange extends RangeValue<$JIE.DateTimeRange> {
-    public static Name       = "DateTimeRange";
-    public static Attributes = $J.extend<IDateTimeRangeAttributes>({ }, $JT.SimpleType.Attributes);
+    public static Name                                = "DateTimeRange";
+    public static Attributes:IDateTimeRangeAttributes = { ...$JT.SimpleType.Attributes };
 
     public static subClass(attr: IDateTimeRangeAttributes): typeof DateTimeRange {
         return $JT.subClassHelper(DateTimeRange, attr);

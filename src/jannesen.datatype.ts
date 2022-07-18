@@ -841,8 +841,8 @@ export interface ISimpleTypeAttributes<TNative> extends IBaseTypeAttributes
  */
 export abstract class SimpleType<TNative,TControl extends IBaseControl=IBaseControl> extends BaseType<TControl>
 {
-    public static   Name        = "SimpleType";
-    public static   Attributes  = $J.extend<ISimpleTypeAttributes<any>>({ }, BaseType.Attributes);
+    public static   Name                                  = "SimpleType";
+    public static   Attributes:ISimpleTypeAttributes<any> = { ...BaseType.Attributes };
 
     protected       _value!:    TNative|null;
 
@@ -1344,8 +1344,8 @@ export interface IIntegerAttributes extends ISimpleNumberTypeAttributes
  */
 export class Integer extends SimpleNumberType<$JI.Integer>
 {
-    public static   Name        = "Integer";
-    public static   Attributes  = $J.extend<IIntegerAttributes>({ }, SimpleType.Attributes);
+    public static   Name                          = "Integer";
+    public static   Attributes:IIntegerAttributes = { ...SimpleType.Attributes };
     public static   subClass(attr:IIntegerAttributes): typeof Integer {
         return subClassHelper(Integer, attr);
     }
@@ -1406,8 +1406,8 @@ export interface INumberAttributes extends ISimpleNumberTypeAttributes
  */
 export class Number extends SimpleNumberType<$JI.Number>
 {
-    public static   Name        = "Number";
-    public static   Attributes  = $J.extend<INumberAttributes>({ precision:2 }, SimpleType.Attributes);
+    public static   Name                         = "Number";
+    public static   Attributes:INumberAttributes = { ...SimpleType.Attributes, precision:2 };
     public static   subClass(attr:INumberAttributes): typeof Number {
         return subClassHelper(Number, attr);
     }
@@ -1642,9 +1642,9 @@ export abstract class StringBase<TControl extends IBaseControl=IBaseControl> ext
 }
 
 export class String extends StringBase<$JI.String> {
-    public static   Name        = "String";
-    public static   NativeType  = "string";
-    public static   Attributes  = $J.extend<IStringAttributes>({ }, SimpleType.Attributes);
+    public static   Name                         = "String";
+    public static   NativeType                   = "string";
+    public static   Attributes:IStringAttributes = { ...SimpleType.Attributes };
     public static   subClass(attr:IStringAttributes): typeof String {
         return subClassHelper(String, attr);
     }
@@ -1655,9 +1655,9 @@ export class String extends StringBase<$JI.String> {
 }
 
 export class StringMultiLine extends StringBase<$JI.StringMultiLine> {
-    public static   Name        = "StringMultiLine";
-    public static   NativeType  = "string";
-    public static   Attributes  = $J.extend<IStringAttributes>({ }, SimpleType.Attributes);
+    public static   Name                         = "StringMultiLine";
+    public static   NativeType                   = "string";
+    public static   Attributes:IStringAttributes = { ...SimpleType.Attributes };
     public static   subClass(attr:IStringAttributes): typeof StringMultiLine {
         return subClassHelper(StringMultiLine, attr);
     }
@@ -1682,9 +1682,9 @@ export interface IStringHtmlAttributes extends IStringAttributes
 }
 
 export class StringHtml extends StringBase<$JI.StringMultiLine> {
-    public static   Name        = "StringHtml";
-    public static   NativeType  = "string";
-    public static   Attributes  = $J.extend<IStringHtmlAttributes>({ }, SimpleType.Attributes);
+    public static   Name                             = "StringHtml";
+    public static   NativeType                       = "string";
+    public static   Attributes:IStringHtmlAttributes = { ...SimpleType.Attributes };
     public static   subClass(attr:IStringHtmlAttributes): typeof StringMultiLine {
         return subClassHelper(StringHtml, attr);
     }
@@ -1717,9 +1717,9 @@ export interface IBooleanAttributes extends ISimpleTypeAttributes<boolean>
  */
 export class Boolean extends SimpleType<boolean, $JI.Boolean>
 {
-    public static   Name        = "Boolean";
-    public static   NativeType  = "boolean";
-    public static   Attributes  = $J.extend<IBooleanAttributes>({ tristate:true }, SimpleType.Attributes);
+    public static   Name                          = "Boolean";
+    public static   NativeType                    = "boolean";
+    public static   Attributes:IBooleanAttributes = { ...SimpleType.Attributes, tristate:true };
     public static   subClass(attr:IBooleanAttributes): typeof Boolean {
         return subClassHelper(Boolean, attr);
     }
@@ -1819,8 +1819,8 @@ export interface IDateAttributes extends ISimpleNumberTypeAttributes
  */
 export class Date extends SimpleNumberType<$JI.Date>
 {
-    public static   Name        = "Date";
-    public static   Attributes  = $J.extend<IDateAttributes>({ }, SimpleType.Attributes);
+    public static   Name                       = "Date";
+    public static   Attributes:IDateAttributes = { ...SimpleType.Attributes };
     public static   subClass(attr:IDateAttributes): typeof Date {
         return subClassHelper(Date, attr);
     }
@@ -1950,8 +1950,8 @@ export interface IDateTimeAttributes extends ISimpleNumberTypeAttributes
  */
 export class DateTime extends SimpleNumberType<$JI.DateTime>
 {
-    public static   Name        = "DateTime";
-    public static   Attributes  = $J.extend<IDateTimeAttributes>({ displayUtc:false, timezone:undefined }, SimpleType.Attributes);
+    public static   Name                           = "DateTime";
+    public static   Attributes:IDateTimeAttributes = { ...SimpleType.Attributes, displayUtc:false, timezone:undefined };
     public static   subClass(attr:IDateTimeAttributes): typeof DateTime {
         return subClassHelper(DateTime, attr);
     }
@@ -2149,9 +2149,9 @@ export interface ITimeAttributes extends ISimpleNumberTypeAttributes
  */
 export class Time extends SimpleNumberType<$JI.Time>
 {
-    public static   Name        = "Time";
-    public static   NativeType  = "number";
-    public static   Attributes  = $J.extend<ITimeAttributes>({ factor:TimeFactor.Sec, precision:0 }, SimpleType.Attributes);
+    public static   Name                       = "Time";
+    public static   NativeType                 = "number";
+    public static   Attributes:ITimeAttributes = { ...SimpleType.Attributes, factor:TimeFactor.Sec, precision:0 };
     public static   subClass(attr:ITimeAttributes): typeof Time {
         return subClassHelper(Time, attr);
     }
@@ -2331,8 +2331,8 @@ export interface ISelectTypeAttributes<TNativeType extends SelectValue, TDatasou
  */
 export abstract class SelectType<TNative extends SelectValue, TDatasource extends SelectDatasource<TNative,ISelectRecord>> extends SimpleType<TNative, $JI.ISelectInputControl<TNative, TDatasource>>
 {
-    public static   Name        = "SelectType";
-    public static   Attributes  = $J.extend<ISelectTypeAttributes<SelectValue, SelectDatasource<SelectValue, ISelectRecord>>>({ displayfield:"text" } as any, SimpleType.Attributes);
+    public static   Name                                                                                        = "SelectType";
+    public static   Attributes:ISelectTypeAttributes<SelectValue, SelectDatasource<SelectValue, ISelectRecord>> = { ...SimpleType.Attributes, displayfield:"text" } as any;
 
     private _record?:TDatasource_Record<TDatasource>;
 
@@ -2728,8 +2728,8 @@ export type RecordObject<TRec extends IFieldDef, TNames extends string[]> = { [K
  */
 export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseControl> extends BaseType<TControl> implements $J.IUrlArgsFunc
 {
-    public static   Name                = "Record";
-    public static   Attributes          = $J.extend<IRecordAttributes>({ null_response_error:true }, BaseType.Attributes);
+    public static   Name                         = "Record";
+    public static   Attributes:IRecordAttributes = { ...BaseType.Attributes, null_response_error:true };
     public static   FieldDef:IFieldDef  = {};
 
     protected       _fields!:IRecord|null;
@@ -2741,9 +2741,9 @@ export class Record<TRec extends IFieldDef, TControl extends IBaseControl=IBaseC
         newClass.prototype   = Object.create(Record.prototype);
         newClass.prototype.constructor = newClass;
 
-        newClass.Name        = Record.Name;
-        newClass.Attributes  = $J.extend<IRecordAttributes>(attr || {}, Record.Attributes);
-        newClass.FieldDef    = recdef;
+        newClass.Name       = Record.Name;
+        newClass.Attributes = { ...Record.Attributes, ...attr };
+        newClass.FieldDef   = recdef;
 
         return newClass;
     }
@@ -3071,9 +3071,9 @@ export type RecordOfSet<TSet extends RecordSet<IFieldDef>> = TSet extends Set<in
  */
 export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseType
 {
-    public static   Name                                                            = "Set";
-    public static   Attributes                                                      = $J.extend<ISetAttributes>({ }, BaseType.Attributes);
-    public static   ItemDef:typeof Record| typeof SimpleType | undefined   = undefined;
+    public static   Name                                                 = "Set";
+    public static   Attributes:ISetAttributes                            = { ...BaseType.Attributes };
+    public static   ItemDef:typeof Record| typeof SimpleType | undefined = undefined;
 
     protected       _items!:TSet[];
 
@@ -3084,7 +3084,7 @@ export class Set<TSet extends Record<IFieldDef>|SimpleType<any>> extends BaseTyp
         newClass.prototype.constructor = newClass;
 
         newClass.Name        = Set.Name;
-        newClass.Attributes  = $J.extend<ISetAttributes>(attr || {}, Set.Attributes);
+        newClass.Attributes  = { ...Set.Attributes, ...attr };
         newClass.ItemDef     = itemdef;
 
         return newClass;
@@ -3673,7 +3673,7 @@ export function subClassHelper(baseClass:any,attr:IBaseTypeAttributes)
 
     newClass.Name        = baseClass.Name;
     newClass.NativeType  = baseClass.NativeType;
-    newClass.Attributes  = $J.extend(attr || {}, baseClass.Attributes);
+    newClass.Attributes  = { ...baseClass.Attributes, ...attr };
     newClass.subClass    = (attr:IBaseTypeAttributes) => { return subClassHelper(newClass, attr); };
     newClass.castFrom    = baseClass.castFrom;
 

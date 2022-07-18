@@ -214,7 +214,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
     {
         let active:     IActiveTask;
 
-        const executeContext     = new $JA.Context($J.extend<$JA.IContextOptions>({ parent:this._context, dom:this._container }, contextOptions));
+        const executeContext = new $JA.Context({ ...contextOptions, parent:this._context, dom:this._container });
 
         if (this._activeTask) {
             return $JA.Task.reject(new $JA.BusyError("Content loader busy."));
@@ -653,7 +653,7 @@ export class FormLoader<TArgs=any> extends ContentLoader<Form<TArgs> | FormError
 
     public              open(formNameClass:string|(new (context:$JA.Context)=>Form<TArgs>), args:TArgs, formstate?:IFormState, contextOptions?:$JA.IContextOptions, refresh?:boolean): $JA.Task<void>
     {
-        const executeContext = new $JA.Context($J.extend<$JA.IContextOptions>({ parent:this._context, dom:this._container }, contextOptions));
+        const executeContext = new $JA.Context({ ...contextOptions, parent:this._context, dom:this._container });
         return this._open(formNameClass, args, formstate, executeContext, !refresh)
                     .then(() => {
                               if (this._contentBody) {

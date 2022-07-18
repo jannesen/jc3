@@ -303,31 +303,6 @@ export function testContructorOf<T extends new ()=>Object>(constructor:any, type
 }
 
 /**
- * Merge the contents of two or more objects together into the first object.
- * And return the first object
- *
- * @param   target      to extend.
- */
-export function extend(target:any, ...sources: any[]): Object;
-export function extend<T extends { [key: string]: any }>(target: T, ...sources: any[]): T;
-export function extend(target:any, ...sources: any[]): Object
-{
-    sources.forEach(obj =>
-    {
-        if (obj instanceof Object) {
-            for (const propertyName in obj) {
-                if (obj.hasOwnProperty(propertyName)) {
-                    if (target[propertyName] === undefined)
-                        target[propertyName] = obj[propertyName];
-                }
-            }
-        }
-    });
-
-    return target;
-}
-
-/**
  * !!DOC
  */
 export function isEqual(a1: any, a2: any) {

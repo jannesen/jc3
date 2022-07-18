@@ -119,7 +119,7 @@ export class DatePicker implements $JD.IDOMContainer,$J.EventHandling
     }
     public  set     State(state:DatePickerState)
     {
-        state = $J.extend({}, state) as DatePickerState;
+        state = { ...state };
         this._state = state;
 
         switch (state.Mode) {
@@ -720,7 +720,7 @@ export abstract class ViewBase implements $JD.IDOMContainer
         }
 
         this._cells     = cells;
-        this._viewState = $J.extend({}, state) as ViewState;
+        this._viewState = { ...state };
     }
 
     protected               tableHeader():$JD.DOMHTMLElement|null
@@ -847,7 +847,7 @@ class MonthView extends ViewBase
     }
     public          initDate(date:ValueMinMax, range?:number|null)
     {
-        this._value = $J.extend({}, date) as ValueMinMax;
+        this._value = { ...date };
         this._range = range;
         this._month = {
                             Value:      YearMonth.FromDate(typeof date.Value === 'number' ? date.Value : this._picker.ToDay).Ticks,
@@ -944,7 +944,7 @@ class YearView extends ViewBase
 
     public          init(month:ValueMinMaxNotNull)
     {
-        this._value = $J.extend({}, month) as ValueMinMax;
+        this._value = { ...month };
         this._year  = {
                             Value:      toInt(month.Value    / 12),
                             MinValue:   toInt(month.MinValue / 12),
@@ -1021,7 +1021,7 @@ class DecadeView extends ViewBase
 
     public          init(year:ValueMinMaxNotNull)
     {
-        this._value     = $J.extend({}, year) as ValueMinMax;
+        this._value     = { ...year };
         this._firstVisible = year.Value - 12;
         this.stateChanged(true);
     }
@@ -1096,7 +1096,7 @@ class DayView extends ViewBase
     public          initTime(time:ValueMinMax)
     {
         this._firstValue = typeof time.Value === 'number' ? time.Value - time.Value % TicksPerDay : 0;
-        this._value      = $J.extend({}, time) as ValueMinMax;
+        this._value      = { ...time };
         this.stateChanged(true);
     }
     public          initDate(date:number, time:ValueMinMax)
