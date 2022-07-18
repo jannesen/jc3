@@ -352,8 +352,8 @@ export abstract class InputTextControl<TNativeValue,
             }
 
             if (ev instanceof KeyboardEvent && ev.key === 'Tab' && !(ev.ctrlKey || ev.altKey && ev.metaKey) &&
-                $global.document.activeElement === this._input.element) {
-                $global.document.activeElement.dispatchEvent(new KeyboardEvent(ev.type, {
+                globalThis.document.activeElement === this._input.element) {
+                globalThis.document.activeElement.dispatchEvent(new KeyboardEvent(ev.type, {
                                                                                    code:       ev.code,
                                                                                    key:        ev.key,
                                                                                    location:   ev.location,
@@ -364,7 +364,7 @@ export abstract class InputTextControl<TNativeValue,
                                                                                    shiftKey:   ev.shiftKey,
                                                                                    bubbles:    true,
                                                                                    cancelable: true,
-                                                                                   view:       $global.window
+                                                                                   view:       globalThis.window
                                                                                }));
             }
         }
@@ -461,7 +461,7 @@ export abstract class InputTextControl<TNativeValue,
 
             if (restorefocus) {
                 const c = activeDropdown.container;
-                if (c && c.contains($global.document.activeElement)) {
+                if (c && c.contains(globalThis.document.activeElement)) {
                     this._input.focus();
                 }
             }
@@ -527,7 +527,7 @@ export abstract class InputTextControl<TNativeValue,
 
         if (!this.hasFocus(ev.relatedTarget as Element)) {
             if (this._activeDropdown) {
-                this.closeDropdown(!ev.relatedTarget || ev.relatedTarget === $global.document.body);
+                this.closeDropdown(!ev.relatedTarget || ev.relatedTarget === globalThis.document.body);
             }
 
             this.onblurparse();
@@ -2119,7 +2119,7 @@ export class SelectDataSet<TNativeValue extends $JT.SelectValue,
 
         return false;
     }
-    private static columnSep = $global.String.fromCharCode(10);
+    private static columnSep = globalThis.String.fromCharCode(10);
 }
 
 export interface ISearchFilterOptions
@@ -2354,8 +2354,8 @@ export class SetInput<TSet extends $JT.Record<$JT.IFieldDef>|$JT.SimpleType<any>
         this._data.addItem(setItem.data);
     }
     public              removeItem(setItem: SetItem<TSet>) {
-        const activeElement = $global.document.activeElement;
-        if (activeElement instanceof HTMLElement && setItem.domElement.element.contains($global.document.activeElement)) {
+        const activeElement = globalThis.document.activeElement;
+        if (activeElement instanceof HTMLElement && setItem.domElement.element.contains(globalThis.document.activeElement)) {
             const form = $JD.getTabForm(setItem.domElement.element);
             if (form) {
                 let f = $JD.nextTabStop(form, activeElement, false, setItem.domElement.element);

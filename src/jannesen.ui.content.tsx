@@ -129,7 +129,7 @@ const nativeFocus = HTMLElement.prototype.focus;
 HTMLElement.prototype.focus = function (options?:FocusOptions) {
                                   let node:HTMLElement|null = this;
 
-                                  while (node && node !== $global.document.body) {
+                                  while (node && node !== globalThis.document.body) {
                                       const contentLoader = $JD.getElementData(node, "contentloader");
                                       if (contentLoader instanceof ContentLoader) {
                                           if (contentLoader._focusHandler(this, options)) {
@@ -189,7 +189,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
     }
 
     public              focus() {
-        if (this._contentBody && !this._container.contains($global.document.activeElement)) {
+        if (this._contentBody && !this._container.contains(globalThis.document.activeElement)) {
             if (this.isBusy) {
                 this._overlay.focus();
             }
@@ -257,7 +257,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                                 if (--(this._execute_cnt) === 0) {
                                     this._container.removeClass("-execute");
 
-                                    if (this._overlay.element === $global.document.activeElement && this._contentBody) {
+                                    if (this._overlay.element === globalThis.document.activeElement && this._contentBody) {
                                         if (this._restoreFocus) {
                                             this._restoreFocus.target.focus(this._restoreFocus.options);
                                         }
@@ -272,8 +272,8 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
 
         this._setActiveTask(active = { task, ct:executeContext });
 
-        if ($global.document.activeElement instanceof HTMLElement && this._container.contains($global.document.activeElement) && $global.document.activeElement !== this._overlay.element) {
-            this._restoreFocus = { target:$global.document.activeElement };
+        if (globalThis.document.activeElement instanceof HTMLElement && this._container.contains(globalThis.document.activeElement) && globalThis.document.activeElement !== this._overlay.element) {
+            this._restoreFocus = { target:globalThis.document.activeElement };
             this._overlay.focus();
         }
 
@@ -399,7 +399,7 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
                 ev.stopPropagation();
                 ev.preventDefault();
                 const target = ev.target;
-                if (target === $global.document.activeElement && target instanceof HTMLElement) {
+                if (target === globalThis.document.activeElement && target instanceof HTMLElement) {
                     const body = this._contentBody;
                     if (body) {
                         body._handlerTab(target, ev.shiftKey);
@@ -560,7 +560,7 @@ export abstract class ContentBody<TLoader extends ContentLoader<any, any>, TArgs
 
     public              focus()
     {
-        if (!this._content.contains($global.document.activeElement)) {
+        if (!this._content.contains(globalThis.document.activeElement)) {
             this.focusFirstInput();
         }
     }
@@ -1238,7 +1238,7 @@ export abstract class DialogBase<TArgs, TRtn> extends ContentBody<DialogLoader<T
     }
 
     public              focus() {
-        if (!this._content.contains($global.document.activeElement)) {
+        if (!this._content.contains(globalThis.document.activeElement)) {
             setDialogOnTop(this._loader);
             this.focusFirstInput();
         }
@@ -1814,7 +1814,7 @@ function setDialogOnTop(dialogLoader: DialogLoader<any,any>|null)
     const dialogs = [] as { dialogloader: DialogLoader<any,any>; zindex:number }[];
 
     try {
-        for (const c of $global.document.body.children) {
+        for (const c of globalThis.document.body.children) {
             const dl = $JD.getElementData(c, "contentloader");
             if (dl instanceof DialogLoader && dl !== dialogLoader) {
                 dialogs.push({
@@ -1869,8 +1869,8 @@ function resetWindowFullscreen()
 function window_onfocusin(ev:FocusEvent) {
     const target = ev.target;
     if (target instanceof HTMLElement) {
-        if (target === $global.document.body) {
-            for (const c of $global.document.body.children) {
+        if (target === globalThis.document.body) {
+            for (const c of globalThis.document.body.children) {
                 const dl = $JD.getElementData(c, "contentloader");
                 if (dl instanceof DialogLoader) {
                     if (dl.isOnTop) {
@@ -1882,7 +1882,7 @@ function window_onfocusin(ev:FocusEvent) {
         }
 
         let node:HTMLElement|null = target;
-        while (node && node !== $global.document.body) {
+        while (node && node !== globalThis.document.body) {
             {
                 const contentLoader = $JD.getElementData(node, "contentloader");
                 if (contentLoader instanceof ContentLoader) {
@@ -1906,7 +1906,7 @@ function window_onfocusin(ev:FocusEvent) {
     }
 }
 export function getContentBody(n:HTMLElement|null) {
-    while (n && n !== $global.document.body) {
+    while (n && n !== globalThis.document.body) {
         const contentBody = $JD.getElementData(n, "contentbody");
         if (contentBody instanceof ContentBody) {
             return contentBody;

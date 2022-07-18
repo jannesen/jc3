@@ -1832,7 +1832,7 @@ export class Date extends SimpleNumberType<$JI.Date>
         const format = this.Format;
 
         if (typeof format === "string" && format !== "") {
-            const date = new $global.Date(value * (24 * 60 * 60 * 1000));
+            const date = new globalThis.Date(value * (24 * 60 * 60 * 1000));
             let rtn  = "";
             let p    = 0;
 
@@ -1963,7 +1963,7 @@ export class DateTime extends SimpleNumberType<$JI.DateTime>
         value = this.valueToUI(value);
 
         if (typeof format === "string" && format !== "") {
-            let date = new $global.Date(value);
+            let date = new globalThis.Date(value);
 
             let rtn:string = "";
             let p:number   = 0;
@@ -1973,7 +1973,7 @@ export class DateTime extends SimpleNumberType<$JI.DateTime>
                 ++p;
 
                 if (date.getTime() % (24*60*60*1000) === 0) {
-                    date = new $global.Date(date.getTime() - (24*60*60*1000));
+                    date = new globalThis.Date(date.getTime() - (24*60*60*1000));
                     h = 24;
                 }
             }
@@ -2088,7 +2088,7 @@ export class DateTime extends SimpleNumberType<$JI.DateTime>
      */
     public Now(): number
     {
-        const d = (new $global.Date());
+        const d = (new globalThis.Date());
         return this.ValueIsUtc ? d.getTime() : d.getTime() - (d.getTimezoneOffset() * 60 * 1000);
     }
     /**
@@ -3548,7 +3548,7 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
                                                                          }, null)
                         .then((data) => {
                                   if ((data as ({readonly [key:string]:any}))[this._keyfieldname] === key) {
-                                      this._cache[ck].timeout = $global.Date.now() + this._cachetimeout;
+                                      this._cache[ck].timeout = globalThis.Date.now() + this._cachetimeout;
                                       this._cache[ck].entry   = data;
 
                                       if (!this._cleanuptimer) {
@@ -3636,13 +3636,13 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
     private _entrytimeout()
     {
         const t = this._cachetimeout;
-        return (t > 0) ? $global.Date.now() + t : undefined;
+        return (t > 0) ? globalThis.Date.now() + t : undefined;
     }
     private _cleanup() {
         this._cleanuptimer = undefined;
 
-        const n = $global.Date.now();
-        let m = $global.Number.MAX_SAFE_INTEGER;
+        const n = globalThis.Date.now();
+        let m = globalThis.Number.MAX_SAFE_INTEGER;
 
         for (const ct of Object.keys(this._cache)) {
             const l = this._cache[ct].timeout;
@@ -3656,8 +3656,8 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
             }
         }
 
-        if (m < $global.Number.MAX_SAFE_INTEGER) {
-            this._cleanuptimer = $J.setTimeout(this._cleanup, Math.max(m - $global.Date.now(), 0) + 500, this);
+        if (m < globalThis.Number.MAX_SAFE_INTEGER) {
+            this._cleanuptimer = $J.setTimeout(this._cleanup, Math.max(m - globalThis.Date.now(), 0) + 500, this);
         }
     }
 }

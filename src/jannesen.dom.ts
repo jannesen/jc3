@@ -1483,7 +1483,7 @@ export abstract class Container extends $J.EventHandling implements IDOMContaine
 type intrinsicNames = "a" | "abbr" | "address" | "area" | "article" | "aside" | "audio" | "b" | "base" | "bdi" | "bdo" | "big" | "blockquote" | "body" | "br" | "button" | "canvas" | "caption" | "cite" | "code" | "col" | "colgroup" | "data" | "datalist" | "dd" | "del" | "details" | "dfn" | "dialog" | "div" | "dl" | "dt" | "em" | "embed" | "fieldset" | "figcaption" | "figure" | "footer" | "form" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "head" | "header" | "hr" | "html" | "i" | "iframe" | "img" | "input" | "ins" | "kbd" | "keygen" | "label" | "legend" | "li" | "link" | "main" | "map" | "mark" | "menu" | "menuitem" | "meta" | "meter" | "nav" | "noscript" | "object" | "ol" | "optgroup" | "option" | "output" | "p" | "param" | "picture" | "pre" | "progress" | "q" | "rp" | "rt" | "ruby" | "s" | "samp" | "script" | "section" | "select" | "small" | "source" | "span" | "strong" | "style" | "sub" | "summary" | "sup" | "table" | "tbody" | "td" | "textarea" | "tfoot" | "th" | "thead" | "time" | "title" | "tr" | "track" | "u" | "ul" | "var" | "video" | "wbr";
 export function createElement(tagName:intrinsicNames, attrs?:HTMLAttributes, ...children:AddNode[]): DOMHTMLElement
 {
-    const elm = new DOMHTMLElement($global.document.createElement(tagName));
+    const elm = new DOMHTMLElement(globalThis.document.createElement(tagName));
 
     if (attrs !== undefined && attrs !== null && typeof attrs === "object") {
         for (const attrName in attrs) {
@@ -1536,7 +1536,7 @@ export function createText(txt:string): DOMText
     if (txt === undefined || txt === null)
         txt = "";
 
-    return new DOMText($global.document.createTextNode(txt));
+    return new DOMText(globalThis.document.createTextNode(txt));
 }
 
 /**
@@ -1558,12 +1558,12 @@ export function getElementData(elm:Element, data:string): any {
 /**
  * !!DOC
  */
-export const window   = new DOMWindow($global.window);
+export const window   = new DOMWindow(globalThis.window);
 
 /**
  * !!DOC
  */
-export const document = new DOMHTMLDocument($global.document);
+export const document = new DOMHTMLDocument(globalThis.document);
 
 /**
  * !!DOC
@@ -1694,7 +1694,7 @@ export function compareSize(s1: ISize|null|undefined, s2: ISize|null|undefined) 
  * !!DOC
  */
 export function getTabForm(elm:HTMLElement|null) {
-    while (elm && elm !== $global.document.body) {
+    while (elm && elm !== globalThis.document.body) {
         if (elm.classList.contains('jannesen-ui-tabform')) {
             return elm;
         }
@@ -1920,10 +1920,10 @@ export function onAnimationTransitionEnd(elm: DOMHTMLElement, cb: ()=>void)
 //
 function DOMContentLoaded()
 {
-    $global.document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
+    globalThis.document.removeEventListener("DOMContentLoaded", DOMContentLoaded, false);
 
     if (ondomreadyHandlers) {
-        body = new DOMHTMLElement($global.document.body);
+        body = new DOMHTMLElement(globalThis.document.body);
         body.pinElement();
 
         for (const h of ondomreadyHandlers) {
@@ -2044,7 +2044,7 @@ function insertHelper(child:any):NodeFragment|null
 {
     switch (typeof child) {
     case "string":
-        return $global.document.createTextNode(child);
+        return globalThis.document.createTextNode(child);
 
     case "object":
         if (child !== null) {
@@ -2057,7 +2057,7 @@ function insertHelper(child:any):NodeFragment|null
                     return insertHelper(c);
 
                 if (typeof c === 'string')
-                    return $global.document.createTextNode(c);
+                    return globalThis.document.createTextNode(c);
 
                 if (typeof child.toDom === "function")
                     return insertHelper(child.toDom());
@@ -2080,7 +2080,7 @@ function insertHelper(child:any):NodeFragment|null
 function insertFragment(f:NodeFragment):Text|HTMLElement|DocumentFragment
 {
     if (Array.isArray(f)) {
-        const rtn = $global.document.createDocumentFragment();
+        const rtn = globalThis.document.createDocumentFragment();
         f.forEach((i) => rtn.appendChild(i));
         return rtn;
     } else {
@@ -2187,10 +2187,10 @@ function focusElement(n: HTMLElement, ignorearea?:HTMLElement) {
 //-------------------------------------------------------------------------------------------------
 // start
 //
-curlocationhash = $global.window.location.hash;
-$global.window.addEventListener("hashchange", WINHashChange, false);
+curlocationhash = globalThis.window.location.hash;
+globalThis.window.addEventListener("hashchange", WINHashChange, false);
 
-if ($global.document.readyState === "loading")
-    $global.document.addEventListener("DOMContentLoaded", DOMContentLoaded, false);
+if (globalThis.document.readyState === "loading")
+    globalThis.document.addEventListener("DOMContentLoaded", DOMContentLoaded, false);
 else
     setTimeout(DOMContentLoaded, 0);

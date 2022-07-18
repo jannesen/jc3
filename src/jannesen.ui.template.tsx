@@ -542,7 +542,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
                 }
             }
 
-            if (!this._content.contains($global.document.activeElement)) {
+            if (!this._content.contains(globalThis.document.activeElement)) {
                 this.focusFirstInput();
             }
         } catch (e) {
