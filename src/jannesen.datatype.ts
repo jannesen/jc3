@@ -189,20 +189,16 @@ export interface IValidateErrorErrors
     path?:      string;
 }
 
-export class ValidateErrors extends __Error
+export class ValidateErrors extends Error implements $J.IMultiLineError
 {
-    private     _errors:    IValidateErrorErrors[];
+    public      errors:     IValidateErrorErrors[];
 
-    public get  errors()
-    {
-        return this._errors;
-    }
+    public get  name()       { return "ValidateErrors"; }
 
                 constructor(error?:string|Error, value?:BaseType, control?:IControlBase, path?:string)
     {
-        super("ValidateErrors");
-        this.message = "Empty ValidateErrors";
-        this._errors = [];
+        super("Empty ValidateErrors");
+        this.errors = [];
 
         if (error) {
             this.addError(error, value, control, path);
@@ -216,18 +212,18 @@ export class ValidateErrors extends __Error
         }
 
         if (error instanceof ValidateErrors) {
-            for (const e of error._errors) {
+            for (const e of error.errors) {
                 this.addError(e.error, e.value, e.control, e.path);
             }
         }
         else {
-            this.message = (this._errors.length > 0) ? this.message + "\n" + stringErrorToMessage(error) : stringErrorToMessage(error);
-            this._errors.push({ error, value, control, path });
+            this.message = (this.errors.length > 0) ? this.message + "\n" + stringErrorToMessage(error) : stringErrorToMessage(error);
+            this.errors.push({ error, value, control, path });
         }
     }
     public      getFirstControl()
     {
-        return (this._errors.length > 0) ? this._errors[0].control : null;
+        return (this.errors.length > 0) ? this.errors[0].control : null;
     }
     /**
      * Set focus to first error control is posible
@@ -243,27 +239,30 @@ export class ValidateErrors extends __Error
 
         return false;
     }
-    public      toMessageString()
+    public      toMessageStrings()
     {
-        let rtn:string = '';
+        const rtn:string[] = [];
 
-        for (const e of this._errors) {
-            const s = e.path  ? '[ValidateErrors][' + e.path +']: ' + stringErrorToMessage(e.error) : stringErrorToMessage(e.error);
-            rtn = rtn.length > 0 ? rtn + '\n' + s : s;
+        for (const e of this.errors) {
+            rtn.push(e.path
+                        ? '[ValidateErrors][' + e.path +']: ' + stringErrorToMessage(e.error)
+                        : '[ValidateErrors]: ' + stringErrorToMessage(e.error));
         }
 
         return rtn;
     }
 }
 
-export class ValueError extends __Error
+export class ValueError extends Error
 {
     public      value:     BaseType;
     public      control:   IControlBase|undefined;
 
+    public get  name()       { return "ValueError"; }
+
                 constructor(value:BaseType, control:IControlBase|undefined, innerError:Error)
     {
-        super("ValueError", "Value error");
+        super("Value error");
         this.value       = value;
         this.control     = control;
         this.innerError  = innerError;

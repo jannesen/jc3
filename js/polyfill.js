@@ -25,22 +25,6 @@ var __extends = (function () {
     };
 })();
 
-var __Error = (function () {
-    __extends(__Error, Error);
-    function __Error(name, message) {
-        this.name = name;
-        this.message = message;
-        this.stack = Error().stack;
-    }
-    __Error.prototype.toMessageString = function () {
-        return '[' + this.name + ']: ' + this.message;
-    };
-    __Error.prototype.toString = function () {
-        return this.message;
-    };
-    return __Error;
-}());
-
 var $global = {
     window:     window,
     document:   document,

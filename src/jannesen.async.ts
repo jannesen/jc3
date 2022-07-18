@@ -59,50 +59,60 @@ export interface ITaskContext<T>
 /**
  *!!DOC
  */
-export class LoadError extends __Error
+export class LoadError extends Error
 {
+    public get  name()       { return "LoadError"; }
+
     constructor(message:string) {
-        super("LoadError", message);
+        super(message);
     }
 }
 
 /**
  *!!DOC
  */
-export class OperationCanceledError extends __Error
+export class OperationCanceledError extends Error
 {
+    public get  name()       { return "OperationCanceledError"; }
+
     constructor(message?:string) {
-        super("OperationCanceledError", message || "Operation canceled.");
+        super(message || "Operation canceled.");
     }
 }
 
 /**
  *!!DOC
  */
-export class XMLHttpRequestFailed extends __Error
+export class XMLHttpRequestFailed extends Error
 {
+    public get  name()       { return "XMLHttpRequestFailed"; }
+
     constructor(message:string) {
-        super("XMLHttpRequestFailed", message);
+        super(message);
     }
 }
 
 /**
  *!!DOC
  */
-export class TimeoutError extends __Error
+export class TimeoutError extends Error
 {
+    public get  name()       { return "TimeoutError"; }
+
     constructor(message?:string) {
-        super("TimeoutError", message || "Timeout");
+        super(message || "Timeout");
     }
 }
 
 /**
  *!!DOC
  */
-export class BusyError extends __Error
+export class BusyError extends Error
 {
+    public get  name()       { return "BusyError"; }
+
     constructor(message:string) {
-        super("BusyError", message);
+        super(message);
     }
 }
 

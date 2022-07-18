@@ -1777,21 +1777,32 @@ function errorObjToError(body:$JD.DOMHTMLElement, err:any) {
     body.appendChild("[UNKNONW ERROR]");
 }
 function errorToMsg(err:Error): $JD.DOMHTMLElement {
-    let f   = false;
     const msg = <div class="-error"/>;
+    let f     = false;
 
-    for(let e:Error|undefined=err ; e instanceof Error ; e = e.innerError) {
-        for (const m of (e instanceof __Error ? e.toMessageString() : "[" + e.name + "]: " + e.toString()).split('\n')) {
-            if (f)
-                msg.appendChild(<br/>);
-            else
-                f = true;
-
-            msg.appendChild(m);
+    for(let e:Error|$J.IMultiLineError|undefined=err ; e instanceof Error ; e = e.innerError) {
+        if ($J.isIMultiLineError(e)) {
+            for (const l of e.toMessageStrings()) {
+                addLine(l);
+            }
+        }
+        else {
+            addLine("[" + e.name + "]: " + e.message);
         }
     }
 
     return msg;
+
+    function addLine(line: string) {
+        if (f) {
+            msg.appendChild(<br/>);
+        }
+        else {
+            f = true;
+        }
+
+        msg.appendChild(line);
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

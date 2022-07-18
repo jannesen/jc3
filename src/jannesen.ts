@@ -112,24 +112,46 @@ export interface ICallArgs // TODO
 /**
  * !!DOC
  */
+export interface IMultiLineError extends Error
+{
+    toMessageStrings():     string[];
+}
+
+/**
+ * !!DOC
+ */
 export interface ISetFocusOnError extends Error
 {
     setFocusOnError():  boolean;
 }
 
-export function isISetFocusOnError(o:Error): o is ISetFocusOnError
+/**
+ * !!DOC
+ */
+export function isIMultiLineError(err:Error): err is IMultiLineError
 {
-    return o instanceof Error && typeof (o as any).setFocusOnError === 'function';
+    return err instanceof Error && typeof (err as any).toMessageStrings === 'function';
+}
+
+/**
+ * !!DOC
+ */
+export function isISetFocusOnError(err:Error): err is ISetFocusOnError
+{
+    return err instanceof Error && typeof (err as any).setFocusOnError === 'function';
 }
 
 //=============================================== Error Classes ===================================
+
 /**
  *!!DOC
  */
-export class MessageError extends __Error
+export class MessageError extends Error
 {
+    public get  name()       { return "MessageError"; }
+
     constructor(message:string, innerError?:Error) {
-        super("MessageError", message);
+        super(message);
         this.innerError  = innerError;
     }
 }
@@ -137,10 +159,12 @@ export class MessageError extends __Error
 /**
  *!!DOC
  */
-export class InvalidStateError extends __Error
+export class InvalidStateError extends Error
 {
+    public get  name()       { return "InvalidStateError"; }
+
     constructor(message?:string, innerError?:Error) {
-        super("InvalidStateError", message || "Invalid state");
+        super(message || "Invalid state");
         this.innerError  = innerError;
     }
 }
@@ -148,10 +172,12 @@ export class InvalidStateError extends __Error
 /**
  *!!DOC
  */
-export class NotImplentedError extends __Error
+export class NotImplentedError extends Error
 {
+    public get  name()       { return "NotImplentedError"; }
+
     constructor(funcname:string) {
-        super("NotImplentedError", funcname + ": not implemented.");
+        super(funcname + ": not implemented.");
     }
 }
 
@@ -169,14 +195,16 @@ export interface IAjaxCallDefinition
 /**
  * !!DOC
  */
-export class AjaxError extends __Error
+export class AjaxError extends Error
 {
     public  errCode:        string;
     public  callDefinition: IAjaxCallDefinition;
     public  httpStatus:     number|undefined;
 
+    public  get name()      { return "AjaxError"; }
+
     constructor(errCode: string, message:string, callDefinition:IAjaxCallDefinition, httpStatus?:number, innerError?:Error) {
-        super("AjaxError", message);
+        super(message);
         this.errCode        = errCode;
         this.callDefinition = callDefinition;
         this.httpStatus     = httpStatus;
@@ -199,10 +227,12 @@ export interface IServerErrorDetails
 /**
  *!!DOC
  */
-export class ServerError extends __Error
+export class ServerError extends Error implements IMultiLineError
 {
-    public  errCode:        string;
-    public  serverError:    IServerErrorDetails;
+    public errCode:             string;
+    public serverError:         IServerErrorDetails;
+
+    public get  name()          { return "ServerError"; }
 
     constructor(serverError: IServerErrorDetails)
     {
@@ -218,23 +248,22 @@ export class ServerError extends __Error
             }
         }
 
-        super("ServerError", (message !== undefined ? message : "Invalid error response received from server."));
+        super(message !== undefined ? message : "Invalid error response received from server.");
         this.errCode     = (serverError instanceof Object && typeof serverError.code === "string" ? serverError.code : "UNKNOWN");
         this.serverError = serverError;
     }
 
-    public toMessageString()
+    public toMessageStrings()
     {
-        let rtn = '';
+        const rtn:string[] = [];
 
         if (this.serverError instanceof Object && Array.isArray(this.serverError.detail)) {
             for (const d of this.serverError.detail) {
-                const m = '[ServerError.detail]: ' + (typeof d.message === 'string' && d.message.length > 0 ? d.message : 'UNKNOWN');
-                rtn = (rtn.length ? rtn + '\n' + m : m);
+                rtn.push('[ServerError.detail]: ' + (typeof d.message === 'string' && d.message.length > 0 ? d.message : 'UNKNOWN'));
             }
         }
         else {
-            rtn = '[ServerError]: ' + this.message;
+            rtn.push('[ServerError]: ' + this.message);
         }
 
         return rtn;
@@ -244,20 +273,24 @@ export class ServerError extends __Error
 /**
  *!!DOC
  */
-export class ConversionError extends __Error
+export class ConversionError extends Error
 {
+    public get  name()       { return "ConversionError"; }
+
     constructor(message:string) {
-        super("ConversionError", message);
+        super(message);
     }
 }
 
 /**
  *!!DOC
  */
-export class FormatError extends __Error
+export class FormatError extends Error
 {
+    public get  name()       { return "FormatError"; }
+
     constructor(message:string) {
-        super("FormatError", message);
+        super(message);
     }
 }
 

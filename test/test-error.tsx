@@ -2,10 +2,12 @@
 /* @jsx-intrinsic-factory $JD.createElement */
 import * as $JD      from "jc3/jannesen.dom";
 
-export class CustomError extends __Error
+export class CustomError extends Error
 {
+    public get name() { return "CustomError"; }
+
     constructor(message:string) {
-        super('CustomError', message);
+        super(message);
     }
 
     public method() {
