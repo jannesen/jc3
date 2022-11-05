@@ -42,8 +42,8 @@ export function stringToBoolean(s: string): boolean
     case "1":       return true;
     case "j":       return true;
     case "n":       return false;
-    case "ja":      return true;
-    case "nee":     return false;
+    case $JL.yes:   return true;
+    case $JL.no:    return false;
     }
 
     throw new $J.FormatError($JL.incorrect_boolean_value(s));
@@ -252,8 +252,8 @@ export function stringToYear(s: string): number
 
 export function yearToShortYear(y: number): number
 {
-    if (y>=2000 && y<2030)  return y-2000;
-    if (y>=1930 && y<2000)  return y-1900;
+    if (y>=2000 && y<2050)  return y-2000;
+    if (y>=1950 && y<2000)  return y-1900;
 
     return y;
 }
