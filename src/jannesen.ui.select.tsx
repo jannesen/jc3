@@ -26,7 +26,7 @@ export class ValuesDropdown<TNativeValue,
             this._inputelm = input.getinputelm();
 
             try {
-                const valueList = input.opts.dropdown_values!();
+                const valueList = input.opts.dropdown_values!(ct);
 
                 if (valueList instanceof $JA.Task) {
                     return valueList.then((v) => { this._init(v, data.keydown); })

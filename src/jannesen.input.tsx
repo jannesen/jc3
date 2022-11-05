@@ -613,7 +613,7 @@ export interface IDropdownStdData
 
 export interface IInputControlDropdownValuesOptions<TNative> extends IInputControlOptions
 {
-    dropdown_values?:   () => DropdownValuesList<TNative>|null|undefined;
+    dropdown_values?:   (ct:$JA.Context) => DropdownValuesList<TNative>|null|undefined;
 }
 
 export abstract class InputTextValueDropdownControl<TNativeValue,
