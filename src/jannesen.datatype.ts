@@ -1298,7 +1298,7 @@ export abstract class SimpleNumberType<TControl extends IBaseControl> extends Si
     public get MinValue():number|undefined {
         return this.getAttr("minValue");
     }
-    public set MinValue(v:number|undefined) {
+    public set MinValue(v:number|undefined|null) {
         this.setAttr("minValue", (typeof v === "number" ? v : undefined));
     }
 
@@ -1308,7 +1308,7 @@ export abstract class SimpleNumberType<TControl extends IBaseControl> extends Si
     public get MaxValue():number|undefined {
         return this.getAttr("maxValue");
     }
-    public set MaxValue(v:number|undefined) {
+    public set MaxValue(v:number|undefined|null) {
         this.setAttr("maxValue", (typeof v === "number" ? v : undefined));
     }
 
@@ -3516,7 +3516,7 @@ export class RemoteSelectDatasource<TNative extends SelectValue, TRecord extends
             this._cleanuptimer = $J.setTimeout(this._cleanup, this._cachetimeout + 500, this);
         }
     }
-    public  getrecordAsync(key:TNative, allowAsync:boolean): TRecord|undefined|$JA.Task<TRecord|undefined> {
+    public  getrecordAsync(key:TNative|null, allowAsync:boolean): TRecord|undefined|$JA.Task<TRecord|undefined> {
         if (key === null) {
             return undefined;
         }
