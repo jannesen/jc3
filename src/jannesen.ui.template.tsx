@@ -393,7 +393,7 @@ export abstract class QueryForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record
 export interface ISearchFormState<TCall extends $JA.IAjaxCallDefinition<$JT.Record<$JT.IFieldDef>|void,void,$JT.RecordSet<$JT.IFieldDef>>>
 {
     callargs:       $JA.AjaxCallRequestType<TCall>|null;
-    resultdata:     $JA.AjaxCallResponseType<TCall>;
+    resultdata:     $JA.AjaxCallResponseType<TCall>|undefined;
     datatablestate: $JDATATABLE.IDataTableState|undefined;
 }
 /**
@@ -456,7 +456,7 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
     protected               onopen(args:$J.IUrlArgs, state:ISearchFormState<TCall>|null|undefined, ct:$JA.Context):$JA.Task<void>|void
     {
         this.showDataPopup();
-        if (state) {
+        if (state && state.resultdata) {
             if (this._formargs as unknown instanceof $JT.Record) {
                 (this._formargs as $JT.Record<$JT.IFieldDef>).assign(state.callargs);
             }
@@ -509,6 +509,10 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
                                                       { datatable }
                                                   </div>;
 
+                                if (state && state.datatablestate) {
+                                    datatable.state = state.datatablestate;
+                                }
+
                                 this._result = { callargs, resultdata, container, datatable };
                                 this.content.appendChild(container);
                                 this.onresize(this.formSize);
@@ -549,7 +553,28 @@ export abstract class SearchForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
             console.error(e);
         }
     }
+    public                  refresh()
+    {
+        const loader = this.loader;
+        if (loader && this._formstate && this._result && this._result.datatable) {
+            const state =   {
+                    ...this._formstate,
+                    timestamp:  (new Date()).getTime(),
+                    state:      {
+                                        callargs:       this._result.callargs,
+                                        datatablestate: this._result.datatable.state
+                                }
+                };
 
+            const args = normalizeArgs(this._formargs);
+
+            this.showDataPopup();
+            loader.open(this.contentNameClass, args, state, undefined, true);
+        }
+        else {
+            super.refresh();
+        }
+    }
     public                  savestate():ISearchFormState<TCall>|null
     {
         const result = this._result;

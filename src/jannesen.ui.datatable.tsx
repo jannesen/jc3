@@ -52,7 +52,7 @@ export interface IScrollbarOpts
 export interface IDataTableState
 {
     toprow:         number;
-    selectedrow:    number|null;
+    selectedrow:    number|undefined;
     filter_enabled: boolean;
     filter_text:    string;
 }
@@ -78,7 +78,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
     private     _visualRows:    number|undefined;
     private     _curTopRow:     number|undefined;
     private     _curCountRow:   number|undefined;
-    private     _selectedRow:   number|null|undefined;
+    private     _selectedRow:   number|undefined;
     private     _filter_text:   string;
     private     _filter_sset:   string[]|undefined;
     private     _filter_rset:   TRecord[];
@@ -102,7 +102,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
 
     public get  state():IDataTableState|undefined
     {
-        if (typeof this._scrollbar.Value === 'number' && typeof this._selectedRow === 'number') {
+        if (typeof this._scrollbar.Value === 'number') {
             return  {
                         toprow:         this._scrollbar.Value,
                         selectedrow:    this._selectedRow,
@@ -197,7 +197,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                                                         }}
                                                     onmouseleave={(ev) => {
                                                             if (this._mouseenabled) {
-                                                                this._select(null, false);
+                                                                this._select(undefined, false);
                                                             }
                                                         }}
                                                     onwheel={(ev) => {
@@ -305,10 +305,6 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
     public      focus()
     {
         this._container.focus();
-
-        if (this._selectedRow === null) {
-            this._select(0, true);
-        }
     }
     public      refreshData()
     {
@@ -328,7 +324,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
         if (typeof rowClass === "function") {
             for (const tr of this._body.children) {
                 const idx = helper_getrecordId(tr.element);
-                if (idx !== null) {
+                if (typeof idx === 'number') {
                     const cls = rowClass(this._filter_rset[idx], idx);
                     tr.attr('class', typeof cls === 'string' ? cls : undefined);
                 }
@@ -471,7 +467,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
 
             if (typeof this._selectedRow === 'number') {
                 const selectedrow = new_rset.indexOf(this._filter_rset[this._selectedRow]);
-                this._selectedRow = selectedrow >= 0 ? selectedrow : null;
+                this._selectedRow = selectedrow >= 0 ? selectedrow : undefined;
             }
 
             this._filter_rset = new_rset;
@@ -509,14 +505,14 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
             return bottomRow;
         }
     }
-    private     _select(row:number|null, updateFill:boolean) {
+    private     _select(row:number|undefined, updateFill:boolean) {
         if (typeof row === 'number') {
             if (this._filter_rset.length > 0) {
                 if (row < 0)                        row = 0;
                 if (row >= this._filter_rset.length)   row = this._filter_rset.length - 1;
             }
             else
-                row = null;
+                row = undefined;
         }
 
         if (typeof row === 'number' && updateFill) {
@@ -543,8 +539,6 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                     this._body.childNodes(idx).removeClass("-selected");
                 }
             }
-            this._selectedRow = null;
-
             this._setSelected(this._selectedRow = row);
         }
     }
@@ -1002,7 +996,7 @@ export class Scrollbar extends $JD.Container
 }
 //$J.applyMixins(Scrollbar, [$J.EventHandling]);
 
-function helper_getrecordId(e:any): number|null
+function helper_getrecordId(e:any): number|undefined
 {
     while (e instanceof Element) {
         if (e.tagName === "TR") {
@@ -1016,7 +1010,7 @@ function helper_getrecordId(e:any): number|null
          e = e.parentElement;
     }
 
-    return null;
+    return undefined;
 }
 function helper_getbutton<TRec extends DataTableSourceType>(buttons:IDataTableOptsButton<TRec>[], e:any): IDataTableOptsButton<TRec>|undefined
 {
@@ -1027,7 +1021,7 @@ function helper_getbutton<TRec extends DataTableSourceType>(buttons:IDataTableOp
 
     return undefined;
 }
-function helper_getrecordAt(rect:$JD.IRect|null): number|null
+function helper_getrecordAt(rect:$JD.IRect|null): number|undefined
 {
-    return (rect !== null) ? helper_getrecordId(document.elementFromPoint(rect.left + 1, rect.top + rect.height / 2)) : null;
+    return (rect !== null) ? helper_getrecordId(document.elementFromPoint(rect.left + 1, rect.top + rect.height / 2)) : undefined;
 }
