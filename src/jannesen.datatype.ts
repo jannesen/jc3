@@ -3449,7 +3449,7 @@ export class EnumSelectDatasource<TNative extends SelectValue, TRecord extends I
 
         return undefined;
     }
-    public  getrecordAsync(key:TNative): TRecord|undefined {
+    public  getrecordAsync(key:TNative|null): TRecord|undefined {
         return this.getrecord(key);
     }
     public  fetchdataAsync(context:$JA.Context, inputContext:$JI.SelectInputContext, searchkeys?:string|string[], max?:number): $JA.Task<TRecord[]> {
