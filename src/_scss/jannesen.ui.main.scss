@@ -123,18 +123,27 @@ div.jannesen-ui-main {
             user-select:        none;
 
             > div.-title {
-                display:        inline-block;
+                display:        block;
+                position:       absolute;
+                top:            0;
+                left:           0;
+                right:          150px;
+                bottom:         0;
                 box-sizing:     border-box;
                 padding-left:   .2em;
                 padding-top:    .15em;
                 vertical-align: top;
                 white-space:    nowrap;
                 user-select:    text;
+                overflow:       hidden;
             }
 
             > div.-right {
-                display:        inline-block;
-                float:          right;
+                display:        block;
+                position:       absolute;
+                top:            0;
+                right:          0;
+                bottom:         0;
             }
 
             button.-sidebar {
@@ -195,12 +204,12 @@ div.jannesen-ui-main {
             position:           relative;
             box-sizing:         border-box;
             padding:            0;
-            margin:             .1em 0;
-            width:              1.5em;
-            height:             1.3em;
+            margin:             2px 0;
+            width:              30px;
+            height:             26px;
+            vertical-align:     top;
             border:             1px solid rgba(0,0,0,0);
             color:              #afafaf;
-            font-size:          1em;
             background-color:   rgba(0,0,0,0);
             overflow:           hidden;
             font:               normal normal normal 20px 'Font Awesome 5 Pro';
