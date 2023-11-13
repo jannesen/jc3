@@ -123,27 +123,25 @@ div.jannesen-ui-main {
             user-select:        none;
 
             > div.-title {
-                display:        block;
+                display:        inline-block;
+                box-sizing:     border-box;
                 position:       absolute;
                 top:            0;
-                left:           0;
-                right:          150px;
-                bottom:         0;
-                box-sizing:     border-box;
                 padding-left:   .2em;
                 padding-top:    .15em;
                 vertical-align: top;
-                white-space:    nowrap;
-                user-select:    text;
                 overflow:       hidden;
+                user-select:    text;
+                white-space:    nowrap;
             }
 
             > div.-right {
-                display:        block;
-                position:       absolute;
-                top:            0;
-                right:          0;
-                bottom:         0;
+                display:            block;
+                position:           absolute;
+                top:                0;
+                right:              0;
+                bottom:             0;
+                background-color:   hsl(var(--jc-main-color-hue),var(--jc-main-color-sat), var(--jc-main-color-light) );
             }
 
             button.-sidebar {
