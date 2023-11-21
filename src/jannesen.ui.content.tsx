@@ -1400,7 +1400,7 @@ export abstract class Dialog<TArgs, TRtn> extends DialogBase<TArgs, TRtn|string|
     {
         return null;
     }
-    protected           setDialogContent(title:string, body:$JD.AddNode, buttons:(IDialogButton|$JD.DOMHTMLElement)[])
+    protected           setDialogContent(title:$JD.AddNode, body:$JD.AddNode, buttons:(IDialogButton|$JD.DOMHTMLElement)[])
     {
         this.content.appendChild(<>
                                     <div class="-header -dialog-move-target"><span class="-title">{ title }</span></div>
