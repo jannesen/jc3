@@ -1828,9 +1828,7 @@ export class Date extends SimpleNumberType<$JI.Date>
         return this.getinputcontrol<$JI.Date, $JI.IDateControlOptions>("jc3/jannesen.input", "Date", opts);
     }
 
-    public cnvValueToText(value: number): string {
-        const format = this.Format;
-
+    public cnvValueToText(value: number, format?:string): string {
         if (typeof format === "string" && format !== "") {
             const date = new globalThis.Date(value * (24 * 60 * 60 * 1000));
             let rtn  = "";
