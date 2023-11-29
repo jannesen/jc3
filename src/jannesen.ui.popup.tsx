@@ -195,9 +195,9 @@ export abstract class Popup
                                     container.css(transitionproperty, value);
                                 }, 0);
                 }
-        }
+            }
 
-        this._container.css("visibility", undefined);
+            this._container.css("visibility", undefined);
         }
         catch (e) {
             $JD.body.removeChild(this._container);
@@ -786,8 +786,7 @@ export abstract class TableDropdown<TNativeValue,
         container.bind("keydown", (ev) => {
                                             if (this.onKeyDown(ev)) {
                                                 this._mouseenabled = false;
-                                                ev.preventDefault();
-                                                ev.stopPropagation();
+                                                $J.eventHandled(ev);
                                             }
                                         });
         container.bind("mousemove", (ev) => {

@@ -232,12 +232,14 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
 
     public                  body_onkeydown(ev: KeyboardEvent) {
         if (ev.key === 'Escape' && !ev.altKey && !ev.ctrlKey && !ev.shiftKey && !ev.metaKey) {
-            ev.stopPropagation();
             this.cmdCancel();
+            $J.eventHandled(ev);
+            return;
         }
         if (ev.key === 'Enter' && !ev.altKey && !ev.ctrlKey && ev.shiftKey && !ev.metaKey) {
-            ev.stopPropagation();
             this.cmdSave();
+            $J.eventHandled(ev);
+            return;
         }
     }
 }

@@ -150,6 +150,8 @@ export class MenuButton extends $JD.Container implements IMenuBase,IMenuParent
             case "ArrowDown":
                 if (!this.disabled) {
                     this.openMenu();
+                    $J.eventHandled(ev);
+                    return;
                 }
             }
         }

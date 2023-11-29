@@ -1396,3 +1396,9 @@ function newEventHandler()
 
     return me;
 }
+
+export function eventHandled(ev:UIEvent)
+{
+    ev.stopPropagation();
+    ev.preventDefault();
+}

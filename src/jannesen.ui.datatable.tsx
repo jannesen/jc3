@@ -145,8 +145,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
         this._container =   <div class="jannesen-datatable" tabIndex="0" onkeydown={(ev) => {
                                         if (this._onkeydown(ev)) {
                                             this._mouseenabled = false;
-                                            ev.preventDefault();
-                                            ev.stopPropagation();
+                                            $J.eventHandled(ev);
                                         }
                                     }}>
                             </div>;
@@ -213,7 +212,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                                                             }
                                                         }}
                                                     onclick={(ev) => {
-                                                            ev.stopPropagation();
+                                                            $J.eventHandled(ev);
                                                             this._mouseenabled = true;
                                                             const idx = helper_getrecordId(ev.target);
                                                             if (typeof idx === 'number') {
@@ -231,7 +230,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                                                         }}
                                                     ondblclick={(ev) => {
                                                             if (typeof this._opts.rowDblClick === "function") {
-                                                                ev.stopPropagation();
+                                                                $J.eventHandled(ev);
                                                                 const idx = helper_getrecordId(ev.target);
                                                                 if (typeof idx === 'number') {
                                                                     this._opts.rowDblClick(this._filter_rset[idx], ev);
@@ -257,7 +256,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                                         <div class="-filter">
                                             { this._filter_input = <input class="-input" type="text" maxLength={64} tabIndex={-1}
                                                                           oninput={() => { this._delay(DelayReason.Filter); } }
-                                                                          onkeydown={(ev) => { ev.stopPropagation(); } }
+                                                                          onkeydown={(ev) => { $J.eventHandled(ev); } }
                                                                    /> }
                                             <span class="-close"  onclick={() => this._filterenabled(false) } />
                                         </div>

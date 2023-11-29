@@ -637,8 +637,9 @@ export abstract class ViewBase implements $JD.IDOMContainer
             case "Enter":
                 if (this._viewState.selected !== null && this.validValue(this._viewState.selected)) {
                     this.onClick(this._viewState.selected, ev);
+                    $J.eventHandled(ev);
                 }
-                break;
+                return;
 
             case "Tab":
                 if (this._viewState.selected !== null && this.validValue(this._viewState.selected)) {
@@ -648,18 +649,17 @@ export abstract class ViewBase implements $JD.IDOMContainer
                     this._picker.close(ev);
                 }
 
-                ev.stopPropagation();
-                ev.preventDefault();
-                break;
+                $J.eventHandled(ev);
+                return;
 
-            case "Escape":      this.viewUp();                              break;
-            case "F4":          this.viewDown();                            break;
-            case "Home":        this.moveHome();                            break;
-            case "End":         this.moveEnd();                             break;
-            case "ArrowLeft":   this.movePrevNext(-1);                      break;
-            case "ArrowRight":  this.movePrevNext( 1);                      break;
-            case "ArrowUp":     this.movePrevNext(-this._viewState.sizeX);  break;
-            case "ArrowDown":   this.movePrevNext( this._viewState.sizeX);  break;
+            case "Escape":      this.viewUp();                              $J.eventHandled(ev); return;
+            case "F4":          this.viewDown();                            $J.eventHandled(ev); return;
+            case "Home":        this.moveHome();                            $J.eventHandled(ev); return;
+            case "End":         this.moveEnd();                             $J.eventHandled(ev); return;
+            case "ArrowLeft":   this.movePrevNext(-1);                      $J.eventHandled(ev); return;
+            case "ArrowRight":  this.movePrevNext( 1);                      $J.eventHandled(ev); return;
+            case "ArrowUp":     this.movePrevNext(-this._viewState.sizeX);  $J.eventHandled(ev); return;
+            case "ArrowDown":   this.movePrevNext( this._viewState.sizeX);  $J.eventHandled(ev); return;
             }
         }
     }

@@ -388,16 +388,14 @@ export abstract class ContentLoader<TContentBody extends ContentBody<ContentLoad
     }
     protected           _onkeydown(ev:KeyboardEvent) {
         if (this.isBusy) {
-            ev.stopPropagation();
-            ev.preventDefault();
+            $J.eventHandled(ev);
             return;
         }
 
         switch (ev.key) {
         case "Tab":
             if (!ev.altKey && !ev.ctrlKey && !ev.metaKey) {
-                ev.stopPropagation();
-                ev.preventDefault();
+                $J.eventHandled(ev);
                 const target = ev.target;
                 if (target === globalThis.document.activeElement && target instanceof HTMLElement) {
                     const body = this._contentBody;
@@ -1479,8 +1477,9 @@ export class DialogMessage extends Dialog<IDialogMessageArgs, string>
     }
     public              body_onkeydown(ev: KeyboardEvent) {
         if (ev.key === "Enter" && !ev.altKey && !ev.ctrlKey && !ev.metaKey) {
-            ev.stopPropagation();
             this.closeForm("OK");
+            $J.eventHandled(ev);
+            return;
         }
     }
 }
@@ -1519,12 +1518,14 @@ export class DialogConfirm extends Dialog<{title:string; message:string|$JD.AddN
     }
     public              body_onkeydown(ev: KeyboardEvent) {
         if (ev.key === "Y" && !ev.altKey && !ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
-            ev.stopPropagation();
+            $J.eventHandled(ev);
             this.closeForm("YES");
+            return;
         }
         if (ev.key === "N" && !ev.altKey && !ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
-            ev.stopPropagation();
+            $J.eventHandled(ev);
             this.closeForm("NO");
+            return;
         }
     }
 }
@@ -1558,8 +1559,9 @@ export class DialogError extends Dialog<string|Error|Error[]|$JD.DOMHTMLElement,
 
     public              body_onkeydown(ev: KeyboardEvent) {
         if (ev.key === "Escape" && !ev.altKey && !ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
-            ev.stopPropagation();
+            $J.eventHandled(ev);
             this.closeForm(undefined);
+            return;
         }
     }
 }
@@ -1694,7 +1696,7 @@ export function moveTracker(ev:UIEvent, initPos: $JD.IPosition, callback: (pos:$
         eventCollection.bind<"touchend"|"mouseup",    UIEvent>($JD.window, (touch ? "touchend"  : "mouseup"  ), stop);
 
         function move(ev:UIEvent) {
-            ev.stopPropagation();
+            $J.eventHandled(ev);
 
             if (validEvent(ev)) {
                 const pos = getEventPosition(ev);

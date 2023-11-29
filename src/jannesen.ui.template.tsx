@@ -940,12 +940,14 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
 
     public                  body_onkeydown(ev: KeyboardEvent) {
         if (ev.key === 'Escape' && !ev.altKey && !ev.ctrlKey && !ev.shiftKey && !ev.metaKey) {
-            ev.stopPropagation();
             this.cmdCancel();
+            $J.eventHandled(ev);
+            return;
         }
         if (ev.key === 'Enter' && !ev.altKey && !ev.ctrlKey && ev.shiftKey && !ev.metaKey) {
-            ev.stopPropagation();
             this.cmdSave();
+            $J.eventHandled(ev);
+            return;
         }
     }
 
@@ -1029,12 +1031,14 @@ export abstract class SubmitDialog<TArgs, TRtn=void> extends $JCONTENT.DialogBas
 
     public                  body_onkeydown(ev: KeyboardEvent) {
         if (ev.key === 'Escape' && !ev.altKey && !ev.ctrlKey && !ev.shiftKey && !ev.metaKey) {
-            ev.stopPropagation();
             this.cmdCancel();
+            $J.eventHandled(ev);
+            return;
         }
         if (ev.key === 'Enter' && !ev.altKey && !ev.ctrlKey && ev.shiftKey && !ev.metaKey) {
-            ev.stopPropagation();
             this.cmdSubmit();
+            $J.eventHandled(ev);
+            return;
         }
     }
 

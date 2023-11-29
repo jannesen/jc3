@@ -217,10 +217,14 @@ export class SelectInputDropdown<TNativeValue extends $JT.SelectValue,
     {
         try {
             if (Array.isArray(data)) {
-                const input        = this.control!;
+                const input        = this.control;
                 const value        = this._dataset.Value;
                 const keyfieldname = this._dataset.Datasource.keyfieldname;
                 const columns      = this._dataset.Columns;
+
+                if (!input) {
+                    throw new Error("Input lost");
+                }
 
                 const tb:$JD.DOMHTMLElement[]                             = [];
                 const tbdata:($JT.TDatasource_Record<TDatasource>|null)[] = [];

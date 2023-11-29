@@ -1,6 +1,7 @@
 ﻿/// <reference path="lib-ext.d.ts"/>
 /* @jsx-mode generic */
 /* @jsx-intrinsic-factory $JD.createElement */
+import * as $J       from "jc3/jannesen";
 import * as $JA      from "jc3/jannesen.async";
 import * as $JD      from "jc3/jannesen.dom";
 
@@ -127,27 +128,32 @@ export class TreeView extends $JD.Container
                 switch(event.key) {
                 case "Enter":
                     this._onclickItem(selectedItem);
-                    break;
+                    $J.eventHandled(event);
+                    return;
                 case "ArrowLeft":
                     if (selectedItem.container.hasClass('-expanded')) {
                         (this.selectedItem as TreeViewItemList).expand(false);
                     } else {
                         this._selectionLeftUp();
                     }
-                    break;
+                    $J.eventHandled(event);
+                    return;
                 case "ArrowRight":
                     if (selectedItem.container.hasClass('-collapsed')) {
                         this._onclickItem(selectedItem);
                     } else if (selectedItem.container.hasClass('-expanded')) {
                         this._selectionRight();
                     }
-                    break;
+                    $J.eventHandled(event);
+                    return;
                 case "ArrowUp":
                     this._selectionPrevious();
-                    break;
+                    $J.eventHandled(event);
+                    return;
                 case "ArrowDown":
                     this._selectionNext();
-                    break;
+                    $J.eventHandled(event);
+                    return;
                 }
             }
         }

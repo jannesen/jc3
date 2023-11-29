@@ -515,6 +515,7 @@ export abstract class InputTextControl<TNativeValue,
         case "F4":
             if (!(evt.altKey || evt.ctrlKey || evt.metaKey)) {
                 this.openDropdown(evt.key === "ArrowDown");
+                $J.eventHandled(evt);
                 return;
             }
         }
@@ -1581,6 +1582,7 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     }
 
     protected       input_onblur(ev:FocusEvent) {
+        console.log("input_onblur", ev.relatedTarget);
         this._inputTimerStop();
 
         if (this._container !== this._input) {
@@ -1646,18 +1648,19 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
                 } else {
                     this.openDropdown(evt.key === "ArrowDown");
                 }
-                break;
+                $J.eventHandled(evt);
+                return;
 
             case "Backspace":
             case "Delete":
                 this.input_textchange();
-                break;
+                return;
 
             default:
                 if (evt.key.length === 1) {
                     this.input_textchange();
                 }
-                break;
+                return;
             }
         }
     }
