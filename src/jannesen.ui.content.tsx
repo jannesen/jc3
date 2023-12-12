@@ -1477,8 +1477,8 @@ export class DialogMessage extends Dialog<IDialogMessageArgs, string>
     }
     public              body_onkeydown(ev: KeyboardEvent) {
         if (ev.key === "Enter" && !ev.altKey && !ev.ctrlKey && !ev.metaKey) {
-            this.closeForm("OK");
             $J.eventHandled(ev);
+            this.closeForm("OK");
             return;
         }
     }

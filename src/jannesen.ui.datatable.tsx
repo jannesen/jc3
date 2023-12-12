@@ -256,7 +256,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                                         <div class="-filter">
                                             { this._filter_input = <input class="-input" type="text" maxLength={64} tabIndex={-1}
                                                                           oninput={() => { this._delay(DelayReason.Filter); } }
-                                                                          onkeydown={(ev) => { $J.eventHandled(ev); } }
+                                                                          onkeydown={(ev) => { ev.stopPropagation(); } }
                                                                    /> }
                                             <span class="-close"  onclick={() => this._filterenabled(false) } />
                                         </div>

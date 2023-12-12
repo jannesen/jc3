@@ -148,9 +148,9 @@ export class MenuButton extends $JD.Container implements IMenuBase,IMenuParent
         if (!ev.altKey && !ev.ctrlKey && !ev.metaKey) {
             switch(ev.key) {
             case "ArrowDown":
+                $J.eventHandled(ev);
                 if (!this.disabled) {
                     this.openMenu();
-                    $J.eventHandled(ev);
                     return;
                 }
             }
