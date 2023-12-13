@@ -212,27 +212,28 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
                                                             }
                                                         }}
                                                     onclick={(ev) => {
-                                                            $J.eventHandled(ev);
                                                             this._mouseenabled = true;
                                                             const idx = helper_getrecordId(ev.target);
                                                             if (typeof idx === 'number') {
                                                                 if (this._opts.buttons && (ev.target as HTMLElement).tagName === "SPAN") {
                                                                     const b = helper_getbutton(this._opts.buttons, ev.target);
                                                                     if (b && typeof b.onClick === 'function') {
+                                                                        $J.eventHandled(ev);
                                                                         b.onClick(this._filter_rset[idx]);
                                                                         return ;
                                                                     }
                                                                 }
                                                                 if (typeof this._opts.rowClick === "function") {
+                                                                    $J.eventHandled(ev);
                                                                     this._opts.rowClick(this._filter_rset[idx]);
                                                                 }
                                                             }
                                                         }}
                                                     ondblclick={(ev) => {
                                                             if (typeof this._opts.rowDblClick === "function") {
-                                                                $J.eventHandled(ev);
                                                                 const idx = helper_getrecordId(ev.target);
                                                                 if (typeof idx === 'number') {
+                                                                    $J.eventHandled(ev);
                                                                     this._opts.rowDblClick(this._filter_rset[idx], ev);
                                                                 }
                                                             }
