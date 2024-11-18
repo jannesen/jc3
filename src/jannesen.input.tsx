@@ -173,7 +173,12 @@ export abstract class SimpleControl<TValue extends $JT.SimpleType<any>,
      * Focus input element
      */
     public      focus() {
-        this.getinputelm().focus();
+        const i = this.getinputelm();
+        if (i.isVisible) {
+            i.focus();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1196,8 +1201,9 @@ export class SelectRadio<TNativeValue extends $JT.SelectValue, TDatasource exten
      */
     public      focus() {
         if (this._buttons.length > 0) {
-            this._buttons[0].focus();
+            return this._buttons[0].focus();
         }
+        return false;
     }
 
     public      getinputelm(): $JD.DOMHTMLElement
@@ -1289,7 +1295,11 @@ export class RadioButton<TNativeValue extends $JT.SelectValue, TDatasource exten
     }
 
     public      focus() {
-        this._button.focus();
+        if (this._button.isVisible) {
+            this._button.focus();
+            return true;
+        }
+        return false;
     }
 
     /* @internal */ setValue(keyvalue: TNativeValue|null) {

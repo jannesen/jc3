@@ -128,7 +128,7 @@ export interface IBaseConstructor<TValue, TAttr>
  */
 export interface IControlBase
 {
-                focus(): void;
+                focus(): boolean;
 }
 
 export interface IControl<T> extends IControlBase
@@ -233,8 +233,7 @@ export class ValidateErrors extends Error implements $J.IMultiLineError
         const ctl = this.getFirstControl();
 
         if (ctl) {
-            ctl.focus();
-            return true;
+            return ctl.focus();
         }
 
         return false;
