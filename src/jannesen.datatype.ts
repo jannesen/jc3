@@ -3816,6 +3816,7 @@ class RecordValidator<TRec extends Record<IFieldDef>> implements IValidatable
 
     private _fieldChanged(reason:ChangeReason)
     {
+        this._result = undefined;
         if (this._context) {
             this._context.stop();
             this._context = null;
@@ -3873,7 +3874,6 @@ class RecordValidator<TRec extends Record<IFieldDef>> implements IValidatable
         }
 
         return this._result;
-
     }
     private _setError(result:undefined|ValidateResult|Error)
     {
