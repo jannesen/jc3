@@ -2346,6 +2346,19 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
     public toDom(format?:string):string|$JD.DOMHTMLElement|$JD.DOMText {
         const value = this.value;
         const rec   = this.getrecordAsync(value, true);
+        let text    = false;
+
+        if (typeof format === 'string') {
+            if (format === 'text') {
+                text = true;
+                format = undefined;
+            }
+            else if (format.endsWith(':text')) {
+                text = true;
+                format = format.substring(0, format.length - 5);
+            }
+        }
+
         let rtn:string|$JD.DOMHTMLElement|$JD.DOMText;
 
         if (rec instanceof $JA.Task) {
@@ -2366,11 +2379,13 @@ export abstract class SelectType<TNative extends SelectValue, TDatasource extend
             rtn = this.toDisplayText(value, rec, format);
         }
 
-        const href = (format !== 'text' && value) ? this.cnvHRef(value) : undefined;
-        if (href) {
-            rtn = $JD.createElement("a", { href: href }, rtn);
-            if (format === 'newtab') {
-                rtn.attr('target', '_blank');
+        if (!text && value) {
+            const href =  this.cnvHRef(value);
+            if (href) {
+                rtn = $JD.createElement("a", { href: href }, rtn);
+                if (format === 'newtab') {
+                    rtn.attr('target', '_blank');
+                }
             }
         }
 
