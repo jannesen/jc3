@@ -294,6 +294,18 @@ export class FormatError extends Error
     }
 }
 
+/**
+ *!!DOC
+ */
+export class AccessError extends Error
+{
+    public get  name()       { return "AccessError"; }
+
+    constructor(message:string) {
+        super(message);
+    }
+}
+
 //=============================================== Static functions ================================
 /**
  * Run through the properties of each of the mixins and copy them over to the target of the mixins,

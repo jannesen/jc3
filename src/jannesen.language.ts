@@ -8,6 +8,7 @@ export const translateError = [
     { errclass: "LoadError",            translator: "Error while loading." },
     { errclass: "ConversionError",      translator: "Conversion error." },
     { errclass: "FormatError",          translator: "Format error." },
+    { errclass: "AccessError",          translator: "Access error." },
     { errclass: "ValidateErrors",       translator: (err:Error) => err.message },
     { errclass: "FormError",            translator: "Error in form handeling." },
     { errclass: $J.ServerError,         translator: (err:$J.ServerError) => {

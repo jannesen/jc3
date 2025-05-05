@@ -9,6 +9,7 @@ export const translateError = [
     { errclass: "LoadError",            translator: "Niet geïmplementeerd." },
     { errclass: "ConversionError",      translator: "Conversie fout." },
     { errclass: "FormatError",          translator: "Formaat fout." },
+    { errclass: "AccessError",          translator: "Toegangs geweigerd." },
     { errclass: "ValidateErrors",       translator: (err:Error) => err.message },
     { errclass: "FormError",            translator: "Fout in form afhandeling." },
     { errclass: $J.ServerError,         translator: (err:$J.ServerError) => {
