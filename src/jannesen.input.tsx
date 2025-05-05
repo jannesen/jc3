@@ -1592,7 +1592,6 @@ export class SelectInput<TNativeValue extends $JT.SelectValue = $JT.SelectValue,
     }
 
     protected       input_onblur(ev:FocusEvent) {
-        console.log("input_onblur", ev.relatedTarget);
         this._inputTimerStop();
 
         if (this._container !== this._input) {
