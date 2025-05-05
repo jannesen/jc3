@@ -41,6 +41,7 @@ export interface IDataTableOptsColumn<TRec extends DataTableSourceType>
 export interface IDataTableOptsButton<TRec extends DataTableSourceType>
 {
     className:      string;
+    disabled?:      boolean;
     title?:         string;
     onClick?:       (rec: TRec)=>void;
 }
@@ -699,7 +700,7 @@ export class DataTable<TRecord extends DataTableSourceType> implements $JD.IDOMC
 
             if (this._opts.buttons) {
                 row.appendChild(<td class="-right-buttons">
-                                    { this._opts.buttons.map((b,i) => <span class={ b.className } title={ b.title } />) }
+                                    { this._opts.buttons.map((b,i) => <span class={ b.className } disabled={ b.disabled } title={ b.title } />) }
                                 </td>);
             }
 

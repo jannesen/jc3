@@ -192,6 +192,10 @@ $jc-line-icon-btn-width:             1.5em !default;
             opacity:        1 !important;
         }
     }
+    &[disabled] {
+        pointer-events: none;
+        opacity:    0.3;
+    }
     &.-edit     { @include line-icon-btn-helper($fa-var-pencil, #0035ff, 1.5, 10.29, 12) }
     &.-add      { @include line-icon-btn-helper($fa-var-plus,   #00d000, 1.5,  9.43, 11) }
     &.-delete   { @include line-icon-btn-helper($fa-var-trash,  #c50000, 1.5,  9.43, 12) }

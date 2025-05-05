@@ -6,6 +6,7 @@ import * as $J          from "jc3/jannesen";
 import * as $JT         from "jc3/jannesen.datatype";
 import * as $JA         from "jc3/jannesen.async";
 import * as $JD         from "jc3/jannesen.dom";
+import * as $JTEMPLATE  from "jc3/jannesen.ui.template";
 import * as $JCONTENT   from "jc3/jannesen.ui.content";
 import * as $JR         from "jc3/jannesen.language";
 
@@ -29,6 +30,10 @@ export abstract class WizardDialog<TCall extends $JA.IAjaxCallDefinition<any, vo
     protected               prevButton:         $JD.DOMHTMLElement;
     protected               stepCounter:        $JD.DOMHTMLElement;
 
+    public static           hasPermission():    boolean
+    {
+        return $JTEMPLATE.hasPermission(Object.getOwnPropertyDescriptor(this.prototype, "interfaceSave")!.get!.call(undefined));
+    }
     protected get           interfaceSave():    TCall
     {
         throw new $J.InvalidStateError("interfaceSave not implemented.");

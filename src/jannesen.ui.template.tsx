@@ -36,9 +36,15 @@ function normalizeArgs(args:$J.IUrlArgsColl|$JCONTENT.IUrlArgsSet|$JT.Record<$JT
 }
 
 //-------------------------------------------------------------------------------------------------
-export var hasPermission:(o:string|$JA.IAjaxCallDefinition<any,any,any>|(new(context:$JA.Context)=>BaseForm<any,any>)|(new()=>StandardDialog<any,any>), method?:string) => boolean = (cls) => true; //eslint-disable-line no-var
+export interface IHasPermission
+{
+    hasPermission():        boolean;
+}
 
-export function setHasPermission(f: (o:string|$JA.IAjaxCallDefinition<any,any,any>|(new(context:$JA.Context)=>BaseForm<any,any>)|(new()=>StandardDialog<any,any>), method?:string) => boolean)
+
+export var hasPermission:(o:IHasPermission|$JA.IAjaxCallDefinition<any,any,any>|string, method?:string) => boolean = (cls) => true; //eslint-disable-line no-var
+
+export function setHasPermission(f: (o:IHasPermission|$JA.IAjaxCallDefinition<any,any,any>|string, method?:string) => boolean)
 {
     hasPermission = f;
 }
@@ -119,6 +125,10 @@ export abstract class BaseForm<TCall extends $JA.IAjaxCallDefinition<$JT.Record<
     protected               _formargs:              $JA.AjaxCallArgsType<TCall>;
     private                 _datapopup?:            DataPopup|null;
 
+    public static           hasPermission():    boolean
+    {
+        return hasPermission(Object.getOwnPropertyDescriptor(this.prototype, "interfaceGet")!.get!.call(undefined));
+    }
     protected get           interfaceGet():         TCall          { throw new $J.InvalidStateError("interfaceGet not implemented."); }
     protected get           formargs() {
         return this._formargs;
@@ -249,9 +259,15 @@ export abstract class SimpleForm<TCall extends $JA.IAjaxCallDefinition<$JT.Recor
 /**
  *!!DOC
  */
+export interface IBaseFormConstructor
+{
+    hasPermission():            boolean;
+    new (context:$JA.Context):  BaseForm<any, any>;
+}
+
 export interface ITabAttr extends $JTAB.ITabAttr
 {
-    form?:      new (context:$JA.Context) => BaseForm<any, any>;
+    form?:      IBaseFormConstructor;
 }
 
 export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,void,any>> extends SimpleForm<TCall> implements $JCONTENT.IMoreMenu
@@ -746,6 +762,11 @@ export abstract class StandardDialog<TCall extends $JA.IAjaxCallDefinition<any,v
     protected               callargs:           $JA.AjaxCallArgsType<TCall>;
     protected               data:               $JA.AjaxCallRequestType<TCall>;
 
+    public static           hasPermission():    boolean
+    {
+        return hasPermission(Object.getOwnPropertyDescriptor(this.prototype, "interfaceSave")!.get!.call(undefined));
+    }
+
     protected get           interfaceSave():    TCall
     {
         throw new $J.InvalidStateError("interfaceSave not implemented.");
@@ -1071,6 +1092,10 @@ export abstract class SubmitDialogAjaxCall<TCall extends $JA.IAjaxCallDefinition
     protected               callargs:           $JA.AjaxCallArgsType<TCall>;
     protected               data:               $JA.AjaxCallRequestType<TCall>;
 
+    public static           hasPermission():    boolean
+    {
+        return hasPermission(Object.getOwnPropertyDescriptor(this.prototype, "interface")!.get!.call(undefined));
+    }
     protected get           interface():        TCall
     {
         throw new $J.InvalidStateError("Interface not defined.");
