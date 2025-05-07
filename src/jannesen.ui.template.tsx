@@ -297,25 +297,26 @@ export abstract class SimpleTabForm<TCall extends $JA.IAjaxCallDefinition<any,vo
         }
     }
     protected               dataReceived(data: $JA.AjaxCallResponseType<TCall>): void|$JA.Task<void> {
-        const tabs = <$JTAB.Tabs context={ this.context }>
-                     {
-                        this.createTab(data).map((tab) => {
-                                                    if (tab) {
-                                                        if (tab instanceof $JTAB.Tab) {
-                                                            return tab;
-                                                        }
-                                                        else if (tab.title) {
-                                                            if (tab.form) {
-                                                                if (!(tab.disabled = !hasPermission(tab.form!))) {
-                                                                    tab.loadform=(loader) => loader.open(tab!.form!, this.args);
-                                                                }
-                                                            }
-                                                            return new $JTAB.Tab(tab);
-                                                        }
-                                                    }
-                                                })
-                     }
-                     </$JTAB.Tabs>;
+        const tabs = <$JTAB.Tabs context={ this.context }/>;
+
+        for (const tab of this.createTab(data)) {
+            if (tab) {
+                if (tab instanceof $JTAB.Tab) {
+                    tabs.addTabAt(undefined, tab);
+                }
+                else if (tab.title) {
+                    if (tab.form) {
+                        if (hasPermission(tab.form)) {
+                            tab.loadform=(loader) => loader.open(tab!.form!, this.args);
+                            tabs.addTabAt(undefined, new $JTAB.Tab(tab));
+                        }
+                    }
+                    else {
+                        tabs.addTabAt(undefined, new $JTAB.Tab(tab));
+                    }
+                }
+            }
+        }
 
         (tabs.context.values as $JCONTENT.IContextFormHost).formchanged = (reason, form) => {
                                                                               const activeTab = tabs.selectedTab;
