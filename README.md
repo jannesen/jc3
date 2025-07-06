@@ -1,4 +1,4 @@
-﻿# JC3
+# JC3
 
 The 3 version of JC. JC is a library for single page web applications.
 All modules are async loaded by using [alameda](https://github.com/requirejs/alameda).
@@ -20,7 +20,7 @@ async classes like ExecuteContext, Task, Ajax, Require
 Dom manipulations.
 
 ### jannesen.datatype / jannesen.datatypeex
-Rich datatypes. Data including attributes and conversion. 
+Rich datatypes. Data including attributes and conversion.
 For example String: attributes maxlength, required, uppercase etc. Conversion to/from user, urlarg, json.
 
 
@@ -37,7 +37,7 @@ UI popup
 UI dropdown select used by Select input.
 
 ### jannesen.ui.datetimepicker
-datatimepicker 
+datatimepicker
 
 ### jannesen.ui.treeview
 Treeview
