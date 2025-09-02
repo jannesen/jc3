@@ -1939,6 +1939,7 @@ export interface IDateTimeAttributes extends ISimpleNumberTypeAttributes
     format?:        string;
     displayUtc?:    boolean;
     timezone?:      ITimeZone;
+    timeformat?:    $J.TimeFormat;
 }
 
 /**
@@ -2028,7 +2029,7 @@ export class DateTime extends SimpleNumberType<$JI.DateTime>
 
         {
             const n = $J.divModulo(value, 86400000);
-            return $JR.dateToString(n.result) + " " + $JR.timeToString(n.remainder, $J.TimeFormat.HMS);
+            return $JR.dateToString(n.result) + " " + $JR.timeToString(n.remainder, this.TimeFormat || $J.TimeFormat.HMS);
         }
     }
 
@@ -2036,7 +2037,7 @@ export class DateTime extends SimpleNumberType<$JI.DateTime>
         const m = regexDateTime.exec(text);
 
         if (m && typeof m[1] === 'string' && typeof m[2] === 'string') {
-            return this.uiToValue($JR.stringToDate(m[1]) * 86400000 + $JR.stringToTime(m[2], $J.TimeFormat.HMS));
+            return this.uiToValue($JR.stringToDate(m[1]) * 86400000 + $JR.stringToTime(m[2], this.TimeFormat || $J.TimeFormat.HMS));
         }
 
         throw new $J.FormatError($JL.invalid_datetime);
@@ -2079,6 +2080,12 @@ export class DateTime extends SimpleNumberType<$JI.DateTime>
     }
     public get ValueIsUtc() {
         return (this.TimeZone || this.DisplayUtc) ? true : false;
+    }
+    /**
+     *!!DOC
+     */
+    public get TimeFormat(): $J.TimeFormat|undefined {
+        return this.getAttr("timeformat");
     }
     /**
      * return now according to te timezone.
