@@ -285,19 +285,23 @@ export abstract class InputDropdown<TValue extends $JT.SimpleType<number>,
 {
     protected       _datepicker!:       DatePicker;
 
-    protected       Init(state:DatePickerState, minValue:number, maxValue:number)
+    protected       Init(state:DatePickerState, minValue:number, maxValue:number, uiToValue?:(v:number)=>number)
     {
         this._datepicker = new DatePicker();
         this._datepicker.bind('click',  (ev) => {
                                     const input = this.control;
 
                                     if (input) {
-                                        const value = ev && ev.value;
+                                        let value = ev && ev.value;
 
                                         if (value === undefined) {
                                             this.Close(undefined, (ev ? ev.event : undefined));
                                         }
-                                        else if (value === null || (minValue <= value && maxValue >= value)) {
+                                        else if (value === null) {
+                                            this.Close(null, (ev ? ev.event : undefined));
+                                        }
+                                        else if (minValue <= value && maxValue >= value) {
+                                            if (uiToValue) value = uiToValue(value);
                                             this.Close(value, (ev ? ev.event : undefined));
                                         }
                                     }
@@ -351,11 +355,11 @@ export class DateTimeInputDropdown extends InputDropdown<$JT.DateTime, $JI.DateT
     public          OnLoad()
     {
         const value       = this.control!.value!;
-        const nativeValue = value.value;
+        const nativeValue = value.valueToUI(value.value);
         let minValue    = value.MinValue;
         let maxValue    = value.MaxValue;
-        if (typeof minValue !== 'number') minValue = MinDate * TicksPerDay;
-        if (typeof maxValue !== 'number') maxValue = MaxDate * TicksPerDay;
+        minValue = typeof minValue === 'number' ? value.valueToUI(minValue) : MinDate * TicksPerDay;
+        maxValue = typeof maxValue === 'number' ? value.valueToUI(maxValue) : MaxDate * TicksPerDay;
 
         this.Init({
                         Mode:   PickerMode.DateTime,
@@ -364,7 +368,7 @@ export class DateTimeInputDropdown extends InputDropdown<$JT.DateTime, $JI.DateT
                                     MinValue:       minValue,
                                     MaxValue:       maxValue
                                 }
-                    }, minValue, maxValue);
+                    }, minValue, maxValue, (v) => value.uiToValue(v));
     }
 }
 
