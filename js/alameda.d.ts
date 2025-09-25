@@ -1,4 +1,4 @@
-﻿interface RequireError extends Error
+interface RequireError extends Error
 {
     requireType: string;
     requireModules: string[];

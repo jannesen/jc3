@@ -1,4 +1,4 @@
-﻿var $build = require(process.env.WEBBUILDER);
+var $build = require(process.env.WEBBUILDER);
 
 var references = {
                     contrib:                "../..",
@@ -48,7 +48,7 @@ var eslint = {
         "constructor-super": "error",
         "eqeqeq": [ "error", "smart" ],
         "guard-for-in": "error",
-        "linebreak-style": ["error", "windows"],
+        "linebreak-style": ["error", "unix"],
         "new-parens": "error",
         "no-caller": "error",
         "no-console": [ "error", { "allow": [ "log", "warn", "assert", "error", "Console", "timeStamp" ] } ],
@@ -108,7 +108,7 @@ var eslint = {
         //"@typescript-eslint/no-redeclare": "error",
         //"@typescript-eslint/prefer-function-type": "error",
         //"@typescript-eslint/triple-slash-reference": "error",
-       
+
         // eslint-plugin-import
         "import/no-extraneous-dependencies": ["error", { "optionalDependencies": false }],
 

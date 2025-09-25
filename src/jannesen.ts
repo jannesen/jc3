@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 const tick_per_day            = (24*60*60*1000);
 const rounderror              = 100.5 - (1.005 * 100);
 let   global_uniqueidcounter  = Math.floor(Math.random() * 100000);

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta name="google" content="notranslate">
@@ -9,23 +9,23 @@
 require.config({
 map: {
         "*": {
-			"jc3/jannesen.regional": "jc3/jannesen.regional.nl",
-			"jc3/jannesen.language": "jc3/jannesen.language.nl",
-			"jc3/jannesen.timezone": "jc3/jannesen.timezone.cet",
-			"css": "lib/js/css"
-		}
+            "jc3/jannesen.regional": "jc3/jannesen.regional.nl",
+            "jc3/jannesen.language": "jc3/jannesen.language.nl",
+            "jc3/jannesen.timezone": "jc3/jannesen.timezone.cet",
+            "css": "lib/js/css"
+        }
     },
     paths: {
-        "jc3":		"lib/jc3",
+        "jc3":      "lib/jc3",
     },
-    enforceDefine:	true,
-	waitSeconds:	5,
+    enforceDefine:  true,
+    waitSeconds:    5,
     defaultErrback: null
 });
 
 requirejs.onError = function(err)
 {
-	throw err;
+    throw err;
 };
 
 require(["interface-browser"]);

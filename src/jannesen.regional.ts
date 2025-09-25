@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 import * as $J from "jc3/jannesen";
 import * as $JL from "jc3/jannesen.language";
 

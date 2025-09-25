@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,16 +8,16 @@
 <script src="../lib/js/alameda.js?v=@BUILDDATE@"></script>
 <script>
 require.config({
-	paths: {
-        "jc3":		"../lib/js"
-	},
-	enforceDefine:	true,
-	waitSeconds:	5
+    paths: {
+        "jc3":      "../lib/js"
+    },
+    enforceDefine:  true,
+    waitSeconds:    5
 });
 
 requirejs.onError = function(err)
 {
-	throw err;
+    throw err;
 };
 
 require(["treeview"], function($M) {

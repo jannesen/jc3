@@ -1,4 +1,4 @@
-﻿/// <reference path="lib-ext.d.ts"/>
+/// <reference path="lib-ext.d.ts"/>
 /// <reference path="../js/alameda.d.ts" />
 import * as $J   from "jc3/jannesen";
 import * as $JA  from "jc3/jannesen.async";

@@ -1,4 +1,4 @@
-﻿{
+{
   "data": [
     { "text": "Welkom", "url": "main:Welkom" },
     { "text": "TAS",    "treelist": "api-sub-1.json" },
